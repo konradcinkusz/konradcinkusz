@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @konradcinkusz
 - 👀 I’m interested in .NET programming
-- 🌱 I’m currently learning how to good design your microservice architecture
+- 🌱 I’m currently learning how to good design microservice architecture using azure, kubernetes, docker etc.
 - 💞️ I’m looking to collaborate on every project with good business analysis :)
 - 📫 You can send me a message directly konradcinkusz@gmail.com
 
