@@ -7,15 +7,11 @@
   <a href="https://www.youtube.com/@_dev_insight">▶️ Dev Insight</a>
   &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
   <a href="https://x.com/dev_insight">🐦 @dev_insight</a>
-  &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-  <a href="https://www.linkedin.com/in/konrad-cinkusz-378127227">💼 LinkedIn</a>
-  &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-  <a href="https://konradcinkusz.github.io">🌐 Portfolio</a>
 </p>
 
 <br/>
 
-I'm a senior backend engineer with **10 years of commercial experience** across e-commerce, energy, and enterprise domains. My core stack is **.NET, C#, Azure, and microservices** — building distributed systems that handle real load on real infrastructure.
+I'm a software engineer with **10 years of commercial experience** across e-commerce, energy, and enterprise domains. My core stack is **.NET, C#, Azure, and microservices** - building distributed systems that handle real load on real infrastructure.
 
 When I build something useful and repeatable, I open-source it. Right now that means **AI observability platforms**, **multi-agent developer tooling**, and educational .NET content.
 
@@ -25,15 +21,15 @@ I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** — a channe
 
 Below are the open source projects I actively maintain, focused on AI tooling, developer experience, and educational .NET content.
 
-| Project | Description | |
-| --- | --- | --- |
-| [CopilotScope](https://github.com/konradcinkusz/CopilotScope) | AI coding-session observability — OpenTelemetry collector, Postgres store, and Blazor Server dashboard with real-time quality scoring on .NET Aspire | [![GitHub Repo stars](https://img.shields.io/github/stars/konradcinkusz/CopilotScope?style=for-the-badge&color=yellow)](https://github.com/konradcinkusz/CopilotScope) |
-| [AgentHelm](https://github.com/konradcinkusz/AgentHelm) | Web cockpit for AI coding agents — drive GitHub Copilot CLI, Claude Code, and Gemini via the Agent Client Protocol with permission policies, audit trail, and git diff review | [![GitHub Repo stars](https://img.shields.io/github/stars/konradcinkusz/AgentHelm?style=for-the-badge&color=yellow)](https://github.com/konradcinkusz/AgentHelm) |
-| [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess) | Two LLM-powered chess agents battle through a Streamlit interface with configurable personalities and real-time board visualisation | [![GitHub Repo stars](https://img.shields.io/github/stars/konradcinkusz/llm-multi-agent-chess?style=for-the-badge&color=yellow)](https://github.com/konradcinkusz/llm-multi-agent-chess) |
-| [TinyTransformer](https://github.com/konradcinkusz/TinyTransformer) | Minimal educational C# implementation of the Transformer architecture — encoder–decoder, multi-head attention, feed-forward layers, and positional encodings | [![GitHub Repo stars](https://img.shields.io/github/stars/konradcinkusz/TinyTransformer?style=for-the-badge&color=yellow)](https://github.com/konradcinkusz/TinyTransformer) |
-| [csharp-flashcards](https://github.com/konradcinkusz/csharp-flashcards) | Beamer Q&A flashcard deck covering C# from fundamentals through cloud and leadership topics — built for interview prep, classes, and self-study | [![GitHub Repo stars](https://img.shields.io/github/stars/konradcinkusz/csharp-flashcards?style=for-the-badge&color=yellow)](https://github.com/konradcinkusz/csharp-flashcards) |
-| [C# Dictionaries — Deep Dive](https://github.com/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation) | Deep dive into Dictionary internals — hashing, buckets, collisions, resizing, complexity analysis, and benchmarks | [![GitHub Repo stars](https://img.shields.io/github/stars/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation?style=for-the-badge&color=yellow)](https://github.com/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation) |
-| [IberiaFamilyCalculator](https://github.com/konradcinkusz/IberiaFamilyCalculator) | Interactive Spanish IRPF, autónomos, and payroll calculator — drag sliders, add entities, share the full setup via a single URL | [![GitHub Repo stars](https://img.shields.io/github/stars/konradcinkusz/IberiaFamilyCalculator?style=for-the-badge&color=yellow)](https://github.com/konradcinkusz/IberiaFamilyCalculator) |
+| Project | Description |
+| --- | --- |
+| [CopilotScope](https://github.com/konradcinkusz/CopilotScope) | AI coding-session observability - OpenTelemetry collector, Postgres store, and Blazor Server dashboard with real-time quality scoring on .NET Aspire |
+| [AgentHelm](https://github.com/konradcinkusz/AgentHelm) | Web cockpit for AI coding agents - drive GitHub Copilot CLI, Claude Code, and Gemini via the Agent Client Protocol with permission policies, audit trail, and git diff review |
+| [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess) | Two LLM-powered chess agents battle through a Streamlit interface with configurable personalities and real-time board visualisation |
+| [TinyTransformer](https://github.com/konradcinkusz/TinyTransformer) | Minimal educational C# implementation of the Transformer architecture - encoder-decoder, multi-head attention, feed-forward layers, and positional encodings |
+| [csharp-flashcards](https://github.com/konradcinkusz/csharp-flashcards) | Beamer Q&A flashcard deck covering C# from fundamentals through cloud and leadership topics - built for interview prep, classes, and self-study |
+| [C# Dictionaries - Deep Dive](https://github.com/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation) | Deep dive into Dictionary internals - hashing, buckets, collisions, resizing, complexity analysis, and benchmarks |
+| [IberiaFamilyCalculator](https://github.com/konradcinkusz/IberiaFamilyCalculator) | Interactive Spanish IRPF, autónomos, and payroll calculator - drag sliders, add entities, share the full setup via a single URL |
 
 ## 💻 Tech Stack
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
