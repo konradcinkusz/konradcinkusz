@@ -6,46 +6,137 @@
   "state": "active",
   "tier": "P1",
   "oneLiner": "Bramka architektoniczna dla .NET: analizatory {{term:roslyn}}, które wywalają build, gdy kod łamie zadeklarowaną architekturę — liczone z diffu PR-a.",
-  "summary": "Siedem analizatorów {{term:roslyn}} na `netstandard2.0` egzekwuje część zasad z konstytucji architektonicznej: granicę shared kernela, przenośność persystencji, warstwowanie kontroler/DbContext, encje-sieroty, dziedziczenie zamiast interfejsu, wyciek typów vendor SDK poza adapter, brak `AddServiceDefaults`. Bramka liczy się **wyłącznie z linii zmienionych w pull requeście** — bez tego każda nowa reguła zapala tysiące ostrzeżeń w istniejącym kodzie i zespół wyłącza narzędzie w pierwszym tygodniu; problem jest udokumentowany i odtworzony na dwucommitowym repro. {{term:provenance|Provenance}} czytane jest z prawdziwego gita — `git diff -U0` plus `git blame` plus trailery commitów — nigdy ze stylu kodu, i służy wyłącznie do podniesienia progu severity; w komentarzu PR-a nie pojawia się ani jako odznaka, ani jako wynik. Całość wychodzi jako trzy narzędzia `dotnet`, obraz kontenerowy i composite action.",
-  "stack": [".NET 8", "netstandard2.0", "Roslyn 4.8.0 (analizatory) / 4.11.0 (silnik)", "xUnit", "Docker", "GitHub Actions"],
+  "summary": "Siedem analizatorów {{term:roslyn}} na `netstandard2.0` egzekwuje część zasad z konstytucji architektonicznej: granicę shared kernela, przenośność persystencji, warstwowanie kontroler/DbContext, encje-sieroty, dziedziczenie zamiast interfejsu, wyciek typów vendor SDK poza adapter, brak `AddServiceDefaults`. Bramka liczy się **wyłącznie z linii zmienionych w pull requeście** — bez tego każda nowa reguła zapala tysiące ostrzeżeń w istniejącym kodzie i zespół wyłącza narzędzie w pierwszym tygodniu; problem jest udokumentowany i odtworzony na dwucommitowym repro. {{term:provenance|Provenance}} czytane jest z prawdziwego gita — `git diff -U0` plus `git blame` plus trailery commitów — nigdy ze stylu kodu, i służy wyłącznie do podniesienia progu severity; w komentarzu PR-a nie pojawia się ani jako odznaka, ani jako wynik. Całość wychodzi jako dwa narzędzia `dotnet` — `ArchGate.Cli` i `ArchGate.CiComment`, jedyne dwa projekty z `PackAsTool` — plus trzeci pakiet `ArchGate.Analyzers`, który narzędziem nie jest: to pakiet analizatora Roslyna z `IncludeBuildOutput=false`, którego DLL trafia do `analyzers/dotnet/cs`. Do tego obraz kontenerowy i composite action.",
+  "stack": [
+    ".NET 8",
+    "netstandard2.0",
+    "Roslyn 4.8.0 (analizatory) / 4.11.0 (silnik)",
+    "xUnit",
+    "Docker",
+    "GitHub Actions"
+  ],
   "primaryLanguage": "C#",
   "license": "MIT",
-  "tests": "150 atrybutów [Fact] w 21 plikach; ROADMAP podaje 146/146 i jest o trzy commity stary. Testów nie uruchomiono w tym przebiegu — brak SDK w środowisku.",
-  "ci": "`archgate-pr-check.yml` uruchamia bramkę na własnych PR-ach; `release.yml` na tagu `v*` buduje sześć zadań, w tym weryfikację spakowanego analizatora w tymczasowym projekcie konsumenckim. Żaden tag nie istnieje, więc release nigdy nie przeszedł na żywo.",
+  "tests": "150 atrybutów [Fact] w 21 plikach (`grep -rho '[Fact]' tests --include='*.cs' | wc -l`; zero `[Theory]`, zero `[InlineData]`); ROADMAP podaje 146/146 i jest o dwa commity stary — ostatnia zmiana `ROADMAP-archgate.md` to `716c32a`, a `git rev-list --count 716c32a..HEAD` daje 2 (jeden commit roboczy i jeden merge). Testów nie uruchomiono w tym przebiegu — brak SDK w środowisku.",
+  "ci": "`archgate-pr-check.yml` uruchamia bramkę na własnych PR-ach; `release.yml` na tagu `v*` deklaruje pięć zadań — `build`, `publish-nuget`, `publish-container`, `release-notes`, `moving-tag` — w tym weryfikację spakowanego analizatora w tymczasowym projekcie konsumenckim (krok w `build`). Żaden tag nie istnieje, więc release nigdy nie przeszedł na żywo.",
   "metrics": [
-    { "label": "Analizatory Roslyn", "value": "7 zarejestrowanych" },
-    { "label": "Identyfikatory diagnostyk", "value": "11" },
-    { "label": "Pokrycie konstytucji", "value": "6 z 15 zasad (4 nigdy nie będą)" },
-    { "label": "Warianty mutacyjne", "value": "10, zero survivors" },
-    { "label": "Kod C#", "value": "3 638 linii src + 4 113 linii testów" },
-    { "label": "Dokumentacja", "value": "11 plików, 2 383 linie" },
-    { "label": "Zadeklarowane pakiety NuGet", "value": "3, żaden nieopublikowany" },
-    { "label": "Tagi w repozytorium", "value": "0" }
+    {
+      "label": "Analizatory Roslyn",
+      "value": "7 zarejestrowanych"
+    },
+    {
+      "label": "Identyfikatory diagnostyk",
+      "value": "11"
+    },
+    {
+      "label": "Pokrycie konstytucji",
+      "value": "6 z 15 zasad (4 nigdy nie będą)"
+    },
+    {
+      "label": "Warianty mutacyjne",
+      "value": "10, zero survivors"
+    },
+    {
+      "label": "Kod C#",
+      "value": "3 638 linii src + 4 113 linii testów"
+    },
+    {
+      "label": "Dokumentacja",
+      "value": "11 plików, 2 383 linie"
+    },
+    {
+      "label": "Zadeklarowane pakiety NuGet",
+      "value": "3, żaden nieopublikowany"
+    },
+    {
+      "label": "Tagi w repozytorium",
+      "value": "0"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/archgate",
     "live": [],
     "docs": [
-      { "label": "Wizja i specyfikacja produktu", "path": "ARCHGATE-VISION.md" },
-      { "label": "Zamrożone kontrakty (SPEC)", "path": "docs/SPEC.md" },
-      { "label": "Kolizja nazwy i unieważnione twierdzenia", "path": "docs/COMPETITIVE-2026-08-18.md" },
-      { "label": "Przebieg mutacyjny reguł", "path": "docs/MUTATIONS.md" },
-      { "label": "Bramka liczona z diffu", "path": "docs/DIFF-GATE.md" }
+      {
+        "label": "Wizja i specyfikacja produktu",
+        "path": "ARCHGATE-VISION.md"
+      },
+      {
+        "label": "Zamrożone kontrakty (SPEC)",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "Kolizja nazwy i unieważnione twierdzenia",
+        "path": "docs/COMPETITIVE-2026-08-18.md"
+      },
+      {
+        "label": "Przebieg mutacyjny reguł",
+        "path": "docs/MUTATIONS.md"
+      },
+      {
+        "label": "Bramka liczona z diffu",
+        "path": "docs/DIFF-GATE.md"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": true, "ghcr": true, "pages": false, "packages": true },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": true,
+    "pages": false,
+    "packages": true
+  },
   "components": [
-    { "name": "ArchGate.Engine (Scanner)", "path": "src/ArchGate.Engine/Scanner.cs", "description": "Harness: parsuje każdy plik `.cs` do jednej kompilacji, uruchamia rejestr reguł, mapuje diagnostyki na rekord naruszenia i wylicza werdykt bramki. Neutralny wrapper — uruchom dowolny zestaw analizatorów po katalogu i dostań deterministyczny JSON.", "reusable": true },
-    { "name": "Provenance z historii gita", "path": "src/ArchGate.Engine/Provenance", "description": "Atrybucja linia po linii z `git blame` i trailerów commitów, klasyfikowana na Human/Ai/Mixed/Unknown. Odróżnia pusty diff od awarii gita, żeby bramka degradowała się do trybu absolutnego zamiast cicho przepuszczać.", "reusable": true },
-    { "name": "Model konfiguracji konwencji", "path": "src/ArchGate.Rules/ArchGateConventions.cs", "description": "Jedna konfiguracja, dwa kanały: analizator czyta `.globalconfig`, CLI czyta `archgate.json` i spłaszcza go na te same klucze — bo analizator nie może otwierać plików przy `EnforceExtendedAnalyzerRules`.", "reusable": true },
-    { "name": "ArchGate.Rules (7 analizatorów)", "path": "src/ArchGate.Rules", "description": "Same analizatory są ogólnym pakietem dla dowolnego repozytorium C#, ale konkretne reguły kodują zasady P1–P15 z konstytucji — poza nią część trzeba przekonfigurować.", "reusable": false },
-    { "name": "ArchGate.CiComment", "path": "src/ArchGate.CiComment", "description": "Renderuje wynik do Markdownu, liczy różnicę wobec poprzedniego skanu i aktualizuje **jeden** przyklejony komentarz PR-a po ukrytym markerze. Provenance celowo nigdy tam nie trafia.", "reusable": false },
-    { "name": "Composite GitHub Action", "path": "action.yml", "description": "Świadomie composite, nie kontenerowa — akcje kontenerowe działają tylko na runnerach linuksowych. Wykrywa obecność commitu bazowego przed włączeniem trybu diff.", "reusable": false }
+    {
+      "name": "ArchGate.Engine (Scanner)",
+      "path": "src/ArchGate.Engine/Scanner.cs",
+      "description": "Harness: parsuje każdy plik `.cs` do jednej kompilacji, uruchamia rejestr reguł, mapuje diagnostyki na rekord naruszenia i wylicza werdykt bramki. Neutralny wrapper — uruchom dowolny zestaw analizatorów po katalogu i dostań deterministyczny JSON.",
+      "reusable": true
+    },
+    {
+      "name": "Provenance z historii gita",
+      "path": "src/ArchGate.Engine/Provenance",
+      "description": "Atrybucja linia po linii z `git blame` i trailerów commitów, klasyfikowana na Human/Ai/Mixed/Unknown. Odróżnia pusty diff od awarii gita, żeby bramka degradowała się do trybu absolutnego zamiast cicho przepuszczać.",
+      "reusable": true
+    },
+    {
+      "name": "Model konfiguracji konwencji",
+      "path": "src/ArchGate.Rules/ArchGateConventions.cs",
+      "description": "Jedna konfiguracja, dwa kanały: analizator czyta `.globalconfig`, CLI czyta `archgate.json` i spłaszcza go na te same klucze — bo analizator nie może otwierać plików przy `EnforceExtendedAnalyzerRules`.",
+      "reusable": true
+    },
+    {
+      "name": "ArchGate.Rules (7 analizatorów)",
+      "path": "src/ArchGate.Rules",
+      "description": "Same analizatory są ogólnym pakietem dla dowolnego repozytorium C#, ale konkretne reguły kodują zasady P1–P15 z konstytucji — poza nią część trzeba przekonfigurować.",
+      "reusable": false
+    },
+    {
+      "name": "ArchGate.CiComment",
+      "path": "src/ArchGate.CiComment",
+      "description": "Renderuje wynik do Markdownu, liczy różnicę wobec poprzedniego skanu i aktualizuje **jeden** przyklejony komentarz PR-a po ukrytym markerze. Provenance celowo nigdy tam nie trafia.",
+      "reusable": false
+    },
+    {
+      "name": "Composite GitHub Action",
+      "path": "action.yml",
+      "description": "Świadomie composite, nie kontenerowa — akcje kontenerowe działają tylko na runnerach linuksowych. Wykrywa obecność commitu bazowego przed włączeniem trybu diff.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "architecture-standards", "reason": "Nie wymyśla własnego języka reguł — egzekwuje zasady P1–P15 z tamtego repozytorium i cytuje je w kategorii każdej diagnostyki. Pętla jest domknięta." },
-    { "slug": "copilot-scope", "reason": "Sygnał {{term:provenance}} jest zaprojektowany wprost jako zaprzeczenie tamtego: specyfikacja cytuje sesyjne uśrednianie jako błąd, którego nie wolno powtórzyć." },
-    { "slug": "agent-eval-bench", "reason": "Stamtąd przeniesiona jest dyscyplina dowodowa: {{term:mutation|przebieg mutacyjny}} i zasada, że zestaw testów, który nigdy nie oblał, nie został przetestowany." }
+    {
+      "slug": "architecture-standards",
+      "reason": "Nie wymyśla własnego języka reguł — egzekwuje zasady P1–P15 z tamtego repozytorium i cytuje je w kategorii każdej diagnostyki. Pętla jest domknięta."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Sygnał {{term:provenance}} jest zaprojektowany wprost jako zaprzeczenie tamtego: specyfikacja cytuje sesyjne uśrednianie jako błąd, którego nie wolno powtórzyć."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Stamtąd przeniesiona jest dyscyplina dowodowa: {{term:mutation|przebieg mutacyjny}} i zasada, że zestaw testów, który nigdy nie oblał, nie został przetestowany."
+    }
   ],
   "product": "Kupujący jest nazwany wprost: engineering lead albo zespół platformowy w organizacji .NET, który widzi rosnący dług z kodu pisanego przez AI i nie ma go czym zmierzyć. Model open-core, z pustym katalogiem `enterprise/` czekającym na funkcje zespołowe. Problem jest jednak przed tym wszystkim: **kanał sprzedaży jest zablokowany przez nazwę**. Do czasu jej zmiany to jest artefakt wiarygodnościowy — gotowy, udokumentowany, przetestowany mutacyjnie silnik — i nic więcej.",
   "highlights": [
@@ -63,7 +154,7 @@
   "next": [
     "Zdecyduj nową nazwę i przeprowadź ją **jednym przebiegiem**: nazwa repo, trzy identyfikatory pakietów, wszystkie identyfikatory diagnostyk, przestrzenie nazw, `action.yml`, Dockerfile, dokumentacja. Identyfikatory stają się kontraktem API w chwili, gdy pierwszy konsument wpisze je do `.editorconfig` — po tym momencie zmiana jest łamiąca.",
     "Popraw linię copyright w LICENSE; nosi cudze nazwisko, skopiowane z innego repozytorium.",
-    "Wypuść pierwszy tag pod nową nazwą i sprawdź, czy sześć zadań release'u faktycznie przechodzi — dziś to są niezweryfikowane założenia o sekretach i widoczności pakietu.",
+    "Wypuść pierwszy tag pod nową nazwą i sprawdź, czy pięć zadań release'u faktycznie przechodzi — dziś to są niezweryfikowane założenia o sekretach i widoczności pakietu.",
     "Otwórz repozytorium. Prywatna bramka CI nie ma jak zdobyć pierwszego użytkownika.",
     "Włącz bramkę na PR-ach repozytorium konsumenta i napraw otwarte wpisy — to jest jedyny test, który liczy się dla kupującego."
   ],
@@ -74,5 +165,13 @@
   ],
   "headline": "Nazwa zajęta przez działający produkt w tym samym rejestrze — rename blokuje całą dystrybucję",
   "headlineTone": "bad",
-  "github": { "stars": 0, "openIssues": 3, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-19", "commits": 38, "files": 113 }
+  "github": {
+    "stars": 0,
+    "openIssues": 3,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-19",
+    "commits": 38,
+    "files": 113
+  }
 }

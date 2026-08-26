@@ -68,13 +68,11 @@ for (const r of data.repos ?? []) {
   for (const l of r.links?.live ?? []) {
     if (!/^https:\/\//.test(l.url)) fail(`${at}: live link "${l.label}" is not https`);
   }
-  // A private repository must not advertise a link a reader cannot open.
-  if (r.visibility === "private") {
-    for (const d of r.links?.docs ?? []) {
-      if (/github\.com\/konradcinkusz/.test(d.url) && !d.privateOk) {
-        warn(`${at}: docs link "${d.label}" points into a private repository; a reader will get a 404`);
-      }
-    }
+  // Docs links into a private repository are expected and the renderer greys them
+  // out with a reason, so they are not worth a warning. What IS worth one: a public
+  // repository promising a document, since that link resolves to a real 404.
+  for (const doc of r.links?.docs ?? []) {
+    if (/^https?:|^\//.test(doc.path)) fail(`${at}: docs entry "${doc.label}" must be a repo-relative path, not a URL`);
   }
 }
 
@@ -118,9 +116,19 @@ for (const s of slugs) {
 }
 
 // --- glossary references in prose -----------------------------------------
+// BOTH forms: {{term:id}} and {{term:id|label}}. Matching only the bare form let
+// two labelled references sit in the manifest pointing at glossary entries that
+// do not exist, while this script printed OK.
 const prose = JSON.stringify(data);
-for (const id of prose.matchAll(/\{\{term:([a-z0-9-]+)\}\}/g)) {
-  if (!glossaryIds.has(id[1])) fail(`prose references unknown glossary term "${id[1]}"`);
+let refCount = 0;
+for (const m of prose.matchAll(/\{\{term:([a-z0-9-]+)(?:\|[^}]*)?\}\}/g)) {
+  refCount++;
+  if (!glossaryIds.has(m[1])) fail(`prose references unknown glossary term "${m[1]}"`);
+}
+// A term nobody links to is dead weight in a two-column glossary.
+const linked = new Set([...prose.matchAll(/\{\{term:([a-z0-9-]+)/g)].map((m) => m[1]));
+for (const g of data.glossary ?? []) {
+  if (!linked.has(g.id)) warn(`glossary entry "${g.id}" is never referenced from any prose`);
 }
 const gIds = new Set();
 for (const g of data.glossary ?? []) {
@@ -138,6 +146,7 @@ const counts = {
   glossary: (data.glossary ?? []).length,
   tiers: (data.ops?.tiers ?? []).length,
 };
+counts["glossary references"] = refCount;
 console.log("portfolio.json —", Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(", "));
 for (const w of warnings) console.log(`  warn  ${w}`);
 for (const e of errors) console.error(`  ERROR ${e}`);

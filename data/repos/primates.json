@@ -7,51 +7,163 @@
   "tier": "P3",
   "oneLiner": "Przepisanie martwego monolitu ogłoszeniowego na siedem serwisów .NET 9 z Aspire i deployem sterowanym tagiem na Fly.io.",
   "summary": "Stary monolit ogłoszeniowy (FSE) został przepisany od zera na siedem serwisów ASP.NET Core: tożsamość z RS256 i JWKS, ogłoszenia z taksonomią i publikacją rozbitą na pięć kroków, append-only księgę punktów, bezstanowe media, czat nad Claude oraz efemeryczny job wygaszania promocji. Aspire składa to lokalnie, produkcją jest Fly.io. Najciekawsza decyzja nie dotyczy podziału, tylko sposobu odzyskania domeny z legacy: encje w trzech serwisach nie zostały przepisane ręcznie, lecz wygenerowane parserem po snapshocie EF, a `tools/verify-model-usage.py` sprawdza, czy każda właściwość używana w konfiguracji fluent, w LINQ i w inicjalizatorach faktycznie istnieje na encji. Skrypt wyłapał cztery realne defekty, w tym indeks na nieistniejącej kolumnie `AdvertTraffic` i flagę `IsActive`, której nie ma w schemacie. Wspólne jądro {{term:servicedefaults|ServiceDefaults}} ma mechaniczny sufit 800 linii egzekwowany w CI (dziś 542) oraz testy architektoniczne blokujące wejście encji i `DbContext`. Dokumentacja jest tu mocniejsza od kodu: 14 ADR-ów, rejestr odstępstw i audyt, który sam sobie wystawia ocenę 22 pozycji ze 103.",
-  "stack": [".NET 9", "ASP.NET Core", ".NET Aspire 9.5.2", "EF Core 9 + Npgsql", "PostgreSQL 17", "Blazor Server (interactive)", "Angular 10 / TypeScript 3.9.5", "Anthropic .NET SDK 12.40.0"],
+  "stack": [
+    ".NET 9",
+    "ASP.NET Core",
+    ".NET Aspire 9.5.2",
+    "EF Core 9 + Npgsql",
+    "PostgreSQL 17",
+    "Blazor Server (interactive)",
+    "Angular 10 / TypeScript 3.9.5",
+    "Anthropic .NET SDK 12.40.0"
+  ],
   "primaryLanguage": "C#",
   "license": "brak pliku LICENSE w repozytorium; `src/Primates.Web/package.json` deklaruje MIT, ale to metadana odziedziczona po legacy aplikacji Angulara",
   "tests": "Jeden projekt testowy: `tests/Primates.ArchitectureTests` z 2 atrybutami [Fact] i 1 [Theory] o 4 wierszach InlineData, czyli 6 przypadków, wszystkie o regułach ADR-002 dla {{term:kernel|wspólnego jądra}}; 23 pliki `.spec.ts` w Angularze to wygenerowane przez CLI zaślepki „should create”, których CI nie uruchamia, a księga punktów, pipeline publikacji i oba frontendy nie mają ani jednego testu.",
   "ci": "Pięć workflowów. `flyio.yml` (35 KB) to trzon: {{term:tagdeploy|wyzwalany tagiem `v*`}}, bramka testowa (kernel-size-check, build Release, dotnet test), wykrywanie zmian względem poprzedniego tagu, macierz buildów z pushem do `registry.fly.io` i deploy w kolejności zależności z weryfikacją endpointu JWKS. Reszta to manualne scale/destroy, publikacja `docs/index.html` na Pages i ręczny build PDF-a analizy biznesowej z LaTeX-a; skanera sekretów nie ma w żadnym z nich.",
   "metrics": [
-    { "label": "Projekty w solucji", "value": "10 .NET + 1 Angular" },
-    { "label": "Linie wspólnego jądra", "value": "542 / 800 (limit egzekwowany w CI)" },
-    { "label": "Pliki encji domenowych", "value": "43 (adverts 26, billing 8, identity 9)" },
-    { "label": "Kontrolery i endpointy", "value": "13 kontrolerów, 60 atrybutów [Http*]" },
-    { "label": "Strony .razor w BlazorWeb", "value": "26" },
-    { "label": "Pliki TypeScript (Angular 10)", "value": "169" },
-    { "label": "Konfiguracje Fly", "value": "9 plików fly.toml, 0 tagów git" },
-    { "label": "Pokrycie analizy biznesowej", "value": "22 zrobione / 52 częściowe / 29 brakujących ze 103" }
+    {
+      "label": "Projekty w solucji",
+      "value": "11 projektów .NET w `Primates.sln` (10 w `src/`, 1 w `tests/`); Angular `src/Primates.Web` nie ma pliku projektu i nie jest w solucji"
+    },
+    {
+      "label": "Linie wspólnego jądra",
+      "value": "542 / 800 (limit egzekwowany w CI)"
+    },
+    {
+      "label": "Pliki encji domenowych",
+      "value": "43 (adverts 26, billing 8, identity 9)"
+    },
+    {
+      "label": "Kontrolery i endpointy",
+      "value": "13 kontrolerów, 60 atrybutów [Http*]"
+    },
+    {
+      "label": "Strony .razor w BlazorWeb",
+      "value": "18 plików `.razor` z dyrektywą `@page` (20 tras); 26 to liczba wszystkich plików `.razor`"
+    },
+    {
+      "label": "Pliki TypeScript (Angular 10)",
+      "value": "169"
+    },
+    {
+      "label": "Konfiguracje Fly",
+      "value": "9 plików fly.toml, 0 tagów git"
+    },
+    {
+      "label": "Pokrycie analizy biznesowej",
+      "value": "22 zrobione / 52 częściowe / 29 brakujących ze 103"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/primates",
     "live": [
-      { "label": "Strona projektu (GitHub Pages)", "url": "https://konradcinkusz.github.io/primates/" }
+      {
+        "label": "Strona projektu (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/primates/"
+      }
     ],
     "docs": [
-      { "label": "Decyzje architektoniczne (14 ADR)", "path": "docs/architecture/06-DECISIONS.md" },
-      { "label": "Audyt zgodności ze standardami estate", "path": "docs/STANDARDS-GAP-ANALYSIS.md" },
-      { "label": "Audyt pokrycia analizy biznesowej", "path": "docs/BUSINESS-ANALYSIS-COVERAGE.md" },
-      { "label": "Inwentarz braków implementacyjnych", "path": "docs/IMPLEMENTATION-GAPS.md" },
-      { "label": "Topologia i koszty Fly", "path": "flyio/INFRASTRUCTURE-ANALYSIS.md" },
-      { "label": "Przewodnik deploymentu", "path": "docs/deployment.md" }
+      {
+        "label": "Decyzje architektoniczne (14 ADR)",
+        "path": "docs/architecture/06-DECISIONS.md"
+      },
+      {
+        "label": "Audyt zgodności ze standardami estate",
+        "path": "docs/STANDARDS-GAP-ANALYSIS.md"
+      },
+      {
+        "label": "Audyt pokrycia analizy biznesowej",
+        "path": "docs/BUSINESS-ANALYSIS-COVERAGE.md"
+      },
+      {
+        "label": "Inwentarz braków implementacyjnych",
+        "path": "docs/IMPLEMENTATION-GAPS.md"
+      },
+      {
+        "label": "Topologia i koszty Fly",
+        "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
+      },
+      {
+        "label": "Przewodnik deploymentu",
+        "path": "docs/deployment.md"
+      }
     ]
   },
-  "deployment": { "fly": true, "docker": true, "ghcr": false, "pages": true, "packages": false },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
   "components": [
-    { "name": "Primates.ServiceDefaults", "path": "src/Primates.ServiceDefaults", "description": "Sześć plików i 542 linie czystej instalacji przekrojowej: {{term:otel|OpenTelemetry}}, health checks, service discovery, odporność HTTP, walidacja JWT z opcjonalnym drugim wystawcą, przenośny między providerami setup EF i wykonawca skryptów SQL. Nie ma w nim ani jednej encji ani `DbContext`, a testy architektoniczne tego pilnują.", "reusable": true },
-    { "name": "Testy architektoniczne + kernel-size-check.sh", "path": "tests/Primates.ArchitectureTests", "description": "xunit sprawdza, że assembly jądra nie zawiera typów encji, podklas `DbContext` ani typów o nazwach domenowych (Seed, Constants, Pricing, Promotion), a skrypt bash wywala CI powyżej 800 linii. Reguła jest neutralna wobec domeny i przenosi się do innego repo przez zmianę ścieżki i nazwy typu bazowego.", "reusable": true },
-    { "name": "Generator encji i weryfikator modelu", "path": "tools", "description": "Trzy skrypty Pythona operujące na składni snapshotu EF Core, a nie na domenie: parser snapshotu, generator klas encji i `verify-model-usage.py`, który konfrontuje każdą właściwość użytą w kodzie ze schematem. Zadziała przy dowolnej migracji legacy schematu EF na nowe encje.", "reusable": true },
-    { "name": "Pipeline deployu na Fly.io", "path": ".github/workflows/flyio.yml", "description": "Deploy {{term:tagdeploy|sterowany tagiem}} z detekcją zmian względem poprzedniego tagu, regułą „brak aplikacji na Fly = zawsze buduj” dla zimnego środowiska, build-once-deploy-many przez `registry.fly.io` i uporządkowaną kolejnością serwisów. Zmienne to nazwy aplikacji i ścieżki Dockerfile'i, mechanika jest niezależna od domeny.", "reusable": true },
-    { "name": "Primates.AgentService", "path": "src/Primates.AgentService", "description": "Bezstanowy czat nad Claude, w którym agent nie ma żadnej zdolności ponad zalogowanego użytkownika: pięć narzędzi to cienkie opakowania na już autoryzowane endpointy adverts i billing, wołane tokenem użytkownika przez `BearerTokenForwardingHandler`. Narzędzia wydające punkty pauzują turę i czekają na jawne potwierdzenie, a pętla ma limit 8 iteracji.", "reusable": false },
-    { "name": "Primates.BlazorWeb", "path": "src/Primates.BlazorWeb", "description": "Drugi frontend zbudowany pod wzorzec BFF (ADR-014): przeglądarka rozmawia wyłącznie z własnym originem, tokeny siedzą w serwerowej sesji ciasteczkowej, obrazy idą przez własne `/media/{id}`. 26 stron `.razor`, w tym płatne odblokowanie kontaktu i UI czatu agenta, których Angular nigdy nie dowiózł.", "reusable": false },
-    { "name": "Primates.AdvertsService", "path": "src/Primates.AdvertsService", "description": "Największy serwis, 26 encji: taksonomia bazarów i kategorii, wyszukiwanie, formularze dynamiczne, moderacja oraz publikacja ogłoszenia rozbita na pipeline pięciu kroków w miejsce legacy god-service. Krok `ApplyAttributesStep` nadal nie zapisuje atrybutów i jest to przyznane w dokumentacji.", "reusable": false },
-    { "name": "Primates.BillingService", "path": "src/Primates.BillingService", "description": "Append-only księga punktów z serializowalną transakcją wydania, cennik zależny od bazaru, kategorii, typu transakcji i promocji oraz mockowy provider płatności za interfejsem `IPaymentProvider`. Wzorzec księgi jest ogólny, implementacja związana z typem `AdvertCost`.", "reusable": false }
+    {
+      "name": "Primates.ServiceDefaults",
+      "path": "src/Primates.ServiceDefaults",
+      "description": "Sześć plików i 542 linie czystej instalacji przekrojowej: {{term:otel|OpenTelemetry}}, health checks, service discovery, odporność HTTP, walidacja JWT z opcjonalnym drugim wystawcą, przenośny między providerami setup EF i wykonawca skryptów SQL. Nie ma w nim ani jednej encji ani `DbContext`, a testy architektoniczne tego pilnują.",
+      "reusable": true
+    },
+    {
+      "name": "Testy architektoniczne + kernel-size-check.sh",
+      "path": "tests/Primates.ArchitectureTests",
+      "description": "xunit sprawdza, że assembly jądra nie zawiera typów encji, podklas `DbContext` ani typów o nazwach domenowych (Seed, Constants, Pricing, Promotion), a skrypt bash wywala CI powyżej 800 linii. Reguła jest neutralna wobec domeny i przenosi się do innego repo przez zmianę ścieżki i nazwy typu bazowego.",
+      "reusable": true
+    },
+    {
+      "name": "Generator encji i weryfikator modelu",
+      "path": "tools",
+      "description": "Trzy skrypty Pythona operujące na składni snapshotu EF Core, a nie na domenie: parser snapshotu, generator klas encji i `verify-model-usage.py`, który konfrontuje każdą właściwość użytą w kodzie ze schematem. Zadziała przy dowolnej migracji legacy schematu EF na nowe encje.",
+      "reusable": true
+    },
+    {
+      "name": "Pipeline deployu na Fly.io",
+      "path": ".github/workflows/flyio.yml",
+      "description": "Deploy {{term:tagdeploy|sterowany tagiem}} z detekcją zmian względem poprzedniego tagu, regułą „brak aplikacji na Fly = zawsze buduj” dla zimnego środowiska, build-once-deploy-many przez `registry.fly.io` i uporządkowaną kolejnością serwisów. Zmienne to nazwy aplikacji i ścieżki Dockerfile'i, mechanika jest niezależna od domeny.",
+      "reusable": true
+    },
+    {
+      "name": "Primates.AgentService",
+      "path": "src/Primates.AgentService",
+      "description": "Bezstanowy czat nad Claude, w którym agent nie ma żadnej zdolności ponad zalogowanego użytkownika: pięć narzędzi to cienkie opakowania na już autoryzowane endpointy adverts i billing, wołane tokenem użytkownika przez `BearerTokenForwardingHandler`. Narzędzia wydające punkty pauzują turę i czekają na jawne potwierdzenie, a pętla ma limit 8 iteracji.",
+      "reusable": false
+    },
+    {
+      "name": "Primates.BlazorWeb",
+      "path": "src/Primates.BlazorWeb",
+      "description": "Drugi frontend zbudowany pod wzorzec BFF (ADR-014): przeglądarka rozmawia wyłącznie z własnym originem, tokeny siedzą w serwerowej sesji ciasteczkowej, obrazy idą przez własne `/media/{id}`. 18 routowalnych stron (pliki `.razor` z `@page`, razem 20 tras) z 26 plików `.razor` w projekcie, w tym płatne odblokowanie kontaktu i UI czatu agenta, których Angular nigdy nie dowiózł.",
+      "reusable": false
+    },
+    {
+      "name": "Primates.AdvertsService",
+      "path": "src/Primates.AdvertsService",
+      "description": "Największy serwis, 26 encji: taksonomia bazarów i kategorii, wyszukiwanie, formularze dynamiczne, moderacja oraz publikacja ogłoszenia rozbita na pipeline pięciu kroków w miejsce legacy god-service. Krok `ApplyAttributesStep` nadal nie zapisuje atrybutów i jest to przyznane w dokumentacji.",
+      "reusable": false
+    },
+    {
+      "name": "Primates.BillingService",
+      "path": "src/Primates.BillingService",
+      "description": "Append-only księga punktów z serializowalną transakcją wydania, cennik zależny od bazaru, kategorii, typu transakcji i promocji oraz mockowy provider płatności za interfejsem `IPaymentProvider`. Wzorzec księgi jest ogólny, implementacja związana z typem `AdvertCost`.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "authservice", "reason": "AppHost uruchamia obraz `ghcr.io/konradcinkusz/authservice:v0.3.1` jako drugiego wystawcę tokenów (ADR-013), a własny IdentityService zostaje jako ścieżka zgodności. To jedyny konsument, który postawił tamten serwis obok istniejącej tożsamości zamiast w jej miejsce." },
-    { "slug": "architecture-standards", "reason": "Całe repo jest mierzone checklistą P1-P15 stamtąd, a `docs/architecture/07-STANDARDS-FEEDBACK.md` zwraca poprawki do samego standardu. Sprzężenie idzie w obie strony." },
-    { "slug": "aurelius-promptus", "reason": "ADR-002 i ADR-003 cytują tamten system jako udokumentowany przypadek rozrostu wspólnego jądra; sufit 800 linii jest bezpośrednią odpowiedzią na tamtą porażkę." },
-    { "slug": "AgentHelm", "reason": "AgentService to kolejny agent nad Claude z narzędziami i bramką potwierdzenia, czyli ta sama klasa problemu co narzędzia do prowadzenia agentów." }
+    {
+      "slug": "authservice",
+      "reason": "AppHost uruchamia obraz `ghcr.io/konradcinkusz/authservice:v0.3.1` jako drugiego wystawcę tokenów (ADR-013), a własny IdentityService zostaje jako ścieżka zgodności. To jedyny konsument, który postawił tamten serwis obok istniejącej tożsamości zamiast w jej miejsce."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Całe repo jest mierzone checklistą P1-P15 stamtąd, a `docs/architecture/07-STANDARDS-FEEDBACK.md` zwraca poprawki do samego standardu. Sprzężenie idzie w obie strony."
+    },
+    {
+      "slug": "aurelius-promptus",
+      "reason": "ADR-002 i ADR-003 cytują tamten system jako udokumentowany przypadek rozrostu wspólnego jądra; sufit 800 linii jest bezpośrednią odpowiedzią na tamtą porażkę."
+    },
+    {
+      "slug": "AgentHelm",
+      "reason": "AgentService to kolejny agent nad Claude z narzędziami i bramką potwierdzenia, czyli ta sama klasa problemu co narzędzia do prowadzenia agentów."
+    }
   ],
   "product": "Brak kupującego. To nie jest sprzedawalny produkt, tylko referencyjna implementacja standardów estate na realnej, brzydkiej domenie odziedziczonej po martwym monolicie. Wartość jest dwojaka: dowód kompetencji migracyjnej (siedem serwisów, JWKS, deploy sterowany tagiem, własny audyt zgodności) oraz poligon, z którego reguły wędrują później do architecture-standards i authservice. Analiza biznesowa i ADR-011 opisują model przychodowy portalu w postaci punktów i subskrypcji Pro, ale żaden płatny użytkownik nie istnieje i nic w repozytorium tego nie sugeruje.",
   "gaps": [
@@ -59,12 +171,12 @@
     "Testów poza jądrem nie ma. Sześć przypadków dotyczy reguł ADR-002; pozycja 16 checklisty standardów jest czerwona dla wszystkich siedmiu deployowalnych i dokumentacja sama to odnotowuje.",
     "**Zero tagów git w tym klonie, przy deployu wyzwalanym wyłącznie tagiem `v*`.** Z repozytorium nie da się potwierdzić, że jakikolwiek release faktycznie poszedł, a adresy `primates-*.fly.dev` pochodzą z linii `app=` w fly.toml i z `docs/deployment.md`, nie z odpytania. Historia zawiera poprawki błędów deployu, więc coś było uruchamiane, ale to poszlaka.",
     "Eksport {{term:otel|OTLP}} jest okablowany w jądrze, a żaden fly.toml nie ustawia `OTEL_EXPORTER_OTLP_ENDPOINT`. Wdrożone środowisko nie eksportuje telemetrii nigdzie i mówi to wprost pozycja 4 audytu standardów.",
-    "Sześć z ośmiu Dockerfile'i ma `org.opencontainers.image.source` wskazujący na `konradcinkusz/FSE`, czyli na źródło, którego już nie ma. Obrazy w registry.fly.io podpisują się nieistniejącym repozytorium."
+    "Siedem z ośmiu Dockerfile'i ma `org.opencontainers.image.source` wskazujący na `konradcinkusz/FSE`, czyli na źródło, którego już nie ma; tylko `src/Primates.AgentService/Dockerfile` wskazuje na `konradcinkusz/primates`. Obrazy w registry.fly.io podpisują się nieistniejącym repozytorium."
   ],
   "next": [
     "Dopisz deploy BlazorWeb i authservice do `flyio.yml` albo usuń ich pliki fly.toml. Obecny stan obiecuje wdrożenie, którego nie ma.",
     "Usuń klucz Google Maps z czterech modułów Angulara do istniejącego `assets/config.json` i dodaj gitleaks do workflow. Klucz jest w historii, więc rotacja i tak jest konieczna.",
-    "Dodaj plik LICENSE i popraw `org.opencontainers.image.source` w sześciu Dockerfile'ach na to repozytorium.",
+    "Dodaj plik LICENSE i popraw `org.opencontainers.image.source` w siedmiu Dockerfile'ach na to repozytorium.",
     "Wypchnij tag `v*` i potwierdź, że reguła zimnego środowiska faktycznie podnosi cały estate od zera. Dziś to nieprzetestowana z repozytorium obietnica.",
     "Napisz testy charakteryzujące księgę punktów i pipeline publikacji, zanim cokolwiek w nich się zmieni."
   ],
@@ -83,5 +195,13 @@
   ],
   "headline": "Dokumentacja audytuje własny kod na 22/103, a testów poza jądrem nie ma wcale",
   "headlineTone": "warn",
-  "github": { "stars": 0, "openIssues": 46, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-24", "commits": 67, "files": 595 }
+  "github": {
+    "stars": 0,
+    "openIssues": 46,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-24",
+    "commits": 67,
+    "files": 595
+  }
 }

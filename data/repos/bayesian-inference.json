@@ -7,34 +7,91 @@
   "tier": "P3",
   "oneLiner": "Silnik dokładnego wnioskowania w sieciach Bayesa napisany od zera plus aplikacja Blazor, która go nie używa i liczy własne, błędne wyniki.",
   "summary": "Repozytorium ma dwie połowy, które dzielą nazwę i nie dzielą kodu. Pierwsza to `WSB.BayesianNetwork.Logic`: algorytm Enumeration-Ask z Russella i Norviga napisany bez żadnej biblioteki probabilistycznej, z konsolowym harnessem liczącym pełny przegląd 6561 kombinacji dowodów. Druga to aplikacja pełnostackowa — Blazor WebAssembly (37 komponentów `.razor`) rozmawiający po REST z hostem ASP.NET Core (9 kontrolerów), CQRS na MediatR, EF Core 7 z Npgsql, tokeny RS256 walidowane wobec {{term:oidc|JWKS}} osobnej instancji `authservice`. Aplikacja webowa **nie referencjonuje przetestowanego silnika**, tylko duplikuje liczenie prawdopodobieństwa we własnej warstwie serwisowej. Najciekawsza decyzja nie jest w kodzie, tylko w `docs/research`: autor nie mógł uruchomić .NET w środowisku badania, więc napisał 229-liniową replikę silnika w Pythonie, zwalidował ją na istniejących testach jednostkowych, a dopiero potem użył jej jako instrumentu — i tym instrumentem wykazał, że sieć demo ma niedospecyfikowane CPT, a webowa ścieżka liczenia w ogóle nie zwraca posteriorów. To jest repozytorium, którego najlepszym produktem jest dowód na własne błędy.",
-  "stack": [".NET 7 (SDK 7.0.203)", "Blazor WebAssembly 7.0.5", "ASP.NET Core MVC + Swashbuckle 6.5.0", "EF Core 7.0.5 + Npgsql 7.0.4", "PostgreSQL 16", "MediatR 11.1.0 + AutoMapper 12.0.1", "xUnit 2.4.2", "Docker + Fly.io"],
+  "stack": [
+    ".NET 7 (SDK 7.0.203)",
+    "Blazor WebAssembly 7.0.5",
+    "ASP.NET Core MVC + Swashbuckle 6.5.0",
+    "EF Core 7.0.5 + Npgsql 7.0.4",
+    "PostgreSQL 16",
+    "MediatR 11.1.0 + AutoMapper 12.0.1",
+    "xUnit 2.4.2",
+    "Docker + Fly.io"
+  ],
   "primaryLanguage": "C#",
   "license": "MIT",
   "tests": "Dokładnie 4 testy `[Fact]` w jednym projekcie, wszystkie na silniku; wartości oczekiwane (0,461538 dla sieci WetRain, 0,336689 dla wariantu Alarm) wyprowadzone ręcznie z CPT w komentarzach, a nie skopiowane z wyjścia algorytmu. Webowa ścieżka liczenia nie ma żadnego testu, co README i analiza luk stwierdzają wprost. Przebiegu nie zweryfikowano — w środowisku przeglądu nie było SDK .NET.",
-  "ci": "Cztery workflowy. `build.yml` robi restore, build Release i `dotnet test` całej solucji, a następnie **stosuje ręcznie napisaną migrację EF Core wobec usługi `postgres:16`** — migracja powstała bez lokalnego dostępu do bazy i to jest jej jedyna weryfikacja. Pozostałe trzy (`deploy.yml` na flyctl, `pages.yml`, `reset-demo.yml` z cronem co 6 godzin) same się wyłączają, gdy brakuje sekretu albo zmiennej, więc dziś wszystkie kończą się no-opem.",
+  "ci": "Cztery workflowy. `build.yml` robi restore, build Release i `dotnet test` całej solucji, a następnie **stosuje ręcznie napisaną migrację EF Core wobec usługi `postgres:16`** — migracja powstała bez lokalnego dostępu do bazy i to jest jej jedyna weryfikacja. Tylko dwa z pozostałych trzech same się wyłączają: `deploy.yml` (flyctl) sprawdza w skrypcie `if [ -z \"$FLY_API_TOKEN\" ]` i kończy `exit 0`, a `reset-demo.yml` (cron co 6 godzin) ma na krokach `if: ${{ vars.DEMO_APP_URL != '' }}` z gałęzią „not configured yet”; bez sekretu i bez zmiennej oba kończą się no-opem. `pages.yml` nie ma żadnego takiego zabezpieczenia — w pliku nie występuje ani jeden `if:`, ani odwołanie do `vars.` czy `secrets.` — więc odpala się przy każdym pushu ruszającym `html/` i zgodnie z własnym nagłówkiem krok `actions/deploy-pages@v4` **kończy się błędem** „Pages site not found”, dopóki właściciel repozytorium nie przestawi Settings → Pages → Source na „GitHub Actions”. To jest czerwony bieg, a nie ciche pominięcie.",
   "metrics": [
-    { "label": "Commity", "value": "27" },
-    { "label": "Pliki w git", "value": "2264 (w tym ok. 2000 ikon bootstrap-icons)" },
-    { "label": "Projekty w solucji", "value": "9 csproj" },
-    { "label": "Testy xUnit", "value": "4 [Fact]" },
-    { "label": "Kontrolery API / komponenty .razor", "value": "9 / 37" },
-    { "label": "Handlery CQRS", "value": "28 plików .cs" },
-    { "label": "ADR-y", "value": "11 (ADR-001..ADR-011)" },
-    { "label": "Zapytania w przeglądzie konsolowym", "value": "6561 (3^8), z czego 648 daje sensowny posterior" }
+    {
+      "label": "Commity",
+      "value": "27"
+    },
+    {
+      "label": "Pliki w git",
+      "value": "2264 (w tym ok. 2000 ikon bootstrap-icons)"
+    },
+    {
+      "label": "Projekty w solucji",
+      "value": "9 csproj"
+    },
+    {
+      "label": "Testy xUnit",
+      "value": "4 [Fact]"
+    },
+    {
+      "label": "Kontrolery API / komponenty .razor",
+      "value": "9 / 37"
+    },
+    {
+      "label": "Handlery CQRS",
+      "value": "28 plików .cs"
+    },
+    {
+      "label": "ADR-y",
+      "value": "11 (ADR-001..ADR-011)"
+    },
+    {
+      "label": "Zapytania w przeglądzie konsolowym",
+      "value": "6561 (3^8), z czego 648 daje sensowny posterior"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/bayesian-inference",
     "live": [],
     "docs": [
-      { "label": "Studium 01 — niedospecyfikowane CPT w sieci StockBN", "path": "docs/research/01-STOCKBN-CPT-UNDERSPECIFICATION.md" },
-      { "label": "Studium 02 — webowa ścieżka liczenia", "path": "docs/research/02-WEB-CALCULATION-PATH.md" },
-      { "label": "Artykuł LaTeX spinający oba studia", "path": "docs/research/papers/00-COMPREHENSIVE-REVIEW.tex" },
-      { "label": "Analiza 18 punktów zgodności ze standardem", "path": "docs/architecture/02-GAP-ANALYSIS.md" },
-      { "label": "Decyzje architektoniczne ADR-001..011", "path": "docs/architecture/05-DECISIONS.md" },
-      { "label": "Audyt gotowości do otwarcia źródeł", "path": "docs/architecture/06-OPEN-SOURCE-READINESS.md" }
+      {
+        "label": "Studium 01 — niedospecyfikowane CPT w sieci StockBN",
+        "path": "docs/research/01-STOCKBN-CPT-UNDERSPECIFICATION.md"
+      },
+      {
+        "label": "Studium 02 — webowa ścieżka liczenia",
+        "path": "docs/research/02-WEB-CALCULATION-PATH.md"
+      },
+      {
+        "label": "Artykuł LaTeX spinający oba studia",
+        "path": "docs/research/papers/00-COMPREHENSIVE-REVIEW.tex"
+      },
+      {
+        "label": "Analiza 18 punktów zgodności ze standardem",
+        "path": "docs/architecture/02-GAP-ANALYSIS.md"
+      },
+      {
+        "label": "Decyzje architektoniczne ADR-001..011",
+        "path": "docs/architecture/05-DECISIONS.md"
+      },
+      {
+        "label": "Audyt gotowości do otwarcia źródeł",
+        "path": "docs/architecture/06-OPEN-SOURCE-READINESS.md"
+      }
     ]
   },
-  "deployment": { "fly": true, "docker": true, "ghcr": false, "pages": true, "packages": false },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
   "components": [
     {
       "name": "docs/research — studia, artefakty i artykuł",
@@ -86,8 +143,14 @@
     }
   ],
   "overlaps": [
-    { "slug": "authservice", "reason": "Aplikacja nie ma własnego klucza podpisującego: waliduje RS256 wobec JWKS instancji tamtej usługi (ADR-010/ADR-011), a runbook wdrożenia stawia obie aplikacje obok siebie na Fly.io. Przy HS256 po tamtej stronie JWKS jest puste i każdy token leci w kosz przy pozornie zdrowych obu usługach." },
-    { "slug": "architecture-standards", "reason": "Całe `docs/architecture` i `docs/research` są pisane wprost pod tamtejszą checklistę zgodności i standard badawczy. To jest realny przypadek użycia tamtego repozytorium, nie deklaracja." }
+    {
+      "slug": "authservice",
+      "reason": "Aplikacja nie ma własnego klucza podpisującego: waliduje RS256 wobec JWKS instancji tamtej usługi (ADR-010/ADR-011), a runbook wdrożenia stawia obie aplikacje obok siebie na Fly.io. Przy HS256 po tamtej stronie JWKS jest puste i każdy token leci w kosz przy pozornie zdrowych obu usługach."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Całe `docs/architecture` i `docs/research` są pisane wprost pod tamtejszą checklistę zgodności i standard badawczy. To jest realny przypadek użycia tamtego repozytorium, nie deklaracja."
+    }
   ],
   "product": "Brak kupującego, i README samo to przyznaje w sekcji *What this project is not* — projekt nie konkuruje z pgmpy ani z żadną biblioteką PGM. Punktem wyjścia była praca zaliczeniowa, rozbudowana potem do referencyjnej aplikacji pełnostackowej i do przypadku testowego dla własnego standardu dokumentacji. Wartość jest wiarygodnościowa i dydaktyczna: pokazuje algorytm dokładnego wnioskowania napisany ręcznie oraz autora, który publikuje formalne studium błędów we własnym kodzie zamiast je cicho poprawić.",
   "gaps": [
@@ -119,5 +182,13 @@
   ],
   "headline": "Dwie połowy, które się nie znają — i autor sam to udowodnił dwoma studiami",
   "headlineTone": "warn",
-  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-15", "commits": 27, "files": 2264 }
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-15",
+    "commits": 27,
+    "files": 2264
+  }
 }

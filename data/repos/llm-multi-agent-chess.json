@@ -7,39 +7,93 @@
   "tier": "P4",
   "oneLiner": "Dwa agenty LLM grają ze sobą partię szachów — raz w Pythonie ze Streamlitem, raz w .NET 8 na własnym silniku szachowym.",
   "summary": "Repozytorium wozi dwie równoległe implementacje jednego pomysłu. Pierwsza, z sierpnia 2025, to Streamlit nad `python-chess` z fabryką agentów, agentem losowym i headlessowym `simulate_game`. Druga, z kwietnia 2026, to pełny rewrite: ASP.NET Core Web API, Blazor WebAssembly za nginx, SignalR do strumieniowania ruchów i PostgreSQL przez EF Core, uruchamiane jako trzy kontenery w `docker-compose`. Najciekawsza decyzja inżynierska to rezygnacja z biblioteki szachowej po stronie .NET: `ChessBoard.cs` ma 692 linie i sam obsługuje FEN, SAN, generację legalnych ruchów z roszadą i biciem w przelocie, mata, pata, regułę 50 ruchów, powtórzenia oraz render planszy do SVG. Druga warta uwagi rzecz to warstwa {{term:audit|audytu}}: każda próba promptu ląduje w tabeli `PromptLogs` razem z pełną odpowiedzią modelu i flagą sukcesu, a trzy strony admina pozwalają to przeglądać z filtrem po partii. Skończone są silnik, API, schemat bazy i panel; niedokończone jest sklejenie tego w uruchamialną całość — README opisuje wyłącznie porzuconą gałąź Pythona.",
-  "stack": [".NET 8", "ASP.NET Core Web API", "Blazor WebAssembly 8.0.25", "SignalR 8.0.10", "EF Core 8.0.10 + Npgsql", "OpenAI .NET SDK 2.1.0", "PostgreSQL 16-alpine za nginx", "Python 3 + Streamlit 1.24.0"],
+  "stack": [
+    ".NET 8",
+    "ASP.NET Core Web API",
+    "Blazor WebAssembly 8.0.25",
+    "SignalR 8.0.10",
+    "EF Core 8.0.10 + Npgsql",
+    "OpenAI .NET SDK 2.1.0",
+    "PostgreSQL 16-alpine za nginx",
+    "Python 3 + Streamlit 1.24.0"
+  ],
   "primaryLanguage": "C#",
   "license": "MIT",
-  "tests": "Dziesięć funkcji testowych w pięciu plikach `tests/`, wszystkie w Pythonie; po stronie .NET zero projektów testowych. Uruchomienia nie udało się potwierdzić (brak pytest i modułu `chess` w środowisku), ale dwie funkcje wołają `pytest.patch`, które w API pytest nie istnieje, więc na pewno się wywracają.",
+  "tests": "Dziesięć funkcji testowych w czterech plikach `tests/`: `test_agents.py` 3, `test_game.py` 3, `test_utils.py` 3, `test_simulation.py` 1. Katalog ma sześć plików — pozostałe dwa to `conftest.py` i `__init__.py`, w którym `test_board` mimo nazwy jest fixture'em (`@pytest.fixture`), a nie testem. Wszystko w Pythonie; po stronie .NET zero projektów testowych. Uruchomienia nie udało się potwierdzić (brak pytest i modułu `chess` w środowisku), ale dwie funkcje w `test_agents.py` wołają `pytest.patch`, które w API pytest nie istnieje, więc na pewno się wywracają.",
   "ci": "Brak CI — w repozytorium nie ma katalogu `.github` ani żadnego workflowu. Nikt więc nie wie, czy stos .NET się kompiluje.",
   "metrics": [
-    { "label": "Commity", "value": "7, od 2025-08-26 do 2026-04-11" },
-    { "label": "Pliki w gicie", "value": "101" },
-    { "label": "Własny silnik szachowy", "value": "692 linie (ChessBoard.cs)" },
-    { "label": "Kod .NET bez migracji", "value": "3 597 linii (API 1 730 + Blazor 1 867)" },
-    { "label": "Kod Python z testami", "value": "1 545 linii" },
-    { "label": "Funkcje testowe", "value": "10, wszystkie w Pythonie" },
-    { "label": "Kontenery w docker-compose", "value": "3 (db, api, frontend)" },
-    { "label": "Migracje EF Core", "value": "2" }
+    {
+      "label": "Commity",
+      "value": "7, od 2025-08-26 do 2026-04-11"
+    },
+    {
+      "label": "Pliki w gicie",
+      "value": "101"
+    },
+    {
+      "label": "Własny silnik szachowy",
+      "value": "692 linie (ChessBoard.cs)"
+    },
+    {
+      "label": "Kod .NET bez migracji",
+      "value": "3 768 linii — `wc -l` po plikach `.cs` w ChessApi bez katalogu `Migrations/` (1 801) plus `.cs` i `.razor` w ChessBlazor (1 967), z pominięciem `bin/` i `obj/`"
+    },
+    {
+      "label": "Kod Python z testami",
+      "value": "1 545 linii"
+    },
+    {
+      "label": "Funkcje testowe",
+      "value": "10 w czterech plikach `tests/`, wszystkie w Pythonie"
+    },
+    {
+      "label": "Kontenery w docker-compose",
+      "value": "3 (db, api, frontend)"
+    },
+    {
+      "label": "Migracje EF Core",
+      "value": "2"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/llm-multi-agent-chess",
     "live": [],
     "docs": [
-      { "label": "README — opisuje wyłącznie wariant Streamlit", "path": "README.md" },
-      { "label": "Wytyczne dla kontrybutorów", "path": "CONTRIBUTING.md" },
-      { "label": "Kodeks postępowania", "path": "CODE_OF_CONDUCT.md" },
-      { "label": "Stos .NET — trzy kontenery", "path": "chess-dotnet/docker-compose.yml" },
-      { "label": "Silnik szachowy", "path": "chess-dotnet/ChessApi/Chess/ChessBoard.cs" }
+      {
+        "label": "README — opisuje wyłącznie wariant Streamlit",
+        "path": "README.md"
+      },
+      {
+        "label": "Wytyczne dla kontrybutorów",
+        "path": "CONTRIBUTING.md"
+      },
+      {
+        "label": "Kodeks postępowania",
+        "path": "CODE_OF_CONDUCT.md"
+      },
+      {
+        "label": "Stos .NET — trzy kontenery",
+        "path": "chess-dotnet/docker-compose.yml"
+      },
+      {
+        "label": "Silnik szachowy",
+        "path": "chess-dotnet/ChessApi/Chess/ChessBoard.cs"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": true, "ghcr": false, "pages": false, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
   "components": [
     {
       "name": "Audyt promptów i panel admina",
       "path": "chess-dotnet/ChessApi/Controllers/AdminController.cs",
-      "description": "Encja `PromptLog` zapisuje dla **każdej próby** model, osobowość, pełny tekst promptu, odpowiedź i flagę sukcesu; kontroler wystawia statystyki, listę partii i stronicowany przegląd promptów z filtrem po graczu. Wzorzec prompt/response/success plus stronicowany przegląd jest neutralny domenowo — do przeniesienia wystarczy odciąć klucz obcy `GameId`.",
-      "reusable": true
+      "description": "Encja `PromptLog` zapisuje dla **każdej próby** model, osobowość, pełny tekst promptu, odpowiedź i flagę sukcesu; kontroler wystawia statystyki, listę partii i stronicowany przegląd promptów z filtrem po graczu. Do przeniesienia jednak nie wystarczy odciąć klucza obcego `GameId`: konstruktor to `AdminController(IDbContextFactory<AppDbContext> dbFactory)`, a `AppDbContext` wystawia wyłącznie `DbSet<Game>`, `DbSet<MoveRecord>` i `DbSet<PromptLog>`, których każda z pięciu akcji używa. Cztery z pięciu sygnatur zwracają typy domenowe — `Task<ActionResult<AdminStats>> GetStats()`, `Task<ActionResult<List<AdminGameSummary>>> GetGames(string?, int, int)`, `Task<ActionResult<AdminGameDetail>> GetGame(Guid)` i `Task<ActionResult<List<AdminPromptLogItem>>> GetPrompts(Guid?, string?, int, int)`; domenowo neutralna jest tylko `GetPlayers()` zwracająca `List<string>`. Przenośny jest sam wzorzec prompt/response/success, nie ten kod.",
+      "reusable": false
     },
     {
       "name": "ChessBoard — silnik szachowy w C#",
@@ -85,11 +139,26 @@
     }
   ],
   "overlaps": [
-    { "slug": "chess-mas", "reason": "Ta sama domena i ten sam pomysł — system wieloagentowy grający w szachy. Dwa repozytoria o tym samym temacie w portfolio wymagają rozdzielenia albo scalenia." },
-    { "slug": "agents-and-llms", "reason": "Wspólny wątek: budowanie promptu pod wybór akcji i walidacja odpowiedzi modelu wobec listy dozwolonych ruchów." },
-    { "slug": "cognitive-multi-agent-simulation", "reason": "Oba puszczają agentów LLM przeciwko sobie i logują przebieg do późniejszej analizy." },
-    { "slug": "cards-game", "reason": "Gra jako poligon dla agentów, z ręcznie napisanymi regułami i własnym modelem stanu rozgrywki." },
-    { "slug": "copilot-scope", "reason": "Tabela `PromptLogs` to zalążek tego, co tam jest zrobione porządnie — zapis promptu, odpowiedzi i wyniku jako materiał do oceny jakości sesji." }
+    {
+      "slug": "chess-mas",
+      "reason": "Ta sama domena i ten sam pomysł — system wieloagentowy grający w szachy. Dwa repozytoria o tym samym temacie w portfolio wymagają rozdzielenia albo scalenia."
+    },
+    {
+      "slug": "agents-and-llms",
+      "reason": "Wspólny wątek: budowanie promptu pod wybór akcji i walidacja odpowiedzi modelu wobec listy dozwolonych ruchów."
+    },
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "Oba puszczają agentów LLM przeciwko sobie i logują przebieg do późniejszej analizy."
+    },
+    {
+      "slug": "cards-game",
+      "reason": "Gra jako poligon dla agentów, z ręcznie napisanymi regułami i własnym modelem stanu rozgrywki."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Tabela `PromptLogs` to zalążek tego, co tam jest zrobione porządnie — zapis promptu, odpowiedzi i wyniku jako materiał do oceny jakości sesji."
+    }
   ],
   "product": "**Brak kupującego.** To, że modele językowe grają w szachy słabo, jest dobrze udokumentowane, więc sam produkt nie ma odbiorcy i nie warto udawać, że ma. Wartość jest kredytowa i warsztatowa: silnik szachowy napisany od zera w C# plus kompletny stos ASP.NET Core + SignalR + Blazor WASM + EF Core + Postgres w `docker-compose` to sensowna próbka kodu na rozmowę. Osobno wartościowy jest wątek audytu promptów, bo pokazuje myślenie o obserwowalności agenta, a nie tylko o samym wywołaniu modelu.",
   "highlights": [

@@ -7,50 +7,156 @@
   "tier": "P4",
   "oneLiner": "Dwa agenty LLM grają w szachy, a o legalności ruchu decyduje wyłącznie deterministyczny silnik zasad.",
   "summary": "Port prototypu `llm-multi-agent-chess` z Pythona i Streamlita na .NET 10, złożony przez {{term:aspire|Aspire}} 13.4.6 z sześciu projektów źródłowych i dwóch testowych. Każda strona planszy to niezależny `AIAgent` z {{term:maf|Microsoft Agent Framework}} 1.15.0, a wybór backendu (Anthropic, Azure OpenAI, Azure AI Foundry, lokalna Ollama albo człowiek) jest wpisem w `appsettings`, nie gałęzią w kodzie. Najważniejsza decyzja jest jednozdaniowa: `ChessMas.Engine` to jedyny autorytet legalności. Agent woła `get_board_state`, dostaje FEN wraz z pełną listą legalnych ruchów w UCI i SAN, proponuje ruch przez `propose_move`, a `TryApplyMove` dopasowuje propozycję do obiektu `Move` wygenerowanego przez silnik zamiast parsować napis. To bezpośrednia odpowiedź na tryb awarii oryginalnego prototypu, w którym model odtwarzał pozycję z prozy i gubił stan planszy. Doklejone jest rozliczanie kosztów po realnym `AgentRunResponse.Usage` oraz cztery metryki {{term:otel|OTel}}, ale całość ma **cztery commity, zero persystencji i żadnego zapisanego dowodu, że rozegrano tu partię z prawdziwym modelem**.",
-  "stack": [".NET 10 / C# 13", ".NET Aspire 13.4.6", "Microsoft.Agents.AI 1.15.0", "Microsoft.Extensions.AI 10.8.3", "Blazor Server", "ChessDotNetCore 1.6.0", "OpenTelemetry 1.17.0", "xUnit 2.9.3"],
+  "stack": [
+    ".NET 10",
+    ".NET Aspire 13.4.6",
+    "Microsoft.Agents.AI 1.15.0",
+    "Microsoft.Extensions.AI 10.8.3",
+    "Blazor Server",
+    "ChessDotNetCore 1.6.0",
+    "OpenTelemetry 1.17.0",
+    "xUnit 2.9.3"
+  ],
   "primaryLanguage": "C#",
   "license": "MIT",
   "tests": "26 metod `[Fact]` i zero `[Theory]` w dwóch projektach: 15 dla silnika, 5 dla arytmetyki kosztów, 6 dla bramki ruchu człowieka. Żaden nie wymaga klucza API; liczba przechodzących nie została zweryfikowana, bo policzone są atrybuty, nie przebiegi.",
   "ci": "`ci.yml` robi restore, build w Release i `dotnet test` z logerem trx oraz uploadem artefaktu wyników; brak Dockera i brak sekretów. `pages.yml` publikuje katalog `docs/` na GitHub Pages, a `dependabot.yml` pilnuje NuGeta co tydzień w trzech grupach. CHANGELOG odnotowuje, że workflow początkowo wyzwalał się na `main` przy gałęzi domyślnej `master`, więc przez pewien czas nie uruchomił się ani razu.",
   "metrics": [
-    { "label": "Projekty w solucji", "value": "6 źródłowych + 2 testowe" },
-    { "label": "Linie C#/Razor", "value": "2 252" },
-    { "label": "Testy xUnit", "value": "26" },
-    { "label": "Commity", "value": "4" },
-    { "label": "Pliki śledzone przez git", "value": "54" },
-    { "label": "Backendy modeli do wyboru w UI", "value": "5 + człowiek" },
-    { "label": "Metryki OTel", "value": "4" },
-    { "label": "Limity jednej partii", "value": "200 plyów, 5 odrzuceń na turę" }
+    {
+      "label": "Projekty w solucji",
+      "value": "6 źródłowych + 2 testowe"
+    },
+    {
+      "label": "Linie C#/Razor",
+      "value": "2 252"
+    },
+    {
+      "label": "Testy xUnit",
+      "value": "26"
+    },
+    {
+      "label": "Commity",
+      "value": "4"
+    },
+    {
+      "label": "Pliki śledzone przez git",
+      "value": "54"
+    },
+    {
+      "label": "Backendy modeli do wyboru w UI",
+      "value": "5 + człowiek"
+    },
+    {
+      "label": "Metryki OTel",
+      "value": "4"
+    },
+    {
+      "label": "Limity jednej partii",
+      "value": "200 plyów, 5 odrzuceń na turę"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/chess-mas",
-    "live": [{ "label": "Strona projektu (GitHub Pages)", "url": "https://konradcinkusz.github.io/chess-mas/" }],
+    "live": [],
     "docs": [
-      { "label": "Strona projektu (źródło Pages)", "path": "docs/index.html" },
-      { "label": "Cztery inwarianty projektu", "path": "CONTRIBUTING.md" },
-      { "label": "Polityka bezpieczeństwa i braki produkcyjne", "path": "SECURITY.md" },
-      { "label": "Changelog z listą zgadniętych API, które nie istniały", "path": "CHANGELOG.md" }
+      {
+        "label": "Strona projektu (źródło Pages)",
+        "path": "docs/index.html"
+      },
+      {
+        "label": "Cztery inwarianty projektu",
+        "path": "CONTRIBUTING.md"
+      },
+      {
+        "label": "Polityka bezpieczeństwa i braki produkcyjne",
+        "path": "SECURITY.md"
+      },
+      {
+        "label": "Changelog z listą zgadniętych API, które nie istniały",
+        "path": "CHANGELOG.md"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
   "components": [
-    { "name": "HumanMoveGate", "path": "src/ChessMas.Orchestrator/HumanMoveGate.cs", "description": "Most między pętlą działającą w tle a synchronicznym requestem HTTP: jeden `TaskCompletionSource` na turę, przezbrajany po każdym odrzuceniu, z rejestrem kluczowanym po `gameId` i stronie. Orkiestrator zawiesza się na `await` zamiast odpytywać, a 91 linii nie wie nic o szachach.", "reusable": true },
-    { "name": "GameCostTracker + ModelPricingCatalog", "path": "src/ChessMas.Orchestrator/GameCostTracker.cs", "description": "Mnoży realne `AgentRunResponse.Usage` przez cennik z sekcji `ModelPricing` w konfiguracji. Model bez wpisu raportuje `null`, nigdy 0 USD, a każdy wpis cenowy niesie datowane pole `Note` ze źródłem. Jedyna zależność domenowa to enum `Side`.", "reusable": true },
-    { "name": "ChessMas.ServiceDefaults", "path": "src/ChessMas.ServiceDefaults", "description": "{{term:servicedefaults|Wspólny projekt Aspire}}: eksport traces i metryk po OTLP, health checki, service discovery i odporność `HttpClient`. Zero encji domenowych, kopiowalny do dowolnej solucji .NET.", "reusable": true },
-    { "name": "ChessMas.Engine", "path": "src/ChessMas.Engine", "description": "{{term:determinizm|Deterministyczny}} autorytet zasad. `GetSnapshot` zwraca FEN, listę legalnych ruchów w UCI i SAN, flagę szacha i historię; `TryApplyMove` jest jedynym miejscem, w którym zmienia się stan planszy. SAN liczony jest na planszy pomocniczej odtworzonej z FEN, żeby nie dotykać żywej pozycji.", "reusable": false },
-    { "name": "ChessMas.Agents", "path": "src/ChessMas.Agents", "description": "Granica narzędziowa. `ChessTools` wystawia `GetBoardState` i `ProposeMove` jako `AIFunction`, każda instancja związana z jedną stroną, więc agent białych nie ma fizycznej możliwości zaproponować ruchu za czarne. Fabryka ma dwie ścieżki budowy: przez {{term:ichatclient|IChatClient}} i przez `AIProjectClient.AsAIAgent` dla Foundry.", "reusable": false },
-    { "name": "GameOrchestrator + minimal API", "path": "src/ChessMas.Orchestrator", "description": "Jawny `while`-loop zamiast grafu MAF Workflow, bo warunek końca ocenia silnik, a nie model. Pięć endpointów (`POST /games`, `GET .../state`, `/outcome`, `/cost`, `POST .../move`) i 276 linii bez ani jednego testu.", "reusable": false },
-    { "name": "ChessMetrics", "path": "src/ChessMas.Orchestrator/ChessMetrics.cs", "description": "Trzy liczniki i histogram: `chess.moves.proposed`, `chess.moves.rejected`, `chess.ply.duration_ms`, `chess.games.completed`, tagowane stroną i statusem. Wskaźnik odrzuconych propozycji jest tu pomyślany jako surowiec pod ranking backendów.", "reusable": false },
-    { "name": "ChessMas.Web", "path": "src/ChessMas.Web", "description": "Blazor Server z planszą rysowaną od zera z pola FEN, bez żadnej zewnętrznej biblioteki JS, i klikalnymi chipami legalnych ruchów dla człowieka. Odpytuje orkiestratora co 400 ms we własnej turze i co 1 s poza nią.", "reusable": false }
+    {
+      "name": "HumanMoveGate",
+      "path": "src/ChessMas.Orchestrator/HumanMoveGate.cs",
+      "description": "Most między pętlą działającą w tle a synchronicznym requestem HTTP: jeden `TaskCompletionSource` na turę, przezbrajany po każdym odrzuceniu, z rejestrem kluczowanym po `gameId` i stronie. Orkiestrator zawiesza się na `await` zamiast odpytywać, a 91 linii nie wie nic o szachach.",
+      "reusable": true
+    },
+    {
+      "name": "ChessMas.ServiceDefaults",
+      "path": "src/ChessMas.ServiceDefaults",
+      "description": "{{term:servicedefaults|Wspólny projekt Aspire}}: eksport traces i metryk po OTLP, health checki, service discovery i odporność `HttpClient`. Zero encji domenowych, kopiowalny do dowolnej solucji .NET.",
+      "reusable": true
+    },
+    {
+      "name": "GameCostTracker + ModelPricingCatalog",
+      "path": "src/ChessMas.Orchestrator/GameCostTracker.cs",
+      "description": "Mnoży realne `AgentRunResponse.Usage` przez cennik z sekcji `ModelPricing` w konfiguracji. Model bez wpisu raportuje `null`, nigdy 0 USD, a każdy wpis cenowy niesie datowane pole `Note` ze źródłem. Nie jest przenośny bez przeróbki: `GameCostTracker.cs` ma `using ChessMas.Engine;`, a typ domenowy `ChessMas.Engine.Side` siedzi w publicznej powierzchni — `RecordPly(int plyNumber, Side side, long inputTokens, long outputTokens)`, rekord `PlyCost(int PlyNumber, Side Side, long InputTokens, long OutputTokens, decimal? EstimatedCostUsd)` i przez listę `ByPly` także `GameCostSummary`. Sam `ModelPricingCatalog` jest od tego wolny.",
+      "reusable": false
+    },
+    {
+      "name": "ChessMas.Engine",
+      "path": "src/ChessMas.Engine",
+      "description": "{{term:determinizm|Deterministyczny}} autorytet zasad. `GetSnapshot` zwraca FEN, listę legalnych ruchów w UCI i SAN, flagę szacha i historię; `TryApplyMove` jest jedynym miejscem, w którym zmienia się stan planszy. SAN liczony jest na planszy pomocniczej odtworzonej z FEN, żeby nie dotykać żywej pozycji.",
+      "reusable": false
+    },
+    {
+      "name": "ChessMas.Agents",
+      "path": "src/ChessMas.Agents",
+      "description": "Granica narzędziowa. `ChessTools` wystawia `GetBoardState` i `ProposeMove` jako `AIFunction`, każda instancja związana z jedną stroną, więc agent białych nie ma fizycznej możliwości zaproponować ruchu za czarne. Fabryka ma dwie ścieżki budowy: przez {{term:ichatclient|IChatClient}} i przez `AIProjectClient.AsAIAgent` dla Foundry.",
+      "reusable": false
+    },
+    {
+      "name": "GameOrchestrator + minimal API",
+      "path": "src/ChessMas.Orchestrator",
+      "description": "Jawny `while`-loop zamiast grafu MAF Workflow, bo warunek końca ocenia silnik, a nie model. Pięć endpointów (`POST /games`, `GET .../state`, `/outcome`, `/cost`, `POST .../move`) i 276 linii bez ani jednego testu.",
+      "reusable": false
+    },
+    {
+      "name": "ChessMetrics",
+      "path": "src/ChessMas.Orchestrator/ChessMetrics.cs",
+      "description": "Trzy liczniki i histogram: `chess.moves.proposed`, `chess.moves.rejected`, `chess.ply.duration_ms`, `chess.games.completed`, tagowane stroną i statusem. Wskaźnik odrzuconych propozycji jest tu pomyślany jako surowiec pod ranking backendów.",
+      "reusable": false
+    },
+    {
+      "name": "ChessMas.Web",
+      "path": "src/ChessMas.Web",
+      "description": "Blazor Server z planszą rysowaną od zera z pola FEN, bez żadnej zewnętrznej biblioteki JS, i klikalnymi chipami legalnych ruchów dla człowieka. Odpytuje orkiestratora co 400 ms we własnej turze i co 1 s poza nią.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "llm-multi-agent-chess", "reason": "Bezpośredni port tamtego prototypu Python/Streamlit; README nazywa go źródłem i opisuje, który tryb awarii tamtej wersji ta architektura naprawia." },
-    { "slug": "copilot-scope", "reason": "README i komentarz w `ChessMetrics` wskazują CopilotScope jako źródło wzorca: kompozycja Aspire, OTel od pierwszego dnia i podejście do scoringu." },
-    { "slug": "agent-eval-bench", "reason": "Oba mierzą zachowanie modelu w pętli agentowej i liczą koszt tokenów, tylko ChessMas robi to na jednym zadaniu i sam zastrzega, że nie jest benchmarkiem." },
-    { "slug": "maf-book", "reason": "Ten sam przedmiot, Microsoft Agent Framework w .NET, od strony działającego kodu zamiast tekstu książki: `AsAIAgent` i `AIFunctionFactory` są tu użyte, a tam opisane." },
-    { "slug": "aurelius-promptus", "reason": "Komentarz w `ChessTools.cs` odwołuje się wprost do wzorca granicy narzędziowej przed akcją zapisu, użytego w tamtym przepływie provisioningu." }
+    {
+      "slug": "llm-multi-agent-chess",
+      "reason": "Bezpośredni port tamtego prototypu Python/Streamlit; README nazywa go źródłem i opisuje, który tryb awarii tamtej wersji ta architektura naprawia."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "README i komentarz w `ChessMetrics` wskazują CopilotScope jako źródło wzorca: kompozycja Aspire, OTel od pierwszego dnia i podejście do scoringu."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Oba mierzą zachowanie modelu w pętli agentowej i liczą koszt tokenów, tylko ChessMas robi to na jednym zadaniu i sam zastrzega, że nie jest benchmarkiem."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "Ten sam przedmiot, Microsoft Agent Framework w .NET, od strony działającego kodu zamiast tekstu książki: `AsAIAgent` i `AIFunctionFactory` są tu użyte, a tam opisane."
+    },
+    {
+      "slug": "aurelius-promptus",
+      "reason": "Komentarz w `ChessTools.cs` odwołuje się wprost do wzorca granicy narzędziowej przed akcją zapisu, użytego w tamtym przepływie provisioningu."
+    }
   ],
-  "product": "Brak kupującego i README sam zamyka tę drogę, mówiąc, że to nie jest benchmark siły gry, jedna partia niczego nie dowodzi, a koszt jest szacunkiem wobec cennika, nie fakturą. To projekt kredytujący: pokazuje, że autor składa system agentowy w .NET z twardą granicą deterministyczną, telemetrią i rozliczaniem kosztów. Jeśli cokolwiek stąd ma wartość rynkową, to dwa kawałki niezwiązane z szachami: `GameCostTracker` z konfiguracyjnym cennikiem oraz `HumanMoveGate` jako wzorzec human-in-the-loop.",
+  "product": "Brak kupującego i README sam zamyka tę drogę, mówiąc, że to nie jest benchmark siły gry, jedna partia niczego nie dowodzi, a koszt jest szacunkiem wobec cennika, nie fakturą. To projekt kredytujący: pokazuje, że autor składa system agentowy w .NET z twardą granicą deterministyczną, telemetrią i rozliczaniem kosztów. Jeśli cokolwiek stąd ma wartość rynkową, to `HumanMoveGate` jako wzorzec human-in-the-loop, który o szachach nie wie nic, oraz `GameCostTracker` z konfiguracyjnym cennikiem — ale ten drugi dopiero po wycięciu z jego sygnatur enuma `Side`.",
   "highlights": [
     "`TryApplyMove` dopasowuje propozycję do obiektów `Move` wygenerowanych przez silnik, a nie parsuje napisu. Ruch człowieka i ruch agenta idą **dokładnie tą samą ścieżką**, bez osobnej gałęzi „zaufaj człowiekowi”.",
     "CHANGELOG dokumentuje, że projekt pierwotnie w ogóle się nie kompilował, bo powstał bez SDK i NuGeta, i wymienia z nazwy zgadnięte API `ChessDotNetCore`, które nie istniały: namespace, `CurrentPlayer`, `MoveType`, `Promotion` jako `char?`. Rzadka szczerość w publicznym repo.",
@@ -63,7 +169,8 @@
     "`GameOrchestrator` ma 276 linii i jest najbardziej złożonym plikiem w repo, a testów nie ma tam ani jednego. 26 testów pokrywa silnik, koszty i bramkę człowieka.",
     "Brak persystencji i brak ewikcji: gry, wyniki i trackery kosztów żyją w `ConcurrentDictionary`, który nigdy nie jest czyszczony. `SECURITY.md` sam nazywa to nieograniczonym wzrostem.",
     "Brak autentykacji na API orkiestratora i brak limitu równoległych gier. Limity 200 plyów i 5 odrzuceń chronią jedną partię, nic nie chroni rachunku.",
-    "`POST /games` startuje pętlę przez `Task.Run` bez obserwacji wyjątków, a workflow Pages wymaga jednorazowego ustawienia źródła w Settings, którego nie da się potwierdzić z repozytorium."
+    "`POST /games` startuje pętlę przez `Task.Run` bez obserwacji wyjątków, więc awaria pętli gry nie ma gdzie wypłynąć.",
+    "Strona GitHub Pages nie jest potwierdzalna z repozytorium, więc została zdjęta z linków: `pages.yml` w swoim własnym komentarzu mówi, że bez jednorazowego ustawienia Settings -> Pages -> Source: \"GitHub Actions\" workflow uruchamia się i dopiero wtedy nie wdraża. W repo nie ma gałęzi `gh-pages` ani żadnego zapisu udanego wdrożenia, a istnienie samego workflow to dowód na intencję, nie na opublikowaną stronę. Źródło strony leży w `docs/index.html` i tam da się je obejrzeć."
   ],
   "next": [
     "Napisz testy `GameOrchestrator` z podstawionym fake `AIAgent`. Pętla, limit odrzuceń, walkower i ścieżka człowieka są deterministyczne i nie potrzebują modelu; to największa dziura w pokryciu.",
@@ -80,5 +187,13 @@
   ],
   "headline": "Architektura twardej granicy jest gotowa, ale nikt nie rozegrał tu ani jednej partii",
   "headlineTone": "warn",
-  "github": { "stars": 0, "openIssues": 9, "openPrs": 9, "dependabotPrs": 9, "lastCommit": "2026-07-31", "commits": 4, "files": 54 }
+  "github": {
+    "stars": 0,
+    "openIssues": 9,
+    "openPrs": 9,
+    "dependabotPrs": 9,
+    "lastCommit": "2026-07-31",
+    "commits": 4,
+    "files": 54
+  }
 }
