@@ -17,7 +17,8 @@
         "label": "@dev_insight",
         "url": "https://x.com/dev_insight"
       }
-    ]
+    ],
+    "scope": "Mapa obejmuje **35 repozytoriów przeczytanych od początku do końca** — README, dokumentację, kod, workflowy i historię gita. Konto ma ich więcej: co najmniej jedenaście kolejnych jest publicznych, nie zarchiwizowanych i **nie ma ich tutaj**, w tym `DeepDiveInto_CSharp_Dictionaries_presentation` (3 gwiazdki) i `llm-book-mini-project`, do którego odwołuje się jedna z książek. Repozytorium trafia na mapę wtedy, gdy ktoś je faktycznie przeczytał — nie wtedy, gdy istnieje."
   },
   "clusters": [
     {
@@ -5301,8 +5302,8 @@
         "openPrs": 0,
         "dependabotPrs": 0,
         "lastCommit": "2026-08-26",
-        "commits": 16,
-        "files": 63
+        "commits": 17,
+        "files": 67
       }
     },
     {
@@ -5667,7 +5668,8 @@
         "Trzy pomiary wymagające płatnego dostawcy są nieuruchomione: jakość odpowiedzi w topologiach wieloagentowych (rozdz. 11, nagłówkowy eksperyment książki), trafność wyboru narzędzia wobec liczby narzędzi (rozdz. 6) i cache hit rate (rozdz. 12). Tabele w dodatku B stoją puste i mają stać puste.",
         "Deklarowane 244 strony i „zero overfull vboxes” pochodzą wyłącznie z README i CLAUDE.md; w repozytorium nie ma ani `main.log`, ani PDF-a, więc bez zbudowania nie da się tego potwierdzić.",
         "Skrypty w `code/` nie mają lintera, testu ani pliku zależności i nie chodzą w CI, mimo że wszystkie wykonują się w sekundy bez dostawcy. Nikt nie zauważy, kiedy przestaną się uruchamiać.",
-        "Mini-projekt Ops Copilot jest osobnym repozytorium, które 17 ramek `projectbox` traktuje jak kontrakt, a według notatek ma zaimplementowany tylko etap 00. README opisuje oba repozytoria jak jedną całość."
+        "Mini-projekt Ops Copilot jest osobnym repozytorium, które 17 ramek `projectbox` traktuje jak kontrakt, a według notatek ma zaimplementowany tylko etap 00. README opisuje oba repozytoria jak jedną całość.",
+        "Książka odwołuje się do projektu towarzyszącego `llm-book-mini-project` — publicznego repozytorium, w którym siedemnaście rozdziałów ma zdefiniowane etapy, a zaimplementowany jest jeden. Tego repozytorium nie ma na tej mapie, więc jego stanu nie zweryfikowano tu z pierwszej ręki."
       ],
       "risks": [
         "Dziewięć pinów w `preamble.tex` starzeje się szybko: samo `langchain-core` miało 49 stabilnych wydań między styczniem a lipcem 2026, a job porównujący je z PyPI ma `continue-on-error`, więc {{term:drift|dryf}} nigdy nie zatrzyma builda.",

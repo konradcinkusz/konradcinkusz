@@ -237,6 +237,8 @@
     const prs = repos.reduce((a, r) => a + ((r.github && r.github.openPrs) || 0), 0);
     const bots = repos.reduce((a, r) => a + ((r.github && r.github.dependabotPrs) || 0), 0);
 
+    if (DATA.meta.scope) $("#scope-note").innerHTML = prose(DATA.meta.scope);
+
     $("#stats").innerHTML = html`
       <div class="stat"><div class="v">${repos.length}</div><div class="l">repozytoriów na mapie</div></div>
       <div class="stat good"><div class="v">${pub}</div><div class="l">publicznych · ${repos.length - pub} prywatnych</div></div>
