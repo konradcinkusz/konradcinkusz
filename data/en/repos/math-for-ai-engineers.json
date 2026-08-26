@@ -1,0 +1,120 @@
+{
+  "slug": "math-for-ai-engineers",
+  "name": "math-for-ai-engineers",
+  "cluster": "D-content",
+  "visibility": "private",
+  "state": "stub",
+  "tier": "P4",
+  "oneLiner": "A reserved repository name: one commit, one README file of 49 bytes, no content.",
+  "summary": "The whole repository is a `README.md` with two lines: the heading `# math-for-ai-engineers` and the sentence `From zero to AI Engineer`. There is no code, no notebooks, no LaTeX files, no licence and no `.github` directory. The history runs to one commit (`b4320e0`, 2026-08-26 09:33), and all four git references — two local and two remote — point at the same tree with the same single file. The stated intent is mathematics for AI engineers, but nothing beyond the title supports that: no list of topics, no choice of format, not one paragraph of content. The most interesting engineering decision in this repository has not been taken yet, and it is the decision about format, because it determines whether this becomes notebooks, a LaTeX book or an MkDocs site. In its current state, any maturity rating above `stub` would be invented.",
+  "stack": [
+    "Markdown",
+    "git"
+  ],
+  "primaryLanguage": "Markdown",
+  "license": "brak pliku LICENSE",
+  "tests": "No tests, and nothing that could be tested: `git ls-files` returns one entry, `README.md`.",
+  "ci": "no CI — the `.github` directory does not exist, so no run has ever happened.",
+  "metrics": [
+    {
+      "label": "Files tracked by git",
+      "value": "1"
+    },
+    {
+      "label": "Commits",
+      "value": "1"
+    },
+    {
+      "label": "README size",
+      "value": "49 bytes"
+    },
+    {
+      "label": "Lines of content in the repository",
+      "value": "2"
+    },
+    {
+      "label": "Git references pointing at the same tree",
+      "value": "4 of 4"
+    },
+    {
+      "label": "CI workflows",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/math-for-ai-engineers",
+    "live": [],
+    "docs": [
+      {
+        "label": "The only file in the repository",
+        "path": "README.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "README.md",
+      "path": "README.md",
+      "description": "Two lines: a title and a statement of intent, `From zero to AI Engineer`. It settles neither format nor scope, so no plan of work can be derived from it.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "brain-train",
+      "reason": "The same teaching goal around AI concepts. Mathematical content has a place ready for it there and an existing format, so a separate repository has to justify why it does not go there."
+    },
+    {
+      "slug": "tiny-transformer",
+      "reason": "Implementing a transformer from scratch already forces the same mathematics to be derived. A chapter on attention written separately will duplicate code that works there."
+    },
+    {
+      "slug": "bayesian-inference",
+      "reason": "Bayesian inference is a subset of the stated scope and exists as a separate project. Without settling the boundary first, the same material will be written twice."
+    }
+  ],
+  "product": "No buyer, and this is not a transitional state that content would fix. The market for ML mathematics material is dense and mostly free, and the author's name is not a distribution advantage here. If the material were written, its only role would be building credibility and learning, so the portfolio value depends entirely on whether the repository stops being empty.",
+  "highlights": [
+    "The whole repository weighs **49 bytes** and fits in two lines. It is the only entry in the portfolio for which a full listing of the content takes less room than its own description.",
+    "All four git references — `main`, `claude/portfolio-html-app-w6306n` and their counterparts on `origin` — point at exactly the same tree. The working branch never received a single commit.",
+    "The one commit was made through GitHub's web interface: the committer is `GitHub <noreply@github.com>` and the author is `dev_insight <34044180+konradcinkusz@users.noreply.github.com>` — the author's personal account under a display name that appears in 31 local portfolio repositories (among them `copilot-scope` with 64 commits, `konrad-cinkusz-cv-maker` with 48, `agent-eval-bench` with 33). The author distinguishes nothing here; what does is that this is the commit that created the repository, not a trace of work on content."
+  ],
+  "gaps": [
+    "Everything beyond the title is missing: no pages of content, no notebooks, no source files.",
+    "The README does not settle the target format. Jupyter notebooks, a LaTeX book and an MkDocs site are three different projects with different costs, and none has been chosen.",
+    "No list of topics, so neither the scope nor how much of it `brain-train` and `bayesian-inference` already cover can be judged.",
+    "No LICENSE file. Without one the material is under full copyright by default, which is the exact opposite of the intent of teaching material.",
+    "The branch `claude/portfolio-html-app-w6306n` names the portfolio application, sits in a repository about mathematics, and contains nothing."
+  ],
+  "next": [
+    "Decide whether this repository should exist. If the content is to go into `brain-train`, archive it today rather than keeping an empty entry in the portfolio.",
+    "If it is to exist: write the target format and a list of 8–12 topics into the README before the first content file is written.",
+    "Add a LICENSE file ({{term:mit|MIT}}, or CC BY for the content alone), so the legal status is settled from the start.",
+    "Delete the branch `claude/portfolio-html-app-w6306n` — it is empty and its name misleads.",
+    "Write one complete chapter as a test of the format. Only that will show whether the chosen format can be sustained through twelve more."
+  ],
+  "risks": [
+    "An empty public repository in a portfolio reads as an abandoned intent and lowers the credibility of the finished projects next to it.",
+    "No LICENSE means all rights reserved by default, so nobody can legally use the material once it is written.",
+    "The scope overlaps with at least three other repositories. Without drawing the boundary first, the same content will be written in several places and no version will be canonical.",
+    "Another open front against an already breached {{term:wip|work-in-progress limit}}: the cost of keeping it is not zero, and the return today is exactly zero."
+  ],
+  "headline": "49 bytes of README and one commit: a reserved name, not a project",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-26",
+    "commits": 1,
+    "files": 1
+  }
+}

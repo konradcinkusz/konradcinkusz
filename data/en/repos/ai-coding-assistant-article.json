@@ -1,0 +1,190 @@
+{
+  "slug": "ai-coding-assistant-article",
+  "name": "Building AI Coding Assistants in the Age of Foundation Models",
+  "cluster": "D-content",
+  "visibility": "private",
+  "state": "draft",
+  "tier": "P4",
+  "oneLiner": "A LaTeX article on coding-assistant architecture: three layers, RAG for code and {{term:mcp|MCP}}, with an implementation path in C#.",
+  "summary": "A single-file academic article (class `article`, ten chapter files pulled in from `main.tex`) on how commercial coding assistants are built and how to build your own. The text breaks the system into three layers: completion through the LSP on a 100-200 ms budget, chat with context assembly, and an agent layer with a tool loop and self-verification through compilation and tests. Chapters 4 and 5 are the core: the indexing pipeline (AST-aware chunking through Tree-sitter, code embeddings, cross-encoder reranking) and {{term:mcp|Model Context Protocol}} as the integration {{term:substrat|substrate}}, with its host, client and server roles. The most interesting substantive decision is in section 4.4: rather than stopping at vector search, the author carries the LspRag pattern over to {{term:roslyn|Roslyn}} and OmniSharp, adding an exact walk of the symbol graph from the language server where textual similarity fails. The article states one falsifiable thesis about retrieval quality dominating model quality, and chapter 8 gives the design of the experiment that would settle it. The experiment has not been run, and every number in the text comes from the 22 cited sources, not from the author's own measurements. The repository has one commit from 2026-04-26 and 17 files: this is a finished draft of a text, not a project under development.",
+  "stack": [
+    "LaTeX (article, XeLaTeX przez latexmk)",
+    "listings + tabularx + booktabs + hyperref + microtype",
+    "PlantUML + Graphviz",
+    "GitHub Actions (xu-cheng/latex-action@v4)",
+    "softprops/action-gh-release@v2",
+    "C# / .NET (in listings only, not compiled)"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT No Attribution",
+  "tests": "No tests: the repository holds no executable code and no test project. Nor has it been verified that the document typesets, because the environment had neither `latexmk`, nor `xelatex`, nor `plantuml`.",
+  "ci": "One 53-line `ci.yml` workflow: it installs plantuml and graphviz, renders `figures/*.plantuml` to PNG, typesets the document with XeLaTeX, renames it to `AI_Coding_Assistant.pdf` and publishes it as a GitHub Release. It fires only on a push of a `v*` tag ({{term:tagdeploy|release on tag}}), so an ordinary commit or pull request is not checked at all.",
+  "metrics": [
+    {
+      "label": "Chapter files",
+      "value": "10 (.tex)"
+    },
+    {
+      "label": "Words in the chapters",
+      "value": "6,964"
+    },
+    {
+      "label": "Lines of .tex including main.tex",
+      "value": "677 (593 across the ten chapters + 84 in main.tex; excluding the 78-line PlantUML source, which is not a .tex file)"
+    },
+    {
+      "label": "Bibliography entries",
+      "value": "22 (1 uncited)"
+    },
+    {
+      "label": "Code listings",
+      "value": "5, all in chapter 6"
+    },
+    {
+      "label": "Tables / figures",
+      "value": "1 / 1"
+    },
+    {
+      "label": "Commits / files",
+      "value": "1 / 17"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/ai-coding-assistant-article",
+    "live": [],
+    "docs": [
+      {
+        "label": "README with a quick start and the repo structure",
+        "path": "README.md"
+      },
+      {
+        "label": "The substantive core: RAG for code and LspRag",
+        "path": "chapters/04-retrieval.tex"
+      },
+      {
+        "label": "MCP as the integration layer",
+        "path": "chapters/05-mcp.tex"
+      },
+      {
+        "label": "The C# implementation path, with five listings",
+        "path": "chapters/06-csharp-implementation.tex"
+      },
+      {
+        "label": "The falsifiable thesis and the experiment design",
+        "path": "chapters/08-discussion.tex"
+      },
+      {
+        "label": "The typesetting and PDF release pipeline",
+        "path": ".github/workflows/ci.yml"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "main.tex: the preamble and the document driver",
+      "path": "main.tex",
+      "description": "Class `article` 12pt a4paper, `geometry` at 2.5 cm, `hyperref` with coloured links, and a custom `csharpstyle` whose keyword list is extended with `record`, `required`, `McpServer` and `Tool`. The whole text comes in through ten `\\input`s, so the preamble is independent of the prose.",
+      "reusable": true
+    },
+    {
+      "name": "Pipeline build i release",
+      "path": ".github/workflows/ci.yml",
+      "description": "A sequence of plantuml, `latex-action` and `gh-release` across two jobs, passing the PDF between them as an artefact. It knows not one name from this article beyond the output file name, so it moves to any repository holding a LaTeX document.",
+      "reusable": true
+    },
+    {
+      "name": "Chapter 4: retrieval for code",
+      "path": "chapters/04-retrieval.tex",
+      "description": "A four-stage indexing pipeline with a two-level chunk hierarchy (the class as parent, the method as child) and incremental reindexing on a file watcher. Section 4.4 adds a walk of the LSP symbol graph on top of vector search, and cites LspRag's line-coverage increase of 213% for Java and 174% for Go.",
+      "reusable": false
+    },
+    {
+      "name": "Chapter 6: the C# implementation path",
+      "path": "chapters/06-csharp-implementation.tex",
+      "description": "Five listings over 198 lines: hosting an MCP server through `AddMcpServer` and `WithStdioServerTransport`, tools carrying the `McpServerToolType` and `McpServerTool` attributes, a vector index, a chat layer on Semantic Kernel, and `.vscode/mcp.json`. They refer to types that exist nowhere (`ICodebaseIndex`, `TreeSitterChunker`, `Reranker`), and have never been compiled.",
+      "reusable": false
+    },
+    {
+      "name": "Descriptive chapters 1-3, 5, 7-9",
+      "path": "chapters/",
+      "description": "A taxonomy of tools, the three-layer architecture, MCP, model choice, limitations and conclusions. Chapter 8 is the important one here, because it holds the text's only study design, with three retrieval conditions against a fixed model.",
+      "reusable": false
+    },
+    {
+      "name": "Bibliografia",
+      "path": "chapters/10-references.tex",
+      "description": "A `thebibliography` environment with 22 entries, in which peer-reviewed work (Lewis 2020, ReAct, SWE-bench, Lost in the Middle, LspRag / arXiv 2510.22210) sits next to blog posts and marketing copy. The `kinde2026` key is cited nowhere, and will print regardless.",
+      "reusable": false
+    },
+    {
+      "name": "Figura 1: diagram warstw",
+      "path": "figures/assistant-layers.plantuml",
+      "description": "A 78-line component diagram: IDE and CLI, the LSP/MCP layer, orchestration in Semantic Kernel, the retrieval subsystem with its vector store and symbol resolver, and the model API. The PNG is in `.gitignore` and is produced only in CI, so a change to the figure reviews as a text diff.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "maf-book",
+      "reason": "The same .NET domain plus MCP, and the same LaTeX format. The article condenses into a dozen-odd pages what maf-book develops over 246. Both works carry the same debt too: an experiment designed and never run."
+    },
+    {
+      "slug": "llm-book",
+      "reason": "Both texts describe the orchestration layer above foundation models, retrieval and context management, only from two sides: llm-book from Python and LangGraph, the article from C# and Semantic Kernel."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "The same subject from the other side: the article describes how a coding assistant is built, CopilotScope measures telemetry from five such assistants. The three-layer model from chapter 3 is a ready-made vocabulary for that collector."
+    },
+    {
+      "slug": "agents-and-llms",
+      "reason": "Topical overlap by name: the agent loop and tool calls from chapter 3. The contents of that repository have not been verified."
+    }
+  ],
+  "product": "No buyer. This is channel material and evidence of competence: it shows the author understands coding-assistant architecture, MCP and RAG from the .NET side, which is the side almost nobody writes about. Real value appears only once the chapter 8 experiment has been run, because nobody has published good data on retrieval dominating model quality measured against a specific repository, and the study design is already here. Until then the article is a good survey whose thesis remains a declaration.",
+  "highlights": [
+    "The thesis is stated openly and falsifiably, with a design ready to go: a fixed model, three retrieval conditions (none, baseline, enriched), and measurement of correctness and hallucination rate on tasks from a real repository. A declaration of this kind in a survey text is rare.",
+    "Section 4.4 carries the LspRag pattern (arXiv 2510.22210) over to {{term:roslyn|Roslyn}} and OmniSharp: vector search supplies candidates, and `definition` and `references` calls to the language server walk the symbol graph where textual similarity does not reach. The source work reports +213% line coverage for Java and +174% for Go.",
+    "A complete and coherent draft in one commit: 6,964 words across ten chapters, an abstract, a table of contents, 22 bibliography entries, a model comparison table and a layer diagram.",
+    "The diagram is kept solely as a 78-line PlantUML source, with the PNG in `.gitignore` and generated in CI. A change to the figure reviews as a diff, not as a swapped binary.",
+    "CI closes the whole publishing loop in one file: render the diagrams, XeLaTeX, artefact, GitHub Release with the renamed PDF."
+  ],
+  "gaps": [
+    "**The central thesis is not verified.** Chapter 8 gives the experiment design and reports no result at all; the article contains not one measurement of the author's own. That is what separates this text from work with an original contribution.",
+    "The repository holds no tag, and CI fires only on a push of a `v*` tag. The PDF badge in the README links to `releases/latest/download/AI_Coding_Assistant.pdf`, which most likely does not exist, and the CI badge shows the status of a workflow that has never run.",
+    "No ordinary commit or PR is checked. A LaTeX syntax error would surface only at the attempt to release, that is, at the worst possible moment.",
+    "The `kinde2026` entry is in the bibliography and is cited in no chapter; `thebibliography` will print it regardless. The bibliography also mixes peer-reviewed work with marketing posts, and it is the latter the market figures in chapter 1 come from.",
+    "`main.tex` loads `inputenc` with the `utf8` option, although CI typesets with XeLaTeX, where the package is redundant. The files are pure ASCII, so the build survives it, but it is a leftover from pdflatex."
+  ],
+  "risks": [
+    "An identity mismatch: `main.tex` and LICENSE sign the article as K.C. Voss, while the single commit is signed Konrad Cinkusz. In a portfolio under your own name this has to be reconciled or explained outright.",
+    "The C# listings have never been compiled and call types that do not exist (`ICodebaseIndex`, `TreeSitterChunker`, `Reranker`), and nowhere does the text note that they are sketches. A reader may take them for working code.",
+    "Names in the MCP SDK and Semantic Kernel age fast, and the article itself admits the SDK is in preview, yet it pins no version. The maf-book notes indicate that the `McpClientFactory.CreateAsync` used in the listing has already given way to `McpClient.CreateAsync`.",
+    "One commit and zero activity since 2026-04-26. From the outside it looks abandoned, even though the text is finished."
+  ],
+  "next": [
+    "Settle the authorship: either sign the article under your own name, or keep the pseudonym deliberately. Today the document and the git history say different things.",
+    "Add a CI job on `push` and `pull_request` that typesets the document without publishing a release. At present nothing guards against text that does not compile.",
+    "Push a `v1.0.0` tag so that both badges in the README stop pointing at an artefact that is not there.",
+    "Compile the five listings from chapter 6 in a small solution against the real ModelContextProtocol and Semantic Kernel packages, correct the type names, and note in the text which versions this was checked against.",
+    "Run the chapter 8 experiment against one real C# repository and put the results in. That is the only change that turns a survey into work with an original contribution."
+  ],
+  "headline": "A falsifiable thesis with not one measurement, and the PDF badge leads to an empty release",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-04-26",
+    "commits": 1,
+    "files": 17
+  }
+}

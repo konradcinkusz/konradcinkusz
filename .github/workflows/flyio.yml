@@ -67,13 +67,29 @@ jobs:
                         --remote-only \
                         --wait-timeout 300
 
-      # The health check proves nginx is up. It does not prove the manifest shipped.
+      # The health check proves nginx is up. It does not prove the manifest shipped,
+      # and it does not prove BOTH languages shipped — a truncated upload or a
+      # builder run against a half-translated tree still serves a valid JSON file
+      # that a Polish reader would never notice was missing its English half.
       - name: Verify the manifest is served
         run: |
+          probe='let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{
+            const j=JSON.parse(s);
+            const langs=Object.keys(j).filter(k=>k!=="ui");
+            const bad=langs.filter(l=>!j[l].repos||j[l].repos.length<30);
+            const ui=langs.filter(l=>!j.ui||!j.ui[l]||Object.keys(j.ui[l]).length<100);
+            console.log(JSON.stringify({langs,repos:langs.map(l=>j[l].repos.length),bad,ui}));
+          })'
           for i in 1 2 3 4 5; do
-            count=$(curl -fsS --max-time 20 https://konrad-portfolio.fly.dev/data/portfolio.json \
-                    | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s);console.log(j.repos.length)})' ) && break
+            out=$(curl -fsS --max-time 30 https://konrad-portfolio.fly.dev/data/portfolio.json | node -e "$probe") && break
             echo "attempt $i failed, retrying"; sleep 10
           done
-          echo "repositories served: ${count:-0}"
-          [ "${count:-0}" -ge 30 ] || { echo "::error::manifest served with ${count:-0} repositories"; exit 1; }
+          echo "served: ${out:-nothing}"
+          node -e '
+            const r = JSON.parse(process.argv[1] || "{}");
+            const want = ["pl", "en"];
+            for (const l of want) if (!(r.langs || []).includes(l)) { console.error(`::error::the served manifest has no "${l}" bundle`); process.exit(1); }
+            if ((r.bad || []).length) { console.error(`::error::these languages served fewer than 30 repositories: ${r.bad.join(", ")}`); process.exit(1); }
+            if ((r.ui || []).length) { console.error(`::error::these languages served an empty or short interface bundle: ${r.ui.join(", ")}`); process.exit(1); }
+            console.log(`${r.langs.length} language(s) served: ${r.langs.map((l, i) => `${l} (${r.repos[i]} repos)`).join(", ")}`);
+          ' "${out:-}"

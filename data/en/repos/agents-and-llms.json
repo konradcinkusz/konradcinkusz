@@ -1,0 +1,123 @@
+{
+  "slug": "agents-and-llms",
+  "name": "Agents & LLMs",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P2",
+  "oneLiner": "A static base of 41 concepts on LLMs and agents, plus an essay on what changes in a layered system once you add an agent.",
+  "summary": "Three files served statically: `index.html` fetches `concepts.json` and renders concept tiles, `architecture.html` is a separate essay, and the rest is the licence and `.nojekyll`. No build steps and no installed dependencies, so `git clone` plus `python3 -m http.server` is enough to run it. Content is entirely separated from presentation: adding a new short is one JSON object with the fields `id`, `title`, `kind`, `def`, `note`, `lang`, `code`, `videoUrl`, without touching the HTML. The most interesting engineering decision is treating view state as an address: the active category and the query land in the query string through `history.replaceState`, every tile has an anchor built from `id`, and a button copies the current address to the clipboard. That lets a pinned comment under a video link into exactly one concept or one filtered view, which is the whole reason this page exists. The second decision of the same kind is a syntax highlighter of its own for Python, JSON and reasoning traces, written on three regex functions instead of pulling in Prism. The thing is finished as a page and unfinished as a media project: none of the 41 `videoUrl` fields is filled in."
+  ,
+  "stack": [
+    "HTML5",
+    "Vanilla JavaScript (bez frameworka i bez bundlera)",
+    "CSS ze zmiennymi, motyw jasny/ciemny w localStorage",
+    "JSON as the only content source",
+    "Mermaid 10 z CDN jsDelivr",
+    "Google Fonts (Space Grotesk, IBM Plex Sans, JetBrains Mono)",
+    "GitHub Pages (.nojekyll)"
+  ],
+  "primaryLanguage": "HTML",
+  "license": "MIT",
+  "tests": "No tests: across the 7 tracked files there is not a single test file, nor configuration for any runner.",
+  "ci": "no CI. The `.github` directory does not exist, so nobody checks even whether `concepts.json` is valid JSON, and that is the one file meant to be edited regularly.",
+  "metrics": [
+    { "label": "Concepts in concepts.json", "value": "41" },
+    { "label": "Categories", "value": "5 (agent 13, prod 10, basics 8, found 5, model 5)" },
+    { "label": "Tiles with a snippet", "value": "23 (10 Mermaid, 9 Python, 3 JSON, 1 reasoning trace)" },
+    { "label": "videoUrl fields filled", "value": "0 of 41" },
+    { "label": "architecture.html essay", "value": "approx. 3,300 words, 4 Mermaid diagrams" },
+    { "label": "Lines of page code", "value": "index.html 566, architecture.html 589" },
+    { "label": "Files tracked in the repo", "value": "7" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/agents-and-llms",
+    "live": [
+      { "label": "YouTube channel written into CONFIG", "url": "https://www.youtube.com/@_dev_insight" }
+    ],
+    "docs": [
+      { "label": "README with the concepts.json entry format", "path": "README.md" },
+      { "label": "Essay: from CRUD to agents", "path": "architecture.html" },
+      { "label": "Content source", "path": "concepts.json" },
+      { "label": "Knowledge base page", "path": "index.html" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "components": [
+    {
+      "name": "Dependency-free syntax highlighter",
+      "path": "index.html",
+      "description": "Three functions that tokenise with a regex: `hlPython` (keywords, strings, numbers, comments, calls, types), `hlJson` telling a key from a value, and `hlTrace` for reasoning traces. Purely textual, with no reference to the domain, so they drop into any static page as a replacement for Prism or highlight.js.",
+      "reusable": true
+    },
+    {
+      "name": "Stan filtra w adresie",
+      "path": "index.html",
+      "description": "`restoreFromURL` and `syncURL` write the category and the query as `?kind=&q=` through `history.replaceState`, preserving the hash, and a button copies the current address with a fallback path onto `execCommand`. Depends only on the category map handed in from outside.",
+      "reusable": true
+    },
+    {
+      "name": "Baza wiedzy",
+      "path": "index.html",
+      "description": "Renders tiles from `concepts.json`, filters on a combined blob of title, definition, note and code with the hit highlighted, counts entries on the category chips, and handles the `/` shortcut into the search field. The `KINDS` categories, the channel branding and the `CONFIG` block are hard-wired, so without an extraction this is a single-project page.",
+      "reusable": false
+    },
+    {
+      "name": "The content source",
+      "path": "concepts.json",
+      "description": "376 lines, 41 objects with eight fields each. All 10 entries carrying a Mermaid diagram sit in the `prod` category, from `harness-engineering` through to `observability-tracing`, so the most heavily drawn part of the material is operations rather than model theory.",
+      "reusable": false
+    },
+    {
+      "name": "Essay: from CRUD to agents",
+      "path": "architecture.html",
+      "description": "The argument is stratification rather than replacement: what moves into the agent, what survives unchanged, and where authorisation, versioning, {{term:determinizm}} and idempotency stop being enough. It ends with two migration options, tools in front of the API versus alongside the API, and links back into specific tiles in `index.html`.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "dev-insight", "reason": "The same brand and the same YouTube channel written into `CONFIG`. This repository is the content backing for the shorts series, not a separate thing." },
+    { "slug": "llm-book", "reason": "The same set of concepts (tool use, RAG, {{term:mcp}}, checkpointing, evals, human-in-the-loop), only as a 40-word tile instead of a 20-page chapter." },
+    { "slug": "maf-book", "reason": "The `workflow`, `executor-edge`, `handoff` and `orchestration-patterns` tiles describe exactly the surface that book writes out at length as {{term:maf|Microsoft Agent Framework}}." },
+    { "slug": "agent-eval-bench", "reason": "The `evals` and `agent-trajectory-evals` tiles define the concepts that project actually measures. One is the glossary of the other." }
+  ],
+  "product": "No buyer, and no point pretending there is one. This is a distribution and credibility channel: a concept base wired to a shorts series, with anchors to paste into pinned comments, so the value is measured in traffic to the channel, not in revenue. The closest thing to sales material is `architecture.html`, because it reads like an opening to a conversation about migrating to agents, but the essay does not sell anything either. The whole construction has one precondition: the series has to start.",
+  "gaps": [
+    "**None of the 41 `videoUrl` fields is filled in**, so the `▶ watch` link promised in the README appears on no tile at all. The knowledge base exists without the series it was meant to accompany.",
+    "The README links to a generic `https://www.youtube.com`, while `CONFIG` in `index.html` points at `@_dev_insight`. Two different channel addresses in a repository of seven files.",
+    "The README still instructs 'set channelUrl before you publish', although commit `944dccb` already did it. The instruction is out of date against its own code.",
+    "The `CONFIG` block is duplicated across both pages with a comment saying 'keep the two in sync' instead of one file loaded by both.",
+    "You cannot confirm from the repository that GitHub Pages is switched on: there is a `.nojekyll` and a paragraph in the README, but no deployment workflow and no production address recorded."
+  ],
+  "next": [
+    "Add a minimal workflow validating `concepts.json`: that it parses, that `id` values are unique, that `kind` holds an allowed value, that `def` is non-empty. One file, ten minutes, and it closes the only real failure this page has.",
+    "Fix the channel link in the README to match the one in `CONFIG` and remove the out-of-date instruction about `channelUrl`.",
+    "Fill in `videoUrl` for the published shorts, or strike the promise of a `▶ watch` link from the README until the series starts.",
+    "Extract `CONFIG` into a single `config.js` loaded by both pages.",
+    "Pin Mermaid to a specific version with SRI or keep a copy locally, and record the actual Pages address in the README once deployment is switched on."
+  ],
+  "highlights": [
+    "41 concepts across five categories with 10 Mermaid diagrams rendered per tile, and all 10 belong to the `prod` category: it is agent operations that got the drawings, not model theory.",
+    "A syntax highlighter of its own for Python, JSON and reasoning traces, written from scratch. The only external runtime dependencies this page has are Mermaid and Google Fonts.",
+    "View state is fully linkable: category and query in the query string, an anchor per concept from the `id` field, a button copying the current address. Exactly the mechanism a pinned comment under a short requires.",
+    "The essay, at roughly 3,300 words, links to primary sources, including the {{term:mcp}} specification of 2026-07-28, MCP Apps and A2UI, and has a section of its own titled 'two claims that do not survive contact with reality'.",
+    "The essay states outright that earlier figures taken from secondary aggregators were removed, because they could not be traced back to a primary publication. A rare thing in a text meant to promote a channel."
+  ],
+  "risks": [
+    "The page advertises itself as a 'companion to the shorts' and links to not one short. A reader will see an unkept promise before they see any content.",
+    "With no validation of `concepts.json`, one comma too many turns the whole page into a 'Couldn't load concepts.json' message. The failure is total, not partial.",
+    "Content about the agent ecosystem has fast {{term:drift}}: the entries on MCP, A2A and evals carry neither a date nor a version pin, so there is no way to see when they stop being true.",
+    "10 commits, the last of them on 2026-08-22. The point of the project depends entirely on the channel, so without the series this repository dies quietly."
+  ],
+  "headline": "Page finished, series never started: 0 of 41 videoUrl fields filled",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-22",
+    "commits": 10,
+    "files": 7
+  }
+}

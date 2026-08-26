@@ -1,0 +1,124 @@
+{
+  "slug": "cards-game",
+  "name": "CardsGame",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P4",
+  "oneLiner": "A five-card draw poker engine where a model, a heuristic and a person sit at the table through the same tool boundary.",
+  "summary": "A game of draw poker in which `CardsGame.Engine` has no I/O and no dependencies and is the only authority on whether a draw is legal and how strong a hand is — everything else asks it. The LLM agent gets exactly two tools, `GetHandState` and `ProposeDiscard`, and `PokerTools` is an instance class with the seat number closed over in the constructor, so there is no argument by which the model could play for someone else; the other players' cards are not in the returned object. The most interesting decision, though, is in `AgentPlayer`: after a turn it **asks the engine whether the draw actually happened**, rather than parsing the move out of the model's prose, and a rejection is an ordinary outcome carrying a reason back — three attempts and the seat stands pat. Who sits in a seat (Foundry, Azure OpenAI, a heuristic, a person) is an entry in the `PokerPlayers:<key>` section rather than code, and an unknown key falls back to the heuristic with a warning instead of throwing. Beyond the game there is `POST /simulations`: one line-up over up to 1000 hands, win rate with ties split, rejection rate, forfeits and p95 turn latency, repeatable through a seed. {{term:aspire|Aspire}} composes the lot — server, Blazor Server, console client — and it starts with no account, no key and no Docker. The one thing never done is playing even a single hand against a live model.",
+  "stack": [".NET 10", "ASP.NET Core Minimal API", "Blazor Server", ".NET Aspire 13.4.6", "Microsoft.Agents.AI 1.15.0", "Microsoft.Agents.AI.Foundry 1.5.0", "OpenTelemetry 1.17.0", "xunit 2.9.3"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Three test projects (Engine, Agents, Server): 102 `[Fact]`, 32 `[Theory]`, 134 `[InlineData]` and 2 `[MemberData]` expanded over the nine hand rules, so roughly 254 cases — consistent with the '250+' the README declares. The number comes from counting attributes in the sources, not from a `dotnet test` run.",
+  "ci": "Three workflows. `ci.yml` has a separate `dotnet format --verify-no-changes` job, a build+test matrix on ubuntu/windows/macos with `fail-fast: false`, a CLI smoke test feeding stdin, a publish check for four RIDs and `permissions: contents: read`. `codeql.yml` has a weekly cron, but the `analyze` job is conditional, because the repository is private and has no code scanning; `release.yml` waits for a `v*` tag that has never existed.",
+  "metrics": [
+    { "label": "Projects in src / test projects", "value": "8 / 3" },
+    { "label": "Lines of C# and Razor (src + tests)", "value": "6,075" },
+    { "label": "Test cases (counted)", "value": "~254" },
+    { "label": "Hand rules in the engine", "value": "9, each with its own tiebreaker" },
+    { "label": "HTTP endpoints", "value": "6" },
+    { "label": "OTel game instruments", "value": "7" },
+    { "label": "Hand limit in a simulation", "value": "1,000 (the registry keeps 200)" },
+    { "label": "Git tags", "value": "0, despite a finished release.yml" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/cards-game",
+    "live": [],
+    "docs": [
+      { "label": "Architecture and the reasoning behind the decisions", "path": "docs/ARCHITECTURE.md" },
+      { "label": "Changelog with seven correctness bugs", "path": "CHANGELOG.md" },
+      { "label": "Architectural rules for contributors", "path": "CONTRIBUTING.md" },
+      { "label": "Security policy", "path": "SECURITY.md" },
+      { "label": "README with a 'Deliberately not done' section", "path": "README.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "CardsGame.AppHost i ServiceDefaults",
+      "path": "src/CardsGame.ServiceDefaults",
+      "description": "116 lines of shared infrastructure: {{term:otel|OTel}} self-instrumentation, health checks, service discovery and HTTP resilience, without a single domain entity. AppHost waits for the server's `/health` before letting the UI and the console client in.",
+      "reusable": true
+    },
+    {
+      "name": "CardsGame.Engine",
+      "path": "src/CardsGame.Engine",
+      "description": "1,193 lines with no dependencies and no I/O: `Card` as a `readonly record struct`, nine `IHandRule` rules with separate tiebreakers, `Deck` with a real draw pile and `DrawPokerGame` as a state machine. Hand precedence follows from `HandCategory` rather than from a separate `Priority` field, which in the previous version managed to drift away from poker.",
+      "reusable": false
+    },
+    {
+      "name": "PokerTools",
+      "path": "src/CardsGame.Agents/PokerTools.cs",
+      "description": "Two methods with `[Description]` attributes and nothing else. The class is an instance class holding the seat number from its constructor, so the model's tool surface is {{term:hermetyczny|sealed off}} from the other players at the level of the type, not of validation.",
+      "reusable": false
+    },
+    {
+      "name": "AgentPlayer i PokerAgentFactory",
+      "path": "src/CardsGame.Agents/AgentPlayer.cs",
+      "description": "A turn loop with a budget of three attempts and verification on the engine's side instead of parsing the model's reply. The factory has two paths, because `AIProjectClient.AsAIAgent` builds an `AIAgent` bypassing the intermediate `IChatClient`.",
+      "reusable": false
+    },
+    {
+      "name": "PokerPlayerFactory",
+      "path": "src/CardsGame.Agents/PokerPlayerFactory.cs",
+      "description": "The only place that decides what fills a given chair — Foundry, Azure OpenAI, a heuristic or a person — on the basis of configuration. A missing key degrades to the heuristic with a warning, so a fresh clone plays without any account at all.",
+      "reusable": false
+    },
+    {
+      "name": "SimulationRunner",
+      "path": "src/CardsGame.Server/SimulationRunner.cs",
+      "description": "A comparison harness: hands run sequentially, because parallelism would falsify the latency of the model seats, ties are split so that win rate sums to one, p95 by the nearest-rank method. A human seat is rejected, because there is nobody to answer.",
+      "reusable": false
+    },
+    {
+      "name": "HumanDrawGate",
+      "path": "src/CardsGame.Agents/HumanDrawGate.cs",
+      "description": "A `TaskCompletionSource` with `RunContinuationsAsynchronously`, so that the rest of the hand does not finish inline on the HTTP request thread. It carries the engine's `RejectionReason` back to the seat's view, so a person gets the same message as a model.",
+      "reusable": false
+    },
+    {
+      "name": "ScriptedAgent",
+      "path": "tests/CardsGame.Agents.Tests/ScriptedAgent.cs",
+      "description": "An `AIAgent` stub playing back a planned sequence of tool calls. It gives determinism in the retry and forfeit tests without a network or an Azure subscription, including the case of an agent that never works.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "chess-mas", "reason": "The same pattern carried over to another game: `HumanMoveGate` against `HumanDrawGate`, `ChessMetrics` against `GameMetrics`, a tool boundary tied to one side. Comments in the code refer to ChessMas by name." },
+    { "slug": "llm-multi-agent-chess", "reason": "Also a perfect-information game driven by models, with move validation on the engine's side instead of trust in the model's output." },
+    { "slug": "agent-eval-bench", "reason": "`SimulationRunner` is in effect an agent benchmark: win rate, rejection rate, forfeits and latency under a repeatable seed. That one measures the same things on tasks, this one on hands." },
+    { "slug": "maf-book", "reason": "The repository runs on `Microsoft.Agents.AI` 1.15.0 and `.Foundry`, that is on exactly the API the book describes — and on the version the book has not yet caught up with." },
+    { "slug": "copilot-scope", "reason": "The src/tests layout, the bare xunit and the separation of server DTOs from UI DTOs are copied from there; the changelog and the comments say so outright." }
+  ],
+  "product": "No buyer, and there is no point pretending otherwise. This is an {{term:evidence|evidence}} project: it shows how to shut a language model inside a boundary that cannot be talked around, and how to measure the quality of play rather than whether HTTP returned 200. The simulation runner comes closest to being useful, but until a live model has been run through it, there is not a single number in it to publish. The portfolio value is real, the product value zero.",
+  "gaps": [
+    "**The model seats have never played against a live Foundry or Azure OpenAI deployment.** The README says so honestly, but it means the repository's main claim has not a single measurement with a real model behind it — only the construction tests and `ScriptedAgent` cover it.",
+    "The sample simulation result in the README is four copies of the heuristic playing each other. It is a demonstration of the mechanics served in the place where the reader expects a result.",
+    "The repository is private, so the `analyze` job in `codeql.yml` is conditional and the analysis never runs. The CodeQL badge in the README therefore describes a workflow that does nothing.",
+    "Zero git tags against a fully written `release.yml` — no CLI artefact has ever been produced, and the README still says 'Not yet released'.",
+    "No containerisation, no authentication and no persistence; `HandRegistry` keeps 200 hands in memory. All three are listed in the 'Deliberately not done' section, so this is deliberate debt, not debt that was missed."
+  ],
+  "next": [
+    "Stand up one Foundry deployment and run a few hundred hands of a model-against-three-heuristics line-up. **Keep the raw event streams, not just the summary rows** — repeating the run only to recover the traces costs the same again.",
+    "Put that result in the README in place of the four heuristics, and mark plainly what still has not been measured.",
+    "Settle the name: the directory is `cards-game`, while the badge, the `git clone` and the URL in the README point at `konradcinkusz/CardsGame`. Two names for one project in one README.",
+    "Tag `v0.1.0`, so that `release.yml` stops being a declaration, and while you are there check how much the binaries really weigh without trimming.",
+    "Open the repository or turn on code scanning — otherwise remove the CodeQL badge, because it promises a check that is not there."
+  ],
+  "highlights": [
+    "The changelog records **seven real correctness bugs** from the previous version, among them a parser registering three of the nine rules (a royal flush reported as `Flush`) and `Rank.Ace` with a value of 0, which made an ace-high straight undetectable. That is rare: a repository that publishes its own domain mistakes instead of quietly rewriting them.",
+    "`PokerTools` is an instance class and closes over the seat number in its constructor, and the other players' cards never reach the returned object. The boundary is a property of the type, not a condition in a validator.",
+    "After a turn `AgentPlayer` asks the engine whether the draw actually happened, rather than parsing the move out of the model's prose; three rejections with a reason returned and the seat stands pat.",
+    "CI builds and tests on ubuntu, windows and macos, checks formatting in a separate job, runs a CLI smoke test feeding stdin and a publish check for four RIDs. `TreatWarningsAsErrors` is on globally in `Directory.Build.props`.",
+    "Roughly 254 test cases with no network and no credentials — every seat at the table is a heuristic or a `ScriptedAgent`, including an agent proposing an illegal draw and an agent that never works."
+  ],
+  "risks": [
+    "Name collision: the directory is `cards-game`, while the README, the CI badge and the `git clone` command point at `https://github.com/konradcinkusz/CardsGame.git`.",
+    "`FluentAssertions` was removed on purpose, because from version 8 it carries Xceed's proprietary licence. An automatic Dependabot bump could put it back into an MIT project with no signal at all.",
+    "The pinning runs ahead (Aspire 13.4.6, `Microsoft.Agents.AI` 1.15.0, SDK 10.0.100 with `rollForward latestMinor`) — without a periodic check against NuGet it will go stale faster than the project gets picked up again."
+  ],
+  "headline": "The boundary holds and is tested; no live model has played a single hand",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 5, "openPrs": 5, "dependabotPrs": 5, "lastCommit": "2026-08-09", "commits": 17, "files": 99 }
+}

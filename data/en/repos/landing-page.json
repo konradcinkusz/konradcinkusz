@@ -1,0 +1,178 @@
+{
+  "slug": "landing-page",
+  "name": "landing-page (Franke label)",
+  "cluster": "F-meta",
+  "visibility": "private",
+  "state": "dormant",
+  "tier": "P4",
+  "oneLiner": "A static one-page sales site for an external client, built on an off-the-shelf template and abandoned after five days.",
+  "summary": "One `index.html` file (621 lines) plus three CSS sheets, five scripts and nine images. The page is entirely in Polish and sells one person's services: a TikTok account audit, video-recording training and packages from 400 to 3000 PLN, with banner, about me, counters, offer, pricing and contact sections. The visual base comes from the LayoutFlow template, which is honestly recorded in the first line of `style-global.css` and in the footer. Authorship can be settled from the history, and it comes out more modestly than the code alone would suggest: the whole `js/` directory — all five files, `scripts.js` and `bliss.js` among them — arrived in a single commit `13493ae` together with the template package (`read-license-and-terms.txt`, `owl-slider`, `contactform`), and not one of them has a single later commit, so there is no basis for attributing any line of JavaScript to the author. What is his own is what shows in the diff since the import: the content and section layout of `index.html` and the cuts in `style.css`, 704 insertions and 576 deletions in total. In the style layer, 63 dimensions in `style.css` are counted in `vw` units, and a separate `style-responsive.css` with three breakpoints is responsible for the breaks alone; that separation of scaling from breaks also came with the template — the import had 91 `vw` dimensions and the same three breakpoints — the author only trimmed them. The rest of the repository is libraries vendored locally: jQuery 2.2.0, counterUp, Waypoints, Font Awesome Free 6.1.1 and Linearicons, which makes the page almost {{term:hermetyczny|self-contained}} and leaves Google Fonts as its only dependency on the network.",
+  "stack": [
+    "HTML5",
+    "CSS3 (3 stylesheets from the template, 1,083 lines, style.css trimmed by the author)",
+    "jQuery 2.2.0",
+    "jquery.counterup 1.0",
+    "Waypoints 2.0.3",
+    "Font Awesome Free 6.1.1",
+    "Linearicons Free",
+    "szablon LayoutFlow"
+  ],
+  "primaryLanguage": "HTML",
+  "license": "brak pliku LICENSE",
+  "tests": "No tests: the repository contains not a single test file, nor configuration for any test runner.",
+  "ci": "No CI. There is no `.github` directory at all, so {{term:dependabot}} does not run here either, even though every library is vendored locally and nobody will refresh them.",
+  "metrics": [
+    {
+      "label": "Commits",
+      "value": "13"
+    },
+    {
+      "label": "Work window",
+      "value": "2024-06-11 to 2024-06-15"
+    },
+    {
+      "label": "Files in the repo (git ls-files)",
+      "value": "34"
+    },
+    {
+      "label": "Lines of index.html",
+      "value": "621"
+    },
+    {
+      "label": "Lines of CSS across 3 sheets",
+      "value": "1083"
+    },
+    {
+      "label": "The author's changes since the template import",
+      "value": "0 lines in `js/`; `index.html` + CSS: 704 insertions, 576 deletions (git diff --stat 13493ae..HEAD)"
+    },
+    {
+      "label": "Dimensions in vw units",
+      "value": "63 in style.css, against 91 in the template version from commit 13493ae"
+    },
+    {
+      "label": "Repo size without .git",
+      "value": "4.5 MB"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/landing-page",
+    "live": [],
+    "docs": [
+      {
+        "label": "README (a stub in UTF-16, 34 bytes)",
+        "path": "README.md"
+      },
+      {
+        "label": "The whole page in one file",
+        "path": "index.html"
+      },
+      {
+        "label": "Header carrying the LayoutFlow template attribution",
+        "path": "style-global.css"
+      },
+      {
+        "label": "The page script with dead calls (from the template, untouched since the import)",
+        "path": "js/scripts.js"
+      },
+      {
+        "label": "Responsive breakpoints",
+        "path": "style-responsive.css"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "style-global.css",
+      "path": "style-global.css",
+      "description": "249 lines of reset and flex utility classes from the LayoutFlow template, without a single name from this domain. It can be moved wholesale into another static page, as long as the attribution in the file's first line moves with it.",
+      "reusable": true
+    },
+    {
+      "name": "js/bliss.js",
+      "path": "js/bliss.js",
+      "description": "Scrollspy plus smooth scrolling to anchors in 679 bytes of minified code. It is configured through the global variables `menuid`, `gaptop`, `scrollspeed` and `menu_active_class` set in the HTML, so it knows no selector of this particular template. It arrived with the template package in commit `13493ae` and has no later change — worth moving elsewhere, but it is not the author's code.",
+      "reusable": true
+    },
+    {
+      "name": "Fonty ikonowe wgrane lokalnie",
+      "path": "fonts/",
+      "description": "Font Awesome Free 6.1.1 and Linearicons Free in the full set of formats, kept in the repo rather than loaded from a CDN. The icons therefore render without the network; the only outbound request left is to Google Fonts.",
+      "reusable": true
+    },
+    {
+      "name": "index.html",
+      "path": "index.html",
+      "description": "A topbar, a sticky header with anchor navigation, a banner, a section about the client, counters, four offer cards, three package tables (1100 / 1900 / 3000 PLN) and a footer. All the content, the 400–3000 PLN price list included, is hard-coded into the markup.",
+      "reusable": false
+    },
+    {
+      "name": "js/scripts.js",
+      "path": "js/scripts.js",
+      "description": "A mobile menu that locks scrolling on `body` and a `.fixed` class on the header after 100 px of scroll — 65 lines that came in with the template in commit `13493ae` and were never changed. Below them sit calls to `owlCarousel` and `datepicker`, libraries no longer in the repo; because they are at the end of the callback, they break only the console and each other.",
+      "reusable": false
+    },
+    {
+      "name": "style.css + style-responsive.css",
+      "path": "style.css, style-responsive.css",
+      "description": "451 lines of styles for specific sections and 383 lines holding three breakpoints. The split is clean: continuous scaling sits in `vw` in the first file, layout breaks in the second and nowhere else.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "konradcinkusz",
+      "reason": "The same type of artefact: a static calling-card page served as files. If both are to stay in the portfolio, they should at least share a utility sheet instead of keeping two copies of the same reset."
+    },
+    {
+      "slug": "cv-maker",
+      "reason": "An identical end product, a one-page presentation of a person in HTML, except that there it is generated from data and here it is written by hand. Comparing the two shows how much of this page could be expressed as a template plus data."
+    }
+  ],
+  "product": "No buyer. This is a finished piece of freelance work for one specific client, the Franke label brand, not a product or a library. Its portfolio value is the lowest in the whole set, because the visual layer comes from an external template and the author's own contribution amounts to the content and section layout in `index.html` and the cuts in `style.css` — the `js/` directory stands exactly as it arrived with the template. The one thing it proves is that a project for an external client was delivered in full in five days.",
+  "highlights": [
+    "A complete sales page with an offer, counters and **three package tables** (three `div.pricing-table` blocks in `index.html`, lines 250, 351 and 472: STANDARD 1100, PREMIUM 1900, VIP 3000 PLN) delivered in **13 commits between 11 and 15 June 2024**, with a readable history: `remove contact form`, `add pricing`, `deleted reviews slider`.",
+    "No build process at all. There is no `package.json`, no bundler and no compilation step, so the page works once the directory is copied onto any static server, and will work exactly the same way in five years.",
+    "**63 dimensions counted in `vw`** in `style.css`, with every layout break moved out into a separate `style-responsive.css` with three breakpoints. Continuous scaling is separated from the jumps here, but the credit is not the author's: the template import in `13493ae` had 91 `vw` dimensions and the same three breakpoints.",
+    "Scrollspy that highlights the active menu item, with smooth scrolling, fits into **679 bytes** of `js/bliss.js` and is configured solely through global variables from the HTML. The file came with the template in commit `13493ae`, is minified, carries no authorship marker and has no later changes, so it is not the author's code.",
+    "The template's provenance is declared in two places: in the first line of `style-global.css` and in the page footer. Nobody pretends the visual layer is the author's own."
+  ],
+  "gaps": [
+    "**The README is a 34-byte stub written in UTF-16 with a BOM**, reading `# landing-page`. It does not say what the project is, who it was built for, where the template comes from or how to run it.",
+    "`index.html` links the sheet `bxslider/jquery.bxslider.css` on line 19, and there is no `bxslider` directory in the repo. Every page load ends in a 404 visible in the console.",
+    "The menu item **Cennik points at `#testimonials`** (line 74), because the pricing section on line 245 inherited the identifier from the deleted reviews slider. The navigation works by accident, not by design.",
+    "The address `franke.label@gmail.com` sits in two places inside an `<a>` tag with no `href` attribute, and `<span class=\"year\"></span>` in the footer is filled in by nothing, so it renders as `Copyright ©  | Template By`. Those are the two most visible elements of the contact page.",
+    "The dead `owlCarousel` and `datepicker` calls in `js/scripts.js` are {{term:drift}} left by two template features the author cut out: the markup and the `owl-slider` and `contactform` directories vanished from the repo in the commits `remove contact form` and `remove unnecessary files`, while `scripts.js` was left untouched since the import."
+  ],
+  "risks": [
+    "The repository publishes a third party's personal and business data: a first name, photographs, an e-mail address, TikTok and Instagram accounts and a full price list. Consent to this cannot be confirmed from the repository, and the June 2024 prices may already be out of date.",
+    "There is no LICENSE file, while libraries under four different licences are vendored in, `jquery.counterup` under GPL v2 among them, alongside a commercial template. The legal status of redistributing this repo is unsettled, and adding {{term:mit|MIT}} will not settle it.",
+    "jQuery 2.2.0 dates from 2016 and no longer gets fixes; Waypoints 2.0.3 and counterUp 1.0 are older still. Vendoring them locally means nobody will notice.",
+    "The name `landing-page` carries no information. In a list of repositories it is noise, not an entry."
+  ],
+  "next": [
+    "Settle whether this repo belongs in the portfolio at all. If it does, describe it outright as template work for an external client; if it does not, archive it and stop counting it.",
+    "Rewrite the README as UTF-8: what the page is, who it was built for, where the template comes from, and that any static server will do. The current file carries not one bit of information.",
+    "Remove the `bxslider` link from line 19 and the `owlCarousel` and `datepicker` calls from `scripts.js`, and move the pricing section's identifier from `#testimonials` to `#pricing` along with the menu link.",
+    "Add `href=\"mailto:...\"` at both occurrences of the address and hard-code the year in the footer. That is three lines, and they repair the only conversion path on this page.",
+    "Add a NOTICE listing the licences of the vendored libraries and of the LayoutFlow template, or confirm with the client whether the page is still to stand publicly with that price list."
+  ],
+  "headline": "Proof of freelance delivery, not engineering: content and sections on someone else's template, zero own JS",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2024-06-15",
+    "commits": 13,
+    "files": 34
+  }
+}

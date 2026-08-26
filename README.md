@@ -34,22 +34,33 @@ The manifest renders as a small static site with five tabs: the **portfolio map*
 axis), the **operating model** (attention tiers, cadence, health checks, WIP limits,
 automation, quarter plan), a sortable **index** and a searchable **glossary**.
 
+**In Polish and English.** Polish is the source; `data/en/` is a translation with the
+same shape. The page switches without a reload — one manifest carries both — and
+remembers the choice; `?lang=pl` or `?lang=en` overrides it. A translation is trusted
+to read well and trusted for nothing else: the validator checks the two trees element
+for element and rejects a dropped list entry, a renamed id, a translated file path, a
+missing interface key, a plural with the wrong number of forms, or a string left in
+Polish. `scripts/i18n-audit.mjs` rejects a user-visible literal that never made it into
+`ui.json` in the first place.
+
 ```sh
 # run it locally
 cd site && python3 -m http.server 8000     # then open http://localhost:8000
 
-# regenerate the manifest after editing data/
+# regenerate the manifest after editing data/ or data/en/
 node scripts/build-manifest.mjs
 node scripts/validate-portfolio.mjs
+node scripts/i18n-audit.mjs
 ```
 
 ### How it is maintained
 
 | | |
 |---|---|
-| **Source of truth** | `data/` — one file per repository under `data/repos/<slug>.json`, plus `clusters`, `consolidation`, `ops`, `glossary` |
+| **Source of truth** | `data/` — one file per repository under `data/repos/<slug>.json`, plus `clusters`, `consolidation`, `ops`, `glossary`, `ui` |
+| **Translation** | `data/en/` — the same tree in English, enforced for structural parity rather than trusted |
 | **Generated + committed** | `site/data/portfolio.json`, built by `scripts/build-manifest.mjs` |
-| **Guarded by** | `validate-portfolio.mjs` (closed schema + referential integrity) · `check-repos.mjs` (a repo that vanished or flipped visibility fails the build) · `smoke-site.mjs` · `theme-audit.mjs` · `render-check.mjs` (real Chromium, both themes) · `health-selftest.mjs` |
+| **Guarded by** | `validate-portfolio.mjs` (closed schema, referential integrity, cross-language parity) · `i18n-audit.mjs` (no hard-coded interface text) · `check-repos.mjs` (a repo that vanished or flipped visibility fails the build) · `smoke-site.mjs` · `theme-audit.mjs` · `render-check.mjs` (real Chromium, both languages and both themes) · `health-selftest.mjs` |
 | **Drift** | CI runs the builder with `--check`; a stale committed manifest fails the build |
 | **The image** | CI builds the container and probes it: non-root, `/healthz` outside the SPA fallback, manifest served, headers on every path |
 | **Nightly** | `collect-health.mjs` reads the whole estate into `data/health.json`; the site renders it when it exists |
