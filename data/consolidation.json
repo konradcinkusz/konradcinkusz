@@ -344,7 +344,7 @@
   ],
   "distribution": {
     "openPaid": {
-      "rule": "**Otwarte** — to, co uruchamiasz lokalnie i co produkuje plik.<br>**Płatne** — to, co pamięta, porównuje, integruje się z Twoimi systemami i przetrwa audyt.",
+      "rule": "**Otwarte** — to, co uruchamiasz lokalnie i co produkuje plik.<br>**Płatne** — to, co pamięta, porównuje, integruje się z Twoimi systemami i przetrwa audyt.<br>To jest {{term:opencore|linia open core}}, przeprowadzona wewnątrz jednego repozytorium, nie między nimi.",
       "openRole": "Rola: kanał, wiarygodność, cytowalność. Zero przychodu — i tak ma być.",
       "paidRole": "Rola: przychód. Opłata platformowa plus rozliczenie za przebieg. Nie {{term:perseat|za stanowisko}}, nie {{term:outcome|za wynik}}.",
       "open": [

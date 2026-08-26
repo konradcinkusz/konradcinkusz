@@ -4,11 +4,16 @@ on:
   push:
     branches: [main]
     paths:
+      # data/ is where all 35 entries, the ops model and the glossary live. Leaving
+      # it out meant an edit to any of them ran neither the drift check nor the
+      # validator, which is the whole point of this workflow.
+      - "data/**"
       - "site/**"
       - "scripts/**"
       - ".github/workflows/validate-portfolio.yml"
   pull_request:
     paths:
+      - "data/**"
       - "site/**"
       - "scripts/**"
   workflow_dispatch:

@@ -19,8 +19,8 @@
   ],
   "primaryLanguage": "JavaScript",
   "license": "MIT",
-  "tests": "Brak testów jednostkowych; zamiast nich cztery skrypty kontrolne uruchamiane w CI: walidator manifestu (schemat zamknięty plus integralność referencyjna), kontroler istnienia i widoczności repozytoriów przez API GitHuba, smoke test struktury strony i test renderowania w Chromium na trzech viewportach i w obu motywach.",
-  "ci": "`validate-portfolio.yml` na push, PR i ręcznie: dryf manifestu, walidacja, istnienie repozytoriów, smoke i pełne renderowanie w przeglądarce. `flyio.yml` na tagu `v*`: tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu pobiera serwowany manifest i żąda co najmniej trzydziestu repozytoriów — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
+  "tests": "Brak testów jednostkowych; zamiast nich sześć skryptów kontrolnych uruchamianych w CI: dryf manifestu, walidator (schemat zamknięty plus integralność referencyjna), istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu i test renderowania w Chromium w trzech kombinacjach motywu i szerokości (jasny 1440, ciemny 1440, jasny 390).",
+  "ci": "`validate-portfolio.yml` na push, PR i ręcznie, z filtrem obejmującym `data/**`, `site/**` i `scripts/**`: siedem kroków, od dryfu manifestu po renderowanie w przeglądarce i build jednopliku. `flyio.yml` na tagu `v*`: tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu pobiera serwowany manifest i żąda co najmniej trzydziestu repozytoriów — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
   "metrics": [
     {
       "label": "Repozytoria na mapie",
@@ -39,20 +39,20 @@
       "value": "7 kerneli, 6 odrzuconych, 11 duplikacji"
     },
     {
-      "label": "Terminy słownika",
-      "value": "43"
+      "label": "Słownik",
+      "value": "43 terminy, 246 odwołań z prozy"
     },
     {
       "label": "Kod strony",
-      "value": "645 linii JS + 579 linii CSS + 324 linie HTML"
+      "value": "648 linii JS + 586 linii CSS + 324 linie HTML (`wc -l`)"
     },
     {
       "label": "Zależności runtime",
-      "value": "0"
+      "value": "0; jedyna zależność deweloperska to Playwright do testu renderowania"
     },
     {
       "label": "Wygenerowany manifest",
-      "value": "527 kB, commitowany i sprawdzany na dryf"
+      "value": "543 KiB, commitowany i sprawdzany na dryf"
     }
   ],
   "links": {
@@ -137,7 +137,7 @@
     {
       "name": "Renderer manifestu",
       "path": "site/assets/app.js",
-      "description": "645 linii bez zależności: fetch manifestu, pięć zakładek, filtry po klastrze i widoczności, sortowanie indeksu, boczny panel repozytorium, podświetlanie konsumentów kernela i mikroskładnia `{{term:id|etykieta}}` linkująca prozę do słownika.",
+      "description": "645 linii bez zależności: fetch manifestu, pięć zakładek, filtry po klastrze i widoczności, sortowanie indeksu, boczny panel repozytorium, podświetlanie konsumentów kernela i mikroskładnia linkująca prozę do słownika.",
       "reusable": false
     },
     {
@@ -171,17 +171,16 @@
   ],
   "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu czterech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 35 repozytoriów, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
   "highlights": [
-    "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 35 slugów bez powtórzeń**, 7 rytuałów, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
-    "Walidator wymusza zamknięty schemat kluczy i pełną integralność referencyjną. Nieznany slug w `overlaps`, kernel z jednym konsumentem albo nierozwiązywalny termin słownika zatrzymują build, więc martwe odwołanie w prozie jest błędem kompilacji, a nie literówką.",
-    "Workflow deployujący nie kończy się na health checku, tylko pobiera serwowany manifest i żąda co najmniej 30 repozytoriów. Jego własny komentarz tłumaczy dlaczego: health check dowodzi wyłącznie, że nginx wstał.",
-    "645 linii JS i 568 linii CSS bez ani jednej zależności npm. Nie ma `package.json`, więc nie ma też łańcucha dostaw do pilnowania ani {{term:dependabot|dependabota}} do obsługi.",
-    "`flyio/SECRETS.md` deklaruje zero sekretów runtime i nazywa to właściwością do utrzymania; jedynym poświadczeniem jest `FLY_API_TOKEN` ograniczony do jednej aplikacji."
+    "Walidator ma **zamknięty** zestaw kluczy repozytorium i sprawdza integralność krzyżowo: nieznany slug w `overlaps`, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. {{term:kernel|Kernel}} z jednym konsumentem jest ostrzeżeniem, nie błędem — to jest osąd, nie naruszenie schematu.",
+    "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 35 slugów bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
+    "Strona nie ma kroku budowania i zero zależności w czasie działania. Jedyna zależność deweloperska to przeglądarka do testu renderowania — który złapał błąd kolejności bootu zostawiający pustą stronę, trzy przepełnienia layoutu i regułę `[hidden]` przegrywającą z `display: flex`.",
+    "Własne liczby tego repozytorium — commity, pliki, data ostatniego commitu — są **wyliczane z gita przy budowie manifestu**, nie wpisywane ręcznie. To jedyny wpis, w którym da się to zrobić, i jedyny, w którym ręczne wpisanie gwarantowałoby nieaktualność."
   ],
   "gaps": [
-    "Manifest jest **migawką z jednego dnia**. Liczby PR-ów, gwiazdek i ostatnich commitów są wpisane ręcznie; nocny kolektor zdrowia opisany w modelu operacyjnym jest zaplanowany i nie istnieje.",
-    "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To jest dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
-    "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione, a więc na razie są obietnicą.",
-    "Wpisy o repozytoriach prywatnych nie linkują do dokumentów wewnętrznych, bo czytelnik dostałby 404. Walidator to ostrzega, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
+    "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Liczby PR-ów, gwiazdek i dat ostatniego commitu są wpisane ręcznie; nocny kolektor zdrowia opisany w modelu operacyjnym jest zaprojektowany i niezbudowany.",
+    "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
+    "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
+    "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
   ],
   "next": [
     "Wypuść pierwszy tag i sprawdź, czy wdrożenie faktycznie przechodzi — łącznie z krokiem weryfikującym serwowany manifest.",

@@ -3,14 +3,14 @@
     "id": "A-runtime",
     "letter": "A",
     "name": "Klaster A — runtime i zachowanie agenta",
-    "note": "Wspólny substrat: **przebieg agenta jako jednostka pracy**. Sekwencja wywołań modelu z wynikiem, którą da się zapisać, odtworzyć, ocenić i porównać z innym przebiegiem. Te projekty mogą mieć wspólny {{term:cassette|replay}}, wspólny {{term:runstore|magazyn przebiegów}} i wspólny scoring — i tylko one.",
+    "note": "Wspólny substrat: **przebieg agenta jako jednostka pracy**. Sekwencja wywołań modelu z wynikiem, którą da się zapisać, odtworzyć, ocenić i porównać z innym przebiegiem. Te projekty mogą mieć wspólny {{term:playhead|replay}}, wspólny {{term:runstore|magazyn przebiegów}} i wspólny scoring — i tylko one.",
     "barrier": "Analiza {{term:roslyn}} działa na kodzie źródłowym, harness replay na przebiegach agenta. Inny moment w cyklu, inny artefakt, inny kupujący. Sklejenie daje produkt, którego nie da się opisać jednym zdaniem — a produkt bez jednego zdania nie ma kupującego."
   },
   {
     "id": "B-static",
     "letter": "B",
     "name": "Klaster B — kod źródłowy i polityki",
-    "note": "Wspólny substrat: **plik z kodem albo polityka**. Jednostką jest diff, plik, reguła. Te projekty konsumują się nawzajem — {{term:archgate|bramka}} czyta standard, standard cytuje repozytoria — ale nie mają nic wspólnego z kernelami klastra A."
+    "note": "Wspólny substrat: **plik z kodem albo polityka**. Jednostką jest diff, plik, reguła. Te projekty konsumują się nawzajem — {{term:diffgate|bramka}} czyta standard, standard cytuje repozytoria — ale nie mają nic wspólnego z kernelami klastra A."
   },
   {
     "id": "C-infra",

@@ -289,7 +289,7 @@
     },
     {
       "name": "Wtyczki agentowe jako sposób dystrybucji reguł",
-      "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` na wtyczkę, którą agent ma wczytać przed pracą — dzięki temu poprawka reguły propaguje się bez dotykania trzydziestu pięciu plików.",
+      "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu pięciu plików.",
       "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
     },
     {
