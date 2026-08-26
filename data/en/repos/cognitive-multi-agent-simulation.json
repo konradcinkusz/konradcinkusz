@@ -149,10 +149,6 @@
       "reason": "Identity is not built here — authservice v0.3.1 is consumed as a released image, and every API validates tokens against its JWKS. This is the pattern to repeat."
     },
     {
-      "slug": "aurelius-promptus",
-      "reason": "Versioned role definitions here and prompt templates there solve the same problem: what exactly the agent was told to do in this particular run."
-    },
-    {
       "slug": "chess-mas",
       "reason": "A different domain, the same class of problem; named outright as a candidate consumer of the replay kernel and the cheapest test of its portability."
     }

@@ -150,10 +150,6 @@
     {
       "slug": "maf-book",
       "reason": "The same subject, Microsoft Agent Framework in .NET, from the side of working code rather than book text: `AsAIAgent` and `AIFunctionFactory` are used here and described there."
-    },
-    {
-      "slug": "aurelius-promptus",
-      "reason": "A comment in `ChessTools.cs` refers directly to the tool-boundary-before-a-write-action pattern used in that provisioning flow."
     }
   ],
   "product": "No buyer, and the README closes that route itself, saying that this is not a benchmark of playing strength, that one game proves nothing, and that the cost is an estimate against a price list, not an invoice. This is a credibility project: it shows that the author assembles an agent system in .NET with a hard deterministic boundary, telemetry and cost accounting. If anything here has market value it is `HumanMoveGate` as a human-in-the-loop pattern that knows nothing about chess, and `GameCostTracker` with its configurable price list — but the second only once the `Side` enum has been cut out of its signatures.",

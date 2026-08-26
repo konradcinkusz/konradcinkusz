@@ -136,10 +136,6 @@
   ],
   "overlaps": [
     {
-      "slug": "aurelius-promptus",
-      "reason": "This is the system under test. Without a running Portal from that repository this suite has no executable value at all, and CI automation depends on the PR-environment workflow that is disabled over there."
-    },
-    {
       "slug": "architecture-standards",
       "reason": "The generalised rules from the audit (assertion discipline, locator conventions, CI as part of the definition of done) were moved into `docs/guides/E2E-ACCEPTANCE-TESTING.md` in that repo."
     },

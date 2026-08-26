@@ -11,8 +11,7 @@
         "cognitive-multi-agent-simulation",
         "auto-veritas",
         "cv-maker",
-        "black-hole-sim",
-        "aurelius-promptus"
+        "black-hole-sim"
       ],
       "effort": "done",
       "licence": "MIT",
@@ -49,11 +48,10 @@
       "name": "{{term:servicedefaults|ServiceDefaults}} — wspólne jądro hosta",
       "sourceSlug": "cognitive-multi-agent-simulation",
       "sourcePath": "src/CogniSim.ServiceDefaults/",
-      "description": "Uwierzytelnianie wobec JWKS, wybór dostawcy bazy, limitowanie z jednolitym kształtem odpowiedzi 429, migracja w tle po starcie serwera. Jedenaście projektów w portfolio robi to samo; **cztery napisały to niezależnie od zera**.",
+      "description": "Uwierzytelnianie wobec JWKS, wybór dostawcy bazy, limitowanie z jednolitym kształtem odpowiedzi 429, migracja w tle po starcie serwera. Dziesięć projektów w portfolio robi to samo; **cztery napisały to niezależnie od zera**.",
       "consumers": [
         "primates",
         "auto-veritas",
-        "aurelius-promptus",
         "hydro-scope",
         "copilot-scope",
         "agent-eval-bench",
@@ -128,25 +126,6 @@
         "Ten sam kształt danych powstał niezależnie jako {{term:audit|ślad audytowy}} bramki uprawnień"
       ],
       "blocker": "Rób dopiero, gdy K1 ma **dwóch faktycznych** konsumentów w mainie. To jest reguła {{term:wip|limitu}}, nie preferencja."
-    },
-    {
-      "id": "K6",
-      "name": "Wersjonowane definicje agenta",
-      "sourceSlug": "cognitive-multi-agent-simulation",
-      "sourcePath": "src/CogniSim.Ensemble/, agents/",
-      "description": "Rejestr definicji ról z wersją, temperaturą i pochodzeniem, plus {{term:fingerprint}} dokładnego zestawu, który wyprodukował dany przebieg. Bez tego nie da się powiedzieć, czy różnica wyników to zmiana promptu, czy losowość.",
-      "consumers": [
-        "aurelius-promptus",
-        "agent-eval-bench"
-      ],
-      "effort": "days",
-      "licence": "MIT",
-      "readiness": [
-        "Definicja agenta jako dane, walidowana wobec własnego schematu",
-        "Odcisk zestawu jest już wyliczany i przypinany do przebiegu",
-        "Po drugiej stronie stoi cały serwis szablonów promptów, który rozwiązuje tę samą rzecz od innej strony"
-      ],
-      "blocker": "Dwie strony tej duplikacji mają różne modele: jedna wersjonuje **rolę**, druga **szablon**. Scalenie wymaga najpierw wspólnego modelu, a to jest decyzja projektowa, nie refaktor."
     }
   ],
   "kernelsRejected": [
@@ -229,19 +208,6 @@
       "severity": "high"
     },
     {
-      "problem": "Serwis tożsamości raz konsumowany jako obraz, raz wożony jako skopiowany kod.",
-      "sideA": {
-        "slug": "authservice",
-        "what": "Wydany obraz, przypinany po tagu, zero zależności źródłowej"
-      },
-      "sideB": {
-        "slug": "aurelius-promptus",
-        "what": "Własny projekt `AureliusPromptus.AuthService` w solucji — kopia sprzed ekstrakcji"
-      },
-      "resolution": "To jest migracja, która się nie odbyła. Wykonanie jej zamienia jeden punkt danych wzorca ekstrakcji w dwa — czyli z anegdoty robi standard.",
-      "severity": "high"
-    },
-    {
       "problem": "{{term:audit|Ślad audytowy}} i {{term:runstore|magazyn przebiegów}} to ta sama struktura danych.",
       "sideA": {
         "slug": "AgentHelm",
@@ -252,19 +218,6 @@
         "what": "Zapis przebiegu jako funkcja badawcza — co, ile, z jakim wynikiem"
       },
       "resolution": "Ten sam kształt powstał dwa razy z dwóch różnych powodów. Kernel K5 scala oba, ale dopiero po tym, jak K1 ma dwóch odbiorców — bo scalanie magazynu jest tygodniami, a scalanie kasety godzinami.",
-      "severity": "medium"
-    },
-    {
-      "problem": "{{term:ensemble|Wersjonowana definicja roli}} i wersjonowany szablon promptu.",
-      "sideA": {
-        "slug": "cognitive-multi-agent-simulation",
-        "what": "Sześć ról w JSON z wersją, temperaturą i odciskiem zestawu"
-      },
-      "sideB": {
-        "slug": "aurelius-promptus",
-        "what": "Cały serwis szablonów promptów z marketplace i wersjonowaniem"
-      },
-      "resolution": "Jedno pytanie, dwie odpowiedzi: **co dokładnie kazano agentowi robić w tym konkretnym przebiegu**. Kernel K6, ale wymaga najpierw wspólnego modelu — to jest decyzja projektowa, nie refaktor.",
       "severity": "medium"
     },
     {

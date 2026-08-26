@@ -5,8 +5,8 @@
   "visibility": "private",
   "state": "active",
   "tier": "P0",
-  "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści pięć repozytoriów, plus strona, która go renderuje.",
-  "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści pięć repozytoriów naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
+  "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści cztery repozytoria, plus strona, która go renderuje.",
+  "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści cztery repozytoria naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
   "stack": [
     "HTML5",
     "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -24,11 +24,11 @@
   "metrics": [
     {
       "label": "Repozytoria na mapie",
-      "value": "35, w 6 klastrach"
+      "value": "34, w 6 klastrach"
     },
     {
       "label": "Poziomy uwagi",
-      "value": "5 (P0–P4), pokrywają 35 slugów bez powtórzeń"
+      "value": "5 (P0–P4), pokrywają 34 slugi bez powtórzeń"
     },
     {
       "label": "Model operacyjny",
@@ -36,7 +36,7 @@
     },
     {
       "label": "Kernele i duplikacje",
-      "value": "7 kerneli, 6 odrzuconych, 11 duplikacji"
+      "value": "6 kerneli, 6 odrzuconych, 9 duplikacji"
     },
     {
       "label": "Słownik",
@@ -173,16 +173,16 @@
       "reason": "README i `meta.json` linkują do kanału jako głównej osi dystrybucji, więc oba opisują ten sam kanał dotarcia."
     }
   ],
-  "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu czterech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 35 repozytoriów, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
+  "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu trzech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 34 repozytoria, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
   "highlights": [
     "Walidator ma **zamknięty** zestaw kluczy repozytorium i sprawdza integralność krzyżowo: nieznany slug w `overlaps`, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. {{term:kernel|Kernel}} z jednym konsumentem jest ostrzeżeniem, nie błędem — to jest osąd, nie naruszenie schematu.",
-    "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 35 slugów bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
+    "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 34 slugi bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
     "Strona nie ma kroku budowania i zero zależności w czasie działania. Jedyna zależność deweloperska to przeglądarka do testu renderowania — który złapał błąd kolejności bootu zostawiający pustą stronę, trzy przepełnienia layoutu i regułę `[hidden]` przegrywającą z `display: flex`.",
-    "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu czterech."
+    "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu trzech."
   ],
   "gaps": [
     "**To repozytorium jest prywatne, więc README profilu nie renderuje się nigdzie.** GitHub pokazuje `README.md` z repozytorium o nazwie równej nazwie użytkownika tylko wtedy, gdy jest ono publiczne. Tu jest prywatne, potwierdzone dwoma niezależnymi źródłami, więc `github.com/konradcinkusz` nie pokazuje ani tabeli projektów, ani niczego innego z tego pliku. Upublicznienie repozytorium naprawia profil i **jednocześnie publikuje cały manifest**, razem z dossier siedemnastu repozytoriów prywatnych — to jedna decyzja, nie dwie, i patrz `risks` poniżej.",
-    "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
+    "Manifest jest **migawką z jednego dnia** dla trzydziestu trzech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
     "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
     "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
     "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
