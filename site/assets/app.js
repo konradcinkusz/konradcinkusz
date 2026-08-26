@@ -56,6 +56,11 @@
 
   const t = (key) => (UI[key] ?? key);
 
+  // t() with {placeholders} filled from an object. The health collector emits a
+  // key and its numbers rather than a sentence, so the sentence is written here,
+  // in the language the reader chose.
+  const tf = (key, params) => String(t(key)).replace(/\{(\w+)\}/g, (m, k) => (params && k in params ? String(params[k]) : m));
+
   function readLang() {
     const q = new URLSearchParams(location.search).get("lang");
     if (q === "pl" || q === "en") return q;
@@ -482,8 +487,8 @@
             return `<div class="check">
               <div class="n">${esc(b.tier)}</div>
               <div class="s"><a href="#" data-repo="${esc(b.slug)}">${esc(r ? r.name : b.slug)}</a></div>
-              <div class="t">${esc(b.check)}</div>
-              <div class="a">${esc(b.detail)}</div>
+              <div class="t">${esc(t(`breach.${b.check}.name`))}</div>
+              <div class="a">${esc(tf(`breach.${b.check}`, b.params))}</div>
             </div>`;
           }).join("")
           : `<div class="barrier" style="background:var(--good-bg);border-left-color:var(--good)"><span class="bx" style="color:var(--good)">${esc(t("health.clean.tag"))}</span><p class="bt">${esc(t("health.clean.body"))}</p></div>`}`;

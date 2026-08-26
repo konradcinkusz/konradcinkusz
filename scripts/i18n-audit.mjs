@@ -98,6 +98,9 @@ const prefixes = new Set();
 for (const m of html.matchAll(/\bdata-t(?:-ph|-aria)?="([^"]+)"/g)) asked.add(m[1]);
 for (const [, src] of js) {
   for (const m of src.matchAll(/\bt\(\s*"([a-z0-9.]+)"\s*\)/gi)) asked.add(m[1]);
+  // tf(`breach.${b.check}`, ...) and t(`breach.${b.check}.name`) are template
+  // literals, so record the prefix and let the expansion below cover them.
+  for (const m of src.matchAll(/\bt[f]?\(\s*`([a-z0-9.]+\.)\$\{/gi)) prefixes.add(m[1]);
   for (const m of src.matchAll(/\bplural\([^,]+,\s*"([a-z0-9.]+)"\s*\)/gi)) asked.add(m[1]);
   // t("effort." + k.effort) and friends: a computed key. The audit cannot
   // evaluate the expression, so it records the prefix and treats every defined

@@ -13,7 +13,13 @@
 // Spreading the layout across six files meant a shape change had six places to
 // be wrong in and no single place to be right in.
 //
-// So: every consumer imports from here, and the layout changes in one file.
+// So: anything that READS the built manifest imports from here, and the layout
+// changes in one file. One deliberate exception, and it is not a loophole:
+// scripts/assert-served-manifest.mjs checks a manifest fetched over the network,
+// which may be truncated, stale or the wrong shape entirely — loadManifest()
+// below throws on exactly those, and throwing is the wrong answer for a script
+// whose job is to report them. It still imports NOT_A_LANGUAGE from here rather
+// than restating the rule.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -26,7 +32,7 @@ export const SOURCE_LANG = "pl";
 // `ui` sits alongside the language bundles but is not one — it is the interface
 // strings, keyed by language. Anything enumerating languages must exclude it,
 // and forgetting to is the obvious next bug after the one above.
-const NOT_A_LANGUAGE = new Set(["ui"]);
+export const NOT_A_LANGUAGE = new Set(["ui"]);
 
 export function manifestPath(root) {
   return join(root, "site", "data", "portfolio.json");

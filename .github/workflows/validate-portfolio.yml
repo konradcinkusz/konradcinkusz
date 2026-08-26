@@ -122,6 +122,19 @@ jobs:
               || { echo "::error::X-Content-Type-Options missing on $path — a location block replaced the inherited set"; exit 1; }
           done
 
+          echo "--- the manifest is compressed, including for a PROXIED request"
+          raw=$(curl -fsS http://127.0.0.1:8080/data/portfolio.json | wc -c)
+          gz=$(curl -fsS -H 'Accept-Encoding: gzip' http://127.0.0.1:8080/data/portfolio.json --output /tmp/gz.bin && wc -c < /tmp/gz.bin)
+          echo "raw=$raw gzip=$gz"
+          [ "$gz" -lt $((raw / 2)) ] || { echo "::error::manifest is not being compressed (raw $raw, gzip $gz)"; exit 1; }
+          # Fly's edge proxies every request, and nginx's gzip_proxied default is
+          # "off" — which would compress perfectly here and ship 1.18 MB in
+          # production. A Via header is what tells nginx the request was proxied.
+          viagz=$(curl -fsS -H 'Accept-Encoding: gzip' -H 'Via: 1.1 fly' http://127.0.0.1:8080/data/portfolio.json --output /tmp/via.bin && wc -c < /tmp/via.bin)
+          echo "gzip behind a proxy=$viagz"
+          [ "$viagz" -lt $((raw / 2)) ] || { echo "::error::manifest is NOT compressed for a proxied request (raw $raw, gzip $viagz) — check gzip_proxied"; exit 1; }
+          curl -fsSI -H 'Accept-Encoding: gzip' http://127.0.0.1:8080/data/portfolio.json | grep -qi 'vary: accept-encoding' \
+            || { echo "::error::no Vary: Accept-Encoding on the manifest — a cache could hand a gzipped body to a client that cannot read it"; exit 1; }
           echo "--- the manifest is not cached by a proxy"
           curl -fsSI http://127.0.0.1:8080/data/portfolio.json | grep -qi 'cache-control: no-cache' \
             || { echo "::error::manifest is missing its no-cache header"; exit 1; }

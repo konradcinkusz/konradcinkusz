@@ -29,7 +29,15 @@ jobs:
         with:
           node-version: "22"
       - name: Validate site/data/portfolio.json
-        run: node scripts/validate-portfolio.mjs
+        run: |
+          # --check FIRST. Validation proves the committed manifest is well formed;
+          # it says nothing about whether it matches data/. A tag on a commit that
+          # edited data/ and forgot to rebuild would deploy a stale manifest, and
+          # every check after this one — including the post-deploy assertion — would
+          # pass on it, because stale and correct look identical from outside.
+          node scripts/build-manifest.mjs --check
+          node scripts/validate-portfolio.mjs
+          node scripts/i18n-audit.mjs
 
   deploy:
     name: Build and deploy

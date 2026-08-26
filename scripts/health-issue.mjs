@@ -12,6 +12,31 @@ const path = join(root, "data", "health.json");
 if (!existsSync(path)) { console.log("No health data; nothing to report."); process.exit(0); }
 const health = JSON.parse(readFileSync(path, "utf8"));
 
+// A breach carries a key and its numbers, not a sentence, so that the site can
+// write it in either language. The issue body is written for the owner, so it
+// uses the Polish templates — the same strings the Polish page shows, from the
+// same file, rather than a second copy that would drift.
+const UI = JSON.parse(readFileSync(join(root, "data", "ui.json"), "utf8"));
+const fill = (key, params) => String(UI[key] ?? key).replace(/\{(\w+)\}/g, (m, k) => (params && k in params ? String(params[k]) : m));
+const checkName = (b) => UI[`breach.${b.check}.name`] ?? b.check;
+const checkDetail = (b) => (b.detail ?? fill(`breach.${b.check}`, b.params));
+
+// A health file older than a couple of days is not the estate's state, it is a
+// snapshot someone forgot to refresh. Reporting it as current would put a date
+// in the issue title that quietly disagrees with the numbers under it.
+const ageDays = Math.floor((Date.now() - Date.parse(health.collectedAt)) / 86_400_000);
+if (Number.isFinite(ageDays) && ageDays > 2) {
+  console.error(`data/health.json was collected ${ageDays} days ago (${health.collectedAt}). Refusing to report a stale snapshot as current; re-run scripts/collect-health.mjs.`);
+  process.exit(1);
+}
+
+// The header count and the array are two sources for one number. Trust the array
+// — it is the thing the body is built from — and say so if they disagree.
+if (health.totals?.breaches !== health.breaches.length) {
+  console.error(`data/health.json disagrees with itself: totals.breaches is ${health.totals?.breaches}, breaches[] has ${health.breaches.length}. Using the array.`);
+  health.totals.breaches = health.breaches.length;
+}
+
 const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN;
 const REPO = process.env.GITHUB_REPOSITORY ?? "konradcinkusz/konradcinkusz";
 if (!token) { console.log("No token; printing instead.\n"); }
@@ -43,7 +68,7 @@ const body = [
     "",
     "| repozytorium | kontrola | szczegół |",
     "|---|---|---|",
-    ...byTier.get(tier).map((b) => `| \`${b.slug}\` | ${b.check} | ${b.detail} |`),
+    ...byTier.get(tier).map((b) => `| \`${b.slug}\` | ${checkName(b)} | ${checkDetail(b)} |`),
     "",
   ]),
   "---",

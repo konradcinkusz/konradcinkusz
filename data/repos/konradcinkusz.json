@@ -40,11 +40,11 @@
     },
     {
       "label": "Słownik",
-      "value": "43 terminy, 246 odwołań z prozy"
+      "value": "43 terminy, 247 odwołań z prozy (w każdym języku)"
     },
     {
       "label": "Kod strony",
-      "value": "648 linii JS + 586 linii CSS + 324 linie HTML (`wc -l`)"
+      "value": "769 linii JS + 593 linie CSS + 307 linii HTML (`wc -l`)"
     },
     {
       "label": "Zależności runtime",
@@ -52,11 +52,11 @@
     },
     {
       "label": "Wygenerowany manifest",
-      "value": "543 KiB, commitowany i sprawdzany na dryf"
+      "value": "1 179 KiB w dwóch językach, commitowany i sprawdzany na dryf"
     },
     {
       "label": "Skrypty kontrolne",
-      "value": "7, w tym kolektor zdrowia i jego test wobec atrapy API"
+      "value": "13 (12 w `scripts/` plus wspólny akcesor `scripts/lib/manifest.mjs`)"
     }
   ],
   "links": {

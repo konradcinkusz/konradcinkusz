@@ -249,7 +249,7 @@
   "automation": [
     {
       "name": "The portfolio manifest as the source of truth",
-      "how": "Every repository has one file, `data/repos/<slug>.json`. `scripts/build-manifest.mjs` merges them into `site/data/portfolio.json`, which is what gets served. Adding a repository is one new file, not an edit to HTML. CI rejects a manifest that fails the schema or referential integrity.",
+      "how": "Every repository has two files: `data/repos/<slug>.json` in Polish and its twin `data/en/repos/<slug>.json` in English. `scripts/build-manifest.mjs` merges both trees into the one `site/data/portfolio.json` that is served. Adding a repository is two new files, not an HTML edit — one alone fails, because the validator compares the trees element for element. CI rejects a manifest that fails the schema, referential integrity, or parity between the languages.",
       "where": "konradcinkusz/data/, konradcinkusz/scripts/build-manifest.mjs"
     },
     {

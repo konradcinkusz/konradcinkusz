@@ -249,7 +249,7 @@
   "automation": [
     {
       "name": "Manifest portfolio jako źródło prawdy",
-      "how": "Każde repozytorium ma jeden plik `data/repos/<slug>.json`. `scripts/build-manifest.mjs` scala je w `site/data/portfolio.json`, który jest serwowany. Dodanie repozytorium to jeden nowy plik, nie edycja HTML-a. CI odrzuca manifest, który nie przechodzi schematu i integralności referencyjnej.",
+      "how": "Każde repozytorium ma dwa pliki: `data/repos/<slug>.json` po polsku i bliźniaka `data/en/repos/<slug>.json` po angielsku. `scripts/build-manifest.mjs` scala oba drzewa w jeden `site/data/portfolio.json`, który jest serwowany. Dodanie repozytorium to dwa nowe pliki, nie edycja HTML-a — jeden sam nie przejdzie, bo walidator porównuje drzewa element po elemencie. CI odrzuca manifest, który nie przechodzi schematu, integralności referencyjnej albo parzystości między językami.",
       "where": "konradcinkusz/data/, konradcinkusz/scripts/build-manifest.mjs"
     },
     {

@@ -41,13 +41,29 @@ credential nobody will ever revoke.
 
 ## What must never end up in `portfolio.json`
 
-The manifest is served to anyone who loads the page. Private repositories appear in it by
-name and description because the owner chose to list them — that is a deliberate
-disclosure, not an accident. Nothing else about a private repository belongs there:
+Once the site is deployed, the manifest is served to anyone who loads the page. Private
+repositories appear in it by name and description because the owner chose to list them —
+that is a deliberate disclosure, not an accident. Nothing else about a private repository
+belongs there:
 
 - no internal URLs, hostnames or `.internal` addresses
 - no customer, employer or client names
 - no unreleased commercial terms
 
-`.github/workflows/validate-portfolio.yml` fails the build if the manifest gains a key
-outside its schema, which is the mechanical half of this rule.
+**Be exact about what enforces this, because the gap is where a leak fits.** Three
+mechanical guards run on every build, and none of them reads the prose:
+
+| Guard | Covers | Does not cover |
+|---|---|---|
+| the closed key set in `validate-portfolio.mjs` | a new key on a **repository** entry fails the build | `meta`, `clusters`, `consolidation`, `ops`, `glossary`, `ui` — a new key there passes |
+| the cross-language parity check | a key added to one language tree and not the other fails | a key added to **both** passes |
+| the untranslated-string check | a new Polish string copied into the English tree fails | a string translated in both passes |
+
+So the schema catches a stray *field* on a repository and nothing catches a stray
+*sentence* anywhere. Whether a paragraph should be public is a judgement, and it is the
+author's, made when it is written. Reviewing what the private entries already say is worth
+doing before the first deploy, not after — several of them name file paths, class names and
+confirmed security holes in a live paid product.
+
+Today nothing is deployed and the hub repository is private, so none of this has been
+published yet. That is the moment to decide, not a reason to skip the decision.

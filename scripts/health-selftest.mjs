@@ -73,14 +73,28 @@ const errors = [];
 const must = (re, why) => { if (!re.test(out)) errors.push(why); };
 const mustNot = (re, why) => { if (re.test(out)) errors.push(why); };
 
-must(/architecture-standards\s+czerwone CI/, "P0 red for 2 days should breach (threshold 0)");
-must(/authservice\s+brak tagu/, "a repo publishing an image with no tag should breach");
-must(/authservice\s+dług bota/, "6 bot PRs on P0 should breach (threshold 5)");
-must(/black-hole-sim\s+bot zagłusza/, "9 of 9 PRs from a bot on a public repo should breach");
-must(/archgate\s+widoczność/, "manifest says private, stub says public — should breach");
+// Breaches are matched on the MACHINE key the collector emits, not on a label.
+// These assertions used to match Polish prose ("czerwone CI"), which meant the
+// suite went red the moment the collector stopped writing sentences — reporting
+// five thresholds as broken while all five were firing correctly.
+must(/architecture-standards\s+ci-red\b/, "P0 red for 2 days should breach (threshold 0)");
+must(/authservice\s+no-tag\b/, "a repo publishing an image with no tag should breach");
+must(/authservice\s+bot-debt\b/, "6 bot PRs on P0 should breach (threshold 5)");
+must(/black-hole-sim\s+bot-drowning\b/, "9 of 9 PRs from a bot on a public repo should breach");
+must(/archgate\s+visibility\b/, "manifest says private, stub says public — should breach");
 mustNot(/agent-eval-bench\s+\S/, "the clean P1 repository should produce no breach");
+
+// The parameters have to arrive too. A key with an empty params object renders
+// as a template full of literal {placeholders} on the page.
+must(/architecture-standards\s+ci-red\s+\{"n":1,"days":2,"tier":"P0","threshold":0\}/,
+     "the ci-red breach should carry n, days, tier and threshold");
+must(/authservice\s+bot-debt\s+\{"n":6,"tier":"P0","threshold":5\}/,
+     "the bot-debt breach should carry n, tier and threshold");
+
+// And no breach may carry a pre-formatted sentence again: that is what broke the
+// nightly job, because the same Polish string landed in the English bundle.
+mustNot(/"detail"/, "a breach carried a pre-formatted detail string instead of { check, params }");
 
 for (const e of errors) console.error(`  ERROR ${e}`);
 if (errors.length) { console.error(`\n${errors.length} threshold(s) did not behave as specified.\n---\n${out}`); process.exit(1); }
-const n = (out.match(/przekroczeń/) ?? []).length;
-console.log(`Health collector self-test OK — every threshold fires on its fixture and the clean repository stays silent.`);
+console.log("Health collector self-test OK — every threshold fires on its fixture with its parameters, no breach carries prose, and the clean repository stays silent.");
