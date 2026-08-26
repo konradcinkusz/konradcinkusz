@@ -19,25 +19,41 @@ I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** — a channe
 
 ---
 
+## 🛠️ Open source projects
+
+Below are the open source projects I actively maintain, focused on AI tooling, developer
+experience, and educational .NET content.
+
+| Project | Description |
+| --- | --- |
+| [architecture-standards](https://github.com/konradcinkusz/architecture-standards) | An architecture constitution for .NET Aspire on Fly.io and Azure - 15 principles and 17 operational guides, readable as documentation and installable as agent plugins for Claude Code, Copilot and VS Code |
+| [agent-eval-bench](https://github.com/konradcinkusz/agent-eval-bench) | A spec-first evaluation bench for tool-using agents: 35 YAML scenarios, 313 assertions over the execution trace, a deterministic layer that gates every pull request, and a rubric judge that reports `skipped` rather than green without credentials |
+| [CopilotScope](https://github.com/konradcinkusz/copilot-scope) | AI coding-session observability - an OTLP collector with a hand-written protobuf decoder, a Postgres store, and a Blazor dashboard that scores session quality rather than token spend, across five assistants |
+| [AgentHelm](https://github.com/konradcinkusz/AgentHelm) | Web cockpit for AI coding agents - drive GitHub Copilot CLI, Claude Code, and Gemini via the Agent Client Protocol with permission policies, audit trail, and git diff review |
+| [authservice](https://github.com/konradcinkusz/authservice) | Standalone auth microservice for ASP.NET Core: JWT with rotating refresh tokens and reuse detection, RS256 with published JWKS, Google/GitHub OAuth with provider-side email verification, multi-tenant organizations, and an append-only audit log |
+| [MAF for .NET Engineers](https://github.com/konradcinkusz/maf-book) | Practitioner's guide to Microsoft Agent Framework 1.0 for .NET - agents, tools, MCP, graph-based workflows, multi-agent orchestration, middleware, and hosting, with samples that run against a local model |
+| [LangChain, LangGraph and Async Python](https://github.com/konradcinkusz/llm-book) | Practitioner's guide to LangChain 1.x and LangGraph for engineers arriving from .NET - async Python, cancellation, persistence, interrupts, context engineering, and five specified measurement experiments |
+| [csharp-flashcards](https://github.com/konradcinkusz/csharp-flashcards) | Beamer Q&A flashcard deck covering C# from fundamentals through cloud and leadership topics - built for interview prep, classes, and self-study |
+| [agents-and-llms](https://github.com/konradcinkusz/agents-and-llms) | Searchable knowledge base for the Agents & LLMs shorts series - static, search-first page covering basics, foundations, model internals, and agent tooling, with content driven entirely from JSON |
+| [bayesian-inference](https://github.com/konradcinkusz/bayesian-inference) | A from-scratch exact Bayesian-network inference engine (Enumeration-Ask, no probabilistic-reasoning library) in C#, wrapped in a Blazor WebAssembly and ASP.NET Core app |
+| [black-hole-sim](https://github.com/konradcinkusz/black-hole-sim) | A Schwarzschild black hole raytracer in C#: numerically integrates photon geodesics via RK4 and renders a thin accretion disk, with a console renderer and an ASP.NET Core API |
+| [TinyTransformer](https://github.com/konradcinkusz/tiny-transformer) | Minimal educational C# implementation of the Transformer architecture - encoder-decoder, multi-head attention, feed-forward layers, and positional encodings |
+| [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess) | Two LLM-powered chess agents battle through a Streamlit interface with configurable personalities and real-time board visualisation |
+| [chess-mas](https://github.com/konradcinkusz/chess-mas) | Multi-agent chess in C#, orchestrated with .NET Aspire and Microsoft Agent Framework, with cost tracking against Azure AI Foundry |
+| [IberiaFamilyCalculator](https://github.com/konradcinkusz/IberiaFamilyCalculator) | Interactive Spanish IRPF, autónomos, and payroll calculator - drag sliders, add entities, share the full setup via a single URL |
+| [dev-insight](https://github.com/konradcinkusz/dev-insight) | Practical coding examples and patterns featured on the Dev Insight channel - C#, .NET, Transformers, SOLID, and more |
+| [C# Dictionaries - Deep Dive](https://github.com/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation) | Deep dive into Dictionary internals - hashing, buckets, collisions, resizing, complexity analysis, and benchmarks |
+
+---
+
 ## 🗺️ Portfolio map
 
-> **This repository is private, so the profile README does not render.** GitHub only
-> shows the `README.md` of a repository named after the account when that repository is
-> public. Right now `github.com/konradcinkusz` shows none of what follows.
->
-> Making it public would fix the profile **and publish the whole manifest in the same
-> move** — including dossiers for eighteen private repositories that name file paths,
-> class names and confirmed security holes in a live paid product. One decision, not
-> two. If you want the profile without the disclosure, the map needs a public build
-> that ships only the public entries and fails if any surviving string names a private
-> one.
-
-This repository is the hub. It holds a single manifest describing thirty-five
-repositories — seventeen public, eighteen private — what each is, what it is for, what is
+This repository is the hub. It holds a single manifest describing thirty-four
+repositories — seventeen public, seventeen private — what each is, what it is for, what is
 finished, what is not, plus the consolidation analysis and the operating model that keeps
 them from rotting.
 
-**Thirty-five, not all of them.** The account holds considerably more; the map covers the
+**Thirty-four, not all of them.** The account holds considerably more; the map covers the
 set that was surveyed end to end, and says so on its own front page rather than implying it
 is the whole estate. Repositories join the map when someone has actually read them.
 
@@ -95,31 +111,6 @@ git tag -a v1.0.0 -m "portfolio map" && git push origin v1.0.0
 see [`flyio/SECRETS.md`](flyio/SECRETS.md) for why that property is worth keeping.
 
 ---
-
-## 🛠️ Open source projects
-
-Below are the open source projects I actively maintain, focused on AI tooling, developer
-experience, and educational .NET content.
-
-| Project | Description |
-| --- | --- |
-| [architecture-standards](https://github.com/konradcinkusz/architecture-standards) | An architecture constitution for .NET Aspire on Fly.io and Azure - 15 principles and 17 operational guides, readable as documentation and installable as agent plugins for Claude Code, Copilot and VS Code |
-| [agent-eval-bench](https://github.com/konradcinkusz/agent-eval-bench) | A spec-first evaluation bench for tool-using agents: 35 YAML scenarios, 313 assertions over the execution trace, a deterministic layer that gates every pull request, and a rubric judge that reports `skipped` rather than green without credentials |
-| [CopilotScope](https://github.com/konradcinkusz/copilot-scope) | AI coding-session observability - an OTLP collector with a hand-written protobuf decoder, a Postgres store, and a Blazor dashboard that scores session quality rather than token spend, across five assistants |
-| [AgentHelm](https://github.com/konradcinkusz/AgentHelm) | Web cockpit for AI coding agents - drive GitHub Copilot CLI, Claude Code, and Gemini via the Agent Client Protocol with permission policies, audit trail, and git diff review |
-| [authservice](https://github.com/konradcinkusz/authservice) | Standalone auth microservice for ASP.NET Core: JWT with rotating refresh tokens and reuse detection, RS256 with published JWKS, Google/GitHub OAuth with provider-side email verification, multi-tenant organizations, and an append-only audit log |
-| [MAF for .NET Engineers](https://github.com/konradcinkusz/maf-book) | Practitioner's guide to Microsoft Agent Framework 1.0 for .NET - agents, tools, MCP, graph-based workflows, multi-agent orchestration, middleware, and hosting, with samples that run against a local model |
-| [LangChain, LangGraph and Async Python](https://github.com/konradcinkusz/llm-book) | Practitioner's guide to LangChain 1.x and LangGraph for engineers arriving from .NET - async Python, cancellation, persistence, interrupts, context engineering, and five specified measurement experiments |
-| [csharp-flashcards](https://github.com/konradcinkusz/csharp-flashcards) | Beamer Q&A flashcard deck covering C# from fundamentals through cloud and leadership topics - built for interview prep, classes, and self-study |
-| [agents-and-llms](https://github.com/konradcinkusz/agents-and-llms) | Searchable knowledge base for the Agents & LLMs shorts series - static, search-first page covering basics, foundations, model internals, and agent tooling, with content driven entirely from JSON |
-| [bayesian-inference](https://github.com/konradcinkusz/bayesian-inference) | A from-scratch exact Bayesian-network inference engine (Enumeration-Ask, no probabilistic-reasoning library) in C#, wrapped in a Blazor WebAssembly and ASP.NET Core app |
-| [black-hole-sim](https://github.com/konradcinkusz/black-hole-sim) | A Schwarzschild black hole raytracer in C#: numerically integrates photon geodesics via RK4 and renders a thin accretion disk, with a console renderer and an ASP.NET Core API |
-| [TinyTransformer](https://github.com/konradcinkusz/tiny-transformer) | Minimal educational C# implementation of the Transformer architecture - encoder-decoder, multi-head attention, feed-forward layers, and positional encodings |
-| [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess) | Two LLM-powered chess agents battle through a Streamlit interface with configurable personalities and real-time board visualisation |
-| [chess-mas](https://github.com/konradcinkusz/chess-mas) | Multi-agent chess in C#, orchestrated with .NET Aspire and Microsoft Agent Framework, with cost tracking against Azure AI Foundry |
-| [IberiaFamilyCalculator](https://github.com/konradcinkusz/IberiaFamilyCalculator) | Interactive Spanish IRPF, autónomos, and payroll calculator - drag sliders, add entities, share the full setup via a single URL |
-| [dev-insight](https://github.com/konradcinkusz/dev-insight) | Practical coding examples and patterns featured on the Dev Insight channel - C#, .NET, Transformers, SOLID, and more |
-| [C# Dictionaries - Deep Dive](https://github.com/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation) | Deep dive into Dictionary internals - hashing, buckets, collisions, resizing, complexity analysis, and benchmarks |
 
 ## 💻 Tech Stack
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)

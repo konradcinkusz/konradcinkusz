@@ -41,10 +41,12 @@ credential nobody will ever revoke.
 
 ## What must never end up in `portfolio.json`
 
-Once the site is deployed, the manifest is served to anyone who loads the page. Private
-repositories appear in it by name and description because the owner chose to list them —
-that is a deliberate disclosure, not an accident. Nothing else about a private repository
-belongs there:
+This repository is public. Anyone can already read `data/` directly on GitHub — browse it,
+view raw, or clone it — whether or not the site is ever deployed to Fly. "Deploy the site"
+and "expose the data" are not the same decision here: the second one already happened.
+Private repositories appear in the manifest by name and description because the owner
+chose to list them — that is a deliberate disclosure, not an accident. Nothing else about
+a private repository belongs there:
 
 - no internal URLs, hostnames or `.internal` addresses
 - no customer, employer or client names
@@ -62,8 +64,8 @@ mechanical guards run on every build, and none of them reads the prose:
 So the schema catches a stray *field* on a repository and nothing catches a stray
 *sentence* anywhere. Whether a paragraph should be public is a judgement, and it is the
 author's, made when it is written. Reviewing what the private entries already say is worth
-doing before the first deploy, not after — several of them name file paths, class names and
-confirmed security holes in a live paid product.
-
-Today nothing is deployed and the hub repository is private, so none of this has been
-published yet. That is the moment to decide, not a reason to skip the decision.
+doing, and it is now overdue rather than upcoming — the repository is already public. They
+name file paths and class names throughout, and at least one names something sharper:
+`aurelius-promptus-acceptance-tests` records hardcoded seed-account credentials
+(`UserProfileTests/LoginTests.cs:15`), with its own finding noting that if those accounts
+exist anywhere reachable, that is a credential leak, not a hypothetical one.
