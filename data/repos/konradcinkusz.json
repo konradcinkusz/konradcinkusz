@@ -19,7 +19,7 @@
   ],
   "primaryLanguage": "JavaScript",
   "license": "MIT",
-  "tests": "Brak testów jednostkowych; zamiast nich sześć skryptów kontrolnych uruchamianych w CI: dryf manifestu, walidator (schemat zamknięty plus integralność referencyjna), istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu i test renderowania w Chromium w trzech kombinacjach motywu i szerokości (jasny 1440, ciemny 1440, jasny 390).",
+  "tests": "Brak testów jednostkowych; zamiast nich siedem skryptów kontrolnych: dryf manifestu, walidator (schemat zamknięty plus integralność referencyjna), istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu, test renderowania w Chromium w trzech kombinacjach motywu i szerokości, oraz **test progów kolektora zdrowia wobec atrapy API** — każdy próg ma fixture, na którym musi się zapalić, i czyste repozytorium, na którym musi milczeć.",
   "ci": "`validate-portfolio.yml` na push, PR i ręcznie, z filtrem obejmującym `data/**`, `site/**` i `scripts/**`: siedem kroków, od dryfu manifestu po renderowanie w przeglądarce i build jednopliku. `flyio.yml` na tagu `v*`: tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu pobiera serwowany manifest i żąda co najmniej trzydziestu repozytoriów — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
   "metrics": [
     {
@@ -53,6 +53,10 @@
     {
       "label": "Wygenerowany manifest",
       "value": "543 KiB, commitowany i sprawdzany na dryf"
+    },
+    {
+      "label": "Skrypty kontrolne",
+      "value": "7, w tym kolektor zdrowia i jego test wobec atrapy API"
     }
   ],
   "links": {
@@ -177,7 +181,7 @@
     "Własne liczby tego repozytorium — commity, pliki, data ostatniego commitu — są **wyliczane z gita przy budowie manifestu**, nie wpisywane ręcznie. To jedyny wpis, w którym da się to zrobić, i jedyny, w którym ręczne wpisanie gwarantowałoby nieaktualność."
   ],
   "gaps": [
-    "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Liczby PR-ów, gwiazdek i dat ostatniego commitu są wpisane ręcznie; nocny kolektor zdrowia opisany w modelu operacyjnym jest zaprojektowany i niezbudowany.",
+    "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
     "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
     "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
     "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."

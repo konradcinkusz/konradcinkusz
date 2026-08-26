@@ -428,6 +428,31 @@
         <p class="tb">${prose(c.timebox)}</p>
       </article>`).join("");
 
+    const h = DATA.health;
+    $("#health-live").innerHTML = !h
+      ? `<div class="barrier"><span class="bx">brak danych</span><p class="bt">Kolektor nigdy nie został uruchomiony.
+           Odpal <code>GH_TOKEN=… node scripts/collect-health.mjs</code> albo włącz nocny workflow, a ta sekcja
+           wypełni się sama. Do tego czasu liczby w kartach repozytoriów są <b>migawką z jednego dnia</b>.</p></div>`
+      : html`
+        <div class="stats">
+          <div class="stat"><div class="v">${h.totals.repositories}</div><div class="l">sprawdzonych repozytoriów</div></div>
+          <div class="stat ${h.totals.ciFailing ? "alert" : "good"}"><div class="v">${h.totals.ciFailing}</div><div class="l">z czerwonym CI</div></div>
+          <div class="stat ${h.totals.openPrs > 40 ? "warn" : ""}"><div class="v">${h.totals.openPrs}</div><div class="l">otwartych PR-ów · ${h.totals.botPrs} od bota</div></div>
+          <div class="stat ${h.totals.breaches ? "warn" : "good"}"><div class="v">${h.totals.breaches}</div><div class="l">przekroczonych progów</div></div>
+          <div class="stat"><div class="v" style="font-size:15px">${esc(h.collectedAt)}</div><div class="l">data zbiórki</div></div>
+        </div>
+        ${h.breaches.length ? `<div class="check-head"><span>poziom</span><span>repozytorium</span><span>kontrola</span><span>szczegół</span></div>` +
+          h.breaches.map((b) => {
+            const r = repoOf(b.slug);
+            return `<div class="check">
+              <div class="n">${esc(b.tier)}</div>
+              <div class="s"><a href="#" data-repo="${esc(b.slug)}">${esc(r ? r.name : b.slug)}</a></div>
+              <div class="t">${esc(b.check)}</div>
+              <div class="a">${esc(b.detail)}</div>
+            </div>`;
+          }).join("")
+          : `<div class="barrier" style="background:var(--good-bg);border-left-color:var(--good)"><span class="bx" style="color:var(--good)">czysto</span><p class="bt">Żaden próg nie jest przekroczony.</p></div>`}`;
+
     $("#health").innerHTML =
       `<div class="check-head"><span>sygnał</span><span>skąd go bierzesz</span><span>próg</span><span>co robisz po przekroczeniu</span></div>` +
       (o.healthChecks || []).map((h) => html`

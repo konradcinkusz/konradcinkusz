@@ -21,29 +21,77 @@
   "tests": "Zero testów. Git śledzi 11 plików i nie ma wśród nich żadnego pliku testowego ani runnera, mimo że `applyScale`, `calcIRPF`, `calcMinimo`, `calcEmployeeNet` i `calcAutonomoNet` to niemal czyste funkcje liczbowe z gotowym punktem odniesienia w kalkulatorze Agencia Tributaria.",
   "ci": "Brak CI. Nie ma katalogu `.github`, więc nie ma ani jednego własnego workflow. Badge w README pokazuje `pages-build-deployment`, czyli wbudowany mechanizm GitHuba dla brancha `master`, a nie proces skonfigurowany przez autora.",
   "metrics": [
-    { "label": "Linie index.html", "value": "2 392" },
-    { "label": "Rozmiar index.html", "value": "91 486 B" },
-    { "label": "Zależności zewnętrzne", "value": "0" },
-    { "label": "Języki UI", "value": "3 (es, pl, en)" },
-    { "label": "Kluczy tłumaczeń na język", "value": "106" },
-    { "label": "Warianty skal IRPF", "value": "8 (państwowa + 7 CCAA)" },
-    { "label": "Progi kwoty autónomo", "value": "15" },
-    { "label": "Commity", "value": "4" }
+    {
+      "label": "Linie index.html",
+      "value": "2 392"
+    },
+    {
+      "label": "Rozmiar index.html",
+      "value": "91 486 B"
+    },
+    {
+      "label": "Zależności zewnętrzne",
+      "value": "0"
+    },
+    {
+      "label": "Języki UI",
+      "value": "3 (es, pl, en)"
+    },
+    {
+      "label": "Kluczy tłumaczeń na język",
+      "value": "109 na język, identyczny zbiór w es, pl i en (parsowanie obiektu I18N jako JS)"
+    },
+    {
+      "label": "Warianty skal IRPF",
+      "value": "8 (państwowa + 7 CCAA)"
+    },
+    {
+      "label": "Progi kwoty autónomo",
+      "value": "15"
+    },
+    {
+      "label": "Commity",
+      "value": "4"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/IberiaFamilyCalculator",
     "live": [
-      { "label": "Aplikacja na GitHub Pages", "url": "https://konradcinkusz.github.io/IberiaFamilyCalculator/" }
+      {
+        "label": "Aplikacja na GitHub Pages",
+        "url": "https://konradcinkusz.github.io/IberiaFamilyCalculator/"
+      }
     ],
     "docs": [
-      { "label": "README: funkcje, prywatność, zastrzeżenie prawne", "path": "README.md" },
-      { "label": "Cała aplikacja w jednym pliku", "path": "index.html" },
-      { "label": "Deklaracje fontów z unicode-range", "path": "fonts/fonts.css" },
-      { "label": "Licencja fontów SIL OFL 1.1", "path": "fonts/OFL-LICENSE.txt" },
-      { "label": "Licencja MIT", "path": "LICENSE.txt" }
+      {
+        "label": "README: funkcje, prywatność, zastrzeżenie prawne",
+        "path": "README.md"
+      },
+      {
+        "label": "Cała aplikacja w jednym pliku",
+        "path": "index.html"
+      },
+      {
+        "label": "Deklaracje fontów z unicode-range",
+        "path": "fonts/fonts.css"
+      },
+      {
+        "label": "Licencja fontów SIL OFL 1.1",
+        "path": "fonts/OFL-LICENSE.txt"
+      },
+      {
+        "label": "Licencja MIT",
+        "path": "LICENSE.txt"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
   "components": [
     {
       "name": "Potrójna persystencja stanu (loadState, saveState, syncURL)",
@@ -60,7 +108,7 @@
     {
       "name": "Warstwa i18n (I18N + applyLanguage)",
       "path": "index.html, ok. linie 1080-1566",
-      "description": "Trzy słowniki po 106 kluczy, podmieniane po atrybutach `data-i18n` (62 wystąpienia w markupie) oraz `data-i18n-attr` dla atrybutów. Wybór języka startuje od `navigator.language` i ląduje w tym samym stanie co reszta ustawień.",
+      "description": "Trzy słowniki po 109 kluczy każdy, policzone przez sparsowanie obiektu `I18N` jako JavaScriptu, a nie przez grep. Zbiory kluczy są identyczne we wszystkich trzech językach: żaden klucz nie jest obecny w jednym słowniku i nieobecny w innym. Podmiana idzie po atrybutach `data-i18n` (62 wystąpienia w markupie) oraz `data-i18n-attr` dla atrybutów. Wybór języka startuje od `navigator.language` i ląduje w tym samym stanie co reszta ustawień.",
       "reusable": true
     },
     {
@@ -72,7 +120,7 @@
     {
       "name": "Silnik IRPF (applyScale, calcIRPF, calcMinimo)",
       "path": "index.html, ok. linie 1632-1660",
-      "description": "Nalicza podatek po tabeli progów: skala państwowa plus autonomiczna, a dla Kraju Basków i Nawarry wyłącznie skala foralna. `calcMinimo` dzieli minimum osobiste i minima na dzieci 50/50, gdy w gospodarstwie są dwa źródła dochodu.",
+      "description": "Nalicza podatek po tabeli progów: skala państwowa plus autonomiczna, a dla Kraju Basków i Nawarry wyłącznie skala foralna. `calcMinimo(family, splitFactor)` zwraca `MIN_PERSONAL + descTotal * splitFactor`, więc przy dwóch źródłach dochodu dzieli się 50/50 wyłącznie minimum na dzieci; minimum osobiste 5 550 EUR trafia w pełnej wysokości do każdego dochodu z osobna.",
       "reusable": false
     },
     {
@@ -89,8 +137,14 @@
     }
   ],
   "overlaps": [
-    { "slug": "landing-page", "reason": "Ten sam kształt wdrożenia: statyczny plik bez procesu budowania, wypchnięty na Pages. Obie rzeczy dzielą to samo pytanie o to, kto właściwie utrzymuje treść po roku." },
-    { "slug": "konradcinkusz", "reason": "Naturalne demo pod profil: działa bez logowania, bez instalacji i w trzech językach, więc jest najtańszym dowodem, jaki da się komuś podesłać linkiem." }
+    {
+      "slug": "landing-page",
+      "reason": "Ten sam kształt wdrożenia: statyczny plik bez procesu budowania, wypchnięty na Pages. Obie rzeczy dzielą to samo pytanie o to, kto właściwie utrzymuje treść po roku."
+    },
+    {
+      "slug": "konradcinkusz",
+      "reason": "Naturalne demo pod profil: działa bez logowania, bez instalacji i w trzech językach, więc jest najtańszym dowodem, jaki da się komuś podesłać linkiem."
+    }
   ],
   "product": "Brak kupującego i nie ma sensu udawać, że jest. Odbiorcą jest rodzina rozważająca przeprowadzkę do Hiszpanii albo przejście na autónomo, która użyje narzędzia raz albo dwa i nigdy nie wróci. Monetyzacja wymagałaby dwóch rzeczy, których tu nie ma: corocznie aktualizowanych tabel podatkowych i przyjęcia odpowiedzialności za wynik, a README świadomie odcina się od obu. Realna wartość jest kanałowa i akurat w tej roli działa, bo to sprawdzalne demo, które otwiera się w sekundę.",
   "highlights": [
@@ -98,7 +152,7 @@
     "Kwota autónomo jest wyznaczana **iteracyjnie**, bo składka i dochód netto zależą od siebie nawzajem. Pięć przebiegów po 15-progowej tabeli z RD 504/2022 zamiast jednego mnożenia.",
     "Osiem wariantów skal IRPF, w tym Nawarra z 11 progami i Kraj Basków z 8, obok państwowej kończącej się progiem 300 000 EUR przy stawce 24,5 %.",
     "Stan siedzi równolegle w `localStorage` i w hashu URL, więc pełny scenariusz budżetowy przenosi się między ludźmi jednym linkiem, bez serwera i bez konta.",
-    "Trzy pełne tłumaczenia po 106 kluczy każde, z podmianą także atrybutów przez `data-i18n-attr` i autodetekcją `navigator.language` przy pierwszej wizycie."
+    "Trzy pełne tłumaczenia po 109 kluczy, w idealnej parze: parsowanie obiektu `I18N` jako JavaScriptu daje ten sam zbiór kluczy w es, pl i en, zero brakujących i zero nadmiarowych w którąkolwiek stronę. Do tego podmiana atrybutów przez `data-i18n-attr` i autodetekcja `navigator.language` przy pierwszej wizycie."
   ],
   "gaps": [
     "**Zero testów dla silnika podatkowego.** Cztery funkcje fiskalne to arytmetyka na tablicach progów, czyli najłatwiejsza rzecz do przetestowania regresyjnie w całym portfolio, i żadna z nich nie ma ani jednego przypadku odniesienia.",
@@ -122,5 +176,13 @@
   ],
   "headline": "Prawdziwa matematyka podatkowa, zero testów i tabele bez daty ważności",
   "headlineTone": "warn",
-  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-04-26", "commits": 4, "files": 11 }
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-04-26",
+    "commits": 4,
+    "files": 11
+  }
 }

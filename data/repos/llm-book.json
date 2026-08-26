@@ -6,7 +6,7 @@
   "state": "active",
   "tier": "P2",
   "oneLiner": "Źródła książki o LangChain 1.x, LangGraph i async Pythonie dla inżyniera przychodzącego z .NET: 17 rozdziałów, 6 dodatków.",
-  "summary": "Repozytorium to 8 698 linii LaTeX-a: 17 rozdziałów, 6 dodatków, front matter i pipeline budujący PDF. Teza jest jedna i konsekwentnie broniona: po wydaniu 1.0 z 17 października 2025 `langchain` stał się cienką warstwą nad runtime'em `langgraph`, więc większość materiałów w sieci opisuje architekturę, której już nie ma. Najciekawsza decyzja inżynierska nie dotyczy treści, tylko **dyscypliny**: cały dług redakcyjny jest policzalny i liczony przez CI. Cel `make debt` zlicza rozdziały-stuby, brakujące zrzuty ekranu, bloki `verifybox` i diagramy, a workflow `build.yml` publikuje te same liczniki do GitHub Step Summary przy każdym buildzie. Blok `verifybox` oznacza listing, którego nie uruchomiono przeciwko przypiętym wersjom, i w całym repozytorium jest ich **zero**, co znaczy, że autor sam wyegzekwował własną regułę zamiast ją zadeklarować. Diagramy są tekstem: 45 źródeł Mermaid jest commitowanych, wyrenderowane PDF-y gitignorowane, a przy braku renderu makro drukuje źródło diagramu, więc build bez `mermaid-cli` nadal pokazuje czytelnikowi strukturę.",
+  "summary": "Repozytorium to 8 698 linii LaTeX-a w rozdziałach, dodatkach i front matterze (17 rozdziałów, 6 dodatków), plus preambuła i pipeline budujący PDF. Teza jest jedna i konsekwentnie broniona: po wydaniu 1.0 z 17 października 2025 `langchain` stał się cienką warstwą nad runtime'em `langgraph`, więc większość materiałów w sieci opisuje architekturę, której już nie ma. Najciekawsza decyzja inżynierska nie dotyczy treści, tylko **dyscypliny**: cały dług redakcyjny jest policzalny i liczony przez CI. Cel `make debt` zlicza rozdziały-stuby, brakujące zrzuty ekranu, bloki `verifybox` i diagramy, a workflow `build.yml` publikuje te same liczniki do GitHub Step Summary przy każdym buildzie. Blok `verifybox` oznacza listing, którego nie uruchomiono przeciwko przypiętym wersjom, i w 8 450 liniach rozdziałów i dodatków jest ich **zero**. Jedyne wystąpienie w repozytorium to okaz w legendzie ramek we `frontmatter/introduction.tex:157`, który Makefile świadomie wyłącza z licznika i opisuje to komentarzem. Autor sam wyegzekwował własną regułę zamiast ją zadeklarować. Diagramy są tekstem: 45 źródeł Mermaid jest commitowanych, wyrenderowane PDF-y gitignorowane, a przy braku renderu makro drukuje źródło diagramu, więc build bez `mermaid-cli` nadal pokazuje czytelnikowi strukturę.",
   "stack": [
     "LaTeX (latexmk, pdflatex, klasa book)",
     "tcolorbox / listings / imakeidx / microtype",
@@ -22,32 +22,89 @@
   "tests": "Brak testów automatycznych: nie ma pytest, `pyproject.toml` ani pliku zależności. Rolę testu pełni build LaTeX plus krok CI failujący przy nierozwiązanej referencji krzyżowej; cztery skrypty pomiarowe w `code/` (702 linie) nie są w CI uruchamiane.",
   "ci": "Trzy workflow. `build.yml` ma trzy joby: render każdego `.mmd` przez mermaid-cli z failem przy błędzie, kompilacja `latexmk` z grepem `Reference.*undefined` w `main.log` i publikacją liczników długu do Step Summary, oraz doradczy job porównujący dziewięć pinów z PyPI. `release.yml` dopina PDF do GitHub Release na tagu `v*`, `pages.yml` publikuje `docs/`.",
   "metrics": [
-    { "label": "Rozdziały / dodatki", "value": "17 / 6" },
-    { "label": "Linie .tex", "value": "8 698" },
-    { "label": "Wpisy indeksu", "value": "411" },
-    { "label": "Źródła Mermaid", "value": "45" },
-    { "label": "Listingi Pythona", "value": "82" },
-    { "label": "Bloki verifybox", "value": "0" },
-    { "label": "Skrypty pomiarowe", "value": "4 pliki, 702 linie" },
-    { "label": "Uruchomione eksperymenty", "value": "3,5 z 5" }
+    {
+      "label": "Rozdziały / dodatki",
+      "value": "17 / 6"
+    },
+    {
+      "label": "Linie .tex",
+      "value": "8 698 (chapters + appendices + frontmatter; z main.tex i preamble.tex 9 222)"
+    },
+    {
+      "label": "Wpisy indeksu",
+      "value": "411"
+    },
+    {
+      "label": "Źródła Mermaid",
+      "value": "45"
+    },
+    {
+      "label": "Listingi Pythona",
+      "value": "82"
+    },
+    {
+      "label": "Bloki verifybox",
+      "value": "0 w rozdziałach i dodatkach (8 450 linii, `grep -rc 'begin{verifybox}' chapters appendices`); 1 okaz w legendzie wstępu"
+    },
+    {
+      "label": "Skrypty pomiarowe",
+      "value": "4 pliki, 702 linie"
+    },
+    {
+      "label": "Uruchomione eksperymenty",
+      "value": "3,5 z 5"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/llm-book",
     "live": [
-      { "label": "Strona książki (GitHub Pages)", "url": "https://konradcinkusz.github.io/llm-book/" },
-      { "label": "Mini-projekt Ops Copilot (osobne repo)", "url": "https://github.com/konradcinkusz/llm-book-mini-project" },
-      { "label": "Tom siostrzany dla .NET", "url": "https://github.com/konradcinkusz/maf-book" }
+      {
+        "label": "Strona książki (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/llm-book/"
+      },
+      {
+        "label": "Mini-projekt Ops Copilot (osobne repo)",
+        "url": "https://github.com/konradcinkusz/llm-book-mini-project"
+      },
+      {
+        "label": "Tom siostrzany dla .NET",
+        "url": "https://github.com/konradcinkusz/maf-book"
+      }
     ],
     "docs": [
-      { "label": "README z tabelami pomiarów", "path": "README.md" },
-      { "label": "Konwencje i stan weryfikacji API", "path": "CLAUDE.md" },
-      { "label": "Manifest diagramów i zrzutów", "path": "appendices/appF-manifest.tex" },
-      { "label": "Ściągawka API", "path": "appendices/appB-cheatsheet.tex" },
-      { "label": "Kontrola pinów wobec PyPI", "path": "tools/check_versions.py" },
-      { "label": "Landing page publikowany na Pages", "path": "docs/index.html" }
+      {
+        "label": "README z tabelami pomiarów",
+        "path": "README.md"
+      },
+      {
+        "label": "Konwencje i stan weryfikacji API",
+        "path": "CLAUDE.md"
+      },
+      {
+        "label": "Manifest diagramów i zrzutów",
+        "path": "appendices/appF-manifest.tex"
+      },
+      {
+        "label": "Ściągawka API",
+        "path": "appendices/appB-cheatsheet.tex"
+      },
+      {
+        "label": "Kontrola pinów wobec PyPI",
+        "path": "tools/check_versions.py"
+      },
+      {
+        "label": "Landing page publikowany na Pages",
+        "path": "docs/index.html"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
   "components": [
     {
       "name": "Makra brakującego artefaktu",
@@ -63,8 +120,8 @@
     },
     {
       "name": "Pipeline diagramów Mermaid",
-      "path": "Makefile + figures/mermaid/",
-      "description": "Reguła renderuje każdy `.mmd` przez `npx @mermaid-js/mermaid-cli@11` z `--pdfFit`, autowykrywa przeglądarkę i sama generuje `.puppeteer.json`. Wejściem jest dowolny katalog źródeł, a wspólny `config.json` trzyma paletę poza pojedynczymi diagramami.",
+      "path": "Makefile",
+      "description": "Reguła `figures/diagrams/%.pdf: figures/mermaid/%.mmd` renderuje każde z 45 źródeł przez `npx @mermaid-js/mermaid-cli@11` z `--pdfFit`, autowykrywa przeglądarkę i sama generuje `figures/mermaid/.puppeteer.json`. Wejściem jest dowolny katalog źródeł, a wspólny `figures/mermaid/config.json` trzyma paletę poza pojedynczymi diagramami.",
       "reusable": true
     },
     {
@@ -99,13 +156,22 @@
     }
   ],
   "overlaps": [
-    { "slug": "maf-book", "reason": "Tom siostrzany, linkowany wprost z README i landing page: ta sama preambuła, te same liczniki długu i ta sama zasada „pomiar zamiast twierdzenia”, tylko dla stosu .NET. Oba mają też tę samą dziurę: najdroższy eksperyment w książce jest nieuruchomiony." },
-    { "slug": "agents-and-llms", "reason": "Ten sam obszar tematyczny, agenci LLM. Zawartość tamtego repozytorium nie była w tym przebiegu sprawdzana, więc nakładanie się jest deklaratywne." },
-    { "slug": "agent-eval-bench", "reason": "Eksperyment 5 mierzy koszt strukturalny topologii wieloagentowych fake'owym modelem; tamten benchmark ocenia jakość tych samych układów na zadaniach. Nieuruchomiona połowa eksperymentu to dokładnie to, co tamto repo już potrafi policzyć." }
+    {
+      "slug": "maf-book",
+      "reason": "Tom siostrzany, linkowany wprost z README i landing page: ta sama preambuła, te same liczniki długu i ta sama zasada „pomiar zamiast twierdzenia”, tylko dla stosu .NET. Oba mają też tę samą dziurę: najdroższy eksperyment w książce jest nieuruchomiony."
+    },
+    {
+      "slug": "agents-and-llms",
+      "reason": "Ten sam obszar tematyczny, agenci LLM. Zawartość tamtego repozytorium nie była w tym przebiegu sprawdzana, więc nakładanie się jest deklaratywne."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Eksperyment 5 mierzy koszt strukturalny topologii wieloagentowych fake'owym modelem; tamten benchmark ocenia jakość tych samych układów na zadaniach. Nieuruchomiona połowa eksperymentu to dokładnie to, co tamto repo już potrafi policzyć."
+    }
   ],
   "product": "Brak kupującego w sensie transakcyjnym i licencja to przesądza: proza jest na CC BY-NC-SA 4.0, więc komercyjna redystrybucja tekstu jest wykluczona, a w repozytorium nie ma żadnej ścieżki sprzedaży. Realna wartość to {{term:evidence|materiał dowodowy}} pod rekrutację i konsulting w obszarze agentów LLM, oparty na weryfikowanym API i własnych pomiarach zamiast przepisanej dokumentacji. Kanałem zarobkowym mogłoby być szkolenie albo wydanie papierowe, ale nic w repozytorium tego nie przygotowuje: nie ma ani wersji do druku, ani listy mailingowej, ani strony z ofertą.",
   "highlights": [
-    "**Zero bloków `verifybox` w 8 698 liniach tekstu.** Środowisko istnieje w preambule i jest liczone przez CI, a mimo to nie użyto go ani razu, bo każdy z 82 listingów przepuszczono przez przypięte wersje. Konwencja została wyegzekwowana, nie ogłoszona.",
+    "**Zero bloków `verifybox` w 8 450 liniach rozdziałów i dodatków.** Środowisko istnieje w preambule i jest liczone przez CI (`grep -rc 'begin{verifybox}' chapters appendices`), a mimo to nie oznaczono nim ani jednego z 82 listingów — każdy przepuszczono przez przypięte wersje. Jedyne `\\begin{verifybox}` w repozytorium to okaz w legendzie ramek we `frontmatter/introduction.tex:157`, czyli tekst tłumaczący czytelnikowi, co ta ramka znaczy, a nie nieuruchomiony listing; Makefile wyłącza go z licznika i mówi dlaczego. Konwencja została wyegzekwowana, nie ogłoszona.",
     "Przebieg spójnościowy wyłapał **własny błąd książki**: domyślny `recursion_limit` w `langgraph` to 10007, nie 25. Stara wartość przetrwała cały szkic w bloku `console`, którego nikt nigdy nie uruchomił, i została poprawiona w rozdziale oraz w dodatku (commit 9435b1f).",
     "Cztery skrypty pomiarowe (702 linie) są {{term:hermetyczny|hermetyczne}}: żaden nie potrzebuje dostawcy modelu. Eksperyment 1 uderza w ręcznie napisany serwer HTTP na localhost zamiast w `asyncio.sleep`, bo sen dowodzi tylko tego, że scheduler potrafi planować.",
     "Eksperyment 5 rozdzielono na część strukturalną i jakościową, i tylko druga wymaga budżetu. Liczba wywołań modelu jest własnością {{term:topologie|topologii}}, więc licznik na fake'u daje tę samą odpowiedź co realny dostawca: nadzorca robi pięć wywołań przy dwóch pojedynczego agenta, a trzy z nich są routingiem, nie pracą.",

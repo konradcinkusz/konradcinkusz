@@ -7,40 +7,84 @@
   "tier": "P4",
   "oneLiner": "Zarezerwowana nazwa repozytorium: jeden commit, jeden plik README o rozmiarze 49 bajtów, zero treści.",
   "summary": "Całe repozytorium to `README.md` z dwiema liniami: nagłówkiem `# math-for-ai-engineers` i zdaniem `From zero to AI Engineer`. Nie ma kodu, notatników, plików LaTeX, licencji ani katalogu `.github`. Historia liczy jeden commit (`b4320e0`, 2026-08-26 09:33), a wszystkie cztery referencje — dwie lokalne i dwie zdalne — wskazują na to samo drzewo z tym samym jednym plikiem. Deklarowany zamiar to materiał matematyczny dla inżynierów AI, ale nic poza tytułem tego nie potwierdza: brak spisu tematów, brak wyboru formatu, brak jednego akapitu treści. Najciekawsza decyzja inżynierska w tym repozytorium jeszcze nie zapadła i jest to decyzja o formacie, bo od niej zależy, czy powstaną notatniki, książka w LaTeX-u, czy strona MkDocs. W obecnym stanie każda ocena dojrzałości powyżej `stub` byłaby zmyślona.",
-  "stack": ["Markdown", "git"],
+  "stack": [
+    "Markdown",
+    "git"
+  ],
   "primaryLanguage": "Markdown",
   "license": "brak pliku LICENSE",
   "tests": "Brak testów i brak czegokolwiek, co dałoby się przetestować: `git ls-files` zwraca jedną pozycję, `README.md`.",
   "ci": "brak CI — katalog `.github` nie istnieje, więc żaden przebieg nigdy się nie odbył.",
   "metrics": [
-    { "label": "Pliki śledzone przez git", "value": "1" },
-    { "label": "Commity", "value": "1" },
-    { "label": "Rozmiar README", "value": "49 bajtów" },
-    { "label": "Linie treści w repozytorium", "value": "2" },
-    { "label": "Referencje git wskazujące to samo drzewo", "value": "4 z 4" },
-    { "label": "Workflowy CI", "value": "0" }
+    {
+      "label": "Pliki śledzone przez git",
+      "value": "1"
+    },
+    {
+      "label": "Commity",
+      "value": "1"
+    },
+    {
+      "label": "Rozmiar README",
+      "value": "49 bajtów"
+    },
+    {
+      "label": "Linie treści w repozytorium",
+      "value": "2"
+    },
+    {
+      "label": "Referencje git wskazujące to samo drzewo",
+      "value": "4 z 4"
+    },
+    {
+      "label": "Workflowy CI",
+      "value": "0"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/math-for-ai-engineers",
     "live": [],
     "docs": [
-      { "label": "Jedyny plik w repozytorium", "path": "README.md" }
+      {
+        "label": "Jedyny plik w repozytorium",
+        "path": "README.md"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
   "components": [
-    { "name": "README.md", "path": "README.md", "description": "Dwie linie: tytuł i deklaracja intencji `From zero to AI Engineer`. Nie rozstrzyga formatu ani zakresu, więc nie da się z niego wyprowadzić żadnego planu pracy.", "reusable": false }
+    {
+      "name": "README.md",
+      "path": "README.md",
+      "description": "Dwie linie: tytuł i deklaracja intencji `From zero to AI Engineer`. Nie rozstrzyga formatu ani zakresu, więc nie da się z niego wyprowadzić żadnego planu pracy.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "brain-train", "reason": "Ten sam cel dydaktyczny wokół pojęć AI. Treść matematyczna ma tam gotowe miejsce i istniejący format, więc osobne repozytorium musi uzasadnić, dlaczego nie trafia tam." },
-    { "slug": "tiny-transformer", "reason": "Implementacja transformera od zera już wymusza wyprowadzenie tej samej matematyki. Rozdział o uwadze napisany osobno będzie dublował kod, który tam działa." },
-    { "slug": "bayesian-inference", "reason": "Wnioskowanie bayesowskie to podzbiór deklarowanego zakresu i istnieje jako osobny projekt. Bez rozstrzygnięcia granicy ten sam materiał powstanie dwa razy." }
+    {
+      "slug": "brain-train",
+      "reason": "Ten sam cel dydaktyczny wokół pojęć AI. Treść matematyczna ma tam gotowe miejsce i istniejący format, więc osobne repozytorium musi uzasadnić, dlaczego nie trafia tam."
+    },
+    {
+      "slug": "tiny-transformer",
+      "reason": "Implementacja transformera od zera już wymusza wyprowadzenie tej samej matematyki. Rozdział o uwadze napisany osobno będzie dublował kod, który tam działa."
+    },
+    {
+      "slug": "bayesian-inference",
+      "reason": "Wnioskowanie bayesowskie to podzbiór deklarowanego zakresu i istnieje jako osobny projekt. Bez rozstrzygnięcia granicy ten sam materiał powstanie dwa razy."
+    }
   ],
   "product": "Brak kupującego, i nie jest to stan przejściowy do naprawienia treścią. Rynek materiałów z matematyki dla ML jest gęsty i w większości darmowy, a nazwisko autora nie jest tu przewagą dystrybucyjną. Gdyby materiał powstał, jego jedyną rolą byłoby budowanie wiarygodności i własna nauka, więc wartość portfolio zależy wyłącznie od tego, czy repozytorium przestanie być puste.",
   "highlights": [
     "Całe repozytorium waży **49 bajtów** i mieści się w dwóch liniach. To jedyny wpis w portfolio, dla którego pełny listing treści zajmuje mniej miejsca niż jego własny opis.",
     "Wszystkie cztery referencje git — `main`, `claude/portfolio-html-app-w6306n` i ich odpowiedniki na `origin` — wskazują dokładnie to samo drzewo. Gałąź robocza nigdy nie dostała ani jednego commita.",
-    "Jedyny commit jest podpisany autorem `dev_insight`, a nie kontem osobowym, co odróżnia go od reszty historii w portfolio i wskazuje na utworzenie przez automat, nie przez człowieka siadającego do pisania."
+    "Jedyny commit powstał przez interfejs webowy GitHuba: committerem jest `GitHub <noreply@github.com>`, a autorem `dev_insight <34044180+konradcinkusz@users.noreply.github.com>` — czyli osobiste konto autora pod nazwą wyświetlaną, która występuje w 31 lokalnych repozytoriach portfolio (m.in. `copilot-scope` 64 commity, `konrad-cinkusz-cv-maker` 48, `agent-eval-bench` 33). Autor niczego tu nie wyróżnia; wyróżnia to, że jest to commit zakładający repozytorium, a nie ślad pracy nad treścią."
   ],
   "gaps": [
     "Brakuje wszystkiego poza tytułem: zero stron treści, zero notatników, zero plików źródłowych.",

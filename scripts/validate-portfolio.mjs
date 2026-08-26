@@ -137,6 +137,18 @@ for (const g of data.glossary ?? []) {
   if (!g.term || !g.body) fail(`glossary ${g.id}: missing term or body`);
 }
 
+// --- health (optional; written by scripts/collect-health.mjs) --------------
+if (data.health) {
+  for (const r of data.health.rows ?? []) {
+    if (!slugs.has(r.slug)) fail(`health row for unknown slug "${r.slug}"`);
+  }
+  for (const b of data.health.breaches ?? []) {
+    if (!slugs.has(b.slug)) fail(`health breach for unknown slug "${b.slug}"`);
+  }
+  const age = Math.floor((Date.now() - Date.parse(data.health.collectedAt)) / 86400000);
+  if (age > 14) warn(`health data is ${age} days old — the nightly collector has not run`);
+}
+
 // --- report ----------------------------------------------------------------
 const counts = {
   repositories: (data.repos ?? []).length,

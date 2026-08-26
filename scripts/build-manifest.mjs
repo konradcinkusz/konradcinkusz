@@ -46,6 +46,11 @@ try {
 
 const consolidation = read("consolidation.json");
 
+// Optional: written by the nightly collector. Absent on a fresh clone, and the
+// site renders without it rather than showing an empty panel.
+let health = null;
+try { health = read("health.json"); } catch { /* not collected yet */ }
+
 const manifest = {
   meta: read("meta.json"),
   clusters: read("clusters.json"),
@@ -57,6 +62,7 @@ const manifest = {
   distribution: consolidation.distribution,
   ops: read("ops.json"),
   glossary: read("glossary.json"),
+  health,
 };
 
 const json = JSON.stringify(manifest, null, 2) + "\n";
@@ -71,5 +77,5 @@ if (process.argv.includes("--check")) {
   console.log(`site/data/portfolio.json is current (${repos.length} repositories).`);
 } else {
   writeFileSync(out, json);
-  console.log(`Wrote site/data/portfolio.json — ${repos.length} repositories, ${manifest.glossary.length} glossary entries, ${(json.length / 1024).toFixed(0)} kB.`);
+  console.log(`Wrote site/data/portfolio.json — ${repos.length} repositories, ${manifest.glossary.length} glossary entries, ${(json.length / 1024).toFixed(0)} kB${health ? `, health from ${health.collectedAt} (${health.breaches.length} breach(es))` : ", no health data"}.`);
 }
