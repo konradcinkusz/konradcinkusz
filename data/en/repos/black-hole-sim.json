@@ -1,0 +1,203 @@
+{
+  "slug": "black-hole-sim",
+  "name": "BlackHoleSim",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "A Schwarzschild black hole raytracer in C#: one RK4 integrator feeds the CLI, a queued API and a Blazor WASM gallery.",
+  "summary": "The core integrates photon geodesics in the Schwarzschild metric in the equatorial plane — zero Hamiltonian, an RK4 step over the affine parameter, each ray classified as shadow, accretion disc or background. The same `Raytracer` serves three outputs: a console renderer writing PPM, a minimal API that takes a job onto a `Channel` queue and computes it in a hosted `RenderWorker`, and a Blazor WebAssembly UI with a progress bar and a gallery. Job state and the finished PNG live in Postgres through EF Core. The most interesting decision is not physical but a startup one: migrations run in a separate hosted service **after** the listener comes up, `/health` stays red until the schema is ready, and `RenderWorker` waits on `DatabaseReadyGate` rather than bringing the host down with its first query. Renders are private to an account, but the API holds no key material: tokens are issued by a separate instance of the {{term:ghcr|authservice image from GHCR}}, and the API only verifies them with public keys from JWKS. The operational layer is written out in full — four `fly.toml` files, {{term:tagdeploy|deploy from a tag}} with change detection, scale and destroy workflows, a four-container compose, an {{term:aspire|Aspire}} AppHost — and there is not a single tag in the repository, so it has never been run.",
+  "stack": [
+    ".NET 9",
+    "ASP.NET Core minimal API",
+    "Blazor WebAssembly",
+    "EF Core 9.0.18 + Npgsql",
+    "PostgreSQL 16",
+    ".NET Aspire 13.4.6",
+    "SixLabors.ImageSharp 3.1.11",
+    "Fly.io + Docker Compose"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "28 executable cases across five classes: 23 `[Fact]` attributes plus one `[Theory]` with 5 `[InlineData]` rows. Of these, the authorisation boundary is 14 cases in `AuthorizationTests` (9 `[Fact]` and a `[Theory]` with 5 rows) — the earlier figure of 10 came from no count at all. The rest are RK4 convergence, Hamiltonian conservation, state tests and raytracer smoke tests. The numbers come from the attributes in the code (`grep` for `[Fact]`, `[Theory]`, `[InlineData]`, skipping `bin/` and `obj/`) — `dotnet test` was not run in this pass.",
+  "ci": "Four workflows. Exactly one runs on push: `pages.yml` publishes `docs/` to GitHub Pages on push to `master`, but with a path filter — only `docs/**` and the workflow file itself. None runs on a pull request. `flyio.yml` (519 lines) starts only from a `v*` tag or from `workflow_dispatch`: build, tests, change detection against the previous tag, images built straight into `registry.fly.io` and deployed in the order postgres, auth, api, web; Pages publication is not in that file. On top of that, two `workflow_dispatch` workflows — scale and destroy. Tests and gitleaks therefore live in `scripts/ci-local.sh` and in pre-commit, which the repository itself calls a gap in COMPLIANCE.md.",
+  "metrics": [
+    {
+      "label": "Projects in the solution",
+      "value": "8"
+    },
+    {
+      "label": "C# code",
+      "value": "3,486 lines"
+    },
+    {
+      "label": "Test cases",
+      "value": "28"
+    },
+    {
+      "label": "Fly apps in the configuration",
+      "value": "4"
+    },
+    {
+      "label": "GitHub Actions workflows",
+      "value": "4"
+    },
+    {
+      "label": "EF Core migrations",
+      "value": "2, both with a .Designer.cs file"
+    },
+    {
+      "label": "Git tags",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/black-hole-sim",
+    "live": [
+      {
+        "label": "One-pager (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/black-hole-sim/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Fly infrastructure and cost analysis",
+        "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
+      },
+      {
+        "label": "Where every secret lives",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Conformance with architecture-standards",
+        "path": "docs/architecture/COMPLIANCE.md"
+      },
+      {
+        "label": "Changelog describing the defects that were fixed",
+        "path": "CHANGELOG.md"
+      },
+      {
+        "label": "Beamer presentation about the renderer",
+        "path": "docs/main.tex"
+      },
+      {
+        "label": "Onboarding and local CI scripts",
+        "path": "scripts/README.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "BlackHoleSim.ServiceDefaults",
+      "path": "BlackHoleSim.ServiceDefaults",
+      "description": "144 lines of pure infrastructure: `AddServiceDefaults` wires up {{term:otel|OpenTelemetry}} for ASP.NET Core, HttpClient and the runtime, service discovery and `AddStandardResilienceHandler`, and the OTLP exporter only registers itself once `OTEL_EXPORTER_OTLP_ENDPOINT` is set. No entities and no DTOs — moving it is a namespace change.",
+      "reusable": true
+    },
+    {
+      "name": "Konfiguracja i workflowy Fly.io",
+      "path": "flyio",
+      "description": "Four `fly.toml` files in which the comments carry reasons rather than only values: why only the API has `min_machines_running = 1`, why JWKS goes over the public hostname, why Postgres has no `[http_service]`. The pattern itself — deploy from a tag, diff against the previous tag, a missing app treated as changed — is portable once the names are swapped.",
+      "reusable": true
+    },
+    {
+      "name": "Skrypty onboardingu i lokalnego CI",
+      "path": "scripts",
+      "description": "`setup.sh` generates `.env`, the database password and the signing key, installs pre-commit and builds the solution; `ci-local.sh` runs tests, format, gitleaks, a dependency audit, image builds and a compose smoke test. This is in effect the missing PR workflow, only on the developer's side.",
+      "reusable": true
+    },
+    {
+      "name": "BlackHoleSim.Core",
+      "path": "BlackHoleSim.Core",
+      "description": "`IMetric` and `Schwarzschild` with the inverse metric and its radial derivatives, `RK4.Step`, a `Raytracer` parallelised by rows through `Parallel.For`, and PPM and PNG output. The surface is tied to one metric: `State` has the fields t, r, phi, pt, pr, pphi.",
+      "reusable": false
+    },
+    {
+      "name": "BlackHoleSim.Api",
+      "path": "BlackHoleSim.Api",
+      "description": "A minimal API with a `ChannelRenderJobQueue` queue and a worker that recovers jobs left in the Running state after a restart, plus `DatabaseMigrationService`, `DatabaseReadyGate`, per-account rate limiting and JWT verification through JWKS. The queue + worker + schema gate pattern is portable, but the code is not parameterised.",
+      "reusable": false
+    },
+    {
+      "name": "BlackHoleSim.Web",
+      "path": "BlackHoleSim.Web",
+      "description": "Blazor WASM: Render, Gallery, Login, Register, About, plus the `RenderApiClient`, `TokenStore`, `BearerTokenHandler`, `JwtAuthenticationStateProvider` and `AuthSession` layer, with the token refresh after a 401 serialised under a lock so that concurrent requests do not fire three refreshes.",
+      "reusable": false
+    },
+    {
+      "name": "BlackHoleSim.Tests",
+      "path": "BlackHoleSim.Tests",
+      "description": "Alongside the numerical tests (RK4 order of convergence, Hamiltonian conservation along a geodesic) sits `AuthorizationTests`, which boots the real API through `WebApplicationFactory` on SQLite with a substituted token and checks that someone else's job returns 404, not 403.",
+      "reusable": false
+    },
+    {
+      "name": "One-pager i prezentacja beamer",
+      "path": "docs",
+      "description": "`docs/index.html` is 601 lines with its own topology SVG and the metric's formulae, published to Pages; `docs/main.tex` is a 450-line presentation on the renderer's implementation. The only portable part is the `beamerthemedeepdiveinto.sty` theme.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "authservice",
+      "reason": "It runs its own instance of the `ghcr.io/konradcinkusz/authservice:v0.3.0` image and verifies its tokens through JWKS, with no source dependency at all. That is the same consumption pattern as in `primates`."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "`docs/architecture/COMPLIANCE.md` measures this repository directly against those checklists, and `.claude/settings.json` enables the `architecture-core` plugin from that marketplace."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "The same {{term:servicedefaults|shared ServiceDefaults project}} in practically the same shape — two copies of a hundred-odd lines that ought to be one package."
+    },
+    {
+      "slug": "landing-page",
+      "reason": "The same calling-card format: a static one-pager in `docs/index.html` published through GitHub Pages."
+    }
+  ],
+  "product": "No buyer, and there is no point looking for one — nobody buys Schwarzschild renders. This is a proof project: it shows that numerical physics, background work, JWKS-based authentication and a four-application deployment can be assembled into one coherent whole in which every infrastructure decision has its reasoning written down. The value lies in the channel and in credibility: the one-pager, the beamer presentation, and a CHANGELOG whose Fixed section has fifteen points, ten of which describe a defect together with its mechanism. As a P3 in E-lab it is exactly what it is meant to be, provided the deployment pipeline is ever actually run.",
+  "highlights": [
+    "One RK4 integrator serves three output paths — the CLI, the API and the browser — so the image from the console and the one from the gallery come from identical code, not from two implementations of the same physics.",
+    "The API holds no key material: it fetches public keys from the identity service's JWKS, so it can verify a token but cannot issue one. Compromising the API gives no ability to sign.",
+    "Someone else's job returns **404, not 403** — a deliberate decision against identifier enumeration, covered by nine facts in `AuthorizationTests`.",
+    "The CHANGELOG has one Fixed section with fifteen top-level points, ten of which are entries with the defect in bold and the mechanism described — among them an EF migration without a `.Designer.cs` file (`Database.Migrate` found nothing) and two `.dockerignore` files that Docker never read, because the build context is the root directory.",
+    "`AppHost` throws an exception naming the missing file when `secrets/jwt-signing.pem` is absent, instead of quietly falling back to HS256. A configuration failure is loud by design."
+  ],
+  "gaps": [
+    "**Zero git tags, with a deploy triggered only by a `v*` tag.** The most involved element in the repository — 519 lines of `flyio.yml` — has not a single documented run, and the existence of the `blackholesim-*` apps cannot be confirmed. The `*.fly.dev` addresses are configuration, not a link.",
+    "`docs/architecture/COMPLIANCE.md` item 8 still claims the system has no authentication and marks the JWKS requirement as not applicable. That stopped being true when accounts were added, and nobody recalculated the document.",
+    "No workflow on a pull request and no tests on push: `dotnet test` and gitleaks run only on a `v*` tag or locally. The only workflow reacting to a push is `pages.yml`, which publishes `docs/` and checks nothing. A contributor who has not run `pre-commit install` is checked by nothing at all.",
+    "Telemetry is instrumented, but there is no collector standing on Fly and `OTEL_EXPORTER_OTLP_ENDPOINT` is unset, so nothing is exported in the deployed environment.",
+    "PNG renders sit as a blob in the `RenderJobs` table on a 3 GB volume that cannot be shrunk, and there is no retention and no per-account limit."
+  ],
+  "risks": [
+    "Name mismatch: the repository and the directory are `black-hole-sim`, but the clone instruction in the README and `\\RepoURL` in `docs/main.tex` point at `BlackHoleSim`. The badge above the instruction leads to a different address than the instruction itself.",
+    "A hard pin to `ghcr.io/konradcinkusz/authservice:v0.3.0`: going back below v0.3.0 breaks login, because older builds sign with HS256 and publish an empty key set. The dependency is deliberate, but it is not resilient to a regression at the provider.",
+    "A dozen or so package versions scattered across seven `csproj` files with no `Directory.Packages.props`. {{term:dependabot|Dependabot}} is configured, but without CI on a PR its updates pass through no check at all.",
+    "I found no hard-coded credential, but what was checked was the configuration, not the git history — and gitleaks has never run over the full history in CI."
+  ],
+  "next": [
+    "Push a `v0.1.0` tag and see whether `flyio.yml` really does stand all four apps up from nothing. Only that verifies the repository's main claim, and only then can the `*.fly.dev` addresses go on the card as links.",
+    "Correct item 8 in COMPLIANCE.md to the state after accounts were added, and recalculate the summary in section 1. A document describing a state that no longer exists undermines the whole of the rest of the audit.",
+    "Add a pull request workflow with `dotnet test` and gitleaks — it closes item 7 in COMPLIANCE.md and makes Dependabot's updates mean something.",
+    "Make the repository address consistent in the README and in `docs/main.tex` as `black-hole-sim`.",
+    "Add retention or a per-account render limit before the 3 GB volume becomes a problem with no way back."
+  ],
+  "headline": "A complete deployment pipeline, zero tags — it has never been run",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 9,
+    "openPrs": 9,
+    "dependabotPrs": 9,
+    "lastCommit": "2026-08-15",
+    "commits": 69,
+    "files": 132
+  }
+}

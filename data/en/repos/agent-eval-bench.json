@@ -1,0 +1,186 @@
+{
+  "slug": "agent-eval-bench",
+  "name": "agent-eval-bench",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P1",
+  "oneLiner": "An evaluation bench that scores a tool-using agent's **execution trace**, not the text of its answer.",
+  "summary": "The contract came before the code: `docs/SPEC.md` is 55 kB of specification with sixteen behaviours and seven hard constraints, each citing the scenarios that prove it. Thirty-five scenarios sit as YAML data validated by a strict JSON Schema, in five classes: happy, ambiguity, denied, adversarial, degradation. Layer 1 is twelve deterministic assertion types over the captured trace — no model, no network, no credentials — so it can block every pull request. Layer 2 is an LLM judge with anchored rubrics, a pinned model and the prompt hash in the report. The demonstration is an HR agent filing a leave request that stops short of the write: the approval gate is enforced by a **single-use token from a CSPRNG**, not by an instruction in the prompt — you can talk the agent into writing, but not into producing a token that was never issued. A scenario runs through the service's real composition root; failures are injected at the tool seam, so a degradation scenario takes the same code path as a real timeout.",
+  "stack": [
+    ".NET 10",
+    "C# 14",
+    "OpenTelemetry",
+    "Node 22",
+    "Playwright",
+    "Azure Bicep",
+    "LaTeX/Beamer"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "235 [Fact]/[Theory] attributes in the sources (221 Fact, 14 Theory) plus 10 Playwright tests; 35 scenarios / 313 assertions, baseline 35/35 pass",
+  "ci": "Nine workflows. `ci.yml` has seven jobs — lint-docs, lint-actions, lint-shell, architecture, coupling, build-test, e2e (counted from the `jobs:` keys after parsing the file) — including a coupling check: changing the prompt requires changing the specification, changing a rubric requires a version bump. On top of that, a nightly judged run and a production loop scoring real spans.",
+  "metrics": [
+    {
+      "label": "Scenarios",
+      "value": "35 (8 happy · 9 ambiguity · 7 adversarial · 6 denied · 5 degradation)"
+    },
+    {
+      "label": "Assertions",
+      "value": "313"
+    },
+    {
+      "label": "Absence assertions",
+      "value": "60 (19%)"
+    },
+    {
+      "label": "Broken agent variants",
+      "value": "4"
+    },
+    {
+      "label": "Defects caught by the suite",
+      "value": "14, of which 7 in the instrument itself"
+    },
+    {
+      "label": "C# code",
+      "value": "16,733 lines"
+    },
+    {
+      "label": "Mermaid diagrams",
+      "value": "22"
+    },
+    {
+      "label": "CI workflows",
+      "value": "9"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/agent-eval-bench",
+    "live": [],
+    "docs": [
+      {
+        "label": "Behaviour contract (SPEC)",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "What the suite actually caught",
+        "path": "docs/FINDINGS.md"
+      },
+      {
+        "label": "Deviations from the standard",
+        "path": "docs/DEVIATIONS.md"
+      },
+      {
+        "label": "Judge calibration protocol",
+        "path": "docs/CALIBRATION.md"
+      },
+      {
+        "label": "The whole thing in one document",
+        "path": "docs/OVERVIEW.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "AssertionEvaluator — warstwa 1",
+      "path": "tests/AbsenceConcierge.Evals/Assertions",
+      "description": "Twelve deterministic assertion types over the trace. None of them passes vacuously, and an unknown type is an error, not a pass.",
+      "reusable": true
+    },
+    {
+      "name": "ConfirmationTokenStore",
+      "path": "src/AbsenceConcierge.AgentService/Workforce/Confirmation",
+      "description": "A write gate enforced by a 256-bit token from a CSPRNG, issued when the draft is shown and redeemed exactly once. The pattern is domain-independent — the dependency on the draft is four fields.",
+      "reusable": true
+    },
+    {
+      "name": "Walidatory repozytorium",
+      "path": "scripts/",
+      "description": "Node scripts in CI: scenario validation, link checking, diagram parity, EN/PL document parity, change-coupling checking.",
+      "reusable": true
+    },
+    {
+      "name": "Schemat scenariusza (JSON Schema)",
+      "path": "evals/schema/scenario.schema.json",
+      "description": "A strict contract for the scenario file: classes, fixture delta, permitted assertion types. It is not portable between domains: `$defs/toolName` is a closed enum of five HR tools (`get_current_user`, `find_employee`, `list_leave_types`, `list_leaves`, `request_time_off`) mirroring the `IWorkforceTools` interface and referenced from seven places in the schema (`fixture.tool_behaviour` plus `tool`/`source_tool` in assertions); `$defs/eventName` is closed the same way. The format itself is independent of .NET, but another domain has to edit both enums.",
+      "reusable": false
+    },
+    {
+      "name": "RubricJudge i kalibracja",
+      "path": "tests/AbsenceConcierge.Evals/Judging",
+      "description": "A judge with rubrics anchored per level, a pinned model, a prompt hash and {{term:kappa|Cohen's kappa}} arithmetic. Without credentials it reports `skipped`, never a quiet green.",
+      "reusable": false
+    },
+    {
+      "name": "BrokenAgents — pass mutacyjny",
+      "path": "tests/AbsenceConcierge.Evals/Mutations",
+      "description": "Four deliberately broken agent variants and a scenario that has to catch each one. On the first run the variant that writes twice passed two scenarios — and that was fixed in the scenarios, not in the variant.",
+      "reusable": false
+    },
+    {
+      "name": "AgentOrchestrator (11 steps)",
+      "path": "src/AbsenceConcierge.AgentService/Agent",
+      "description": "The order of the steps **is** the specification: EstablishActor → … → ConfirmationGate → ExecuteWrite, with exactly one recorded outcome and one termination reason.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "This is the reference implementation of the AI-EVALS standard from that repository; `DEVIATIONS.md` is a line-by-line reckoning, and the corrections go back into the standard."
+    },
+    {
+      "slug": "judge-worker",
+      "reason": "Also does an LLM judge over an agent trace, with calibration and mutation testing — only as an asynchronous worker on a queue instead of a harness in CI."
+    },
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "Has the {{term:playhead|record/replay cassette}} this repository lacks — and without it layer 2 cannot tell a regression from model randomness."
+    },
+    {
+      "slug": "agent-eval-bench-factorial",
+      "reason": "The private recruitment repository accompanying this project, with the same case as its integration target."
+    }
+  ],
+  "product": "The buyer is real, but it is not the team building the agent — it is whoever has to **prove** that the agent does not do the things it must not. This is an {{term:evidence|audit export}}, not another dashboard. The repository itself is the best credibility artefact in the portfolio today: contract before code, absence assertions, a mutation pass and an explicit register of deviations are a set almost nobody shows publicly.",
+  "highlights": [
+    "Nineteen per cent of the assertions are **absence assertions** — checking what the agent did not do. That is the rarest and hardest part of evaluating agents, and here it is enforced by the schema: a `denied` or `adversarial` scenario without an absence assertion is rejected in CI.",
+    "The approval gate is enforced in three independent places: a single-use token in the code, the agent's declaration in `definition.json` and an assertion in the scenario. The prompt is the fourth and the weakest.",
+    "The suite caught fourteen defects, **seven of them in the instrument itself or in the specification** — that is, the measuring tool was tested against itself.",
+    "Without credentials the judge reports `skipped:no-credential`. Never green. That is a one-line design decision that separates a harness from theatre.",
+    "CI watches the coupling between documents: you cannot change the prompt without changing the specification, nor a rubric without a version bump."
+  ],
+  "gaps": [
+    "No {{term:determinizm|replay layer}}. Without one, layer 2 cannot tell a regression from model randomness — and that is exactly the gap kernel K1 closes, and this is its first consumer.",
+    "Layer 2 has never run against a live model, the MCP adapter has never spoken to a real server, the deployment to Fly never happened. All three are honestly written up as deviations — but they are still promises, not facts.",
+    "Twenty-one open issues against one pull request — that is a backlog, not activity.",
+    "The judge calibration has forty-five labels from **one** rater, and that rater is an AI. {{term:kappa|Kappa}} with a single rater measures consistency, not agreement with a human."
+  ],
+  "next": [
+    "Wire in the {{term:playhead|cassette}} from K1 and switch layer 2 to replay mode. That is one dependency and one configuration change, and it unblocks CI for the judging layer.",
+    "Run layer 2 once against a live model, record the run, and replay it from then on. One cost instead of a continuing one.",
+    "Add a second, human rater for the calibration — without one the kappa figure is technically correct and empty.",
+    "Close or tidy the twenty-one issues; a public repo with that ratio of issues to PRs looks abandoned."
+  ],
+  "risks": [
+    "The address `agent-eval-bench-demo.fly.dev` is declared in the configuration and there is nothing behind it. A deployment address that does not answer is worse than no address at all."
+  ],
+  "headline": "First consumer of kernel K1 — without replay, regression looks like randomness",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 21,
+    "openPrs": 1,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-25",
+    "commits": 122,
+    "files": 292
+  }
+}

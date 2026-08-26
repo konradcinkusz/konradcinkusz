@@ -1,0 +1,188 @@
+{
+  "slug": "IberiaFamilyCalculator",
+  "name": "Family Budget Calculator — Spain 2026",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P4",
+  "oneLiner": "Single-file family budget calculator with real Spanish IRPF and autónomo contribution maths, in three languages.",
+  "summary": "Works out a family's monthly balance in Spain: payroll and self-employment income, benefits in kind and expenses, each one an editable entry with its own slider. The tax engine is not a stub: a six-band state scale plus seven autonomous scales, a personal minimum of 5,550 EUR, per-child minimums with a bonus below the age of three, and a 6.35% employee contribution on a base capped at 59,060 EUR. The most interesting engineering decision sits in `calcAutonomoNet`: the contribution depends on net income and net income depends on the contribution, so the function resolves it by **fixed point** — it starts at 300 EUR a month and runs five times through the 15-band table from RD 504/2022 until the result stops moving. The whole thing is one `index.html` file, 2,392 lines and 91,486 bytes, zero dependencies and zero third-party requests, fonts included. State lives in parallel in `localStorage` and in a base64-encoded URL hash, so an entire budget scenario is shared by the link alone, with no server and no account. The thing is {{term:hermetyczny|self-contained}} and finished, and at the same time there is not one test for the four functions that are pure arithmetic and would take an hour to test.",
+  "stack": [
+    "HTML5 (jeden plik, osadzony CSS i JS)",
+    "Vanilla JavaScript ES2020, bez frameworka",
+    "localStorage + hash URL (base64 z JSON)",
+    "Intl.NumberFormat (EUR, USD, GBP, PLN)",
+    "arkusz @media print (dwa bloki)",
+    "self-hostowane fonty WOFF2 z unicode-range",
+    "GitHub Pages"
+  ],
+  "primaryLanguage": "HTML",
+  "license": "MIT (LICENSE.txt, Copyright (c) 2026 Konrad Cinkusz); fonty osobno na SIL OFL 1.1",
+  "tests": "Zero tests. Git tracks 11 files and none of them is a test file or a runner, even though `applyScale`, `calcIRPF`, `calcMinimo`, `calcEmployeeNet` and `calcAutonomoNet` are almost pure numeric functions with a ready reference point in the Agencia Tributaria calculator.",
+  "ci": "No CI. There is no `.github` directory, so there is not one workflow of the author's own. The badge in the README shows `pages-build-deployment`, which is GitHub's built-in mechanism for the `master` branch, not a process the author configured.",
+  "metrics": [
+    {
+      "label": "Lines in index.html",
+      "value": "2,392"
+    },
+    {
+      "label": "Size of index.html",
+      "value": "91,486 B"
+    },
+    {
+      "label": "External dependencies",
+      "value": "0"
+    },
+    {
+      "label": "UI languages",
+      "value": "3 (es, pl, en)"
+    },
+    {
+      "label": "Translation keys per language",
+      "value": "109 per language, an identical set in es, pl and en (parsing the I18N object as JS)"
+    },
+    {
+      "label": "IRPF scale variants",
+      "value": "8 (state + 7 CCAA)"
+    },
+    {
+      "label": "Autónomo quota bands",
+      "value": "15"
+    },
+    {
+      "label": "Commits",
+      "value": "4"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/IberiaFamilyCalculator",
+    "live": [
+      {
+        "label": "The app on GitHub Pages",
+        "url": "https://konradcinkusz.github.io/IberiaFamilyCalculator/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "README: features, privacy, legal disclaimer",
+        "path": "README.md"
+      },
+      {
+        "label": "The whole app in one file",
+        "path": "index.html"
+      },
+      {
+        "label": "Font declarations with unicode-range",
+        "path": "fonts/fonts.css"
+      },
+      {
+        "label": "SIL OFL 1.1 font licence",
+        "path": "fonts/OFL-LICENSE.txt"
+      },
+      {
+        "label": "MIT licence",
+        "path": "LICENSE.txt"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Triple state persistence (loadState, saveState, syncURL)",
+      "path": "index.html, ok. linie 1600-1631",
+      "description": "Reading goes in order: the URL hash, then `localStorage` under the key `calc-familiar-v1`, and finally the default state. Every field change writes to both places through `history.replaceState`, so the link carries the whole configuration and needs no backend at all.",
+      "reusable": true
+    },
+    {
+      "name": "Silnik dynamicznych encji (addEntity, duplicateItem, undoDelete)",
+      "path": "index.html, ok. linie 1916-2000 i 2165-2325",
+      "description": "A generic list of entries of three types, with an editable name, a slider and configurable min/max/step bounds. Deleting takes a snapshot and shows an undo toast for 4 seconds; the tie to the domain appears only in `recalc`.",
+      "reusable": true
+    },
+    {
+      "name": "Warstwa i18n (I18N + applyLanguage)",
+      "path": "index.html, ok. linie 1080-1566",
+      "description": "Three dictionaries of 109 keys each, counted by parsing the `I18N` object as JavaScript rather than by grep. The key sets are identical across all three languages: no key is present in one dictionary and absent from another. Substitution runs off `data-i18n` attributes (62 occurrences in the markup) and `data-i18n-attr` for attributes. The language choice starts from `navigator.language` and lands in the same state as the rest of the settings.",
+      "reusable": true
+    },
+    {
+      "name": "Self-hostowane fonty",
+      "path": "fonts/fonts.css",
+      "description": "Four WOFF2 files (Cormorant Garamond, DM Sans, latin and latin-ext variants for Polish characters) with `unicode-range` and `font-display: swap`. The README justifies this with the 2022 LG München I ruling on Google Fonts, not with a generality about privacy.",
+      "reusable": true
+    },
+    {
+      "name": "Silnik IRPF (applyScale, calcIRPF, calcMinimo)",
+      "path": "index.html, ok. linie 1632-1660",
+      "description": "Charges tax off a band table: the state scale plus the autonomous one, and for the Basque Country and Navarre the foral scale alone. `calcMinimo(family, splitFactor)` returns `MIN_PERSONAL + descTotal * splitFactor`, so with two income sources only the per-child minimum is split 50/50; the personal minimum of 5,550 EUR goes in full against each income separately.",
+      "reusable": false
+    },
+    {
+      "name": "The autónomo calculator (calcAutonomoNet)",
+      "path": "index.html, ok. linie 1680-1706",
+      "description": "Five fixed-point iterations over the contribution: rendimiento neto after subtracting the contribution and costs picks a band from the 15-element `QUOTA_AUTONOMOS` array (225 to 590 EUR), and the new band changes the rendimiento. Convergence is taken on faith, with no residual check.",
+      "reusable": false
+    },
+    {
+      "name": "Kalkulator etatu (calcEmployeeNet)",
+      "path": "index.html, ok. linie 1661-1679",
+      "description": "Annual gross plus a percentage bonus, a 6.35% contribution on a base capped at 59,060 EUR, IRPF reduced by the tax on the minimum, and a monthly figure at 12, 14 or 16 payslips. It reads the global `state.incomes.length` to decide how to split the minimum, and that is the only side effect in an otherwise pure function.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "landing-page",
+      "reason": "The same shape of deployment: a static file with no build process, pushed to Pages. Both share the same question about who actually maintains the content a year from now."
+    },
+    {
+      "slug": "konradcinkusz",
+      "reason": "A natural demo for the profile: it works with no login, no install and in three languages, so it is the cheapest evidence you can send anyone by link."
+    }
+  ],
+  "product": "No buyer, and there is no point pretending otherwise. The audience is a family weighing up a move to Spain or a switch to autónomo status, who will use the tool once or twice and never come back. Monetisation would need two things that are not here: annually updated tax tables and someone taking responsibility for the result, and the README deliberately disclaims both. The real value is channel value, and in that role it works, because it is checkable evidence that opens in a second.",
+  "highlights": [
+    "A complete app in one file of 91,486 bytes, with zero dependencies and zero third-party requests, fonts included.",
+    "The autónomo quota is worked out **iteratively**, because the contribution and net income depend on each other. Five passes over the 15-band table from RD 504/2022 instead of one multiplication.",
+    "Eight IRPF scale variants, including Navarre with 11 bands and the Basque Country with 8, alongside the state scale ending at a 300,000 EUR band at 24.5%.",
+    "State sits in parallel in `localStorage` and in the URL hash, so a full budget scenario moves between people in one link, with no server and no account.",
+    "Three full translations of 109 keys each, in perfect step: parsing the `I18N` object as JavaScript gives the same key set in es, pl and en, zero missing and zero surplus in either direction. On top of that, attribute substitution through `data-i18n-attr` and `navigator.language` autodetection on the first visit."
+  ],
+  "gaps": [
+    "**Zero tests for the tax engine.** The four fiscal functions are arithmetic over band tables, that is the easiest thing to test for regressions in the whole portfolio, and not one of them has a single reference case.",
+    "The 2026 constants are written into the JS with no year field, no legal source in a comment and no expiry date. When the rules change nothing will signal the {{term:drift|drift}}, and the UI does not show which year the calculator is working to.",
+    "The README tells you to pick branch `main` in the Pages settings, while the badge in the same README shows `master`. One of the two is wrong and on a fork it will break the deployment for anyone who follows the instruction.",
+    "No workflow of any kind, though two sensible checks are cheap: HTML validation and a check that the three i18n dictionaries have an identical key set.",
+    "The 1, 3 and 5 year projection is the balance multiplied by 12, 36 and 60, with no inflation and no band indexation, and the README nowhere marks this as a simplification."
+  ],
+  "risks": [
+    "The app gives specific tax figures, and the only safeguard is a consent modal and a paragraph in the README. An error in the band table is completely invisible to the user, because there is nothing to compare it against.",
+    "The URL hash holds the family's whole budget in base64, so it goes into browser history and everywhere the link is pasted. The data genuinely does not leave the browser, but the link carries it out.",
+    "The Basque Country and Navarre are computed on the autonomous scale alone, with the state scale skipped. That is a deliberate approximation, described as foral, and it diverges from the real system.",
+    "Work is going on in the branch `claude/portfolio-html-app-w6306n`, which is not the default one, so changes may never reach Pages. On top of that, the name `IberiaFamilyCalculator` suggests an airline rather than the Iberian Peninsula."
+  ],
+  "next": [
+    "Write unit tests for `applyScale`, `calcIRPF`, `calcMinimo`, `calcEmployeeNet` and `calcAutonomoNet`, with reference values checked against the Agencia Tributaria calculator. Without them the {{term:determinizm|deterministic}} nature of these functions is wasted.",
+    "Pull every fiscal constant out into one object with a year field and a {{term:provenance|legal source}} against each table, and show the year in the interface next to the result.",
+    "Settle on one branch: `master` or `main`, but the same one in the badge and in the deployment instruction.",
+    "Add `.github/workflows` with one job: HTML validation plus a script comparing the key sets of the three i18n dictionaries.",
+    "Pass `splitFactor` as an argument to the fiscal functions instead of reading the global `state.incomes.length`."
+  ],
+  "headline": "Real tax maths, zero tests and tables with no expiry date",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-04-26",
+    "commits": 4,
+    "files": 11
+  }
+}

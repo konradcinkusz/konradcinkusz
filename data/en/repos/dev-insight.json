@@ -1,0 +1,119 @@
+{
+  "slug": "dev-insight",
+  "name": "DevInsight",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "prototype",
+  "tier": "P2",
+  "oneLiner": "Three C# console demos on `net8.0` as companion code for the DevInsight channel, which does not yet have a single episode.",
+  "summary": "Each directory is a standalone `Exe` project illustrating exactly one language topic. `DevInsight.SOLID.LSP` models `Rectangle` and `Square` as equal implementations of `IShape` rather than by inheritance, so it sidesteps the classic LSP violation instead of describing it. `DevInsight.BitShiftDemos` shows a `[Flags]` enum on `uint`, masking of the shift count by `0x1F`, and packing a firmware version into bits 31..16. `DevInsight.CSharpSamples` touches `TimeZoneInfo` for Europe/London and works out the trading session date from a 23:00 cut-off. The most interesting decision sits in the first of those demos: the `Features` enum **explicitly declares** `Bit32`, `Bit33` and `Bit63` alongside the legal bits, so that the compiler works out the collision itself (1, 2 and `0x80000000`) instead of leaving it in a comment. The whole thing is 224 lines across three `Program.cs` files, zero {{term:nuget|NuGet}} dependencies and zero tests. Two demos are genuinely finished; the third is a sketch that, after all the time zone arithmetic, prints `Hello, World!`.",
+  "stack": [".NET 8 (net8.0)", "C# console apps", "ImplicitUsings enable", "Nullable enable", "Visual Studio solution 12.00 (VS 17.14)", "zero PackageReference"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Zero tests: there is no test project and no file with `test` in its name, even though all three topics (LSP, bit packing, DST boundaries) are purely unit-level and deterministic.",
+  "ci": "No CI. The `.github` directory does not exist, so not even `dotnet build` runs on push.",
+  "metrics": [
+    { "label": "Console projects", "value": "3" },
+    { "label": "Files in the repository", "value": "11" },
+    { "label": "Lines of code across the three `Program.cs` files", "value": "224" },
+    { "label": "NuGet dependencies", "value": "0" },
+    { "label": "Tests", "value": "0" },
+    { "label": "CI workflows", "value": "0" },
+    { "label": "Linked video episodes", "value": "0 of 3" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/dev-insight",
+    "live": [
+      { "label": "DevInsight YouTube channel", "url": "https://www.youtube.com/@_dev_insight" }
+    ],
+    "docs": [
+      { "label": "README with a table of the three projects", "path": "README.md" },
+      { "label": "MIT licence (template not filled in)", "path": "LICENSE.txt" },
+      { "label": "LSP demo, 73 lines", "path": "DevInsight.SOLID.LSP/Program.cs" },
+      { "label": "Bit collisions and firmware packing", "path": "src/DevInsight.BitShiftDemos/Program.cs" },
+      { "label": "TimeZoneInfo and trading date sketch", "path": "src/DevInsight.CSharpSamples/Program.cs" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "BitPacking",
+      "path": "src/DevInsight.BitShiftDemos/Program.cs",
+      "description": "Six static functions on `uint`: `SetFirmware` first clears both bytes with the mask `~((0xFF << 24) | (0xFF << 16))` and only then writes the values, so a second write leaves no rubbish behind from the previous version. `GetFirmware` returns a `(Major, Minor)` tuple, and `Enable`/`Disable`/`Toggle`/`HasFeature` work on the flag mask. No domain type, no dependency.",
+      "reusable": true
+    },
+    {
+      "name": "Enum `Features : uint`",
+      "path": "src/DevInsight.BitShiftDemos/Program.cs",
+      "description": "Fourteen `[Flags]` values, from `Bluetooth = 1u << 0` to `DeepSleep = 1u << 31`, and after them, deliberately, `Bit32`, `Bit33` and `Bit63`. The collision that comes from masking by `0x1F` is worked out here by the compiler, not described in prose.",
+      "reusable": false
+    },
+    {
+      "name": "IShape + AreaCalculator",
+      "path": "DevInsight.SOLID.LSP/Program.cs",
+      "description": "An interface with a single `Area` property, two equal implementations and `TotalArea(IEnumerable<IShape>)` summing over the abstraction. A comment in the code names the reason `Square` does not inherit from `Rectangle` outright: independent `Width` and `Height` setters would break substitutability.",
+      "reusable": false
+    },
+    {
+      "name": "ResolveLondon",
+      "path": "src/DevInsight.CSharpSamples/Program.cs",
+      "description": "Eight lines closing the gap between IANA and Windows identifiers: `TryFindSystemTimeZoneById(\"Europe/London\")` with a hard fallback to `GMT Standard Time`. The only part of this project that does what it promises.",
+      "reusable": false
+    },
+    {
+      "name": "DetermineTradingDate",
+      "path": "src/DevInsight.CSharpSamples/Program.cs",
+      "description": "A local function that moves the date on by a day when the London hour is 23 or later. The rule is tied to a specific trading session cut-off, and its result never reaches the program's output.",
+      "reusable": false
+    },
+    {
+      "name": "DevInsight.sln",
+      "path": "DevInsight.sln",
+      "description": "Ties three projects together, two of which sit in `src/` while the LSP demo sits in the root directory. That inconsistency is visible in the README, because the project table mixes `./DevInsight.SOLID.LSP` and `./src/...` paths.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "csharp-flashcards", "reason": "The same material: C# language details served in small, self-contained portions. There as flashcards, here as a runnable demo behind a video." },
+    { "slug": "architecture-standards", "reason": "The LSP demo touches the SOLID principles, which function there as a binding standard rather than as a teaching example. If both entries are to live, it is worth deciding which one is the source of the definitions." }
+  ],
+  "product": "No buyer, and there is no point looking for one here. This is a pure channel play: the code is there to back up the videos and the author's credibility, not to generate value on its own. The problem is that the channel has not started yet, so today the repository is backing up something that does not exist, and all of its value is deferred to the first published episode.",
+  "highlights": [
+    "The `Features` enum declares `Bit32 = 1u << 32`, `Bit33` and `Bit63` alongside the legal flags, so the collision that follows from masking the shift count by `0x1F` is **worked out by the compiler** rather than described in a comment.",
+    "`BitPacking.SetFirmware` clears both bytes with the mask `~((0xFF << 24) | (0xFF << 16))` before writing, rather than only `OR`-ing. This is the correct pattern, and it is missing from most similar examples online.",
+    "The LSP demo does not repeat the canonical `Square : Rectangle` mistake; both shapes are equal implementations of `IShape`, and `AreaCalculator` sees nothing but the abstraction.",
+    "`ResolveLondon` handles the divergence between IANA and Windows identifiers with a fallback to `GMT Standard Time`, which is precisely the detail on which a time zone demo usually falls over on someone else's machine.",
+    "Zero `PackageReference` entries across the three `.csproj` files: `git clone` and `dotnet run --project` work with no configuration at all."
+  ],
+  "gaps": [
+    "**`DevInsight.CSharpSamples` does not do what the README promises.** `windowLocal23_30`, `dstStart2024`, `dstEnd2024`, `dstStart2025` and `dstEnd2025` are unused, `localNow` and `localNow2` compute exactly the same thing from the same input, and the program's only output is `Hello, World!`.",
+    "The name `windowLocal23_00` suggests local time, but the value goes into `TimeZoneInfo.ConvertTimeFromUtc` as UTC. In a sketch that is misleading; in a recorded episode it would simply be wrong.",
+    "`LICENSE.txt` is an unfilled template: `Copyright (c) [year] [fullname]`. The README links to it as the {{term:mit|MIT}} licence, so the declaration is weaker than it looks.",
+    "All three rows of the project table in the README have the status `coming soon`. The advertised connection to the channel is confirmed by nothing in the repository beyond a link to the profile.",
+    "The directory layout is inconsistent: two projects in `src/`, one in the root, and the README carries both path conventions at once."
+  ],
+  "next": [
+    "Fill in `LICENSE.txt` with the year and the name. One line, and without it the MIT declaration in the README is not backed by anything.",
+    "Finish `DevInsight.CSharpSamples`: remove the dead variables, separate the UTC naming from the local time naming, and print the actual conversion results instead of `Hello, World!`.",
+    "Add an xUnit project with two sets of tests: a `SetFirmware`/`GetFirmware` round trip for random byte pairs, and `DetermineTradingDate` on both 2025 DST boundaries. Both are fully {{term:determinizm|deterministic}}, so they need no fake of any kind.",
+    "Add a GitHub Actions workflow running `dotnet build` and `dotnet test` on push. A repository with three projects and no CI has no way of noticing that one of them has stopped compiling.",
+    "Move `DevInsight.SOLID.LSP` into `src/`, update `DevInsight.sln` and the paths in the README."
+  ],
+  "risks": [
+    "The name `DevInsight` is generic to the point of being useless; a collision with another project, channel or product of that name is close to certain, and the repository addresses this nowhere.",
+    "Six commits, the last on 2026-08-10. If the channel does not start, this is a sketch that will grow old on `net8.0` with no signal that it has been abandoned.",
+    "HEAD sits on the branch `claude/portfolio-html-app-w6306n` rather than on `master`, so the working state does not match the repository's default branch.",
+    "Pinned to `net8.0` with no `global.json`: the build result depends on which SDK the reader's machine has, which is worse for a teaching repository than for an ordinary one."
+  ],
+  "headline": "Two demos finished, the third prints `Hello, World!`, the channel has not started",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-10",
+    "commits": 6,
+    "files": 11
+  }
+}

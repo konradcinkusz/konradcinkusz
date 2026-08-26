@@ -1,0 +1,380 @@
+{
+  "principles": [
+    {
+      "title": "The bottleneck is attention, not code",
+      "body": "An agent will write more than you can get through — that is already true, not a forecast. Every decision in this system optimises one quantity: **how many decisions it takes to stop the portfolio rotting**. Anything that increases the number of things needing a look is a cost, even when it is free in tokens."
+    },
+    {
+      "title": "A repository with no declared level of service does not exist",
+      "body": "Each of the thirty-five repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
+    },
+    {
+      "title": "The tier follows blast radius, not affection",
+      "body": "A kernel consumed by five systems has a {{term:blast|blast radius}} of five; a playground has zero. That is why a two-hundred-line library can matter more than a twenty-thousand-line application, and why extracting something as a kernel **raises** the demands on it instead of lowering them."
+    },
+    {
+      "title": "A public repository is a promise; a private one is not",
+      "body": "Opening a repository takes on an obligation: the README has to be true, CI green, the licence present, and an issue has to get an answer. So the default decision is **private**, and opening is a separate act with a checklist — not a reflex after the first successful build."
+    },
+    {
+      "title": "A constitution instead of memory",
+      "body": "The most expensive failure in this estate is an agent reconstructing architectural rules from whatever code it happens to see, instead of reading the ones already written down. So the rules live in one repository, are installed as {{term:plugins}}, and every new project starts by loading them."
+    },
+    {
+      "title": "Extraction by artefact, never by source",
+      "body": "When a second system wants the same service, it gets a **versioned image or package**, never a submodule or a project reference. One codebase, N independent instances, no shared runtime and no shared root of trust. This pattern has worked once and is documented — the rest of the consolidation is repetitions of it."
+    },
+    {
+      "title": "Do not fill empty tables with plausible numbers",
+      "body": "Several repositories in this portfolio have fully designed experiments and empty results tables. **That emptiness is functional.** A number nobody has measured is worse than no number, because it looks like evidence, it survives review, and it comes back a year later as somebody else's citation."
+    },
+    {
+      "title": "Every ritual leaves an artefact",
+      "body": "A ritual that leaves nothing in the repository is a meeting with yourself. A review ends in a commit, a log entry or a closed issue — and that, not the feeling of having done something, is the evidence that the ritual happened."
+    },
+    {
+      "title": "Closing counts as much as starting",
+      "body": "Archiving a repository is an outcome, not a failure. A repository that has no buyer, is not a channel and is not a kernel costs attention and returns nothing — and the only way to make it stop costing is to close it openly, with one paragraph of explanation in the README."
+    }
+  ],
+  "tiers": [
+    {
+      "id": "P0",
+      "name": "Foundation",
+      "definition": "The things everything else depends on. A failure here propagates to the rest of the portfolio, so the strictest regime applies, however small the repository itself is.",
+      "slo": "Red CI fixed the same day. An issue from an outsider gets an answer within 48 h. A release is always tagged and described in the CHANGELOG.",
+      "budget": "Up to 40% of portfolio time. Always takes precedence over everything below.",
+      "slugs": [
+        "authservice",
+        "architecture-standards",
+        "konradcinkusz"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Product under construction",
+      "definition": "Four things that have, or could have, a named buyer. This is the only tier where new functionality is built — everything below is maintained, not developed.",
+      "slo": "Red CI within 72 h. An active quarterly goal with a 'done when' test. A public README that matches the facts, including a list of what does not work yet.",
+      "budget": "Up to 40% of the time, but never on more than two at once — the rest waits in the queue.",
+      "slugs": [
+        "cognitive-multi-agent-simulation",
+        "agent-eval-bench",
+        "archgate",
+        "copilot-scope"
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Channel",
+      "definition": "Artefacts that accumulate reach without further work: books, decks, knowledge bases, research work, channel material. They do not earn and are not meant to — they are the only route by which anyone finds the rest.",
+      "slo": "The build has to pass, because publication is automatic. Content touched on its own rhythm, not a weekly one. No commitment to answering issues.",
+      "budget": "Up to 15% of the time, in blocks — a fragmented hour does not move a chapter forward.",
+      "slugs": [
+        "maf-book",
+        "llm-book",
+        "csharp-flashcards",
+        "agents-and-llms",
+        "cognitive-multi-agent-simulation-analysis",
+        "dev-insight",
+        "konrad-cinkusz-cv-maker"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Maintenance",
+      "definition": "Works, is built, is not being developed. Usually large systems that took the most investment and from which what is drawn today is mainly evidence of skill and code for kernels.",
+      "slo": "No time commitment on CI. Dependency updates grouped monthly. New functionality only when it is a test of a kernel's portability.",
+      "budget": "Up to 5% of the time, in one monthly block for the whole group at once.",
+      "slugs": [
+        "AgentHelm",
+        "judge-worker",
+        "hydro-scope",
+        "auto-veritas",
+        "cv-maker",
+        "primates",
+        "aurelius-promptus",
+        "aurelius-promptus-acceptance-tests",
+        "zoo-companion",
+        "bayesian-inference",
+        "black-hole-sim"
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Frozen",
+      "definition": "Finished, abandoned or somebody else's. No work beyond security. Candidates for archiving — and archiving here is an outcome, not a failure.",
+      "slo": "None. Dependabot switched off, or grouped into one PR per quarter. Issues switched off wherever the repository has no maintainer.",
+      "budget": "Zero. One quarterly review of the whole group decides what to archive.",
+      "slugs": [
+        "chess-mas",
+        "cards-game",
+        "llm-multi-agent-chess",
+        "tiny-transformer",
+        "IberiaFamilyCalculator",
+        "brain-train",
+        "ai-coding-assistant-article",
+        "agent-eval-bench-factorial",
+        "math-for-ai-engineers",
+        "landing-page"
+      ]
+    }
+  ],
+  "cadence": [
+    {
+      "when": "Daily · 10 minutes",
+      "what": "Go through **only** the notifications from P0 and P1. Open nothing else. If anything is red on those seven repositories, you do nothing else today.",
+      "output": "Zero or one fixing commit. No task list for tomorrow — this is not planning.",
+      "timebox": "A hard 10 minutes. After the tenth minute you close the tab, even halfway through."
+    },
+    {
+      "when": "Monday · 30 minutes",
+      "what": "Run the health collector and read **only the breached rows**. Against each breach write one of three decisions: fixing it this week, dropping the repository's tier, archiving it.",
+      "output": "An updated `data/repos/*.json` and a recomputed manifest — which means this page tells the truth on Monday.",
+      "timebox": "30 minutes. Fixes do not fit in that window and are not meant to."
+    },
+    {
+      "when": "Wednesday · 2 hours",
+      "what": "One block on **one** thing from P1 — the one closest to its 'done when' test. You do not start a second, even if the first gets blocked; you write the blockage down and end the block.",
+      "output": "A commit, or a 'blocked by X' entry in the repository's decision log.",
+      "timebox": "2 hours, one repository, no switching."
+    },
+    {
+      "when": "Saturday · 3 hours",
+      "what": "A second product block plus one channel session: a chapter, an episode, a post. The product block always comes first — the channel is more enjoyable and would eat the lot.",
+      "output": "Progress in P1 **and** one channel artefact. One without the other is a failed Saturday.",
+      "timebox": "2 h product + 1 h channel, in that order."
+    },
+    {
+      "when": "Last Sunday of the month · 90 minutes",
+      "what": "The dependency train: one run across the whole of P3 at once. Grouped Dependabot, one merge per repository, no reading diffs where CI is green and tests exist.",
+      "output": "The bot queue in P3 zeroed. A list of the repositories where CI fell over — those come back as individual tasks.",
+      "timebox": "90 minutes for eleven repositories. If it does not fit, the problem is the lack of grouping, not the lack of time."
+    },
+    {
+      "when": "End of the month · 45 minutes",
+      "what": "Consolidation review. One question: **has any kernel gained a second consumer?** A kernel with one consumer goes back to its source repository; it does not wait.",
+      "output": "An updated 'consolidation' tab — or a decision to reverse the extraction, written down plainly.",
+      "timebox": "45 minutes. This is a review, not a design session."
+    },
+    {
+      "when": "Quarterly · half a day",
+      "what": "Tier and archiving review. Every repository gets three questions: does it have a buyer, is it a channel, is it a kernel. Three 'no's mean P4, and a second consecutive 'no' in P4 means the archive.",
+      "output": "Changed tiers in the manifest, archived repositories, one paragraph in the README of each one closed.",
+      "timebox": "Half a day once a quarter. This is the only moment at which anything may be moved up."
+    }
+  ],
+  "healthChecks": [
+    {
+      "name": "Red CI on P0/P1",
+      "signal": "The last run of the `ci.yml` workflow on the default branch, through the GitHub API.",
+      "threshold": "P0: any failure at all. P1: a failure older than 72 h.",
+      "action": "Stop everything else. Red CI on the foundation is not a task in a queue — it is the only task."
+    },
+    {
+      "name": "CI that does not run itself",
+      "signal": "A workflow whose only trigger is `workflow_dispatch`, even though its badge hangs in the README.",
+      "threshold": "Any instance at all on P0, P1 or P2.",
+      "action": "Either restore the `push`/`pull_request` trigger, or remove the badge. A green badge for a workflow that does not run is false testimony."
+    },
+    {
+      "name": "Dependabot debt",
+      "signal": "Open PRs authored by `dependabot[bot]`, counted per repository. Today: **83 open PRs across the portfolio, 76 from the bot — 92%**.",
+      "threshold": "More than 10 in one repository, or more than 60 across the whole portfolio.",
+      "action": "Turn on grouping in `dependabot.yml` (one PR per ecosystem, not per package) and clear the backlog in one run of the train. {{term:dependabot|Dependabot debt}} is attention debt, not security debt."
+    },
+    {
+      "name": "The bot drowning out the human",
+      "signal": "The share of bot PRs among all the open PRs in a repository.",
+      "threshold": "Above 80% on a public repository.",
+      "action": "Clear the backlog immediately. At that share the first real pull request from a stranger will sink — and that is the one thing a repository is public for."
+    },
+    {
+      "name": "Age of the oldest open PR",
+      "signal": "`created_at` of the oldest open pull request.",
+      "threshold": "Above 90 days at any tier above P4.",
+      "action": "Close it with a comment, or merge it. A PR older than a quarter is a decision that was not taken — and a decision not taken costs more than a bad one."
+    },
+    {
+      "name": "Commits with no release",
+      "signal": "`git rev-list --count <ostatni-tag>..HEAD`.",
+      "threshold": "Above 30 on a repository that publishes an image or a package.",
+      "action": "Tag it. A consumer pins a version, so an unreleased commit is code nobody can use — that is, work that does not exist yet."
+    },
+    {
+      "name": "README drift",
+      "signal": "The numbers in the README (tests, components, versions) compared with what is actually in the repository.",
+      "threshold": "Any discrepancy at all on a public repository.",
+      "action": "Fix the README, not the number. This is the same class of error as a console block nobody ran — it looks like evidence and it survives review."
+    },
+    {
+      "name": "Dead links",
+      "signal": "A check of every external URL in the README and `docs/`, and of every `*.fly.dev` address promised in the documentation.",
+      "threshold": "Any 404, and **any deployment address with nothing standing behind it**.",
+      "action": "Fix the link, or write plainly that the deployment is described and not running. An address that does not answer is worse than no address."
+    },
+    {
+      "name": "Visibility that disagrees with the map",
+      "signal": "`private` from the GitHub API compared with the `visibility` field in the manifest.",
+      "threshold": "Any discrepancy at all.",
+      "action": "Fix the manifest — `scripts/check-repos.mjs` does it automatically in CI. A map showing a private repo as open promises the reader a link that will return 404."
+    },
+    {
+      "name": "No licence file",
+      "signal": "The presence of `LICENSE` in a public repository.",
+      "threshold": "Absent = immediate.",
+      "action": "Add MIT, or take the repository back to private. Public code without a licence is formally all rights reserved — nobody may legally use it, which defeats the whole point of opening it."
+    },
+    {
+      "name": "An experiment that has not been run",
+      "signal": "A designed experiment with an empty results table, present in the repository for longer than a quarter.",
+      "threshold": "Two quarters without a run.",
+      "action": "Either plan a budget and a date, or write in the document that it will not be run and why. **Do not fill the table.** There is no third option."
+    },
+    {
+      "name": "A kernel with one consumer",
+      "signal": "The number of repositories actually consuming the extracted library or image.",
+      "threshold": "Fewer than two, for two quarters after the extraction.",
+      "action": "Reverse the extraction. A library with one user is not a kernel, it is a project moved to a different directory — and you pay for it with a separate CI, a separate release and a separate README."
+    }
+  ],
+  "wipRules": [
+    "**At most two P1 repositories are active at once.** The third waits in the queue, and that is the whole rule. Four products active at the same time are four products at 25% readiness, which is zero products.",
+    "**One kernel extraction at a time.** Extraction is contagious — after the first successful one you see candidates everywhere. The second starts only once the first has **two actual consumers on main**, not in a plan.",
+    "**A new repository only after closing another** — archived, or raised to P1 and released. Thirty-five is not a target; it is a ceiling that has already been reached.",
+    "**At most one open pull request authored by a human per repository.** Two means the first is blocked, and a blocked PR rots and breeds a merge conflict.",
+    "**You do not open a repository until it passes the opening checklist.** Licence, a README that matches the truth, green CI, a secret scan, closed issues. Opening is a commitment, not an event.",
+    "**You do not start an experiment you have nothing to pay for.** A designed and unrun experiment is debt that lights up in the health check every quarter until a decision is taken.",
+    "**A blocking hour is a lost hour.** If a block gets stuck, you write the blockage down and finish — you do not switch to another repository. Switching turns one blocked thing into two half-finished ones."
+  ],
+  "automation": [
+    {
+      "name": "The portfolio manifest as the source of truth",
+      "how": "Every repository has two files: `data/repos/<slug>.json` in Polish and its twin `data/en/repos/<slug>.json` in English. `scripts/build-manifest.mjs` merges both trees into the one `site/data/portfolio.json` that is served. Adding a repository is two new files, not an HTML edit — one alone fails, because the validator compares the trees element for element. CI rejects a manifest that fails the schema, referential integrity, or parity between the languages.",
+      "where": "konradcinkusz/data/, konradcinkusz/scripts/build-manifest.mjs"
+    },
+    {
+      "name": "A drift validator on the generated manifest",
+      "how": "`build-manifest.mjs --check` regenerates the file and stops the build if the committed version differs. The same {{term:drift|pattern}} that architecture-standards uses to police the plugin catalogue — and the same class of problem.",
+      "where": "konradcinkusz/.github/workflows/validate-portfolio.yml"
+    },
+    {
+      "name": "A check on repository visibility and existence",
+      "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across thirty-five entries.",
+      "where": "konradcinkusz/scripts/check-repos.mjs"
+    },
+    {
+      "name": "The nightly health collector",
+      "how": "One scheduled workflow in the hub repository: for each slug it fetches CI status on the default branch, open PRs split between bot and human, the age of the oldest PR, commits since the last tag, the date of the last push, visibility and archive status. Thresholds are **per tier** — red CI on P0 breaches immediately, on P3 only after sixty days. It writes `data/health.json`, recomputes the manifest and opens **one** issue for the whole estate, which closes itself once the thresholds come back under the line.",
+      "where": "konradcinkusz/scripts/collect-health.mjs · scripts/health-issue.mjs · .github/workflows/health.yml"
+    },
+    {
+      "name": "Grouped Dependabot",
+      "how": "One PR per ecosystem instead of one per package, through `groups:` in `dependabot.yml`, plus a weekly interval instead of a daily one. Across the twelve repositories that have Dependabot today, that is the difference between ten PRs and one.",
+      "where": "to roll out: <repo>/.github/dependabot.yml in every P1–P3 repository"
+    },
+    {
+      "name": "A reusable CI workflow",
+      "how": "One `ci-dotnet.yml` with `workflow_call` in the hub repository; every .NET repository calls it in three lines instead of copying sixty. Today `ci.yml` exists in sixteen repositories and each one is a separate copy.",
+      "where": "to build: konradcinkusz/.github/workflows/ci-dotnet.yml"
+    },
+    {
+      "name": "A secret scan everywhere there is code",
+      "how": "`secret-scan.yml` is in eight repositories today. It should be in every one that holds code — this is exactly the kind of check whose absence you notice once, and by then it is too late.",
+      "where": "to roll out from: authservice/.github/workflows/secret-scan.yml"
+    },
+    {
+      "name": "Tag-driven deployment",
+      "how": "Pushing a `v*` tag runs the tests, detects the changes against the **previous tag**, builds the images and deploys in dependency order. A service whose Fly app does not exist is always selected — that is the one thing that lets you stand up a cold estate with a single tag. {{term:tagdeploy|The pattern}} is documented and works in eight repositories.",
+      "where": "architecture-standards/docs/guides/FLY-IO-DEPLOYMENT.md; <repo>/.github/workflows/flyio.yml"
+    },
+    {
+      "name": "Agent plugins as the way to distribute rules",
+      "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching thirty-five files.",
+      "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
+    },
+    {
+      "name": "Image publication independent of deployment",
+      "how": "The job that publishes an image to {{term:ghcr}} must not require any secret that the deployment needs — otherwise someone who never stands up their own instance cannot release a version for consumers. This error happened once in this estate and was fixed the same day.",
+      "where": "authservice/.github/workflows/publish-image.yml"
+    },
+    {
+      "name": "The profile's project table generated from the manifest",
+      "how": "The profile README maintains the project list by hand today and it has already drifted: it points at a repository that is not on the map, and omits four that are. That table should be generated from the same manifest, by the same drift validator.",
+      "where": "to build: konradcinkusz/scripts/build-readme.mjs"
+    },
+    {
+      "name": "The agent start-up playbook",
+      "how": "One saved prompt per type of task — review, modernisation, recovery — plus a rule about where the agent writes the result: always in `docs/architecture/` of the **target repository**, never in the rules repository. Without that, the rules collect content about other people's systems and stop being rules.",
+      "where": "architecture-standards/docs/PLAYBOOK.md, catalog/agents/"
+    }
+  ],
+  "quarterPlan": [
+    {
+      "horizon": "Horizon 0 · first week",
+      "goal": "The map stops lying.",
+      "steps": [
+        "Add `LICENSE` to every public repository that lacks one, or take it back to private.",
+        "Fix the project table in the profile README — today it points at a repository that is off the map and omits four that are on it.",
+        "Restore automatic triggers everywhere a CI badge hangs over a workflow that only runs by hand.",
+        "Turn on Dependabot grouping in the twelve repositories that have it, and clear the backlog in one run.",
+        "Archive the two dead repositories off this map that are sitting on forty-one bot PRs from 2020–2023."
+      ],
+      "doneWhen": "The health collector passes with no breaches, and the number of open PRs across the portfolio drops below twenty."
+    },
+    {
+      "horizon": "Horizon 1 · first month",
+      "goal": "The first kernel has two consumers on main.",
+      "steps": [
+        "Push the record/replay cassette to NuGet under its final name, checked in the registry beforehand.",
+        "Wire it into the evaluation harness — that is the consumer which, without it, cannot tell a regression from model randomness.",
+        "Wire it into the cheapest agent playground as a portability test; if it does not go in within an hour, the kernel is not neutral enough and goes back for a fix.",
+        "Write a README with one thesis and no commercial intent."
+      ],
+      "doneWhen": "Two repositories reference the published package and their tests pass without a network."
+    },
+    {
+      "horizon": "Horizon 2 · second month",
+      "goal": "Plumbing duplication stops growing.",
+      "steps": [
+        "Pick one reference implementation of `ServiceDefaults` from the four that have drifted apart, and write the decision down.",
+        "Extract from it a package containing only what is genuinely shared: authentication, database provider selection, rate limiting and background migration.",
+        "Switch two systems over, starting with the one closest to the reference version.",
+        "Add an architecture test that keeps the package from referencing anything domain-specific — that rule in prose has already failed twice in this estate."
+      ],
+      "doneWhen": "Two systems build on the package, and their local `ServiceDefaults` has slimmed down to the genuinely specific parts."
+    },
+    {
+      "horizon": "Horizon 3 · third month",
+      "goal": "One experiment gets run and written up.",
+      "steps": [
+        "Pick the cheapest of the designed experiments — the one that needs no provider, because it measures a property of the topology, not of the model.",
+        "Run it, keep the **raw event streams**, not just the summary rows; recovering traces by re-running is expensive.",
+        "Enter the results in the table that was empty, and mark plainly which numbers are hard and which are indicative.",
+        "Publish it as a post or a preprint — that is the only channel that reaches the buyer in risk and compliance."
+      ],
+      "doneWhen": "One empty table in the portfolio stops being empty, and does so without a single number nobody measured."
+    },
+    {
+      "horizon": "Horizon 4 · second quarter",
+      "goal": "One product has a named buyer and a price.",
+      "steps": [
+        "Pick one of the four P1 projects and drop the other three to P3 for the length of this horizon.",
+        "Write the one sentence you sell it with, and test it on five people in the target role — not on engineers.",
+        "Build the paid layer: retention, history, export. Not functionality — memory.",
+        "Price it per run or per retention slot, never {{term:perseat|per seat}} and never {{term:outcome|by outcome}}."
+      ],
+      "doneWhen": "There is a page with a price on it, and at least one person outside the circle of friends has asked for access."
+    },
+    {
+      "horizon": "Horizon 5 · third quarter",
+      "goal": "The portfolio shrinks to a size that can be managed.",
+      "steps": [
+        "Archive everything that has answered 'no' to all three questions for two quarters: buyer, channel, kernel.",
+        "Consolidate what survives into at most twenty active repositories.",
+        "Rewrite the README of every closed repository into one paragraph: what it was, what it proved, why it ended.",
+        "Reassign attention tiers to what is left — last quarter's tiers are already out of date."
+      ],
+      "doneWhen": "There are no more than twenty active repositories, and each has a written tier and a passing health check."
+    }
+  ]
+}

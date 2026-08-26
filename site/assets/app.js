@@ -32,11 +32,51 @@
 
   const html = (strings, ...vals) => strings.reduce((a, s, i) => a + s + (vals[i] == null ? "" : vals[i]), "");
   const list = (arr, cls) => (arr || []).map((x) => `<li${cls ? ` class="${cls}"` : ""}>${prose(x)}</li>`).join("");
-  const plural = (n, one, few, many) => (n === 1 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many);
+  // Polish has three plural forms and English two, so the forms live in ui.json
+  // as "one|few|many" (Polish) or "one|other" (English) and the rule is chosen by
+  // language rather than baked into the call site.
+  const plural = (n, key) => {
+    const f = String(t(key)).split("|");
+    if (LANG === "pl") {
+      if (n === 1) return f[0];
+      const few = n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14);
+      return few ? (f[1] ?? f[0]) : (f[2] ?? f[1] ?? f[0]);
+    }
+    return n === 1 ? f[0] : (f[1] ?? f[0]);
+  };
 
-  let DATA = null;
+  /* ---------------------------------------------------------------- język */
+  // The manifest carries both languages. Polish is the source; English is a
+  // translation with a parity check in CI, so a missing string is a build
+  // failure rather than something a reader discovers.
+  let BUNDLE = null;   // { pl: {...}, en: {...}, ui: { pl: {...}, en: {...} } }
+  let LANG = "pl";
+  let DATA = null;     // BUNDLE[LANG]
+  let UI = {};
+
+  const t = (key) => (UI[key] ?? key);
+
+  // t() with {placeholders} filled from an object. The health collector emits a
+  // key and its numbers rather than a sentence, so the sentence is written here,
+  // in the language the reader chose.
+  const tf = (key, params) => String(t(key)).replace(/\{(\w+)\}/g, (m, k) => (params && k in params ? String(params[k]) : m));
+
+  function readLang() {
+    const q = new URLSearchParams(location.search).get("lang");
+    if (q === "pl" || q === "en") return q;
+    try { const v = localStorage.getItem("kc-lang"); if (v === "pl" || v === "en") return v; } catch (e) { /* prywatne okno */ }
+    return (navigator.language || "").toLowerCase().startsWith("pl") ? "pl" : "en";
+  }
+
   const clusterOf = (id) => (DATA.clusters || []).find((c) => c.id === id) || { id, name: id, letter: "?" };
   const repoOf = (slug) => (DATA.repos || []).find((r) => r.slug === slug);
+
+  function applyStatic() {
+    document.documentElement.lang = LANG;
+    $$("[data-t]").forEach((el) => { el.innerHTML = prose(t(el.dataset.t)); });
+    $$("[data-t-ph]").forEach((el) => { el.placeholder = t(el.dataset.tPh); });
+    $$("[data-t-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.tAria)); });
+  }
 
   /* ------------------------------------------------------------------ zakładki */
   function initTabs() {
@@ -60,11 +100,11 @@
   /* -------------------------------------------------------------------- motyw */
   function initTheme() {
     const btn = $("#theme");
-    const apply = (t) => {
-      if (t === "auto") document.documentElement.removeAttribute("data-theme");
-      else document.documentElement.setAttribute("data-theme", t);
-      btn.textContent = t === "auto" ? "motyw: auto" : t === "dark" ? "motyw: ciemny" : "motyw: jasny";
-      btn.setAttribute("aria-label", `Motyw: ${t}. Kliknij, żeby zmienić.`);
+    const apply = (mode) => {
+      if (mode === "auto") document.documentElement.removeAttribute("data-theme");
+      else document.documentElement.setAttribute("data-theme", mode);
+      btn.textContent = t("theme." + mode);
+      btn.setAttribute("aria-label", t("theme.aria"));
     };
     let cur = "auto";
     try { cur = localStorage.getItem("kc-theme") || "auto"; } catch (e) { /* prywatne okno */ }
@@ -108,12 +148,12 @@
   function openTerm(id) {
     const g = (DATA.glossary || []).find((x) => x.id === id);
     if (!g) return;
-    drawer.open("Słownik", html`
+    drawer.open(t("drawer.glossary"), html`
       <h3>${esc(g.term)}</h3>
       ${g.tag ? `<div class="dbadges"><span class="gtag">${esc(g.tag)}</span></div>` : ""}
       ${(g.body || []).map((p) => `<p>${prose(p)}</p>`).join("")}
-      ${g.where ? `<h4>Gdzie w portfolio</h4><p>${prose(g.where)}</p>` : ""}
-      ${(g.slugs || []).length ? `<h4>Repozytoria</h4><div class="dlinks">${(g.slugs || []).map(repoChip).join("")}</div>` : ""}
+      ${g.where ? `<h4>${esc(t("drawer.where"))}</h4><p>${prose(g.where)}</p>` : ""}
+      ${(g.slugs || []).length ? `<h4>${esc(t("drawer.repos"))}</h4><div class="dlinks">${(g.slugs || []).map(repoChip).join("")}</div>` : ""}
     `);
   }
 
@@ -126,7 +166,7 @@
     const r = repoOf(slug);
     if (!r) return;
     const c = clusterOf(r.cluster);
-    const tier = (DATA.ops.tiers || []).find((t) => t.id === r.tier);
+    const tier = (DATA.ops.tiers || []).find((x) => x.id === r.tier);
     const gh = r.github || {};
     const dep = r.deployment || {};
 
@@ -134,15 +174,15 @@
       `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("");
     const docLinks = (r.links.docs || []).map((d) =>
       r.visibility === "private"
-        ? `<a class="dead" title="Repozytorium jest prywatne — link zadziała dopiero po otwarciu">${esc(d.label)}</a>`
+        ? `<a class="dead" title="${esc(t("drawer.privatelink"))}">${esc(d.label)}</a>`
         : `<a href="${esc(r.links.repo)}/blob/main/${esc(d.path)}" target="_blank" rel="noopener">${esc(d.label)}</a>`
     ).join("");
 
-    drawer.open(`${c.name} · poziom ${esc(r.tier)}`, html`
+    drawer.open(`${c.name} · ${t("drawer.tier")} ${esc(r.tier)}`, html`
       <h3>${esc(r.name)}</h3>
       <p class="dsub">${esc(r.slug)}</p>
       <div class="dbadges">
-        <span class="badge ${r.visibility === "public" ? "badge-pub" : "badge-priv"}">${r.visibility === "public" ? "publiczne" : "prywatne"}</span>
+        <span class="badge ${r.visibility === "public" ? "badge-pub" : "badge-priv"}">${esc(t(r.visibility === "public" ? "badge.public" : "badge.private"))}</span>
         <span class="badge badge-mut">${esc(r.state)}</span>
         <span class="badge badge-mut">${esc(r.license)}</span>
         ${tier ? `<span class="badge badge-mut">${esc(tier.name)}</span>` : ""}
@@ -150,52 +190,52 @@
 
       <p>${prose(r.summary)}</p>
 
-      <h4>Linki</h4>
+      <h4>${esc(t("drawer.links"))}</h4>
       <div class="dlinks">
         <a href="${esc(r.links.repo)}" target="_blank" rel="noopener">GitHub</a>
         ${liveLinks}${docLinks}
       </div>
 
-      ${(r.metrics || []).length ? `<h4>Liczby, które udało się zweryfikować</h4><table class="dtable">${
+      ${(r.metrics || []).length ? `<h4>${esc(t("drawer.metrics"))}</h4><table class="dtable">${
         (r.metrics || []).map((m) => `<tr><td>${esc(m.label)}</td><td>${esc(m.value)}</td></tr>`).join("")
       }</table>` : ""}
 
-      <h4>Stan repozytorium</h4>
+      <h4>${esc(t("drawer.state"))}</h4>
       <table class="dtable">
-        <tr><td>Stack</td><td>${esc((r.stack || []).join(" · ")) || "—"}</td></tr>
-        <tr><td>Język główny</td><td>${esc(r.primaryLanguage)}</td></tr>
-        <tr><td>Commity</td><td>${esc(gh.commits ?? "—")}</td></tr>
-        <tr><td>Pliki w repo</td><td>${esc(gh.files ?? "—")}</td></tr>
-        <tr><td>Ostatni commit</td><td>${esc(gh.lastCommit ?? "—")}</td></tr>
-        <tr><td>Gwiazdki</td><td>${esc(gh.stars ?? "—")}</td></tr>
-        <tr><td>Otwarte PR-y</td><td>${esc(gh.openPrs ?? 0)}${gh.dependabotPrs ? ` (w tym ${gh.dependabotPrs} od dependabota)` : ""}</td></tr>
-        <tr><td>Otwarte zgłoszenia + PR-y</td><td>${esc(gh.openIssues ?? "—")}</td></tr>
-        <tr><td>Testy</td><td>${esc(r.tests || "—")}</td></tr>
-        <tr><td>CI</td><td>${esc(r.ci || "—")}</td></tr>
-        <tr><td>Wdrożenie</td><td>${[
+        <tr><td>${esc(t("f.stack"))}</td><td>${esc((r.stack || []).join(" · ")) || "—"}</td></tr>
+        <tr><td>${esc(t("f.lang"))}</td><td>${esc(r.primaryLanguage)}</td></tr>
+        <tr><td>${esc(t("f.commits"))}</td><td>${esc(gh.commits ?? "—")}</td></tr>
+        <tr><td>${esc(t("f.files"))}</td><td>${esc(gh.files ?? "—")}</td></tr>
+        <tr><td>${esc(t("f.lastcommit"))}</td><td>${esc(gh.lastCommit ?? "—")}</td></tr>
+        <tr><td>${esc(t("f.stars"))}</td><td>${esc(gh.stars ?? "—")}</td></tr>
+        <tr><td>${esc(t("f.prs"))}</td><td>${esc(gh.openPrs ?? 0)}${gh.dependabotPrs ? ` (${t("f.prs.bot")} ${gh.dependabotPrs} ${t("f.prs.bot2")})` : ""}</td></tr>
+        <tr><td>${esc(t("f.issues"))}</td><td>${esc(gh.openIssues ?? "—")}</td></tr>
+        <tr><td>${esc(t("f.tests"))}</td><td>${esc(r.tests || "—")}</td></tr>
+        <tr><td>${esc(t("f.ci"))}</td><td>${esc(r.ci || "—")}</td></tr>
+        <tr><td>${esc(t("f.deploy"))}</td><td>${[
           dep.fly ? "Fly.io" : null, dep.docker ? "Docker" : null, dep.ghcr ? "GHCR" : null,
           dep.pages ? "GitHub Pages" : null, dep.packages ? "NuGet" : null,
-        ].filter(Boolean).join(" · ") || "brak"}</td></tr>
+        ].filter(Boolean).join(" · ") || t("f.none")}</td></tr>
       </table>
 
-      ${(r.components || []).length ? `<h4>Komponenty</h4>${
+      ${(r.components || []).length ? `<h4>${esc(t("drawer.components"))}</h4>${
         (r.components || []).map((k) => html`
           <div class="dcomp ${k.reusable ? "reusable" : ""}">
-            <b>${esc(k.name)}</b>${k.reusable ? ' <span class="badge badge-accent">do wydzielenia</span>' : ""}
+            <b>${esc(k.name)}</b>${k.reusable ? ` <span class="badge badge-accent">${esc(t("badge.extract"))}</span>` : ""}
             <span class="path">${esc(k.path)}</span>
             <span class="d">${prose(k.description)}</span>
           </div>`).join("")
       }` : ""}
 
-      ${(r.highlights || []).length ? `<h4>Co tu jest mocne</h4><ul>${list(r.highlights, "good")}</ul>` : ""}
-      ${(r.gaps || []).length ? `<h4>Luki</h4><ul>${list(r.gaps)}</ul>` : ""}
-      ${(r.risks || []).length ? `<h4>Ryzyka</h4><ul>${list(r.risks, "bad")}</ul>` : ""}
-      ${(r.next || []).length ? `<h4>Następne kroki</h4><ul>${list(r.next)}</ul>` : ""}
+      ${(r.highlights || []).length ? `<h4>${esc(t("drawer.strong"))}</h4><ul>${list(r.highlights, "good")}</ul>` : ""}
+      ${(r.gaps || []).length ? `<h4>${esc(t("drawer.gaps"))}</h4><ul>${list(r.gaps)}</ul>` : ""}
+      ${(r.risks || []).length ? `<h4>${esc(t("drawer.risks"))}</h4><ul>${list(r.risks, "bad")}</ul>` : ""}
+      ${(r.next || []).length ? `<h4>${esc(t("drawer.next"))}</h4><ul>${list(r.next)}</ul>` : ""}
 
-      <h4>Pozycja produktowa</h4>
+      <h4>${esc(t("drawer.product"))}</h4>
       <p>${prose(r.product)}</p>
 
-      ${(r.overlaps || []).length ? `<h4>Pokrywa się z</h4><ul>${
+      ${(r.overlaps || []).length ? `<h4>${esc(t("drawer.overlaps"))}</h4><ul>${
         (r.overlaps || []).map((o) => {
           const other = repoOf(o.slug);
           return `<li><a href="#" data-repo="${esc(o.slug)}">${esc(other ? other.name : o.slug)}</a> — ${prose(o.reason)}</li>`;
@@ -218,7 +258,7 @@
             <h3>${esc(r.name)}</h3>
             <p class="slug">${esc(r.slug)}</p>
           </div>
-          <span class="badge ${r.visibility === "public" ? "badge-pub" : "badge-priv"}">${r.visibility === "public" ? "publiczne" : "prywatne"}</span>
+          <span class="badge ${r.visibility === "public" ? "badge-pub" : "badge-priv"}">${esc(t(r.visibility === "public" ? "badge.public" : "badge.private"))}</span>
         </div>
         <p class="one">${prose(r.oneLiner)}</p>
         ${reusable.length ? `<ul>${reusable.slice(0, 3).map((k) => `<li class="star">${esc(k.name)}</li>`).join("")}</ul>` : ""}
@@ -237,19 +277,21 @@
     const prs = repos.reduce((a, r) => a + ((r.github && r.github.openPrs) || 0), 0);
     const bots = repos.reduce((a, r) => a + ((r.github && r.github.dependabotPrs) || 0), 0);
 
+    if (DATA.meta.scope) $("#scope-note").innerHTML = prose(DATA.meta.scope);
+
     $("#stats").innerHTML = html`
-      <div class="stat"><div class="v">${repos.length}</div><div class="l">repozytoriów na mapie</div></div>
-      <div class="stat good"><div class="v">${pub}</div><div class="l">publicznych · ${repos.length - pub} prywatnych</div></div>
-      <div class="stat"><div class="v">${(DATA.clusters || []).length}</div><div class="l">${plural((DATA.clusters || []).length, "substrat", "substraty", "substratów")}</div></div>
-      <div class="stat"><div class="v">${(DATA.kernels || []).length}</div><div class="l">${plural((DATA.kernels || []).length, "kernel", "kernele", "kerneli")} do wydzielenia</div></div>
-      <div class="stat"><div class="v">${deployed}</div><div class="l">z żywym wdrożeniem</div></div>
-      <div class="stat ${prs > 40 ? "alert" : prs > 15 ? "warn" : ""}"><div class="v">${prs}</div><div class="l">otwartych PR-ów · ${bots} od bota</div></div>`;
+      <div class="stat"><div class="v">${repos.length}</div><div class="l">${esc(t("stat.reposOnMap"))}</div></div>
+      <div class="stat good"><div class="v">${pub}</div><div class="l">${esc(t("stat.public"))} · ${repos.length - pub} ${esc(t("stat.private"))}</div></div>
+      <div class="stat"><div class="v">${(DATA.clusters || []).length}</div><div class="l">${plural((DATA.clusters || []).length, "plural.substrates")}</div></div>
+      <div class="stat"><div class="v">${(DATA.kernels || []).length}</div><div class="l">${plural((DATA.kernels || []).length, "plural.kernels")}</div></div>
+      <div class="stat"><div class="v">${deployed}</div><div class="l">${esc(t("stat.deployed"))}</div></div>
+      <div class="stat ${prs > 40 ? "alert" : prs > 15 ? "warn" : ""}"><div class="v">${prs}</div><div class="l">${esc(t("stat.openPrs"))} · ${bots} ${esc(t("stat.fromBot"))}</div></div>`;
 
     const byCluster = (DATA.clusters || []).map((c) => {
       const inC = repos.filter((r) => r.cluster === c.id);
       if (!inC.length) return "";
       const barrier = c.barrier
-        ? `<div class="barrier"><span class="bx">⟂ nie łączyć</span><p class="bt">${prose(c.barrier)}</p></div>`
+        ? `<div class="barrier"><span class="bx">${esc(t("barrier.dontmerge"))}</span><p class="bt">${prose(c.barrier)}</p></div>`
         : "";
       return html`
         <div class="substrate" data-c="${esc(c.letter)}">
@@ -307,7 +349,7 @@
         <h3>${esc(k.id)} · ${prose(k.name)}</h3>
         <p class="src">${esc(k.sourceSlug)}/${esc(k.sourcePath)}</p>
         <div class="chips">
-          <span class="badge ${k.effort === "zrobione" ? "badge-pub" : k.effort === "godziny" ? "badge-accent" : k.effort === "dni" ? "badge-warn" : "badge-alert"}">${esc(k.effort)}</span>
+          <span class="badge ${{ done: "badge-pub", hours: "badge-accent", days: "badge-warn", weeks: "badge-alert" }[k.effort] || "badge-mut"}">${esc(t("effort." + k.effort))}</span>
           <span class="chip-s">${esc(k.licence)}</span>
         </div>
         <ul>${list(k.readiness)}</ul>
@@ -316,7 +358,7 @@
       </article>`).join("");
 
     $("#kernels-rejected").innerHTML = (DATA.kernelsRejected || []).map((k) => html`
-      <div class="dup" data-sev="niska">
+      <div class="dup" data-sev="low">
         <p class="p">${prose(k.name)}</p>
         <p class="r">${prose(k.reason)}</p>
       </div>`).join("");
@@ -344,11 +386,11 @@
     const op = DATA.distribution.openPaid;
     $("#rule-line").innerHTML = prose(op.rule);
     $("#pane-open").innerHTML = html`
-      <h3>Otwarte</h3>
+      <h3>${esc(t("pane.open"))}</h3>
       <p class="role">${prose(op.openRole)}</p>
       <ul>${(op.open || []).map((x) => `<li>${prose(x)}</li>`).join("")}</ul>`;
     $("#pane-paid").innerHTML = html`
-      <h3>Płatne</h3>
+      <h3>${esc(t("pane.paid"))}</h3>
       <p class="role">${prose(op.paidRole)}</p>
       <div class="prod">${(op.paid || []).map((p) => html`
         <div class="p">
@@ -390,12 +432,12 @@
     const o = DATA.ops;
 
     $("#ops-stats").innerHTML = html`
-      <div class="stat"><div class="v">${(DATA.repos || []).length}</div><div class="l">repozytoriów pod opieką jednej osoby</div></div>
-      <div class="stat"><div class="v">${(o.tiers || []).length}</div><div class="l">${plural((o.tiers || []).length, "poziom uwagi", "poziomy uwagi", "poziomów uwagi")}</div></div>
-      <div class="stat"><div class="v">${(o.cadence || []).length}</div><div class="l">${plural((o.cadence || []).length, "rytuał", "rytuały", "rytuałów")} w cyklu</div></div>
-      <div class="stat"><div class="v">${(o.healthChecks || []).length}</div><div class="l">${plural((o.healthChecks || []).length, "kontrola zdrowia", "kontrole zdrowia", "kontroli zdrowia")}</div></div>
-      <div class="stat"><div class="v">${(o.automation || []).length}</div><div class="l">${plural((o.automation || []).length, "automat", "automaty", "automatów")}</div></div>
-      <div class="stat"><div class="v">${(o.quarterPlan || []).length}</div><div class="l">${plural((o.quarterPlan || []).length, "horyzont", "horyzonty", "horyzontów")}</div></div>`;
+      <div class="stat"><div class="v">${(DATA.repos || []).length}</div><div class="l">${esc(t("stat.onePerson"))}</div></div>
+      <div class="stat"><div class="v">${(o.tiers || []).length}</div><div class="l">${plural((o.tiers || []).length, "plural.tiers")}</div></div>
+      <div class="stat"><div class="v">${(o.cadence || []).length}</div><div class="l">${plural((o.cadence || []).length, "plural.rituals")}</div></div>
+      <div class="stat"><div class="v">${(o.healthChecks || []).length}</div><div class="l">${plural((o.healthChecks || []).length, "plural.healthChecks")}</div></div>
+      <div class="stat"><div class="v">${(o.automation || []).length}</div><div class="l">${plural((o.automation || []).length, "plural.automations")}</div></div>
+      <div class="stat"><div class="v">${(o.quarterPlan || []).length}</div><div class="l">${plural((o.quarterPlan || []).length, "plural.horizons")}</div></div>`;
 
     $("#principles").innerHTML = (o.principles || []).map((p, i) => html`
       <article class="principle">
@@ -404,17 +446,17 @@
         <p>${prose(p.body)}</p>
       </article>`).join("");
 
-    $("#tiers").innerHTML = (o.tiers || []).map((t, i) => html`
+    $("#tiers").innerHTML = (o.tiers || []).map((ti, i) => html`
       <div class="tier" data-t="${i + 1}">
-        <h3>${esc(t.id)} · ${prose(t.name)}
-          <span class="chip-s">${(t.slugs || []).length} ${plural((t.slugs || []).length, "repo", "repa", "repozytoriów")}</span>
+        <h3>${esc(ti.id)} · ${prose(ti.name)}
+          <span class="chip-s">${(ti.slugs || []).length} ${plural((ti.slugs || []).length, "plural.repos")}</span>
         </h3>
-        <p class="def">${prose(t.definition)}</p>
+        <p class="def">${prose(ti.definition)}</p>
         <div class="slo">
-          <div><b>Poziom obsługi</b>${prose(t.slo)}</div>
-          <div><b>Budżet czasu</b>${prose(t.budget)}</div>
+          <div><b>${esc(t("tier.slo"))}</b>${prose(ti.slo)}</div>
+          <div><b>${esc(t("tier.budget"))}</b>${prose(ti.budget)}</div>
         </div>
-        <div class="members">${(t.slugs || []).map((s) => {
+        <div class="members">${(ti.slugs || []).map((s) => {
           const r = repoOf(s);
           return `<button data-repo="${esc(s)}">${esc(r ? r.name : s)}</button>`;
         }).join("")}</div>
@@ -430,31 +472,29 @@
 
     const h = DATA.health;
     $("#health-live").innerHTML = !h
-      ? `<div class="barrier"><span class="bx">brak danych</span><p class="bt">Kolektor nigdy nie został uruchomiony.
-           Odpal <code>GH_TOKEN=… node scripts/collect-health.mjs</code> albo włącz nocny workflow, a ta sekcja
-           wypełni się sama. Do tego czasu liczby w kartach repozytoriów są <b>migawką z jednego dnia</b>.</p></div>`
+      ? `<div class="barrier"><span class="bx">${esc(t("health.nodata.tag"))}</span><p class="bt">${prose(t("health.nodata.body"))}</p></div>`
       : html`
         <div class="stats">
-          <div class="stat"><div class="v">${h.totals.repositories}</div><div class="l">sprawdzonych repozytoriów</div></div>
-          <div class="stat ${h.totals.ciFailing ? "alert" : "good"}"><div class="v">${h.totals.ciFailing}</div><div class="l">z czerwonym CI</div></div>
-          <div class="stat ${h.totals.openPrs > 40 ? "warn" : ""}"><div class="v">${h.totals.openPrs}</div><div class="l">otwartych PR-ów · ${h.totals.botPrs} od bota</div></div>
-          <div class="stat ${h.totals.breaches ? "warn" : "good"}"><div class="v">${h.totals.breaches}</div><div class="l">przekroczonych progów</div></div>
-          <div class="stat"><div class="v" style="font-size:15px">${esc(h.collectedAt)}</div><div class="l">data zbiórki</div></div>
+          <div class="stat"><div class="v">${h.totals.repositories}</div><div class="l">${esc(t("health.checked"))}</div></div>
+          <div class="stat ${h.totals.ciFailing ? "alert" : "good"}"><div class="v">${h.totals.ciFailing}</div><div class="l">${esc(t("health.redCi"))}</div></div>
+          <div class="stat ${h.totals.openPrs > 40 ? "warn" : ""}"><div class="v">${h.totals.openPrs}</div><div class="l">${esc(t("stat.openPrs"))} · ${h.totals.botPrs} ${esc(t("stat.fromBot"))}</div></div>
+          <div class="stat ${h.totals.breaches ? "warn" : "good"}"><div class="v">${h.totals.breaches}</div><div class="l">${esc(t("health.breaches"))}</div></div>
+          <div class="stat"><div class="v" style="font-size:15px">${esc(h.collectedAt)}</div><div class="l">${esc(t("health.collectedAt"))}</div></div>
         </div>
-        ${h.breaches.length ? `<div class="check-head"><span>poziom</span><span>repozytorium</span><span>kontrola</span><span>szczegół</span></div>` +
+        ${h.breaches.length ? `<div class="check-head"><span>${esc(t("breach.tier"))}</span><span>${esc(t("breach.repo"))}</span><span>${esc(t("breach.check"))}</span><span>${esc(t("breach.detail"))}</span></div>` +
           h.breaches.map((b) => {
             const r = repoOf(b.slug);
             return `<div class="check">
               <div class="n">${esc(b.tier)}</div>
               <div class="s"><a href="#" data-repo="${esc(b.slug)}">${esc(r ? r.name : b.slug)}</a></div>
-              <div class="t">${esc(b.check)}</div>
-              <div class="a">${esc(b.detail)}</div>
+              <div class="t">${esc(t(`breach.${b.check}.name`))}</div>
+              <div class="a">${esc(tf(`breach.${b.check}`, b.params))}</div>
             </div>`;
           }).join("")
-          : `<div class="barrier" style="background:var(--good-bg);border-left-color:var(--good)"><span class="bx" style="color:var(--good)">czysto</span><p class="bt">Żaden próg nie jest przekroczony.</p></div>`}`;
+          : `<div class="barrier" style="background:var(--good-bg);border-left-color:var(--good)"><span class="bx" style="color:var(--good)">${esc(t("health.clean.tag"))}</span><p class="bt">${esc(t("health.clean.body"))}</p></div>`}`;
 
     $("#health").innerHTML =
-      `<div class="check-head"><span>sygnał</span><span>skąd go bierzesz</span><span>próg</span><span>co robisz po przekroczeniu</span></div>` +
+      `<div class="check-head"><span>${esc(t("check.signal"))}</span><span>${esc(t("check.source"))}</span><span>${esc(t("check.threshold"))}</span><span>${esc(t("check.action"))}</span></div>` +
       (o.healthChecks || []).map((h) => html`
         <div class="check">
           <div class="n">${prose(h.name)}</div>
@@ -567,11 +607,11 @@
       <article class="gloss" id="t-${esc(g.id)}">
         <h3>${esc(g.term)}${g.tag ? ` <span class="gtag">${esc(g.tag)}</span>` : ""}</h3>
         ${(g.body || []).map((p) => `<p>${prose(p)}</p>`).join("")}
-        ${g.where ? `<p class="where"><b>Gdzie:</b> ${prose(g.where)}</p>` : ""}
+        ${g.where ? `<p class="where"><b>${esc(t("gloss.where"))}</b> ${prose(g.where)}</p>` : ""}
       </article>`).join("");
 
     const search = $("#gl-search");
-    const tally = (n) => { $("#gl-count").textContent = `${n} ${plural(n, "termin", "terminy", "terminów")}`; };
+    const tally = (n) => { $("#gl-count").textContent = `${n} ${plural(n, "plural.terms")}`; };
     tally(sorted.length);
     search.addEventListener("input", () => {
       const q = search.value.trim().toLowerCase();
@@ -622,33 +662,42 @@
   }
 
   /* -------------------------------------------------------------------- start */
-  async function boot() {
-    const showTab = initTabs();
-    drawer.init();
-    try {
-      const res = await fetch("data/portfolio.json", { cache: "no-cache" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      DATA = await res.json();
-    } catch (err) {
-      $("#boot").innerHTML =
-        `<div class="err"><b>Nie udało się wczytać <code>data/portfolio.json</code>.</b><br>${esc(err.message)}
+
+  // The only user-visible strings in this file. They have to be here: they are
+  // what the page says when the bundle that carries every other string failed to
+  // load, so reading them out of that bundle would be circular.
+  const BOOT_ERROR = {
+    pl: (m) => `<div class="err"><b>Nie udało się wczytać <code>data/portfolio.json</code>.</b><br>${m}
          <br><br>Strona jest statyczna i czyta ten jeden plik. Jeśli otwierasz ją z dysku przez
          <code>file://</code>, przeglądarka zablokuje odczyt — uruchom <code>python3 -m http.server</code>
-         w katalogu <code>site/</code> i wejdź na <code>http://localhost:8000</code>.</div>`;
-      return;
-    }
+         w katalogu <code>site/</code> i wejdź na <code>http://localhost:8000</code>.</div>`,
+    en: (m) => `<div class="err"><b>Could not load <code>data/portfolio.json</code>.</b><br>${m}
+         <br><br>This page is static and reads that one file. If you opened it from disk over
+         <code>file://</code> the browser will refuse to read it — run <code>python3 -m http.server</code>
+         in <code>site/</code> and go to <code>http://localhost:8000</code>.</div>`,
+  };
 
-    const plain = (s) => String(s).replace(/&nbsp;/g, " ").replace(/<[^>]+>/g, "");
+  // Everything the manifest drives. Called once at boot and again on every
+  // language switch, so a switch cannot leave half the page in the old language.
+  function renderAll(showTab) {
+    const plain = (x) => String(x).replace(/&nbsp;/g, " ").replace(/<[^>]+>/g, "");
     document.title = `${plain(DATA.meta.title)} — ${DATA.meta.owner}`;
+    // The static <meta> in the file is the Polish fallback a crawler with no
+    // JavaScript sees; once the manifest is here it becomes the current language.
+    const desc = $("#meta-desc");
+    if (desc) desc.setAttribute("content", plain(DATA.meta.subtitle));
     $("#mast-title").innerHTML = prose(DATA.meta.title);
     $("#mast-sub").innerHTML = prose(DATA.meta.subtitle);
     $("#mast-stamp").textContent = DATA.meta.stamp;
     $("#mast-links").innerHTML = (DATA.meta.links || [])
       .map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")
-      + `<button class="theme-btn" id="theme" type="button">motyw</button>`;
+      + `<button class="lang-btn" id="lang" type="button">${esc(t("lang.switch"))}</button>`
+      + `<button class="theme-btn" id="theme" type="button">${esc(t("theme.auto"))}</button>`;
+    $("#lang").setAttribute("aria-label", t("lang.aria"));
     initTheme();
+    initLang();
 
-    $("#boot").remove();
+    applyStatic();
     renderPortfolio();
     initPortfolioFilters();
     renderConsolidation();
@@ -656,15 +705,62 @@
     renderIndex();
     initIndex();
     renderGlossary();
-    initDelegation(showTab);
 
+    // Tab counts are appended, so a re-render has to strip the previous ones or
+    // the second language would show "35 35".
     $$(".tabrow button").forEach((b) => {
-      const n = { portfolio: (DATA.repos || []).length, konsolidacja: (DATA.kernels || []).length + (DATA.duplications || []).length,
-        operacje: (DATA.ops.quarterPlan || []).length, indeks: (DATA.repos || []).length, slownik: (DATA.glossary || []).length }[b.dataset.tab];
+      const old = b.querySelector(".n"); if (old) old.remove();
+      const n = { portfolio: (DATA.repos || []).length,
+        konsolidacja: (DATA.kernels || []).length + (DATA.duplications || []).length,
+        operacje: (DATA.ops.quarterPlan || []).length,
+        indeks: (DATA.repos || []).length,
+        slownik: (DATA.glossary || []).length }[b.dataset.tab];
       if (n != null) b.insertAdjacentHTML("beforeend", ` <span class="n">${n}</span>`);
     });
-
     trackSections();
+  }
+
+  function setLang(next, showTab) {
+    LANG = next;
+    DATA = BUNDLE[LANG];
+    UI = BUNDLE.ui[LANG] || {};
+    try { localStorage.setItem("kc-lang", LANG); } catch (e) { /* prywatne okno */ }
+    renderAll(showTab);
+  }
+
+  function initLang() {
+    const btn = $("#lang");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      // The drawer holds a repo rendered in the old language; close it rather
+      // than leave a Polish panel over an English page. Guarded, because close()
+      // restores focus to whatever opened it and would steal it from this button.
+      if (!drawer.node.hidden) drawer.close();
+      setLang(LANG === "pl" ? "en" : "pl", null);
+    });
+  }
+
+  async function boot() {
+    const showTab = initTabs();
+    drawer.init();
+    LANG = readLang();
+    try {
+      const res = await fetch("data/portfolio.json", { cache: "no-cache" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      BUNDLE = await res.json();
+    } catch (err) {
+      $("#boot").innerHTML = BOOT_ERROR[LANG === "pl" ? "pl" : "en"](esc(err.message));
+      return;
+    }
+
+    if (!BUNDLE[LANG]) LANG = BUNDLE.pl ? "pl" : Object.keys(BUNDLE).find((k) => k !== "ui");
+    DATA = BUNDLE[LANG];
+    UI = (BUNDLE.ui || {})[LANG] || {};
+
+    $("#boot").remove();
+    renderAll(showTab);
+    initDelegation(showTab);
+
     if (location.hash.startsWith("#t-")) openTerm(location.hash.slice(3));
   }
 

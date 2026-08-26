@@ -1,0 +1,119 @@
+{
+  "slug": "agent-eval-bench-factorial",
+  "name": "agent-eval-bench-factorial",
+  "cluster": "F-meta",
+  "visibility": "private",
+  "state": "stable",
+  "tier": "P4",
+  "oneLiner": "A private meta layer over `agent-eval-bench`: a 3976-line LaTeX document for one job interview plus an audit of the author's own repo.",
+  "summary": "The repository holds exactly what must not be let into `agent-eval-bench`, because that one is designed to be published together with its whole git history: interview preparation and negotiating context. The core is `interview/interview-prep.tex` — six sections, 92 blocks, built around one editorial decision: language plays two different roles here and the two are physically separated. The Polish prose is coaching commentary, and every sentence meant to be said out loud sits in a separate `sayblock` box in English, of which there are 333. Alongside it, `front.tex` carries a crib sheet of numbers, a list of banned sentences and a separate table of out-of-date lines in the public repo, and `context/FACTORIAL-CONTEXT.md` carries 241 lines of material about the company, the process and the pay calculations. The `build.mjs` generator assembles the `.tex` from `drafts.json`, and its {{term:provenance|provenance}} is checkable rather than declared: run again it produces a file byte-for-byte identical to the version in the repo. That same finding is, however, a charge against the README, which claims the `.tex` has already moved into hand-editing mode.",
+  "stack": ["LaTeX (pdflatex, article, babel polish)", "tcolorbox", "tabularx / booktabs", "Node.js 22 ESM", "GitHub Actions", "xu-cheng/latex-action@v4"],
+  "primaryLanguage": "TeX",
+  "license": "brak pliku LICENSE",
+  "tests": "No tests — the repo contains not a single test file and no framework. The only verification is the {{term:determinizm|deterministic}} generator run, which produces a result identical to the committed `.tex`.",
+  "ci": "One workflow, `build-interview-pdf.yml`, 67 lines, triggered only by hand through `workflow_dispatch`. It builds `interview-prep.tex`, renames it to `Przygotowanie_do_rozmowy_PRYWATNE.pdf` and publishes it as an artefact for 30 days; the file header explains why there is no build on push, and warns that the artefact is private. No linting.",
+  "metrics": [
+    { "label": "Lines in `interview-prep.tex`", "value": "3,976" },
+    { "label": "`sayblock` boxes (English scripts)", "value": "333" },
+    { "label": "Q&A blocks (`qablock`)", "value": "38" },
+    { "label": "Sections / blocks in `drafts.json`", "value": "6 / 92" },
+    { "label": "Characters of block content", "value": "236,726" },
+    { "label": "Characters of adversarial review", "value": "24,102" },
+    { "label": "Files in git / commits", "value": "9 / 2" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/agent-eval-bench-factorial",
+    "live": [],
+    "docs": [
+      { "label": "Interview preparation (source)", "path": "interview/interview-prep.tex" },
+      { "label": "Crib sheet of numbers and fix list for the public repo", "path": "interview/front.tex" },
+      { "label": "Interview context", "path": "context/FACTORIAL-CONTEXT.md" },
+      { "label": "Source material with the adversarial review", "path": "interview/generator/drafts.json" },
+      { "label": "Workflow that builds the PDF", "path": ".github/workflows/build-interview-pdf.yml" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "preamble.tex",
+      "path": "interview/preamble.tex",
+      "description": "133 lines: A4 geometry, Polish `babel`, a seven-colour palette shared with the papers in `agent-eval-bench`, and six custom `tcolorbox` environments. The split between `sayblock` (the text to be spoken) and the prose around it is defined here as a mechanism, not an editorial convention.",
+      "reusable": true
+    },
+    {
+      "name": "Generator LaTeX-a",
+      "path": "interview/generator/build.mjs",
+      "description": "193 lines of Node ESM converting markdown-shaped JSON into LaTeX: escaping that handles the active quotation mark from Polish `babel`, markdown tables into `tabularx`, `[EN]...[/EN]` markers into boxes. Its only tie to the domain is a constant array of section titles.",
+      "reusable": true
+    },
+    {
+      "name": "Workflow that builds the PDF on demand",
+      "path": ".github/workflows/build-interview-pdf.yml",
+      "description": "The 'a PDF is a run artefact, not a commit' pattern: `permissions: contents: read`, `timeout-minutes: 15`, `concurrency` with `cancel-in-progress`, 30-day retention. Apart from the output file name there is nothing domain-specific in it.",
+      "reusable": true
+    },
+    {
+      "name": "interview-prep.tex",
+      "path": "interview/interview-prep.tex",
+      "description": "Six numbered sections — three versions of the story, evals, agent and architecture, the awkward questions, mapping onto the role and the Live Challenge, questions for them — plus two starred ones. 19 subsections and 29 tables; the Polish commentary never mixes with the English script in the same paragraph.",
+      "reusable": false
+    },
+    {
+      "name": "front.tex — the cheat sheet and the fix list",
+      "path": "interview/front.tex",
+      "description": "A table of the numbers you must not get wrong (35 scenarios, 313 assertions, 20 hard-gated), an explicit list of banned sentences, and a separate table of five out-of-date lines in the public `agent-eval-bench`, with the files and the values.",
+      "reusable": false
+    },
+    {
+      "name": "drafts.json — source material and critique",
+      "path": "interview/generator/drafts.json",
+      "description": "506 lines, 282 KB. Alongside the 92 content blocks it carries a `critique` field: 24,102 characters of adversarial review listing fifteen of its own factual errors, four of them out-of-date artefacts in the public repo.",
+      "reusable": false
+    },
+    {
+      "name": "context/FACTORIAL-CONTEXT.md",
+      "path": "context/FACTORIAL-CONTEXT.md",
+      "description": "241 lines: interview assets ranked by strength, a profile of the company's developer surface, a table of net pay calculations, a BATNA naming other companies, and the four stages of the process. This is the part that forces the repo to stay private.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "agent-eval-bench", "reason": "The repo exists solely to talk about that one, and at the same time it makes sure nothing from here leaks into the version meant for publication." },
+    { "slug": "architecture-standards", "reason": "The README cites `00-RESEARCH-DOCUMENTATION.md` as the source of the rule about not committing PDFs; `.gitignore` enforces the same constraint." },
+    { "slug": "llm-book", "reason": "The same production pattern: a custom preamble, palette and `tcolorbox` boxes, the PDF built in CI and kept out of git." },
+    { "slug": "maf-book", "reason": "An identical preamble and `tcolorbox` environment convention, and the same rule that the PDF is a build output." },
+    { "slug": "copilot-scope", "reason": "Named in the material as the fourth interview asset and a ready answer on the thread about tooling for the credibility of AI features." },
+    { "slug": "konrad-cinkusz-cv-maker", "reason": "The same self-presentation layer over the same portfolio, only through a different channel." }
+  ],
+  "product": "No buyer, and that is the intent. This is purely personal material: preparation for one recruitment process plus an audit of your own public repo, and if it works what you win is an offer, not a product. The one thing that could be resold is the method: a document with the roles of the two languages separated, a crib sheet of numbers, a list of banned sentences, and a table of things to fix before you send the link. Written up without any of that content it would be a public pattern rather than interview material.",
+  "highlights": [
+    "The generator run again on a copy of the repo produced an `interview-prep.tex` **byte-for-byte identical** to the committed version — the {{term:provenance|provenance}} of the text is checkable, not declared in the README.",
+    "333 `sayblock` boxes embedded in Polish coaching commentary: the split between what you understand and what you say is enforced by the LaTeX environment, so it cannot be blurred by accident.",
+    "`drafts.json` carries 24,102 characters of **adversarial review of its own material**, pointing at fifteen factual errors; some of the corrections are already visible in `front.tex` (160 lines of ServiceDefaults instead of 137).",
+    "The crib sheet contains a list of banned sentences — including the fact that the {{term:mutation|mutation}} run caught three of four variants, not all of them. Sales material that blocks its own overstatement.",
+    "The workflow is deliberately manual only, with a comment justifying the decision: the document has no release cycle, so a build on push would be noise."
+  ],
+  "gaps": [
+    "**The README claims the `.tex` is the source of truth for hand-editing and that the generator must not be run again — and today the file is identical to its output.** Not one manual correction has been made, so the declared working mode has not started yet.",
+    "The README states the PDF is 93 pages; that cannot be confirmed from the repo, because the PDF is not committed and there is no `pdflatex` locally.",
+    "The fifteen points in the `critique` field carry no state marker — you cannot tell the closed ones from the open ones, apart from those that happen to be visible as corrected in `front.tex`.",
+    "The fix list for the public `agent-eval-bench` is a checklist in a PDF, not a test. Nothing watches that it gets done and nothing will notice if the link goes out first.",
+    "The numbers in the crib sheet are a dated snapshot from 2026-08-15 and the README itself tells you to recount them before the interview; nothing automates that, and the scenario corpus keeps changing."
+  ],
+  "next": [
+    "Fire off **Build Interview PDF** in Actions and either confirm the declared 93 pages or correct the number in the README.",
+    "Go through the fifteen `critique` points and mark in `drafts.json` which are closed — today it is one indistinguishable wall of text.",
+    "Work through the 'To fix in the repo' table in the public `agent-eval-bench` (the stale 19/20, 32 of 32, the comments in `judge.yaml` and `IMcpToolSession.cs`) and then delete the table from `front.tex`.",
+    "Settle the status of the generator: either add a refusal to overwrite an existing `.tex` to `build.mjs`, or strike the sentence about hand-editing from the README, because today the two contradict each other.",
+    "Recount the crib sheet the day before the interview — the scenario and assertion numbers move with the corpus."
+  ],
+  "risks": [
+    "The repo **must** stay private: the pay range, a BATNA naming other companies, a subjective assessment of an employer and the names of third parties. The README says so outright and that is the only safeguard.",
+    "The slug starts with `agent-eval-bench`, so in a repository list the private one and the public one differ by a suffix. On the day that one is published its whole git history goes with it, and the mistake is one click.",
+    "The generator is described as one-off scaffolding, but nothing in the code blocks a second run — after the first hand edit it will wipe the `.tex` without warning.",
+    "No `LICENSE` file — the only repo in the portfolio without a declaration. Private, so no consequences today, but on a change of owner or visibility it is an open question."
+  ],
+  "headline": "Material finished and checkable; the README describes a working mode that has not started",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-16", "commits": 2, "files": 9 }
+}

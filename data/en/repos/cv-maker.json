@@ -1,0 +1,210 @@
+{
+  "slug": "cv-maker",
+  "name": "cv-maker",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Tailored CV generator in which the model never writes LaTeX: the agent returns JSON, .NET binds it to a template and typesets it in a sandbox.",
+  "summary": "The user pastes in a job advert, enters their own facts and picks one of two templates; they get a typeset PDF and never see any LaTeX. The key decision is a negative one: **the model does not generate typesetting code**. Agents return JSON conforming to a schema, `TemplateBinder` builds a fully escaped view model out of it, and only that reaches the Scriban template owned by the repository, so by construction the model's output cannot create a control sequence. The second rule is {{term:provenance}} enforced mechanically rather than by prompt: every bullet and heading must cite a `factId` from the candidate profile, and `FactReferenceValidator` rejects content with unresolvable references, so generation fails rather than releasing a PDF with an invented employer. Typesetting itself sits in a separate service with a TeX Live image: no shell escape, `openin_any`/`openout_any=p`, a working directory per compilation and a hard 30 s timeout. The agent layer reads `cv-generation-flow.json` (five agent definitions, one capped revision run) and has a {{term:determinizm|deterministic}} `MockAgentRuntime`, thanks to which the whole pipeline runs offline, with no Azure account and no keys. Identity is lifted out into an external `authservice` — the API validates the token through JWKS and holds no key material at all.",
+  "stack": [
+    ".NET 9",
+    "ASP.NET Core Minimal API",
+    "Blazor WebAssembly 9.0.11",
+    "EF Core + Npgsql 9.0.4",
+    "Scriban 7.2.6",
+    "Azure.AI.Agents.Persistent 1.1.0",
+    "LuaLaTeX / TeX Live w kontenerze",
+    "Docker Compose + Fly.io + Bicep"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT, z wendorowanym `templates/altacv-modern/assets/altacv.cls` na LPPL 1.3c odnotowanym w LICENSE",
+  "tests": "One test project, `tests/CvMaker.Tests`: 51 test methods (43 [Fact] + 8 [Theory] with 44 [InlineData] rows) across 5 files, 1,077 lines; the number of passing cases has not been verified, because `dotnet test` was never run. Covered are `LatexEscaper` (the injection corpus), `FactReferenceValidator`, `TemplateBinder`, `ProfileContentBuilder` and the agent output parser — `CvMaker.Api` and `CvMaker.Web` have no unit tests at all.",
+  "ci": "Three workflows. `ci.yml` has three jobs: a .NET build and test with a check that the migrations match the model; a sandbox job that starts the renderer image with production hardening and, in separate steps, proves that reading files outside the working directory is refused, that `\\write18` is absent and that a compilation is killed on timeout; and an end-to-end job that brings up the full stack from compose and generates a PDF from both templates. `flyio.yml` deploys only on a `v*` tag, and `secret-scan.yml` runs gitleaks as a container over the full history.",
+  "metrics": [
+    {
+      "label": "Commits",
+      "value": "49"
+    },
+    {
+      "label": "Files in git",
+      "value": "135"
+    },
+    {
+      "label": "Git tags",
+      "value": "0"
+    },
+    {
+      "label": ".NET projects",
+      "value": "6 src + 1 test"
+    },
+    {
+      "label": "Lines of code in src",
+      "value": "7,316 (excluding migrations)"
+    },
+    {
+      "label": "Test methods",
+      "value": "51 (43 Fact + 8 Theory)"
+    },
+    {
+      "label": "Agent definitions",
+      "value": "5"
+    },
+    {
+      "label": "Fly configurations",
+      "value": "6 .fly.toml files, all region fra"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/cv-maker",
+    "live": [],
+    "docs": [
+      {
+        "label": "Product proposal and architecture",
+        "path": "docs/PROPOSAL.md"
+      },
+      {
+        "label": "Register of open deviations",
+        "path": "docs/architecture/DEVIATIONS.md"
+      },
+      {
+        "label": "ADR 0002 — one Postgres, two databases",
+        "path": "docs/decisions/0002-one-postgres-two-databases.md"
+      },
+      {
+        "label": "ADR 0003 — free tier on the user's own model key",
+        "path": "docs/decisions/0003-bring-your-own-key.md"
+      },
+      {
+        "label": "Architecture diagram",
+        "path": "architecture.mmd"
+      },
+      {
+        "label": "Security policy",
+        "path": "SECURITY.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "LatexEscaper",
+      "path": "src/CvMaker.Core/Latex/LatexEscaper.cs",
+      "description": "A single-pass escaper for every TeX metacharacter, plus removal of zero-width characters and bidi overrides. A pure `string -> string` function with no I/O and no CV domain model, so it suits any code putting untrusted text into LaTeX.",
+      "reusable": true
+    },
+    {
+      "name": "LatexCompiler (the rendering service)",
+      "path": "src/CvMaker.Render/LatexCompiler.cs",
+      "description": "Runs `latexmk` over the bound source: `shell_escape=f`, `openin_any`/`openout_any=p`, a separate working directory per compilation, a 30 s timeout, a 20 MB PDF limit and a 2 MB `.tex` limit. The service has no database, no authorisation and no model credentials — it takes a `.tex` and assets and hands back a PDF, so it is a {{term:hermetyczny|hermetic}} typesetting service for any document.",
+      "reusable": true
+    },
+    {
+      "name": "IAgentRuntime: Foundry i Mock",
+      "path": "src/CvMaker.Agentic/Ai/",
+      "description": "Two implementations of one interface: Azure AI Foundry and a mock that emits only content grounded in facts, so a green test does not pretend the fact gate was checked. `GET /api/runtime` reports the active backend, so a misconfigured deployment does not quietly serve mock CVs.",
+      "reusable": true
+    },
+    {
+      "name": "Walidacja JWT wobec JWKS authservice",
+      "path": "src/CvMaker.Api/Auth/JwtExtensions.cs",
+      "description": "The API verifies the bearer token against the published JWKS of an external instance and holds no key material — it can check a token, it cannot issue one. Issuer and audience are pinned to CvMaker, so a token from another product of the same {{term:oidc|provider}} will not authenticate.",
+      "reusable": true
+    },
+    {
+      "name": "FactReferenceValidator",
+      "path": "src/CvMaker.Core/Validation/FactReferenceValidator.cs",
+      "description": "The provenance gate: it checks that every bullet, entry heading and summary cites a `factId` that exists in the candidate profile. Content with unresolvable references is rejected, and generation fails closed rather than releasing an invented fact.",
+      "reusable": false
+    },
+    {
+      "name": "TemplateBinder",
+      "path": "src/CvMaker.Core/Binding/TemplateBinder.cs",
+      "description": "Renders `CvContent` into LaTeX source through Scriban, first building a fully escaped view model — the template engine only ever receives safe strings. `StrictVariables` and `LoopLimit 5000` mean a typo in the template is a build error rather than an empty CV.",
+      "reusable": false
+    },
+    {
+      "name": "FlowEngine + the agent catalogue",
+      "path": "src/CvMaker.Agentic/",
+      "description": "The engine executes a sequence of steps from `cv-generation-flow.json` with `input.*` and `steps.*` placeholder substitution and one condition for the capped revision run. The five agents are versioned data files, not code: `posting-analyst` has an explicit `injectionSuspected` field, `profile-extractor` runs at temperature 0.0.",
+      "reusable": false
+    },
+    {
+      "name": "QuotaService",
+      "path": "src/CvMaker.Api/Quota/QuotaService.cs",
+      "description": "Metering held locally rather than borrowed from the identity service. Consumption is a single conditional UPDATE with `used < limit` in the WHERE, so two concurrent requests will not produce a free generation. The default is 3 generations per 30 days on free, 100 on pro.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "authservice",
+      "reason": "cv-maker has no identity of its own: it logs in against this service, validates its JWKS and deploys its image from {{term:ghcr}} as `cvmaker-authservice-dev`."
+    },
+    {
+      "slug": "aurelius-promptus",
+      "reason": "The whole agent layer — `agents/<slug>/definition.json`, `flows/*.json`, FlowEngine, Foundry with a fallback to mock, `IArtifactStorageService`, the `flyio/` layout — is modelled directly on the AgenticService there."
+    },
+    {
+      "slug": "black-hole-sim",
+      "reason": "The Channel queue with a BackgroundService, recovery of stuck jobs, the cancellation registry and status polling are ported from there along with the Api/Core/Shared/Web/Tests split."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "The repository conventions — minimal API, Blazor client, container images, a single compose file — come from there; PROPOSAL lists this in its reference map."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "`docs/architecture/DEVIATIONS.md` is kept directly against section 3 of that repository and lists seven open deviations."
+    },
+    {
+      "slug": "konrad-cinkusz-cv-maker",
+      "reason": "The same area and almost the same name — two repositories about generating CVs, easy to confuse in the portfolio."
+    }
+  ],
+  "product": "A buyer exists in theory — a candidate submitting many applications — but there is no revenue model: `QuotaService` knows a free and a pro tier, and there is no payment integration anywhere, while ADR 0003 settles that free is meant to run on the user's own key, and that was never built. The CV generator market is crowded, so as a standalone business this does not hold up. The real value is twofold: the author's own use, because this is the productisation of his manual LaTeX pipeline, and technical credibility — a working example of confining the model's output to a JSON schema, enforcing fact provenance and running untrusted LaTeX in a sandbox with evidence in CI. The second of those is sellable as a reference, not as a SaaS.",
+  "gaps": [
+    "**The repository has no tag at all, and `flyio.yml` only fires on a `v*` tag** — so six Fly configurations are as of today a declaration, not a deployment, and there is no address to show.",
+    "`docs/PROPOSAL.md` in paragraph 3 describes a directory tree with `CvMaker.AppHost`, `CvMaker.ServiceDefaults` and `CvMaker.Auth`, none of which are in the repository. The README itself also admits that the earlier claim of three green CI jobs was untrue as of commit `ef5b4fc`.",
+    "Cover letters are promised in the README and have a ready `cover-letter-writer` agent definition, but are not built; the same goes for document version history and the bring-your-own-key of ADR 0003.",
+    "No {{term:otel|OTLP}} telemetry at all, even though one generation passes through four services — the repository's own deviation register calls this the biggest gap. There is also no resilience handler on `RenderClient` and `AgenticClient`, so a transient error means a lost job.",
+    "Multilingual support is blocked by the templates: both use `T1 fontenc`, which breaks Polish characters outside ASCII and handles neither Cyrillic nor CJK. PDF download goes through the API, because there are no signed URLs to the `generated-cvs` container."
+  ],
+  "next": [
+    "Run the build and tests locally, and record the actual state of CI — the README has already lied about this once and admits as much itself.",
+    "Cut the first `v*` tag. Until there is one, the whole of `flyio.yml` is dead and none of the six `.fly.dev` addresses exists.",
+    "Fix paragraph 3 in `docs/PROPOSAL.md`: remove `AppHost`, `ServiceDefaults` and `CvMaker.Auth` from the tree, or mark them as unbuilt.",
+    "Close the two cheapest deviations: `AddStandardResilienceHandler` on both HTTP clients (carefully, given the renderer's long timeout) and moving migrations out of `Program.cs` into a hosted service.",
+    "Decide about `cover-letter-writer`: either finish the cover letter path, or delete the agent definition and the promise from the README."
+  ],
+  "highlights": [
+    "The model never writes LaTeX. Agents return JSON, and the binder builds a fully escaped view model before Scriban sees anything — by construction the model's output cannot create a control sequence.",
+    "CI **actually proves the sandbox**: it starts the renderer image with the same hardening as the deployment and checks, in separate steps, that reading files outside the working directory is refused, that `\\write18` is absent and that a compilation is killed on timeout. Proof of a security property, not happy-path tests.",
+    "The fact gate is mechanical, not prompt-based — `sourceFactIds` that do not resolve to profile facts bring the generation down. That is a distinction most 'agent writes a CV' demonstrations do not make at all.",
+    "The whole pipeline (profile, tailoring, binding, typesetting, PDF) runs offline with no Azure account thanks to `MockAgentRuntime`, and `GET /api/runtime` reports the active backend, so a misconfigured deployment does not quietly serve mock CVs.",
+    "The repository keeps a dated register of deviations from someone else's reference architecture (review of 2026-08-14: seven items open, six closed) plus three ADRs, one of them accepted and openly unimplemented."
+  ],
+  "risks": [
+    "`flyio/authservice.fly.toml` pins `ghcr.io/konradcinkusz/authservice:v0.1.0` — a foreign image on a foreign release cycle, whose disappearance or breaking change takes down login here. It is the only use of GHCR in the repository and nothing from here is pushed there.",
+    "ADR 0002 deliberately puts the product database and the identity database on one Postgres, so restoring a snapshot is all-or-nothing: rolling back accounts along with CVs. On top of that `AUTHSERVICE_DB_PASSWORD` falls back to the server password, which the ADR itself calls a demo convenience.",
+    "Every Fly application name ends in `-dev`, and deployment is triggered by a `v*` tag — there is no separate set of names or configurations for anything production.",
+    "A portfolio name clash with `konrad-cinkusz-cv-maker`; on top of that `NuGetAudit` is set as a build error against pins from August 2026, so a new CVE will stop not only a release but the build, without intervention."
+  ],
+  "headline": "CI proves the renderer sandbox, but zero tags means zero deployments",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 46,
+    "openPrs": 17,
+    "dependabotPrs": 17,
+    "lastCommit": "2026-08-15",
+    "commits": 49,
+    "files": 135
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "slug": "konrad-cinkusz-cv-maker",
+  "name": "Konrad Cinkusz — CV (Switzerland)",
+  "cluster": "F-meta",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P2",
+  "oneLiner": "A LaTeX repository of CVs and cover letters in which the git tag is the switch that decides what CI compiles.",
+  "summary": "Job-application documents in two typesetting styles: AltaCV (two-column, vendored class `altacv.cls` 1.7.4) and academic (the `curve` class, rubrics in `academic/`, publication list through biblatex). The whole thing is held together by `build-matrix.json` — one source of truth that maps the tag scheme `vMAJOR.MINOR.PATCH` onto a list of source→PDF pairs: MAJOR picks the style, MINOR the specialisation for a particular vacancy, PATCH does not change the build plan. `build.sh` reproduces the same switch locally through `jq`, and CI adds a third path: on a pull request `changed-docs.sh` parses `\\input`, `\\makerubric`, `\\addbibresource` and local `\\usepackage` so that it compiles only those documents the diff actually touches. The most interesting decision is exactly here: instead of a full regression run, the repository computes the LaTeX dependency graph from the contents of the files, which is cheap and knowingly incomplete. The result is a {{term:determinizm|reproducible}} artefact per tag rather than a file in the cloud, but the non-technical side has been left behind: no tests, no pushed tags, and a README that links to the repository's previous name.",
+  "stack": [
+    "LaTeX (LuaLaTeX)",
+    "altacv.cls 1.7.4",
+    "curve (CTAN)",
+    "biblatex + biber",
+    "jq",
+    "Bash",
+    "GitHub Actions",
+    "xu-cheng/latex-action@v4"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "Inconsistent: `LICENSE.md` is LPPL 1.3 with LianTze Lim as maintainer (inherited from AltaCV), while the README declares MIT",
+  "tests": "No tests — `find` over the pattern `*test*` returns no file at all. The only verification is that LuaLaTeX compiles the document in CI.",
+  "ci": "One workflow, `ci.yml` (252 lines), two jobs. Pushing a `v*` tag builds the plan from the matrix and publishes a release through `softprops/action-gh-release@v2`; a pull request compiles only the documents named by `changed-docs.sh` and updates a single comment carrying a link to the artefact; `workflow_dispatch` with style/specialization inputs lets you build any combination from any branch.",
+  "metrics": [
+    {
+      "label": "Unique documents in the matrix",
+      "value": "32"
+    },
+    {
+      "label": "Entries in the plan for style 0",
+      "value": "35"
+    },
+    {
+      "label": "Specialisations for named vacancies",
+      "value": "17 (8 AltaCV + 9 academic)"
+    },
+    {
+      "label": "Lines of CI workflow",
+      "value": "252"
+    },
+    {
+      "label": "Lines of `changed-docs.sh`",
+      "value": "72"
+    },
+    {
+      "label": "Items in the publication list",
+      "value": "3 entries in `academic/own-bib.bib`"
+    },
+    {
+      "label": "Pushed tags",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/konrad-cinkusz-cv-maker",
+    "live": [],
+    "docs": [
+      {
+        "label": "README with the application table and a description of the version switch",
+        "path": "README.md"
+      },
+      {
+        "label": "Build matrix — the single source of truth",
+        "path": "build-matrix.json"
+      },
+      {
+        "label": "Dependency resolver for the incremental CI",
+        "path": "changed-docs.sh"
+      },
+      {
+        "label": "Factorial application notes (141 lines)",
+        "path": "application-notes-factorial.md"
+      },
+      {
+        "label": "Anthropic application notes",
+        "path": "application-notes-anthropic.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "changed-docs.sh",
+      "path": "changed-docs.sh",
+      "description": "Computes the LaTeX dependency graph from the diff: it reads `\\input`, `\\include`, `\\makerubric`, `\\addbibresource` and local `\\usepackage`, adds the shared assets (`photo.jpg`, `latexmkrc`) and prints only the documents the change touches. Editing `academic/skills.tex` flags 7 of the 11 academic CVs, editing `academic/education.tex` 10 of 11, and `academic/settings.sty` all 11; editing the README flags nothing.",
+      "reusable": true
+    },
+    {
+      "name": "build.sh",
+      "path": "build.sh",
+      "description": "52 lines of a generic `latexmk -lualatex` runner driven by a JSON file: it takes a style and a specialisation, computes the plan through `jq`, copies the PDFs into `dist/`, and for style 0 packs the lot into a ZIP. The only things hard-coded are the matrix filename and the output directory.",
+      "reusable": true
+    },
+    {
+      "name": "build-matrix.json",
+      "path": "build-matrix.json",
+      "description": "A declarative map from tag to a list of `source|output` pairs, read identically by `build.sh`, `changed-docs.sh` and CI. The structure is neutral, the contents are not: these are named CVs and letters for named companies.",
+      "reusable": false
+    },
+    {
+      "name": "Workflow CI",
+      "path": ".github/workflows/ci.yml",
+      "description": "Three paths in one file, with plan deduplication through `awk` (the same cover letter appears in the specialisations of both styles, and the PDF-collecting step uses `mv` and would fall over on the second occurrence) and a fallback to the full matrix when the merge base cannot be computed.",
+      "reusable": false
+    },
+    {
+      "name": "Styl AltaCV",
+      "path": "sample.tex, altacv.cls, cv-*.tex, cover-letter-*.tex",
+      "description": "A two-column layout with a photograph, the master being `sample.tex`; alongside it 10 CVs and 11 cover letters sitting flat in the repository root. The class is vendored, so the build does not depend on the version on CTAN.",
+      "reusable": false
+    },
+    {
+      "name": "Styl akademicki",
+      "path": "academic/",
+      "description": "A single-column CV in the `curve` class, assembled from interchangeable rubrics (summary, work_authorization, skills, employment, education, projects). Each vacancy gets its own rubric variants and its own `cv-swiss-<vacancy>.tex` file that composes them — composition instead of copying whole documents.",
+      "reusable": false
+    },
+    {
+      "name": "Notatki aplikacyjne",
+      "path": "application-notes-anthropic.md, application-notes-factorial.md",
+      "description": "Answers to the Greenhouse and careers.factorialhr.com form questions kept next to the CVs, together with the conditions for sending — including the requirement to make `agent-eval-bench` and `architecture-standards` public before submitting the application.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "cv-maker",
+      "reason": "The same domain and a confusingly close name. It needs settling whether one is not an older or more general version of the other, because today the portfolio holds two repositories about CVs."
+    },
+    {
+      "slug": "konradcinkusz",
+      "reason": "Both are a self-presentation channel and both duplicate the same list of projects and publications, in two independently maintained formats."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "The CV and letter to Factorial rest entirely on that repository and require it to be made public before sending — a dependency written down in the application notes."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Cited in the CV and the letter to Factorial as the public source of the principles behind the bench."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "The same technical shape: a multi-document LaTeX repository with a latexmk pipeline in CI. The dependency resolver from here would solve the same problem there."
+    }
+  ],
+  "product": "No buyer, and there is no point pretending otherwise. This is a personal tool: a versioned set of documents for your own applications, with 17 specialisations for named companies. The only value on the outside is the mechanism itself — the matrix plus the dependency resolver plus the incremental build — which can be cut out as a template for any LaTeX repository with many documents, but nobody will pay for it. The repository's real function is a different one: it is evidence of engineering discipline applied to your own recruitment process, that is {{term:evidence|evidence}} for an interview, not a product.",
+  "highlights": [
+    "The git tag is the build switch: MAJOR picks the style, MINOR the specialisation, PATCH does not change the plan. The scheme is described consistently in the README, in `build-matrix.json` and in the header of `ci.yml` — a {{term:tagdeploy|tag-driven release}} applied to documents rather than to images.",
+    "`changed-docs.sh` genuinely parses LaTeX dependencies instead of guessing from directories, so a PR touching one rubric compiles between 1 and 10 documents rather than the full 32 from the matrix. Counted by running `changed-docs.sh -` for every file in `academic/`: a rubric for a single vacancy (e.g. `skills_anthropic.tex`) gives 1, `summary.tex` 2, `work_authorization.tex` 6, `skills.tex` and `hobbies.tex` 7 each, `employment.tex` and `projects.tex` 8 each, `education.tex` 10. No rubric flags exactly three documents.",
+    "The workflow header carries a comment explaining why `fetch-depth: 0` is unconditional: the expression `${{ ... && 0 || 1 }}` returns 1 in Actions, because 0 is falsy — which quietly produced a shallow clone and broke the merge base.",
+    "The PR comment is updated, not duplicated: the workflow looks for the marker `<!-- cv-pdf-artifact-comment -->` among the existing comments instead of adding another one on every push.",
+    "The academic style is assembled from interchangeable rubrics, so a variant for a vacancy is a swap of two files rather than a copy of the whole CV — hence 17 specialisations across 32 unique source files."
+  ],
+  "gaps": [
+    "**Zero pushed tags**, while the entire application table in the README refers to particular `v1.x`/`v2.x` as artefacts that already exist. The release mechanism has never been fired in anger.",
+    "Every badge and release link in the README points at `Konrad_Cinkusz_CV_Swizterland` (with the typo in the word Switzerland), while `origin` is `konrad-cinkusz-cv-maker`. The link to CI, to the PDF and to the ZIP all lead to a different name.",
+    "`CHANGELOG.md` is the upstream AltaCV changelog, its last entry being 1.7.4 from July 2025. It describes not one change by the author, and by its filename pretends to be the history of this repository.",
+    "The personal columns in the application table (application date, closing date, phone call, recruiter's phone, URL) are empty in all 11 rows — the tracker is declared and unused.",
+    "The full regression build of the whole matrix has been deliberately taken off the PR path, so a change in `altacv.cls`, `academic/settings.sty` or `photo.jpg` can break a document nobody has looked at until somebody manually runs style 0."
+  ],
+  "risks": [
+    "Personal data in the source files: two phone numbers (Polish and Spanish, both still present in the `.tex`), an email address and `photo.jpg`. The repository is private today, but nothing in the build enforces that.",
+    "The application notes contain salary expectations towards named companies (among others 105,000 EUR gross for Factorial). A leak or an accidental making-public of the repo bears directly on future negotiations.",
+    "Licence conflict: `LICENSE.md` is LPPL 1.3 naming somebody else's maintainer for the whole 'work', while the README promises {{term:mit|MIT}}. For anyone who wanted to reuse `build.sh` or `changed-docs.sh`, the legal position is unsettled.",
+    "HEAD sits on the branch `claude/portfolio-html-app-w6306n`, not on `main`. In a repository where a tag triggers publication, that is a mistake waiting to happen."
+  ],
+  "next": [
+    "Push the tags the application table refers to, or mark in the README which of them do not exist yet. Today the table promises artefacts that are not there.",
+    "Rewrite the badges and release links to `konrad-cinkusz-cv-maker`, or confirm that the old name lives on as a redirect.",
+    "Separate the licences: leave LPPL with `altacv.cls` as an upstream file, and for your own content and scripts add a separate `LICENSE` matching what the README declares.",
+    "Rename `CHANGELOG.md` to `CHANGELOG-altacv.md`, so that it stops pretending to be the history of this repository.",
+    "Unify the phone number across all the `.tex` files and settle whether the contact details should sit in the repository or be injected at build time."
+  ],
+  "headline": "Pipeline better than the content around it: zero tags, wrong links, contradictory licence",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-17",
+    "commits": 104,
+    "files": 84
+  }
+}

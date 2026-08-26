@@ -1,0 +1,39 @@
+[
+  {
+    "id": "A-runtime",
+    "letter": "A",
+    "name": "Cluster A — runtime and agent behaviour",
+    "note": "Shared substrate: **the agent run as the unit of work**. A sequence of model calls with a result, which you can record, replay, score and compare against another run. These projects can share a {{term:playhead|replay}}, share a {{term:runstore|run store}} and share scoring — and they are the only ones that can.",
+    "barrier": "{{term:roslyn}} analysis works on source code, the replay harness on agent runs. A different moment in the cycle, a different artefact, a different buyer. Glue them together and you get a product you cannot describe in one sentence — and a product without one sentence has no buyer."
+  },
+  {
+    "id": "B-static",
+    "letter": "B",
+    "name": "Cluster B — source code and policies",
+    "note": "Shared substrate: **a code file or a policy**. The unit is a diff, a file, a rule. These projects consume each other — the {{term:diffgate|gate}} reads the standard, the standard cites repositories — but they have nothing in common with cluster A's kernels."
+  },
+  {
+    "id": "C-infra",
+    "letter": "C",
+    "name": "Cluster C — reusable infrastructure",
+    "note": "Shared substrate: **a service that another system in this portfolio consumes**. There is exactly one entry here, and that is a finding, not an oversight: {{term:ghcr|one completed extraction}} across thirty-five repositories. The pattern worked once and is documented — the whole consolidation in the next tab is repetitions of it."
+  },
+  {
+    "id": "D-content",
+    "letter": "D",
+    "name": "Cluster D — content and distribution",
+    "note": "Shared substrate: **a document for a reader**. Books, articles, decks, knowledge bases. Zero direct revenue, and that is how it is meant to be — this is the channel that reaches people for everything in clusters A and B, and the only asset that accumulates without further work."
+  },
+  {
+    "id": "E-lab",
+    "letter": "E",
+    "name": "Cluster E — evidence systems",
+    "note": "Shared substrate: **none**. Systems built end to end to prove something: simulations, computation engines, games, and product attempts that stopped. They have no buyer today and should not go looking for one. Their role is twofold: the cheapest test of whether a kernel travels, and material that sells the **author** rather than a product."
+  },
+  {
+    "id": "F-meta",
+    "letter": "F",
+    "name": "Cluster F — material about the author",
+    "note": "Shared substrate: **a career**. The profile, the CV, recruitment material, someone else's landing page. They go on the map so as not to pretend they are not there — and to remind you that part of the portfolio's time goes into this rather than into product."
+  }
+]

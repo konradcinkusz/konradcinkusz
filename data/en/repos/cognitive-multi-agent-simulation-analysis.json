@@ -1,0 +1,143 @@
+{
+  "slug": "cognitive-multi-agent-simulation-analysis",
+  "name": "CogniSim — master's thesis and 2026 analysis",
+  "cluster": "D-content",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P2",
+  "oneLiner": "LaTeX sources of a master's thesis on CogniSim, plus a 2026 audit of what underneath it has ceased to exist.",
+  "summary": "`thesis/` holds the sources of a master's thesis (Warsaw University of Technology, EiTI) describing CogniSim — a multi-agent system on LLMs in which agents play the roles of a software organisation and act out {{term:safe}} and Scrum ceremonies. `docs/` holds six numbered studies from 2026 that check what of that thesis still stands up: a defect audit of the sources, an ecosystem deprecation audit, a migration mapping onto {{term:maf}}, the publication record, related work, and a stack audit of the successor platform. The most interesting decision is not about content but about epistemology: **every external claim carries a {{term:poziom|verification level}}** — primary-artefact, primary-page, secondary or unverified — because the documents were written in a sandbox that blocked `openai.com`, `learn.microsoft.com` and `scaledagile.com`, and rather than pass over that in silence the author marked every such gap in the text. Stage 0 of the roadmap is finished: 22 defects in the thesis fixed, the instrument taken from 63 errors down to zero, both checkers running in CI and in pre-commit. What is unfinished is what the degree actually rests on — the thesis still poses no research question and reports no measurement of its own. Two studies contain explicit self-corrections, because independent re-verification showed two conclusions to be wrong.",
+  "stack": [
+    "LaTeX (klasa eiti-thesis.cls, PW/EiTI)",
+    "BibLaTeX",
+    "minted + Pygments (wymaga -shell-escape)",
+    "latexmk",
+    "Python 3.12 with no external dependencies",
+    "GitHub Actions",
+    "gitleaks",
+    "CodeQL"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT at the root, `thesis/` under GPL-3.0, `thesis/eiti/` with no stated licence (third-party material)",
+  "tests": "No unit tests, because there is no application code. Two checkers do the job of a suite: `check-latex-hygiene.py` (424 lines) gives 0 errors and 66 warnings, matching the committed `artifacts/01/hygiene-after.txt` exactly, and `check-doc-links.py` (227 lines) gives 0 findings across 23 Markdown files. Both were run again during this review.",
+  "ci": "Five workflows: LaTeX hygiene and document links run exactly the same scripts as pre-commit, `secret-scan.yml` runs gitleaks on push, on PR and weekly, CodeQL analyses Python weekly, and `build-thesis-pdf.yml` is `workflow_dispatch` only and assembles the PDF through `xu-cheng/latex-action` with `-shell-escape`. {{term:dependabot}} watches the action versions monthly.",
+  "metrics": [
+    { "label": "Commits", "value": "27, all from 2026-08-24" },
+    { "label": "Files tracked by git", "value": "98" },
+    { "label": "Research studies", "value": "6 (01–06)" },
+    { "label": "Architecture decisions", "value": "10 (D-001 … D-010)" },
+    { "label": "Defects fixed in the thesis", "value": "22" },
+    { "label": "LaTeX checker", "value": "63 errors → 0" },
+    { "label": "Bibliography entries", "value": "161, of which 96 cited" },
+    { "label": "Size", "value": "1,715 lines of .tex, 3,045 lines of Markdown, 847 lines of scripts" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/cognitive-multi-agent-simulation-analysis",
+    "live": [],
+    "docs": [
+      { "label": "The analysis on one page", "path": "docs/README.md" },
+      { "label": "Defect audit of the thesis sources", "path": "docs/research/01-THESIS-SOURCE-DEFECT-AUDIT.md" },
+      { "label": "Ecosystem deprecation audit", "path": "docs/research/02-ECOSYSTEM-DEPRECATION-AUDIT.md" },
+      { "label": "LangChain → Microsoft Agent Framework migration", "path": "docs/research/03-LANGCHAIN-TO-MAF-MIGRATION.md" },
+      { "label": "Roadmap for thesis v2", "path": "docs/architecture/04-THESIS-V2-ROADMAP.md" },
+      { "label": "Decisions D-001 … D-010", "path": "docs/architecture/05-DECISIONS.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "check-latex-hygiene.py",
+      "path": "scripts/check-latex-hygiene.py",
+      "description": "424 lines of plain Python with no dependencies, catching defects a successful LaTeX build does not report: a bare `%` stuck to a word, a `\\cite` with no entry, a duplicated bib key, a `\\ref` with no `\\label`, a backtick in typeset text, a Windows path in a listing. It masks the insides of `verbatim`/`lstlisting`/`minted` and the arguments of `\\url` before it starts counting per cent signs.",
+      "reusable": true
+    },
+    {
+      "name": "check-doc-links.py",
+      "path": "scripts/check-doc-links.py",
+      "description": "227 lines checking that every relative link and every heading anchor in the Markdown set resolves. The second half enforces the ten required study sections in the order imposed by `architecture-standards`, so it carries over to this whole portfolio.",
+      "reusable": true
+    },
+    {
+      "name": "Runbook i skomitowane hooki",
+      "path": "scripts/0-setup-first-time.sh, scripts/hooks/pre-commit, scripts/verify-secret-scan.sh",
+      "description": "One command points `core.hooksPath` at the committed directory, and the pre-commit hook works on a snapshot from `git checkout-index`, not on the dirty working tree. `verify-secret-scan.sh` plants a key in a throwaway repository and checks that gitleaks actually fires.",
+      "reusable": true
+    },
+    {
+      "name": "Workflowy LaTeX-owe",
+      "path": ".github/workflows/latex-hygiene.yml, .github/workflows/build-thesis-pdf.yml",
+      "description": "Hygiene runs on a `thesis/**` path filter; the PDF build is manual and pulls in `py3-pygments` and `latexmk_shell_escape`, because without them chapter 4 does not typeset. Every workflow carries a comment at the top saying why it exists. Ready to graft into `llm-book` and `maf-book`.",
+      "reusable": true
+    },
+    {
+      "name": "Thesis sources",
+      "path": "thesis/",
+      "description": "`main.tex` plus eight chapters and an appendix, the EiTI/PW class, 27 figures, 161 bibliography entries and two published conference papers as PDFs. The distribution of length says a lot: chapter 4 has 722 lines, chapter 6 has forty-one.",
+      "reusable": false
+    },
+    {
+      "name": "Studia badawcze",
+      "path": "docs/research/",
+      "description": "Six studies in a fixed question–method–evidence–threats format, every external claim tagged with a {{term:poziom|verification level}}. Two studies contain self-corrections written into the text rather than quietly patched away.",
+      "reusable": false
+    },
+    {
+      "name": "Analiza produktowa",
+      "path": "docs/product/",
+      "description": "`MARKET-ANALYSIS.md` takes apart the widely quoted figures about the agent market and shows which of them do not survive a check. `PRODUCT-NICHES.md` lists five niches and two traps, with a falsification condition attached to each recommendation.",
+      "reusable": false
+    },
+    {
+      "name": "Standards-compliance layer",
+      "path": "docs/architecture/02-STANDARDS-CONFORMANCE.md",
+      "description": "P1–P15 and the REPO-BASELINE checklist answered for a repository with no application code, with five open gaps recorded rather than passed over. Gap G-5 says outright that this document once lied about itself.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "cognitive-multi-agent-simulation", "reason": "This repository audits that platform in study 06 and cites it as the v2 reference architecture, but does not modify it — decision D-009 records the split explicitly." },
+    { "slug": "architecture-standards", "reason": "The whole `docs/architecture/` layer measures this repository against that constitution, and `.claude/settings.json` declares its marketplace and three plugins." },
+    { "slug": "maf-book", "reason": "Study 03 maps the thesis implementation onto {{term:maf}}, which is exactly the subject of that book. The migration table is publishable on its own." },
+    { "slug": "llm-book", "reason": "Study 02 audits the LangChain and LangGraph 1.x deprecations on the same facts that book describes from the API side." },
+    { "slug": "llm-multi-agent-chess", "reason": "The same subject — multi-agent systems on LLMs — except there as a working experiment, and here as a degree thesis and its critique." }
+  ],
+  "product": "**No buyer** for the repository itself: it is a degree thesis plus its audit, so the value is academic and reputational. A buyer only appears in `docs/product/`, and concerns the successor platform rather than these documents — an {{term:rte}} or a transformation office paying for a dress rehearsal of PI Planning, sold through the {{term:spc}} consultant channel. The documents themselves do have two real channel uses: the LangChain 0.1 → Microsoft Agent Framework migration table is fit to publish on its own, and the study methodology with its verification levels is a better engineering calling card than most of the code in this portfolio.",
+  "highlights": [
+    "The most frequently reported defect in the thesis — 22 unresolved citation keys in chapter 2 — **does not exist**. An independent recount gives 96 cited keys and all of them resolve to entries in the bibliography.",
+    "Study 03 proves from the repository, not from a blog, that the whole LangChain `cookbook/` directory — 106 files with the `DialogueAgent` and `DialogueSimulator` patterns that chapter 4 rests on — was deleted in commit `a4c8baeb` on 6 October 2025.",
+    "The secret-scan workflow does not only run gitleaks: it plants a key in a `minted` listing in a throwaway repository and fails the job if the scanner does not report it. A green result means the control **works**, not that it ran.",
+    "Two studies contain explicit self-corrections. Defects N3 and N4 were first recorded as non-reproducible, then found and corrected in the text, with a methodological conclusion: you look for a LaTeX defect by how it renders, not by how it was written.",
+    "`THIRD-PARTY-NOTICES.md` separates three provenances and says outright that 'Copyleft by …' in the EiTI class is a sentiment, not a licence, and that nothing in the repository extends any permission over those files."
+  ],
+  "gaps": [
+    "**The thesis PDF has never once been built.** Every claim about how the document typesets is predicted from the sources, not observed (gap G-2). One run of `build-thesis-pdf.yml` closes it.",
+    "Stages 1–4 of the roadmap are only costed. The problem the degree actually rests on — no research question and no measurement of its own — is untouched, and stage 0 was about source hygiene.",
+    "Study 04 has draft status and will keep it until somebody reads the primary record: every identifier is a secondary source, and the audit itself caught one invented 2026 item.",
+    "A large share of the external claims rests on secondary sources, because the sandbox blocked the vendors' domains (gap G-3). The repository marks this but does not fix it.",
+    "`thesis/` can diverge from the author's copy on Overleaf and nothing detects it — {{term:drift}} that no checker sees (gap G-1)."
+  ],
+  "risks": [
+    "**Name collision:** `cognitive-multi-agent-simulation` and `cognitive-multi-agent-simulation-analysis` differ by one suffix, and they are two entirely different artefacts — a .NET platform against a thesis and its critique.",
+    "The MIT LICENSE header says 'Copyright (c) 2026 dev_insight' — that is the name of another project in the portfolio, not the author's name. A copied template undermines a file the rest of the repository treats very seriously.",
+    "`thesis/eiti/` is third-party material with no licence stated, and the two conference PDFs in `thesis/articles/` are author manuscripts included under the right to self-archive. The risk passes to anyone who copies those directories onward.",
+    "All 847 lines of Python and shell were written in one session, on the same day as the studies that use them as evidence. Study 01 itself lists this as a threat to validity."
+  ],
+  "next": [
+    "Run `build-thesis-pdf.yml` once and read paragraph 6.1.2. It closes gap G-2 and confirms the fix for defect D1 — one click against the largest open debt.",
+    "Fix the copyright line in LICENSE to the actual rights holder. The same fault sits in at least two other repositories in the portfolio.",
+    "Look for the sixteen output directories from March 2024, visible in two screenshots in chapter 4. If they survived, an honest results chapter with a real n is days of work rather than weeks.",
+    "Read the study 04 identifiers from an unrestricted browser and move them from secondary to primary, or withdraw them — otherwise the document stays a draft permanently.",
+    "Add one sentence to chapter 5 saying that what is modelled is Core {{term:safe}} 6.0: PI Planning has been rebuilt, and Inspect and Adapt is being replaced."
+  ],
+  "headline": "Stage 0 closed and measured; the thesis still has no research question",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 4,
+    "openPrs": 4,
+    "dependabotPrs": 4,
+    "lastCommit": "2026-08-24",
+    "commits": 27,
+    "files": 98
+  }
+}

@@ -41,8 +41,20 @@ jobs:
       - name: The manifest is not stale
         run: node scripts/build-manifest.mjs --check
 
+      # The same assertion the container job runs against nginx and the deploy runs
+      # against the live URL, applied here to the committed file. Cheap, and it
+      # means a half-built manifest fails before anything is built or deployed.
+      - name: The committed manifest is complete
+        run: node scripts/assert-served-manifest.mjs ./site/data/portfolio.json
+
       - name: The site is valid HTML that parses
         run: node scripts/smoke-site.mjs
+
+      # A forgotten literal is silent: it renders one Polish sentence inside an
+      # English page and only a Polish reader notices, and they have no reason to
+      # report it. So the check is mechanical rather than editorial.
+      - name: No hard-coded interface text
+        run: node scripts/i18n-audit.mjs
 
       # A colour defined only inside a theme block never applies to a viewer whose
       # OS is on "system", which is the default. That is a whole-page failure and
@@ -72,3 +84,69 @@ jobs:
           name: portfolio-standalone
           path: dist/portfolio.html
           retention-days: 30
+
+  # The image is what Fly actually runs. Everything above tests the files that go
+  # into it; this tests the thing itself — and it is the only place the nginx
+  # config, the non-root user and the /healthz route outside the SPA fallback are
+  # ever exercised before a deploy.
+  image:
+    name: The container serves the site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: docker build -t portfolio:ci .
+
+      - name: Run and probe
+        run: |
+          docker run -d --name portfolio -p 8080:8080 portfolio:ci
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 && break
+            sleep 1
+          done
+
+          echo "--- runs as a non-root user"
+          uid=$(docker exec portfolio id -u)
+          [ "$uid" != "0" ] || { echo "::error::container runs as root"; exit 1; }
+
+          echo "--- /healthz answers outside the SPA fallback"
+          body=$(curl -fsS http://127.0.0.1:8080/healthz)
+          [ "$body" = "ok" ] || { echo "::error::/healthz returned '$body', not 'ok' — the SPA fallback probably swallowed it"; exit 1; }
+
+          echo "--- the manifest is served, with both languages in it"
+          curl -fsS http://127.0.0.1:8080/data/portfolio.json -o /tmp/served.json
+          node scripts/assert-served-manifest.mjs /tmp/served.json
+
+          echo "--- an unknown path falls back to the app, not to a 404"
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/nie-ma-takiej-sciezki)
+          [ "$code" = "200" ] || { echo "::error::SPA fallback returned $code"; exit 1; }
+
+          echo "--- security headers survive on EVERY path, not just /"
+          for path in / /data/portfolio.json /assets/app.css; do
+            curl -fsSI "http://127.0.0.1:8080$path" | grep -qi 'x-content-type-options: nosniff' \
+              || { echo "::error::X-Content-Type-Options missing on $path — a location block replaced the inherited set"; exit 1; }
+          done
+
+          echo "--- the manifest is compressed, including for a PROXIED request"
+          raw=$(curl -fsS http://127.0.0.1:8080/data/portfolio.json | wc -c)
+          gz=$(curl -fsS -H 'Accept-Encoding: gzip' http://127.0.0.1:8080/data/portfolio.json --output /tmp/gz.bin && wc -c < /tmp/gz.bin)
+          echo "raw=$raw gzip=$gz"
+          [ "$gz" -lt $((raw / 2)) ] || { echo "::error::manifest is not being compressed (raw $raw, gzip $gz)"; exit 1; }
+          # Fly's edge proxies every request, and nginx's gzip_proxied default is
+          # "off" — which would compress perfectly here and ship 1.18 MB in
+          # production. A Via header is what tells nginx the request was proxied.
+          viagz=$(curl -fsS -H 'Accept-Encoding: gzip' -H 'Via: 1.1 fly' http://127.0.0.1:8080/data/portfolio.json --output /tmp/via.bin && wc -c < /tmp/via.bin)
+          echo "gzip behind a proxy=$viagz"
+          [ "$viagz" -lt $((raw / 2)) ] || { echo "::error::manifest is NOT compressed for a proxied request (raw $raw, gzip $viagz) — check gzip_proxied"; exit 1; }
+          curl -fsSI -H 'Accept-Encoding: gzip' http://127.0.0.1:8080/data/portfolio.json | grep -qi 'vary: accept-encoding' \
+            || { echo "::error::no Vary: Accept-Encoding on the manifest — a cache could hand a gzipped body to a client that cannot read it"; exit 1; }
+          echo "--- the manifest is not cached by a proxy"
+          curl -fsSI http://127.0.0.1:8080/data/portfolio.json | grep -qi 'cache-control: no-cache' \
+            || { echo "::error::manifest is missing its no-cache header"; exit 1; }
+
+          echo "OK: image builds, drops root, answers /healthz, serves the manifest and falls back correctly."
+
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs portfolio || true

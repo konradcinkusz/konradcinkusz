@@ -21,35 +21,66 @@ I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** — a channe
 
 ## 🗺️ Portfolio map
 
-This repository is the hub. It holds a single manifest describing every repository in the
-estate — what it is, what it is for, what is finished, what is not — plus the consolidation
-analysis and the operating model that keeps thirty-five repositories from rotting.
+> **This repository is private, so the profile README does not render.** GitHub only
+> shows the `README.md` of a repository named after the account when that repository is
+> public. Right now `github.com/konradcinkusz` shows none of what follows.
+>
+> Making it public would fix the profile **and publish the whole manifest in the same
+> move** — including dossiers for eighteen private repositories that name file paths,
+> class names and confirmed security holes in a live paid product. One decision, not
+> two. If you want the profile without the disclosure, the map needs a public build
+> that ships only the public entries and fails if any surviving string names a private
+> one.
 
-The manifest renders as a small static site with four tabs: the **portfolio map**, the
+This repository is the hub. It holds a single manifest describing thirty-five
+repositories — seventeen public, eighteen private — what each is, what it is for, what is
+finished, what is not, plus the consolidation analysis and the operating model that keeps
+them from rotting.
+
+**Thirty-five, not all of them.** The account holds considerably more; the map covers the
+set that was surveyed end to end, and says so on its own front page rather than implying it
+is the whole estate. Repositories join the map when someone has actually read them.
+
+The manifest renders as a small static site with five tabs: the **portfolio map**, the
 **consolidation analysis** (kernels, duplications, the open/paid line, the distribution
 axis), the **operating model** (attention tiers, cadence, health checks, WIP limits,
-automation, quarter plan) and a searchable **index** with a glossary.
+automation, quarter plan), a sortable **index** and a searchable **glossary**.
+
+**In Polish and English.** Polish is the source; `data/en/` is a translation with the
+same shape. The page switches without a reload — one manifest carries both — and
+remembers the choice; `?lang=pl` or `?lang=en` overrides it. A translation is trusted
+to read well and trusted for nothing else: the validator checks the two trees element
+for element and rejects a dropped list entry, a renamed id, a translated file path, a
+missing interface key, a plural with the wrong number of forms, or a string left in
+Polish. `scripts/i18n-audit.mjs` rejects a user-visible literal that never made it into
+`ui.json` in the first place.
 
 ```sh
 # run it locally
 cd site && python3 -m http.server 8000     # then open http://localhost:8000
 
-# regenerate the manifest after editing data/
+# regenerate the manifest after editing data/ or data/en/
 node scripts/build-manifest.mjs
 node scripts/validate-portfolio.mjs
+node scripts/i18n-audit.mjs
 ```
 
 ### How it is maintained
 
 | | |
 |---|---|
-| **Source of truth** | `data/` — one file per repository under `data/repos/<slug>.json`, plus `clusters`, `consolidation`, `ops`, `glossary` |
+| **Source of truth** | `data/` — one file per repository under `data/repos/<slug>.json`, plus `clusters`, `consolidation`, `ops`, `glossary`, `ui` |
+| **Translation** | `data/en/` — the same tree in English, enforced for structural parity rather than trusted |
 | **Generated + committed** | `site/data/portfolio.json`, built by `scripts/build-manifest.mjs` |
-| **Guarded by** | `scripts/validate-portfolio.mjs` (schema + referential integrity), `scripts/check-repos.mjs` (a repo that vanished or flipped visibility fails the build), `scripts/smoke-site.mjs` |
+| **Guarded by** | `validate-portfolio.mjs` (closed schema, referential integrity, cross-language parity) · `i18n-audit.mjs` (no hard-coded interface text, no unknown enum values) · `assert-served-manifest.mjs` (what a *served* manifest must contain) · `check-repos.mjs` (a repo that vanished or flipped visibility fails the build) · `smoke-site.mjs` · `theme-audit.mjs` · `render-check.mjs` (real Chromium, both languages and both themes) · `health-selftest.mjs` |
 | **Drift** | CI runs the builder with `--check`; a stale committed manifest fails the build |
+| **The image** | CI builds the container and probes it: non-root, `/healthz` outside the SPA fallback, manifest served, headers on every path |
+| **Nightly** | `collect-health.mjs` reads the whole estate into `data/health.json`; the site renders it when it exists |
 
-Adding a repository to the map is one new file in `data/repos/`. Nothing in `site/` is
-edited by hand.
+Adding a repository to the map is two new files — `data/repos/<slug>.json` and its English
+twin in `data/en/repos/`. One alone fails the build. Nothing in `site/` is edited by hand,
+and no script reads the manifest's layout directly: they all go through
+`scripts/lib/manifest.mjs`.
 
 ### Deploying
 
@@ -88,6 +119,7 @@ experience, and educational .NET content.
 | [chess-mas](https://github.com/konradcinkusz/chess-mas) | Multi-agent chess in C#, orchestrated with .NET Aspire and Microsoft Agent Framework, with cost tracking against Azure AI Foundry |
 | [IberiaFamilyCalculator](https://github.com/konradcinkusz/IberiaFamilyCalculator) | Interactive Spanish IRPF, autónomos, and payroll calculator - drag sliders, add entities, share the full setup via a single URL |
 | [dev-insight](https://github.com/konradcinkusz/dev-insight) | Practical coding examples and patterns featured on the Dev Insight channel - C#, .NET, Transformers, SOLID, and more |
+| [C# Dictionaries - Deep Dive](https://github.com/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation) | Deep dive into Dictionary internals - hashing, buckets, collisions, resizing, complexity analysis, and benchmarks |
 
 ## 💻 Tech Stack
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
