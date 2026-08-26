@@ -40,11 +40,11 @@
     },
     {
       "label": "Glossary",
-      "value": "43 terms, 246 references from the prose"
+      "value": "43 terms, 247 references from the prose (in each language)"
     },
     {
       "label": "Site code",
-      "value": "648 lines of JS + 586 lines of CSS + 324 lines of HTML (`wc -l`)"
+      "value": "769 lines of JS + 593 of CSS + 307 of HTML (`wc -l`)"
     },
     {
       "label": "Runtime dependencies",
@@ -52,11 +52,11 @@
     },
     {
       "label": "Generated manifest",
-      "value": "543 KiB, committed and checked for drift"
+      "value": "1,179 KiB across two languages, committed and drift-checked"
     },
     {
       "label": "Control scripts",
-      "value": "7, including the health collector and its test against a fake API"
+      "value": "13 (12 under `scripts/` plus the shared accessor `scripts/lib/manifest.mjs`)"
     }
   ],
   "links": {

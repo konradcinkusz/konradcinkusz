@@ -238,7 +238,13 @@ for (const lang of LANGS.filter((l) => l !== "pl")) {
     if (o && typeof o === "object") { for (const k of Object.keys(o)) strings(o[k], `${path}.${k}`, into); return into; }
     return into;
   };
-  const sa = strings(source, "", []), sb = strings(other, "", []);
+  // `health` is collected once and copied into every bundle by design — it is
+  // one estate, not one per language — so its strings are identical everywhere
+  // and would trip this check by construction. That is safe ONLY because a
+  // breach now carries a key and its parameters rather than a sentence; the
+  // check below enforces that it stays that way.
+  const withoutHealth = (b) => { const { health, ...rest } = b; return rest; };
+  const sa = strings(withoutHealth(source), "", []), sb = strings(withoutHealth(other), "", []);
   for (let i = 0; i < Math.min(sa.length, sb.length); i++) {
     if (sa[i][1] === sb[i][1] && POLISH.test(sb[i][1])) {
       fail(`[${lang}] left untranslated at ${sb[i][0]}: ${JSON.stringify(sb[i][1].slice(0, 90))}`);
@@ -249,6 +255,33 @@ for (const lang of LANGS.filter((l) => l !== "pl")) {
   // {{term:id}} and {{term:id|label}} — the label translates, the id never does.
   const refs = (d) => [...JSON.stringify(d).matchAll(/\{\{term:([a-z0-9-]+)/g)].map((m) => m[1]).sort().join(",");
   if (refs(source) !== refs(other)) fail(`[${lang}] the set of {{term:...}} references differs from Polish — an id was translated or a reference dropped`);
+}
+
+// --- health breaches resolve to a sentence in every language ------------------
+// The collector emits { slug, tier, check, params }. The renderer turns that into
+// prose from ui.json. A breach key with no template renders as the key itself, on
+// the one page a reader visits precisely because something is wrong.
+const h = bundle.pl?.health;
+if (h) {
+  for (const b of h.breaches ?? []) {
+    if ("detail" in b) {
+      fail(`health breach for "${b.slug}" carries a pre-formatted "detail" string. Breaches must carry { check, params } so the sentence can be written in the reader's language — re-run scripts/collect-health.mjs.`);
+    }
+    if (!b.check) { fail(`health breach for "${b.slug}" has no check key`); continue; }
+    for (const lang of LANGS) {
+      const ui = bundle.ui?.[lang] ?? {};
+      for (const key of [`breach.${b.check}`, `breach.${b.check}.name`]) {
+        if (!(key in ui)) fail(`[${lang}] health breach "${b.check}" has no ui key "${key}" — the page would print the key`);
+      }
+    }
+    // A template placeholder with nothing to fill it renders as a literal "{n}".
+    for (const lang of LANGS) {
+      const tpl = bundle.ui?.[lang]?.[`breach.${b.check}`] ?? "";
+      for (const m of tpl.matchAll(/\{(\w+)\}/g)) {
+        if (!(m[1] in (b.params ?? {}))) fail(`[${lang}] health breach "${b.check}" template wants {${m[1]}} and the collector did not supply it`);
+      }
+    }
+  }
 }
 
 // --- interface strings -----------------------------------------------------

@@ -213,7 +213,29 @@
       "health.redCi": "z czerwonym CI",
       "health.collectedAt": "data zbiórki",
       "health.clean.tag": "czysto",
-      "nav.aria": "Główne sekcje"
+      "nav.aria": "Główne sekcje",
+      "breach.missing.name": "istnienie",
+      "breach.missing": "GitHub zwraca 404 — repozytorium zniknęło albo zmieniło nazwę",
+      "breach.visibility.name": "widoczność",
+      "breach.visibility": "manifest mówi {claimed}, GitHub mówi {actual}",
+      "breach.archived.name": "archiwum",
+      "breach.archived": "zarchiwizowane na GitHubie, a stan w manifeście to „{state}”",
+      "breach.ci-red.name": "czerwone CI",
+      "breach.ci-red": "{n} workflow(ów) czerwonych od {days} dni (próg dla {tier}: {threshold})",
+      "breach.bot-debt.name": "dług bota",
+      "breach.bot-debt": "{n} otwartych PR-ów od bota (próg dla {tier}: {threshold})",
+      "breach.old-pr.name": "stary PR",
+      "breach.old-pr": "najstarszy otwarty PR ma {days} dni (próg dla {tier}: {threshold})",
+      "breach.bot-drowning.name": "bot zagłusza",
+      "breach.bot-drowning": "{pct}% otwartych PR-ów to bot — pierwszy PR od człowieka utonie",
+      "breach.unreleased.name": "brak wydania",
+      "breach.unreleased": "{n} commitów od tagu {tag}",
+      "breach.no-tag.name": "brak tagu",
+      "breach.no-tag": "repozytorium deklaruje publikację obrazu albo pakietu, a nie ma ani jednego tagu",
+      "breach.stale.name": "bez ruchu",
+      "breach.stale": "{days} dni od ostatniego pusha (próg dla {tier}: {threshold})",
+      "breach.licence.name": "licencja",
+      "breach.licence": "publiczne repozytorium z licencją „{licence}”"
     },
     "en": {
       "overview.h": "Overview",
@@ -428,7 +450,29 @@
       "health.redCi": "with red CI",
       "health.collectedAt": "collected on",
       "health.clean.tag": "clean",
-      "nav.aria": "Main sections"
+      "nav.aria": "Main sections",
+      "breach.missing.name": "existence",
+      "breach.missing": "GitHub returns 404 — the repository is gone or was renamed",
+      "breach.visibility.name": "visibility",
+      "breach.visibility": "the manifest says {claimed}, GitHub says {actual}",
+      "breach.archived.name": "archived",
+      "breach.archived": "archived on GitHub, while the manifest's state is '{state}'",
+      "breach.ci-red.name": "red CI",
+      "breach.ci-red": "{n} workflow(s) red for {days} days (threshold for {tier}: {threshold})",
+      "breach.bot-debt.name": "bot debt",
+      "breach.bot-debt": "{n} open PRs from a bot (threshold for {tier}: {threshold})",
+      "breach.old-pr.name": "old PR",
+      "breach.old-pr": "the oldest open PR is {days} days old (threshold for {tier}: {threshold})",
+      "breach.bot-drowning.name": "the bot drowns it",
+      "breach.bot-drowning": "{pct}% of open PRs are from a bot — the first one from a person will sink",
+      "breach.unreleased.name": "no release",
+      "breach.unreleased": "{n} commits since tag {tag}",
+      "breach.no-tag.name": "no tag",
+      "breach.no-tag": "the repository claims to publish an image or a package and has not one tag",
+      "breach.stale.name": "no movement",
+      "breach.stale": "{days} days since the last push (threshold for {tier}: {threshold})",
+      "breach.licence.name": "licence",
+      "breach.licence": "a public repository under the licence '{licence}'"
     }
   },
   "pl": {
@@ -5572,11 +5616,11 @@
           },
           {
             "label": "Słownik",
-            "value": "43 terminy, 246 odwołań z prozy"
+            "value": "43 terminy, 247 odwołań z prozy (w każdym języku)"
           },
           {
             "label": "Kod strony",
-            "value": "648 linii JS + 586 linii CSS + 324 linie HTML (`wc -l`)"
+            "value": "769 linii JS + 593 linie CSS + 307 linii HTML (`wc -l`)"
           },
           {
             "label": "Zależności runtime",
@@ -5584,11 +5628,11 @@
           },
           {
             "label": "Wygenerowany manifest",
-            "value": "543 KiB, commitowany i sprawdzany na dryf"
+            "value": "1 179 KiB w dwóch językach, commitowany i sprawdzany na dryf"
           },
           {
             "label": "Skrypty kontrolne",
-            "value": "7, w tym kolektor zdrowia i jego test wobec atrapy API"
+            "value": "13 (12 w `scripts/` plus wspólny akcesor `scripts/lib/manifest.mjs`)"
           }
         ],
         "links": {
@@ -7989,7 +8033,7 @@
       "automation": [
         {
           "name": "Manifest portfolio jako źródło prawdy",
-          "how": "Każde repozytorium ma jeden plik `data/repos/<slug>.json`. `scripts/build-manifest.mjs` scala je w `site/data/portfolio.json`, który jest serwowany. Dodanie repozytorium to jeden nowy plik, nie edycja HTML-a. CI odrzuca manifest, który nie przechodzi schematu i integralności referencyjnej.",
+          "how": "Każde repozytorium ma dwa pliki: `data/repos/<slug>.json` po polsku i bliźniaka `data/en/repos/<slug>.json` po angielsku. `scripts/build-manifest.mjs` scala oba drzewa w jeden `site/data/portfolio.json`, który jest serwowany. Dodanie repozytorium to dwa nowe pliki, nie edycja HTML-a — jeden sam nie przejdzie, bo walidator porównuje drzewa element po elemencie. CI odrzuca manifest, który nie przechodzi schematu, integralności referencyjnej albo parzystości między językami.",
           "where": "konradcinkusz/data/, konradcinkusz/scripts/build-manifest.mjs"
         },
         {
@@ -13802,11 +13846,11 @@
           },
           {
             "label": "Glossary",
-            "value": "43 terms, 246 references from the prose"
+            "value": "43 terms, 247 references from the prose (in each language)"
           },
           {
             "label": "Site code",
-            "value": "648 lines of JS + 586 lines of CSS + 324 lines of HTML (`wc -l`)"
+            "value": "769 lines of JS + 593 of CSS + 307 of HTML (`wc -l`)"
           },
           {
             "label": "Runtime dependencies",
@@ -13814,11 +13858,11 @@
           },
           {
             "label": "Generated manifest",
-            "value": "543 KiB, committed and checked for drift"
+            "value": "1,179 KiB across two languages, committed and drift-checked"
           },
           {
             "label": "Control scripts",
-            "value": "7, including the health collector and its test against a fake API"
+            "value": "13 (12 under `scripts/` plus the shared accessor `scripts/lib/manifest.mjs`)"
           }
         ],
         "links": {
@@ -16219,7 +16263,7 @@
       "automation": [
         {
           "name": "The portfolio manifest as the source of truth",
-          "how": "Every repository has one file, `data/repos/<slug>.json`. `scripts/build-manifest.mjs` merges them into `site/data/portfolio.json`, which is what gets served. Adding a repository is one new file, not an edit to HTML. CI rejects a manifest that fails the schema or referential integrity.",
+          "how": "Every repository has two files: `data/repos/<slug>.json` in Polish and its twin `data/en/repos/<slug>.json` in English. `scripts/build-manifest.mjs` merges both trees into the one `site/data/portfolio.json` that is served. Adding a repository is two new files, not an HTML edit — one alone fails, because the validator compares the trees element for element. CI rejects a manifest that fails the schema, referential integrity, or parity between the languages.",
           "where": "konradcinkusz/data/, konradcinkusz/scripts/build-manifest.mjs"
         },
         {

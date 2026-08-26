@@ -16,6 +16,7 @@
 // would never notice was missing the other.
 
 import { readFileSync } from "node:fs";
+import { NOT_A_LANGUAGE } from "./lib/manifest.mjs";
 
 const REQUIRED_LANGS = ["pl", "en"];
 const MIN_REPOS = 30;
@@ -57,7 +58,9 @@ try { j = JSON.parse(text); } catch (e) { die(`served manifest is not valid JSON
 
 if (Array.isArray(j.repos)) die("served manifest is the OLD flat shape (a top-level \"repos\" array) — the image is stale or the builder was not run");
 
-const langs = Object.keys(j).filter((k) => k !== "ui");
+// Imported rather than restated: "ui sits beside the language bundles and is not
+// one of them" is a fact about the layout, and the layout has one owner.
+const langs = Object.keys(j).filter((k) => !NOT_A_LANGUAGE.has(k));
 if (!langs.length) die("served manifest carries no language bundle at all");
 
 for (const l of REQUIRED_LANGS) {
