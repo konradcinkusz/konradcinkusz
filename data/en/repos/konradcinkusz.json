@@ -1,0 +1,209 @@
+{
+  "slug": "konradcinkusz",
+  "name": "konradcinkusz (GitHub profile + portfolio map)",
+  "cluster": "F-meta",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P0",
+  "oneLiner": "GitHub profile and hub repository: one manifest describing thirty-five repositories, plus a site that renders it.",
+  "summary": "The repository does two things at once and both are committed today. The first is the profile README — the first thing anyone arriving at the rest of the estate sees. The second is the portfolio map: a site in plain HTML, CSS and JS with no build step and no runtime dependencies, which renders five tabs from a single manifest — portfolio, consolidation, operating model, a sortable index and a glossary of forty-three terms. The data sits split across `data/`, one file per repository; `scripts/build-manifest.mjs` glues them into `site/data/portfolio.json`, and `--check` mode detects {{term:drift|drift}} of the committed copy against the sources. The most interesting decision is in the validator: the schema of repository keys is **closed**, and referential integrity is checked across files, so an unknown slug, a {{term:kernel|kernel}} with one consumer, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. This is the only place in the portfolio from which thirty-five repositories are visible at once — and that is why it sits at tier P0 despite not containing a single line of business logic.",
+  "stack": [
+    "HTML5",
+    "CSS3 z custom properties (motyw jasny/ciemny)",
+    "Vanilla JavaScript, ES modules, zero dependencies",
+    "Node.js 22",
+    "nginx 1.27-alpine",
+    "Docker",
+    "Fly.io",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "JavaScript",
+  "license": "MIT",
+  "tests": "No unit tests; seven control scripts instead: manifest drift, the validator (closed schema plus referential integrity), existence and visibility of the repositories through the GitHub API, a structural smoke test of the site, a theme-token audit, a rendering test in Chromium across three combinations of theme and width, and **a test of the health collector's thresholds against a fake API** — every threshold has a fixture it must fire on, and a clean repository it must stay silent on.",
+  "ci": "`validate-portfolio.yml` on push, PR and manually, with a filter covering `data/**`, `site/**` and `scripts/**`: seven steps, from manifest drift through browser rendering to the single-file build. `flyio.yml` on a `v*` tag: creates the app if it does not exist, deploys, and **after** the deployment fetches the served manifest and demands at least thirty repositories — because a health check proves nginx came up, not that the data arrived.",
+  "metrics": [
+    {
+      "label": "Repositories on the map",
+      "value": "35, across 6 clusters"
+    },
+    {
+      "label": "Attention tiers",
+      "value": "5 (P0-P4), covering 35 slugs with no repeats"
+    },
+    {
+      "label": "Operating model",
+      "value": "9 principles · 12 health checks · 7 WIP limits · 12 automations"
+    },
+    {
+      "label": "Kernels and duplications",
+      "value": "7 kernels, 6 rejected, 11 duplications"
+    },
+    {
+      "label": "Glossary",
+      "value": "43 terms, 246 references from the prose"
+    },
+    {
+      "label": "Site code",
+      "value": "648 lines of JS + 586 lines of CSS + 324 lines of HTML (`wc -l`)"
+    },
+    {
+      "label": "Runtime dependencies",
+      "value": "0; the only development dependency is Playwright for the rendering test"
+    },
+    {
+      "label": "Generated manifest",
+      "value": "543 KiB, committed and checked for drift"
+    },
+    {
+      "label": "Control scripts",
+      "value": "7, including the health collector and its test against a fake API"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/konradcinkusz",
+    "live": [
+      {
+        "label": "Dev Insight channel on YouTube",
+        "url": "https://www.youtube.com/@_dev_insight"
+      },
+      {
+        "label": "@dev_insight on X",
+        "url": "https://x.com/dev_insight"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Portfolio operating model",
+        "path": "data/ops.json"
+      },
+      {
+        "label": "Cluster definitions and their substrates",
+        "path": "data/clusters.json"
+      },
+      {
+        "label": "Secrets and manifest rules",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Fly.io deployment configuration",
+        "path": "flyio/portfolio.fly.toml"
+      },
+      {
+        "label": "Manifest validator",
+        "path": "scripts/validate-portfolio.mjs"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Builder manifestu",
+      "path": "scripts/build-manifest.mjs",
+      "description": "57 lines gluing `data/` and `data/repos/*.json` into a single artefact, enforcing that the file name matches the slug. `--check` mode compares the generated result against the committed copy and fails CI when they diverge; a comment in the file points at `architecture-standards` as the source of the pattern.",
+      "reusable": true
+    },
+    {
+      "name": "Repository-existence checker",
+      "path": "scripts/check-repos.mjs",
+      "description": "Queries `api.github.com` about every repository in the manifest and compares the actual visibility and the `archived` flag against the declaration. Without a token it exits with code 0, rather than failing falsely in a fork.",
+      "reusable": true
+    },
+    {
+      "name": "Smoke test strony",
+      "path": "scripts/smoke-site.mjs",
+      "description": "A structural HTML test with no browser: it pairs tabs with panels, checks that every local asset exists and balances the sectioning tags. It knows not one concept from the portfolio domain, so it will work on any static site with tabs.",
+      "reusable": true
+    },
+    {
+      "name": "Obraz i konfiguracja serwera",
+      "path": "Dockerfile, deploy/nginx.conf",
+      "description": "nginx 1.27-alpine serving `site/` as static files, with `/healthz` taken out from under the SPA fallback, no-cache on the manifest, a seven-day cache on assets and security headers. The container runs as an unprivileged user and has its own HEALTHCHECK.",
+      "reusable": true
+    },
+    {
+      "name": "Tag-driven Fly.io deployment",
+      "path": "flyio/portfolio.fly.toml, .github/workflows/flyio.yml",
+      "description": "The `konrad-portfolio` app in the waw region, shared-cpu-1x 256 MB, `min_machines_running = 0`. The workflow explicitly checks for the presence of `FLY_API_TOKEN`, creates the app on demand and verifies the deployment by fetching the manifest, not by a health check.",
+      "reusable": true
+    },
+    {
+      "name": "Walidator manifestu",
+      "path": "scripts/validate-portfolio.mjs",
+      "description": "A closed `REPO_KEYS` set, slug uniqueness, referential integrity between repositories, clusters, kernels and duplications, the assignment of every repo to exactly one {{term:poziom|tier}}, and the resolvability of every glossary reference. The whole of the logic is written for this one schema.",
+      "reusable": false
+    },
+    {
+      "name": "Renderer manifestu",
+      "path": "site/assets/app.js",
+      "description": "645 lines with no dependencies: fetching the manifest, five tabs, filters by cluster and visibility, index sorting, the repository side panel, highlighting of a kernel's consumers and a micro-syntax linking the prose to the glossary.",
+      "reusable": false
+    },
+    {
+      "name": "Data sources",
+      "path": "data/",
+      "description": "`meta.json` with the header and the links, `clusters.json` with six clusters described by {{term:substrat|substrate}} and barrier, `ops.json` (26 kB) with the operating model, `glossary.json` (30 kB) with 43 terms. This is content about this particular portfolio, not a schema for reuse.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "`build-manifest.mjs` quotes the drift-validator pattern directly from that plugin directory, and `data/ops.json` points at the `FLY-IO-DEPLOYMENT.md` there as the source of the deployment schema."
+    },
+    {
+      "slug": "landing-page",
+      "reason": "Two static sites about the author in the same cluster, competing for the same calling-card role."
+    },
+    {
+      "slug": "konrad-cinkusz-cv-maker",
+      "reason": "The same recruitment material in a different format, both in cluster F."
+    },
+    {
+      "slug": "cv-maker",
+      "reason": "An overlapping function: generating material about the author from structured data."
+    },
+    {
+      "slug": "dev-insight",
+      "reason": "The README and `meta.json` link to the channel as the main axis of distribution, so both describe the same channel of reach."
+    }
+  ],
+  "product": "No buyer, and none should be looked for here. This is channel and credibility: the GitHub profile is the first thing a recruiter or a prospective user of the other thirty-four repositories sees. The map is a decision tool for one person, the owner, and in that role it has real indirect value, because it is the only place from which 35 repositories, their duplications and the {{term:wip|WIP}} limits are visible at once. The site itself is not a product and there is no sense in positioning it as one.",
+  "highlights": [
+    "The validator has a **closed** set of repository keys and checks integrity across files: an unknown slug in `overlaps`, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. A {{term:kernel|kernel}} with one consumer is a warning, not an error — that is a judgement, not a schema violation.",
+    "`data/ops.json` is a complete operating model, not a declaration of intent: 9 principles, 5 attention tiers covering **exactly 35 slugs with no repeats**, 7 rituals with a timebox and an artefact on the way out, 12 health checks with a signal, a threshold and an action, 7 WIP limits, 12 automations and 6 plan horizons with a completion test.",
+    "The site has no build step and zero dependencies at run time. The only development dependency is a browser for the rendering test — which caught a boot-ordering bug that left the page blank, three layout overflows and a `[hidden]` rule losing to `display: flex`.",
+    "The manifest is a **generated and committed file**, and that rules one thing out: it cannot carry its own commit count. An attempt to fill that in from git at build time ended in a chase — every commit invalidated the file it had itself written a moment earlier, and `--check` failed on the next run. Those numbers are gathered by the nightly collector, for this repository on the same terms as for the other thirty-four."
+  ],
+  "gaps": [
+    "The manifest is a **snapshot from a single day** for the thirty-four other repositories. The nightly collector meant to take that away is written and tested against a fake API, but has **never run live** — it needs an account-wide token that does not exist yet. Until then the numbers on the cards come from a one-off read.",
+    "The project table in the README is still written by hand, even though the same manifest could generate it. This is exactly the problem the {{term:drift|drift validator}} has already solved for the manifest itself.",
+    "The site has not been deployed even once — the Fly configuration and the workflow are written and never run.",
+    "Entries about private repositories point at documents the reader will not open. The renderer greys such links out and gives the reason, but there is no way to fix it without opening the repositories."
+  ],
+  "next": [
+    "Cut the first tag and check whether the deployment actually passes — including the step that verifies the served manifest.",
+    "Build `scripts/build-readme.mjs` and generate the README's project table from the manifest, to remove the divergence at source.",
+    "Add the nightly health collector, writing `data/health.json` and opening **one** issue with the breached thresholds.",
+    "Move the reusable CI workflow for .NET here; sixteen copies of `ci.yml` across the estate come to one `workflow_call` and three lines at the consumer."
+  ],
+  "risks": [
+    "The manifest is served publicly and names private repositories by name and description. That is a deliberate disclosure, not an accident, and the closed key schema is the mechanism that keeps anything more from joining it."
+  ],
+  "headline": "The only place the whole portfolio is visible at once — and the only one keeping it honest",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-26",
+    "commits": 19,
+    "files": 68
+  }
+}

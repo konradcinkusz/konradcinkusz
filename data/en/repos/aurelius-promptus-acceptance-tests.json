@@ -1,0 +1,190 @@
+{
+  "slug": "aurelius-promptus-acceptance-tests",
+  "name": "AureliusPromptus.AcceptanceTests",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "449 Playwright tests in .NET for the AureliusPromptus Portal, plus an audit that showed 196 of them checked nothing.",
+  "summary": "Two Playwright acceptance-test projects aimed at one Portal application, by default at `http://localhost:3003`. The main project is xUnit v3 on .NET 9 and Playwright 1.52: `BrowserFixture` holds one browser process per collection, `PlaywrightTestBase` gives each test a fresh context and page with video recording and a screenshot on failure, and `AuthTestBase` creates a unique account through the UI and deletes it in teardown. Alongside it sits a second, smaller project on MSTest 4 and .NET 10 with 53 tests, duplicating the same infrastructure against the same application. The most interesting thing in the repository is not the test code, though, but `E2E_Tests_analysis.md`: an audit that catalogued the sham-test patterns and counted them one by one, including 196 empty method bodies, 186 guard-then-bail sites and one mechanical Playwright API mistake (`HasText` with a comma-separated list) disabling 13 calls. Phase 1 of the remediation plan was actually carried out on 2026-08-14: no test was deleted, 196 were explicitly marked `Skip` with an individual reason, and 253 carry an unconditional assertion. This is a rare thing in the portfolio: a repository that documented its own dishonesty and gave a number instead of an adjective.",
+  "stack": [
+    ".NET 9",
+    ".NET 10",
+    "xUnit v3 1.1.0",
+    "MSTest 4.0.1",
+    "Microsoft.Playwright 1.52.0",
+    "Microsoft.Playwright.MSTest.v4 1.55.0",
+    "FluentAssertions 7.0.0",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "brak pliku LICENSE",
+  "tests": "449 xUnit test methods across 52 files: 253 `[Fact]` attributes without `Skip` plus 196 `[Fact(Skip = ...)]`, that is 449 occurrences of `[Fact` counted by grep over the tree, skipping `bin/` and `obj/`; zero `[Theory]` and zero `[InlineData]`. The MSTest project has 53 `[TestMethod]` across 14 files. The earlier '63 and 17 files' are the counts of all `.cs` files in both projects (63 + 17 = 80), not of files containing tests. No run has been verified here, because all of them need a live Portal instance, which this repo does not contain.",
+  "ci": "One workflow, `e2e-manual.yml`, `workflow_dispatch` only, with a required `base_url` and a choice of project, browser and filter. It installs both SDKs (9.0.x and 10.0.x), builds in Release, pulls the browser through `playwright.ps1 --with-deps`, runs `dotnet test` with the trx logger and uploads artefacts for 14 days; there is no `push`, `pull_request` or `schedule` trigger at all.",
+  "metrics": [
+    {
+      "label": "xUnit tests with a real assertion",
+      "value": "253"
+    },
+    {
+      "label": "xUnit tests marked Skip",
+      "value": "196"
+    },
+    {
+      "label": "MSTest tests",
+      "value": "53"
+    },
+    {
+      "label": ".cs files",
+      "value": "80"
+    },
+    {
+      "label": "Lines of C#",
+      "value": "11,475"
+    },
+    {
+      "label": "Commits",
+      "value": "32"
+    },
+    {
+      "label": "Audit document",
+      "value": "37,528 bytes"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/aurelius-promptus-acceptance-tests",
+    "live": [],
+    "docs": [
+      {
+        "label": "Suite audit and four-phase remediation plan",
+        "path": "E2E_Tests_analysis.md"
+      },
+      {
+        "label": "Running the suite and the AP_AT_* environment variables",
+        "path": "README.md"
+      },
+      {
+        "label": "Ready-made refactoring tasks per area",
+        "path": "AureliusPromptus.Web.NextJs.E2ETests/docs/MASTER_PROMPTS.md"
+      },
+      {
+        "label": "Inventory of test files (counts out of date)",
+        "path": "AureliusPromptus.Web.NextJs.E2ETests/docs/TEST_FILES_INVENTORY.md"
+      },
+      {
+        "label": "Manual workflow for running the suite",
+        "path": ".github/workflows/e2e-manual.yml"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "BrowserFixture",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests/BrowserFixture.cs",
+      "description": "An `IAsyncLifetime` that brings up one browser process for the whole xUnit collection rather than per test, with a choice of chromium/firefox/webkit and headless mode through `AP_AT_BROWSER` and `AP_AT_HEADLESS`. The code knows no domain type at all.",
+      "reusable": true
+    },
+    {
+      "name": "PlaywrightTestBase",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests/PlaywrightTestBase.cs",
+      "description": "A fresh `IBrowserContext` and `IPage` per test, video deleted on success and kept on failure, a full-page screenshot, plus a `BeforeContextCloseAsync` extension point called after the screenshot and before the context closes. The only trace of the domain is the toast selector `[data-sonner-toast]`.",
+      "reusable": true
+    },
+    {
+      "name": "Workflow e2e-manual.yml",
+      "path": ".github/workflows/e2e-manual.yml",
+      "description": "A job skeleton for any Playwright suite in .NET: two SDKs, restore, Release build, browser installation with system dependencies, `dotnet test` with trx, and upload of videos and screenshots. The `base_url` parameter is required, so nothing has an environment baked in.",
+      "reusable": true
+    },
+    {
+      "name": "E2E_Tests_analysis.md",
+      "path": "E2E_Tests_analysis.md",
+      "description": "Version 2.0 of the audit, dated 2026-08-14: establishing which application is alive at all, a catalogue of sham-test patterns with an occurrence count for each, a four-phase plan and a report on the Phase 1 work carried out. The generalised rules from it were lifted into the architecture-standards repository.",
+      "reusable": false
+    },
+    {
+      "name": "AuthTestBase",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests/UserProfileTests/AuthTestBase.cs",
+      "description": "`RegisterAndLoginAsync` creates a unique account through the registration form, and the overridden `BeforeContextCloseAsync` deletes it through the same flow that `AccountDeletionTests` verify. A cleanup failure is swallowed deliberately, so that it cannot knock over a green test.",
+      "reusable": false
+    },
+    {
+      "name": "Suity funkcjonalne xUnit",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests",
+      "description": "Eight areas, each with its own base class. The spread of coverage is extreme: `RegistrationTests` has 19 real assertions and zero `Skip`, `LoginTests` 15/0, while `QuotaEnforcementTests` is 0/10 and `OrganizationInvitationReceivingTests` 0/11.",
+      "reusable": false
+    },
+    {
+      "name": "AureliusPromptus.Web.Portal.E2ETests",
+      "path": "AureliusPromptus.Web.Portal.E2ETests",
+      "description": "A parallel project on MSTest 4 and `Playwright.MSTest` (.NET 10) with 53 `[TestMethod]` across 14 files: prompt templates plus login. It has its own base class `PlaywrigthTestBase`, with the typo in the name, its own `AP_PORTAL_*` prefix and an injected clipboard shim. The audit recommends absorbing it.",
+      "reusable": false
+    },
+    {
+      "name": "setup.ps1",
+      "path": "setup.ps1",
+      "description": "A script to dot-source, setting six `AP_AT_*` variables (`AP_AT_BASE_URL`, `AP_AT_BROWSER`, `AP_AT_HEADLESS`, `AP_AT_RECORD_VIDEO`, `AP_AT_SCREENSHOT_ON_FAIL`, `AP_AT_ARTIFACTS_DIR`) plus `AP_PORTAL_BASE_URL` in the current PowerShell session. `AP_AT_CLEANUP_ACCOUNTS` is read in `PlaywrightTestBase`, but this script does not set it — only the default value applies. The default port 3003 is written here as the `-BaseUrl` parameter, and the same fallback also sits in both base classes and in the README.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "aurelius-promptus",
+      "reason": "This is the system under test. Without a running Portal from that repository this suite has no executable value at all, and CI automation depends on the PR-environment workflow that is disabled over there."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "The generalised rules from the audit (assertion discipline, locator conventions, CI as part of the definition of done) were moved into `docs/guides/E2E-ACCEPTANCE-TESTING.md` in that repo."
+    },
+    {
+      "slug": "ai-coding-assistant-article",
+      "reason": "The audit is a counted case of a suite generated in a single AI run, described as production-ready and checking nothing. It is evidence on exactly the subject of that piece."
+    }
+  ],
+  "product": "No buyer. This is the internal quality layer of one private product, and nobody outside will buy or clone tests of somebody else's Portal. The only exportable value lies in `E2E_Tests_analysis.md`: a specific, counted piece of {{term:evidence|evidence}} that a green suite run can mean nothing. That is material for an article or a chapter, not for a product, and it is worth treating as input to a text rather than as a repository to develop.",
+  "highlights": [
+    "The audit does not say \"many tests are weak\", it gives numbers: **196 empty method bodies across 36 files**, 186 guard-then-bail sites, 45 swallowed assertions and one mechanical API mistake (`HasText` with a comma-separated list) disabling 13 calls.",
+    "Phase 1 was carried out, not merely planned: the method count did not change, but **each of the 196 dead tests got an explicit `Skip` with an individual reason** instead of being deleted. The debt is visible in the run result, not in the git history.",
+    "Test-account cleanup is solved in the base class rather than in every test: `BeforeContextCloseAsync` fires after the screenshot and before the context closes, so a failure still leaves an artefact and the account disappears anyway. The `AP_AT_CLEANUP_ACCOUNTS` switch leaves a way out for debugging.",
+    "PR #12, open for three months, was diagnosed and merged instead of the work being redone, with a byte-level comparison of `QuotaEnforcementTests` between the branches as evidence that it had not touched the test bodies.",
+    "The repository openly documents its own genealogy, including the fact that the delivery documents of the original suite boast of \"500+ hours of test design\" and are dated to an impossible December 2024."
+  ],
+  "gaps": [
+    "**The suite has never run automatically and there is no documented green run of the whole thing.** The workflow is `workflow_dispatch` only, so the entire audit stops at static analysis, and its conclusions about coverage are unverified by execution. The tests are not {{term:hermetyczny|hermetic}}: they need a live Portal instance, and nobody here stands one up.",
+    "Whole areas have zero real assertions: `QuotaEnforcementTests` 0/10, `OrganizationInvitationReceivingTests` 0/11, `OrganizationInvitationManagementTests` 0/7, `MessageManagementTests` 0/7, `PremiumFeaturesAccessTests` 0/6. The product's monetisation boundary is entirely uncovered.",
+    "Three systemic blockers from Phase 1 are still open: `RegisterAndLoginAsync` does not create the workspace the dashboard layout insists on, the system-messages bell has no selector at all, and there is no Premium-account helper. Some of the newly added assertions will fall over on the first live run.",
+    "The numbers in the README and in the audit (447 / 252 / 195) disagree with a grep over the code (449 / 253 / 196), and the documents in `docs/` have their own, older {{term:drift|drift}}. The audit admits this and does not fix it.",
+    "Phase 2 not done: two projects on two test frameworks and two versions of .NET aim at the same application, and the name `Web.NextJs.E2ETests` points at a frontend that no longer exists."
+  ],
+  "next": [
+    "Run `e2e-manual.yml` once against any live Portal instance and publish the actual result, red though it may be. Without that the audit is only a well-counted hypothesis.",
+    "Fix the three infrastructure blockers in this order: workspace creation in `RegisterAndLoginAsync`, the system-messages bell selector, the Premium-account helper.",
+    "Move the seed-account passwords (`konrad@aurelius.com` / `konrad@aurelius.today`) out into environment variables and add a `LICENSE`.",
+    "Reconcile the numbers in the README and the audit with the grep, or generate them from a script during the build, so the drift cannot come back.",
+    "Carry out Phase 2: rename the project to `AureliusPromptus.Web.E2ETests`, move the unique scenarios over from the MSTest project and delete it."
+  ],
+  "risks": [
+    "Seed-account passwords are hard-coded in the repository: `konrad@aurelius.com` / `Konrad123!` in `UserProfileTests/LoginTests.cs:15` and `konrad@aurelius.today` / `Konrad123!` in two files of the Portal project. If those accounts exist in a publicly reachable environment, this is a credential leak.",
+    "The seed-account domains do not match each other, nor the product's domain after the rebrand, so the suite may have nothing to log in with before it ever reaches the first assertion.",
+    "The tests create real data in the environment under test. Nothing removes organisations or prompts, and accounts from `LogoutTests` leak, because after logging out there is no session left to delete with.",
+    "No `LICENSE` file, with two versions of .NET and two test frameworks in one solution: nobody else has the right to use this, and maintaining it costs two build paths anyway."
+  ],
+  "headline": "The audit counted 196 sham tests; the suite still has no green run",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 9,
+    "openPrs": 1,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-14",
+    "commits": 32,
+    "files": 96
+  }
+}

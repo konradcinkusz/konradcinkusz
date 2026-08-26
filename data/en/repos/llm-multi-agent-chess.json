@@ -1,0 +1,202 @@
+{
+  "slug": "llm-multi-agent-chess",
+  "name": "Chess Agent System with LLM",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "prototype",
+  "tier": "P4",
+  "oneLiner": "Two LLM agents play chess against each other — once in Python with Streamlit, once in .NET 8 on a hand-written chess engine.",
+  "summary": "The repository carries two parallel implementations of one idea. The first, from August 2025, is Streamlit over `python-chess` with an agent factory, a random agent and a headless `simulate_game`. The second, from April 2026, is a full rewrite: ASP.NET Core Web API, Blazor WebAssembly behind nginx, SignalR for streaming moves and PostgreSQL through EF Core, run as three containers in `docker-compose`. The most interesting engineering decision is dropping the chess library on the .NET side: `ChessBoard.cs` is 692 lines and handles FEN, SAN, legal move generation with castling and en passant, checkmate, stalemate, the 50-move rule, repetition and rendering the board to SVG on its own. The second thing worth noting is the {{term:audit|audit}} layer: every prompt attempt lands in the `PromptLogs` table together with the model's full response and a success flag, and three admin pages let you browse it filtered by game. The engine, the API, the database schema and the panel are finished; what is unfinished is gluing them into something you can run — the README describes only the abandoned Python branch.",
+  "stack": [
+    ".NET 8",
+    "ASP.NET Core Web API",
+    "Blazor WebAssembly 8.0.25",
+    "SignalR 8.0.10",
+    "EF Core 8.0.10 + Npgsql",
+    "OpenAI .NET SDK 2.1.0",
+    "PostgreSQL 16-alpine za nginx",
+    "Python 3 + Streamlit 1.24.0"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Ten test functions in four files under `tests/`: `test_agents.py` 3, `test_game.py` 3, `test_utils.py` 3, `test_simulation.py` 1. The directory has six files — the other two are `conftest.py` and `__init__.py`, in which `test_board`, despite the name, is a fixture (`@pytest.fixture`) rather than a test. All of it in Python; on the .NET side there are no test projects at all. A run could not be confirmed (no pytest and no `chess` module in the environment), but two functions in `test_agents.py` call `pytest.patch`, which does not exist in the pytest API, so those certainly fall over.",
+  "ci": "No CI — the repository has no `.github` directory and no workflow. So nobody knows whether the .NET stack compiles.",
+  "metrics": [
+    {
+      "label": "Commits",
+      "value": "7, from 2025-08-26 to 2026-04-11"
+    },
+    {
+      "label": "Files in git",
+      "value": "101"
+    },
+    {
+      "label": "Hand-written chess engine",
+      "value": "692 lines (ChessBoard.cs)"
+    },
+    {
+      "label": ".NET code excluding migrations",
+      "value": "3,768 lines — `wc -l` over the `.cs` files in ChessApi without the `Migrations/` directory (1,801) plus the `.cs` and `.razor` files in ChessBlazor (1,967), skipping `bin/` and `obj/`"
+    },
+    {
+      "label": "Python code including tests",
+      "value": "1,545 lines"
+    },
+    {
+      "label": "Test functions",
+      "value": "10 in four files under `tests/`, all in Python"
+    },
+    {
+      "label": "Containers in docker-compose",
+      "value": "3 (db, api, frontend)"
+    },
+    {
+      "label": "EF Core migrations",
+      "value": "2"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/llm-multi-agent-chess",
+    "live": [],
+    "docs": [
+      {
+        "label": "README — describes only the Streamlit variant",
+        "path": "README.md"
+      },
+      {
+        "label": "Contributor guidelines",
+        "path": "CONTRIBUTING.md"
+      },
+      {
+        "label": "Code of conduct",
+        "path": "CODE_OF_CONDUCT.md"
+      },
+      {
+        "label": ".NET stack — three containers",
+        "path": "chess-dotnet/docker-compose.yml"
+      },
+      {
+        "label": "Chess engine",
+        "path": "chess-dotnet/ChessApi/Chess/ChessBoard.cs"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Prompt audit and the admin panel",
+      "path": "chess-dotnet/ChessApi/Controllers/AdminController.cs",
+      "description": "The `PromptLog` entity records, for **every attempt**, the model, the persona, the full prompt text, the response and a success flag; the controller exposes statistics, a list of games and a paged view of prompts filtered by player. Moving it elsewhere takes more than cutting the `GameId` foreign key, though: the constructor is `AdminController(IDbContextFactory<AppDbContext> dbFactory)`, and `AppDbContext` exposes only `DbSet<Game>`, `DbSet<MoveRecord>` and `DbSet<PromptLog>`, each of which all five actions use. Four of the five signatures return domain types — `Task<ActionResult<AdminStats>> GetStats()`, `Task<ActionResult<List<AdminGameSummary>>> GetGames(string?, int, int)`, `Task<ActionResult<AdminGameDetail>> GetGame(Guid)` and `Task<ActionResult<List<AdminPromptLogItem>>> GetPrompts(Guid?, string?, int, int)`; the only domain-neutral one is `GetPlayers()`, which returns `List<string>`. What is portable is the prompt/response/success pattern itself, not this code.",
+      "reusable": false
+    },
+    {
+      "name": "ChessBoard — silnik szachowy w C#",
+      "path": "chess-dotnet/ChessApi/Chess/ChessBoard.cs",
+      "description": "692 lines without a single external dependency: FEN both ways, SAN, legal move generation with castling and en passant, seven game states including insufficient material and repetition, plus `MaterialCounts`, `KingSafety`, `SimpleEval` and `ToSvg`. Self-contained, but described end to end by the `Piece`, `ChessMove` and `GameStatus` types.",
+      "reusable": false
+    },
+    {
+      "name": "LlmChessAgent and the validation loop",
+      "path": "chess-dotnet/ChessApi/Agents",
+      "description": "The prompt assembles the FEN, the material balance, the recent moves and the full list of legal moves in SAN, sends it at temperature 0.3 with a 15-token output limit, then checks the response against that list and retries up to `MaxRetries` times. Once the attempts run out it plays the first legal move — and returns `Success = true`.",
+      "reusable": false
+    },
+    {
+      "name": "GameService i ChessGameSession",
+      "path": "chess-dotnet/ChessApi/Services/GameService.cs",
+      "description": "Active games live in a `ConcurrentDictionary` in process memory, written to Postgres in parallel. `ChessGameSession` serialises moves with a single `SemaphoreSlim` so that autoplay does not get in its own way.",
+      "reusable": false
+    },
+    {
+      "name": "GameHub — the move stream over SignalR",
+      "path": "chess-dotnet/ChessApi/Hubs/GameHub.cs",
+      "description": "Broadcasts five events to the game's group, including `OnRetryAttempt`, so the UI sees the model's failed attempts too. Autoplay is a loop in `Task.Run` with a `CancellationTokenSource` per connection, cancelled both by `StopAutoPlay` and by `OnDisconnectedAsync`.",
+      "reusable": false
+    },
+    {
+      "name": "Warstwa danych EF Core",
+      "path": "chess-dotnet/ChessApi/Data/AppDbContext.cs",
+      "description": "Three entities with cascade delete, a unique index on `(GameId, Ply)` and default values on the Postgres side (`gen_random_uuid`, `now`). The migration runs itself at application start, so the first `docker-compose up` creates the schema with no manual step.",
+      "reusable": false
+    },
+    {
+      "name": "ChessBlazor — SPA i trzy strony admina",
+      "path": "chess-dotnet/ChessBlazor",
+      "description": "`Index.razor` assembles the agent configuration, the board, the position analysis and the move history; `GameHubService` wraps `HubConnection` with automatic reconnect. The admin pages alone are over 1,000 lines of Razor.",
+      "reusable": false
+    },
+    {
+      "name": "The Python/Streamlit branch",
+      "path": "src",
+      "description": "The original over `python-chess`: an LLM agent and a random one, per-persona prompts, a logger with a timestamp and `simulate_game` for a game without a UI. Frozen since the first commit and replaced by the rewrite, yet it still sits at the root and it is the one the README describes.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "chess-mas",
+      "reason": "The same domain and the same idea — a multi-agent system playing chess. Two repositories on the same subject in one portfolio need either separating or merging."
+    },
+    {
+      "slug": "agents-and-llms",
+      "reason": "A shared thread: building a prompt for action selection and validating the model's response against a list of permitted moves."
+    },
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "Both set LLM agents against each other and log the run for later analysis."
+    },
+    {
+      "slug": "cards-game",
+      "reason": "A game as a proving ground for agents, with hand-written rules and its own model of the game state."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "The `PromptLogs` table is the seed of what is done properly there — recording the prompt, the response and the outcome as material for judging session quality."
+    }
+  ],
+  "product": "**No buyer.** That language models play chess badly is well documented, so the product itself has no audience and there is no point pretending otherwise. The value is in credibility and in craft: a chess engine written from scratch in C# plus a complete ASP.NET Core + SignalR + Blazor WASM + EF Core + Postgres stack in `docker-compose` is a sensible code sample to bring to an interview. The prompt audit thread is valuable separately, because it shows thinking about agent observability rather than about the model call alone.",
+  "highlights": [
+    "A chess engine in **692 lines of C# with no external library**: FEN, SAN, castling, en passant, checkmate, stalemate, insufficient material, the 50-move rule, repetition and rendering the board to SVG.",
+    "A three-container stack in which the API **has no port exposed to the host** — nginx proxies `/api/`, `/health` and the WebSocket on `/gamehub` with `proxy_read_timeout 86400s`, and Postgres has a `pg_isready` healthcheck.",
+    "Every prompt attempt, failed ones included, goes into `PromptLogs` with its full text and a success flag; retries are additionally broadcast to the UI as `OnRetryAttempt`, so you can see how many times the model gave an illegal move.",
+    "The model's response is validated against the generated list of legal moves rather than parsed and hoped over — the 15-token output limit forces bare SAN notation instead of an argument.",
+    "Two EF Core migrations with a unique index on `(GameId, Ply)`, applied automatically by `MigrateAsync()` at container start."
+  ],
+  "gaps": [
+    "**The README describes only the Streamlit variant** and says not a word about the `chess-dotnet` directory, which is the larger and newer part of the repository. The clone instruction points at `chess-agent-system-with-llm.git`, a different repository name.",
+    "A routing conflict in Blazor: `Home.razor` and `Index.razor` both carry `@page \"/\"`. This was not verified by running it (no .NET SDK in this environment), but to the Blazor router these are ambiguous routes.",
+    "The admin panel and the whole of `AdminController` have **no authentication** — grepping for `Authorize` and `AddAuthentication` in `chess-dotnet` returns nothing, and `/api/admin/prompts` exposes the full text of prompts and responses. CORS is `SetIsOriginAllowed(_ => true)` together with `AllowCredentials`.",
+    "Once its attempts run out, `LlmChessAgent` plays the first legal move and returns `Success = true`, so in the database and in the UI the fallback move looks identical to a decision by the model. That corrupts the only data the audit layer was built for in the first place.",
+    "Games live only in process memory — after a container restart `GET /api/games/{id}` returns 404, even though the game is sitting in Postgres. On top of that, `PlayerName` is in the DTO, the entity, the migration and the admin filters, but `ChessApiClient.CreateGameAsync` never sends it."
+  ],
+  "next": [
+    "Settle which implementation is the real one: if it is .NET, move `src/` and `tests/` to `legacy/` and rewrite the README around `chess-dotnet` — with `docker-compose up`, the `OPENAI_API_KEY` and `POSTGRES_PASSWORD` variables and the `/admin` and `/swagger` addresses.",
+    "Delete `Home.razor`, `Weather.razor` and `Counter.razor` (template leftovers) so the duplicate `@page \"/\"` goes away, and check whether the application comes up in docker-compose at all.",
+    "Add an xUnit project and cover `ChessBoard` with perft tests from several known positions. Without that, the claim that the hand-written engine is correct has nothing behind it.",
+    "Protect `/api/admin` with at least a header carrying a token from configuration, and narrow CORS to the frontend's single origin.",
+    "Distinguish, in `MoveResult`, a move chosen by the model from the fallback first legal move and record that flag — otherwise the prompt logs are no use for any analysis of how well the model does."
+  ],
+  "risks": [
+    "A name collision: the README tells you to clone `chess-agent-system-with-llm`, the directory is called `llm-multi-agent-chess`, and in the portfolio it stands next to `chess-mas`. From the outside this looks like three different projects.",
+    "A panel with no authentication plus a frontend container on port 80 means the full text of the prompts is public from the first `docker-compose up`. The {{term:blast|blast radius}} is small, because nobody has deployed this, but the configuration is ready to be copied.",
+    "`docker-compose.yml` has a default `POSTGRES_PASSWORD:-changeme`, and `ChessApi/appsettings.json` carries `Password=changeme` outright in a versioned file.",
+    "Stale Python pins from the first commit: `openai==1.0.0`, `streamlit==1.24.0`, `python-dotenv==0.19.0` — code dead since August 2025 that nobody has touched since."
+  ],
+  "headline": "692-line chess engine done, README describes the abandoned Python branch",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 4,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-04-11",
+    "commits": 7,
+    "files": 101
+  }
+}

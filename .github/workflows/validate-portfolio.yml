@@ -44,6 +44,12 @@ jobs:
       - name: The site is valid HTML that parses
         run: node scripts/smoke-site.mjs
 
+      # A forgotten literal is silent: it renders one Polish sentence inside an
+      # English page and only a Polish reader notices, and they have no reason to
+      # report it. So the check is mechanical rather than editorial.
+      - name: No hard-coded interface text
+        run: node scripts/i18n-audit.mjs
+
       # A colour defined only inside a theme block never applies to a viewer whose
       # OS is on "system", which is the default. That is a whole-page failure and
       # it is invisible on the machine that authored it.

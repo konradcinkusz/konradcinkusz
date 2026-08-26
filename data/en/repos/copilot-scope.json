@@ -1,0 +1,198 @@
+{
+  "slug": "copilot-scope",
+  "name": "CopilotScope",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P1",
+  "oneLiner": "An OTLP collector and dashboard that turn AI assistant telemetry into a **session quality score**, not token usage.",
+  "summary": "Takes {{term:otel|OpenTelemetry}} telemetry from five surfaces — VS Code Copilot, Copilot CLI, Claude Code, Claude Cowork, Cursor — on a single endpoint, aggregates it into sessions and computes a composite quality score of 0–100 together with a confidence indicator. The component weights are **published** and renormalised only across the components that have data; a coverage coefficient is exported alongside every score, because the first version pinned every session to somewhere around eighty and that was plainly wrong. Beyond the score itself it computes turn analysis (which turn broke and why), survival of accepted edits, latency usefulness, token economics and a frustration heuristic — the last of these deliberately outside the score component set. The protobuf decoder is written in the repository, so the collector has **exactly one dependency** and the dashboard has none.",
+  "stack": [
+    ".NET 10",
+    "Blazor Server",
+    ".NET Aspire 13.4.6",
+    "Postgres 16",
+    "OpenTelemetry 1.17.0",
+    "Prometheus + Grafana",
+    "Azure AI Foundry (opcjonalnie)"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "160 test methods (155 [Fact] + 5 [Theory]) across 19 files with assertions, out of 22 files in the test directory. The number passing was not verified in this run — what is counted is the attributes in the code.",
+  "ci": "Five workflows: build and test of the whole solution, a matrix of four images on GHCR with a smoke test **before** publication, compilation of two LaTeX papers attached to the release, GitHub Pages, gitleaks. Plus dependabot for three ecosystems.",
+  "metrics": [
+    {
+      "label": "Supported telemetry emitters",
+      "value": "5"
+    },
+    {
+      "label": "C#/Razor code",
+      "value": "13,204 lines in total, 7,891 in src"
+    },
+    {
+      "label": "Test methods",
+      "value": "160"
+    },
+    {
+      "label": "Images published to GHCR",
+      "value": "4"
+    },
+    {
+      "label": "Research notebooks",
+      "value": "8"
+    },
+    {
+      "label": "LaTeX papers",
+      "value": "2 (3,451 lines), built in CI"
+    },
+    {
+      "label": "NuGet dependencies in the collector",
+      "value": "1"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/copilot-scope",
+    "live": [
+      {
+        "label": "Site (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/copilot-scope/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Configuration tutorial for each assistant",
+        "path": "docs/TUTORIAL.md"
+      },
+      {
+        "label": "Judge calibration — Cohen's kappa",
+        "path": "docs/CALIBRATION.md"
+      },
+      {
+        "label": "Positioning and strategy",
+        "path": "docs/STRATEGY.md"
+      },
+      {
+        "label": "Self-critical product review",
+        "path": "docs/architecture/PRODUCT-REVIEW-2026-08.md"
+      },
+      {
+        "label": "Ten research proposals",
+        "path": "research/RESEARCH_PROPOSALS.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": true,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Dekoder OTLP",
+      "path": "src/CopilotScope.Collector/Otlp",
+      "description": "A hand-written protobuf reader (718 lines in total) with field numbers verified against the official `.proto` files. It reads the generic OTLP format and has no notion of a session — it can be cut out as a small library for any OTLP receiver without an SDK.",
+      "reusable": true
+    },
+    {
+      "name": "The insight pipeline",
+      "path": "src/CopilotScope.Collector/Quality/Insights.cs",
+      "description": "A pluggable analyser contract: one class plus one registration gives you a new algorithm, and the dashboard renders the result generically. An analyser exception is caught and reported as missing data rather than bringing down ingest.",
+      "reusable": true
+    },
+    {
+      "name": "Judge calibration (Cohen's kappa)",
+      "path": "src/CopilotScope.JudgeAgent/Calibration",
+      "description": "670 lines: unweighted, linearly weighted and quadratically weighted {{term:kappa|kappa}}, each with a seeded bootstrap of 2000 samples. It measures the **agreement ceiling of the human panel itself** first and has a separate 'ceiling too low' verdict. The arithmetic itself is neutral, but the file imports `CopilotScope.Collector.Domain` and calls `CopilotSession.Percentile` in two places — that is the whole dependency to remove before extraction.",
+      "reusable": true
+    },
+    {
+      "name": "CopilotScope.ServiceDefaults",
+      "path": "src/CopilotScope.ServiceDefaults",
+      "description": "A hundred lines of pure infrastructure: self-instrumentation, health, service discovery, HTTP resilience. Deliberately without a single domain entity.",
+      "reusable": true
+    },
+    {
+      "name": "QualityEngine v2",
+      "path": "src/CopilotScope.Collector/Quality/QualityEngine.cs",
+      "description": "Six components with published weights, renormalised only across those with data, plus confidence = coverage times a sample ramp.",
+      "reusable": false
+    },
+    {
+      "name": "Dialect normalisation",
+      "path": "src/CopilotScope.Collector/Domain",
+      "description": "Reduces the `gen_ai.*` vocabulary and the older `copilot_chat.*` one to a single space. A separate 292 lines for Claude Code and Cowork, which by default **emit no spans at all** — the source of truth there is log events.",
+      "reusable": false
+    },
+    {
+      "name": "TelemetryGen",
+      "path": "tools/CopilotScope.TelemetryGen",
+      "description": "Replays a realistic session over real OTLP/HTTP, with gzip — it exercises the actual ingest and decoder path, not a stand-in for it.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "hydro-scope",
+      "reason": "A sister repository: the same shape (OTLP collector, correlation, dashboard), a different domain. A large part of the infrastructure is shared by definition."
+    },
+    {
+      "slug": "judge-worker",
+      "reason": "That worker is the same idea of an LLM judge over recorded runs, exposed as a separate service on a queue — including the same calibration arithmetic."
+    },
+    {
+      "slug": "AgentHelm",
+      "reason": "Named as a sister project with a split of roles: Scope observes sessions, Helm steers them."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Both measure agent quality with rubrics; this one from production telemetry, that one on test tasks."
+    },
+    {
+      "slug": "archgate",
+      "reason": "The per-session averaging of {{term:provenance}} from here is cited there as the mistake that must not be repeated."
+    }
+  ],
+  "product": "A buyer exists conditionally: a platform team or an engineering lead who pays for assistant licences and cannot answer whether the sessions are worth anything. The repository **openly refuses to be a product** — the strategy declares no open-core, no paid tier and no telemetry sent back to the author, and the README forbids using the score to assess people, which cuts off the easiest sales scenario. Without calibration having been run, the key metric has no external validation, so today this is above all a credibility channel — and in that role it works well, because the session quality scoring niche is empty in open source.",
+  "highlights": [
+    "The collector has **one dependency**, because the protobuf decoder is written in place; the Blazor dashboard has none. That is a decision you can see in every later choice in this repository.",
+    "Claude Code and Cowork emit no spans by default — 292 lines treat log events as the source of truth for calls, tokens, tools and edit decisions. That is work nobody else has done publicly.",
+    "The README has a **'how not to use it'** section, which forbids applying the score to staff appraisals and explains why the acceptance rate carries a weight of only 0.20 and is paired with edit survival as a counter-metric.",
+    "The self-critical product review names its own mistakes — among them the fact that the published images did not start at the time, because the Dockerfile targeted a different version than the projects did — and those findings were fixed in two commits.",
+    "The calibration engine computes the human panel's agreement ceiling **before** scoring the judge. That is the right order, and almost nobody follows it."
+  ],
+  "gaps": [
+    "**Calibration has never been run** — there are no human labels in the repository at all, and the sample file has values deliberately too small to certify anything. Every rubric score remains directional and gates nothing.",
+    "Three judge algorithms work only with the cloud, so a local installation — the one being advertised — never sees them. That is a third of the product description with no cover in a scenario anyone will run.",
+    "The collector is single-instance by design; it does not scale horizontally without a partitioned queue. The ADR records this, the README does not surface it.",
+    "The unreleased-changes section of the CHANGELOG is internally contradictory — one block talks about the old framework version, another describes the move to the new one.",
+    "Bicep exposes the collector alone, without the database, the dashboard or the secret store; the ADR calls it an experiment, but the file still sits in the repository as an apparent deployment target.",
+    "The calibration file, although it computes pure statistics, imports the collector's domain namespace for one percentile helper. Two calls — but as long as they are there, the library will not detach without dragging in the collector assembly."
+  ],
+  "next": [
+    "Collect real labels for 50–100 sessions and run the calibration report. Until {{term:kappa|kappa}} has a value, every sentence about the judge is a promise, not a measurement.",
+    "Tidy up the CHANGELOG — two contradictory blocks in one section are exactly the kind of detail that makes a reader stop trusting the rest.",
+    "Settle the naming inconsistency: the directory is `copilot-scope`, while all the badges and images use `copilotscope` without the hyphen.",
+    "Surface the single-instance limitation in the README's deployment table, not only in the ADR.",
+    "Decide on the cloud tier: either budget it and run it, or mark it plainly as not run. Today it is a third of the description with no cover."
+  ],
+  "risks": [
+    "The product name contains a trademark — under any commercial use that is a real problem, and the repository addresses it nowhere.",
+    "Content capture writes fragments of prompts and responses to the database; with per-session series enabled, the metrics endpoint exposes session identifiers.",
+    "The service that builds a persona agent from one specific person's transcripts has as its safeguard **only a hand-written consent configuration**, not a technical mechanism.",
+    "The scanner configuration file permits a secret literal, because the key is in git history — removed from the code, still present in the commits.",
+    "The four images are published by a matrix with fail-fast disabled, so a failed run can leave a **partially published set**; the workflow header itself records this as a trap from a specific release."
+  ],
+  "headline": "Calibration engine ready, zero human labels — a metric with no external validation",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 1,
+    "openIssues": 23,
+    "openPrs": 5,
+    "dependabotPrs": 5,
+    "lastCommit": "2026-08-24",
+    "commits": 152,
+    "files": 188
+  }
+}

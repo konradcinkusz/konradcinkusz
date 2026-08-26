@@ -1,0 +1,85 @@
+{
+  "slug": "auto-veritas",
+  "name": "Auto Veritas",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "A comparison tool for car and finance offers on the Spanish market, where every value carries its own verification date.",
+  "summary": "A service behind a login that sets car and loan offers side by side and holds three timestamps against every number: when the agent checked it at the source, how long the seller declares it valid, and when the source itself was published. Freshness is computed by the server, against thresholds that depend on the data type — prices 7/30 days, instalments 14/45, specifications 183/365 — and published under `/api/v1/meta/freshness-policy`, so the UI renders exactly the values the backend enforces instead of holding a second set of constants that will drift apart (decision D-4). Expired data is degraded and marked, never hidden; an estimated value gets an **estimate** chip and balloon financing a **BALLOON** chip, rather than hiding behind a low instalment. Every `PUT` that changes a price or an instalment writes a snapshot of the previous state, keyed by the offer's `Guid` rather than by the slug — precisely because `PUT` allows the slug to change. Writing goes through the API only and requires the `Admin` or `SuperAdmin` role from {{term:servicedefaults|authservice}}; the frontend has no write surface at all, and that is a product decision, not a shortage of time. The whole thing stands as a four-element topology (Postgres, authservice from an image, OffersService, a BFF in Next.js) built directly against the checklist from `architecture-standards`.",
+  "stack": [".NET 10 / Minimal API", "EF Core 10 + PostgreSQL 17", ".NET Aspire 13.5.2", "Next.js 15 + React 19", "jose 6 (weryfikacja JWKS)", "xUnit + vitest + Playwright", "Docker Compose", "Fly.io (region waw)"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "52 backend cases (40 `[Fact]` plus 3 `[Theory]` with 12 rows of `[InlineData]`) on `WebApplicationFactory` with SQLite, 5 `it()` tests in vitest for web-kit and 7 smoke tests in Playwright — 64 cases in total, all counted directly in the code.",
+  "ci": "Five workflows. `ci.yml` has four jobs: backend (Release build, test, `dotnet format --verify-no-changes`), **mechanical-guards** (an 800-line limit on the kernel, a grep forbidding domain types in the kernel, a grep forbidding `waitForTimeout` in e2e), frontend, and e2e-smoke, which brings up the whole compose stack, waits for `/health/ready` and publishes a report. On top of that, CodeQL on a matrix of two languages with a weekly cron, gitleaks on push and PR, and a 249-line `flyio.yml` with a {{term:tagdeploy|tag-driven deployment}} and a manual teardown behind a confirmation phrase.",
+  "metrics": [
+    { "label": "Backend test cases", "value": "52" },
+    { "label": "web-kit unit tests", "value": "5" },
+    { "label": "E2E smoke tests", "value": "7" },
+    { "label": "Lines in the ServiceDefaults kernel", "value": "361 of the 800 limit enforced in CI" },
+    { "label": "Fly.io apps in the topology", "value": "4" },
+    { "label": "Seeded offers", "value": "17 cars, 22 finance offers" },
+    { "label": "EF Core migrations", "value": "2" },
+    { "label": "Architectural decisions", "value": "14 (D-1..D-14)" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/auto-veritas",
+    "live": [],
+    "docs": [
+      { "label": "Runbook — compose, Aspire and the Fly.io deployment", "path": "docs/RUNBOOK.md" },
+      { "label": "Agent instructions — how offers reach the system", "path": "docs/AGENT-GUIDE.md" },
+      { "label": "Architectural decisions D-1..D-14", "path": "docs/architecture/05-DECISIONS.md" },
+      { "label": "Register of deviations from the standard", "path": "docs/architecture/DEVIATIONS.md" },
+      { "label": "Security review before going public", "path": "docs/security/SECURITY-REVIEW-2026-08-24.md" },
+      { "label": "E2E suite charter — written before the tests", "path": "e2e/CHARTER.md" }
+    ]
+  },
+  "deployment": { "fly": true, "docker": true, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    { "name": "AutoVeritas.ServiceDefaults", "path": "src/AutoVeritas.ServiceDefaults", "description": "361 lines of shared {{term:kernel|kernel}}: {{term:otel|OTel}}, liveness and readiness kept apart, service discovery with resilience, JWT verification by JWKS only, rate limiting partitioned per user with a fallback to IP (200/min on `api`, 500/min globally). The absence of domain types is not a convention here but a grep in CI that fails the build.", "reusable": true },
+    { "name": "@auto-veritas/web-kit", "path": "packages/web-kit", "description": "The whole of the BFF's security logic in one workspace package: HttpOnly SameSite=Strict cookies in a single `set`/`clear` definition, the `/api/auth/*` routes, full verification of the token signature by `jose` against JWKS (not a bare decode), edge middleware and a catch-all proxy with token rotation landing on every exit path. It knows no offer type at all — only the authservice contract binds it.", "reusable": true },
+    { "name": "FreshnessCalculator + FreshnessPolicy", "path": "src/AutoVeritas.OffersService/Domain/Freshness.cs", "description": "63 lines computing a `Fresh`/`Warning`/`Stale`/`Expired` status, on the rule that a breached `offerValidUntil` beats any freshness of verification. It reads the clock through `TimeProvider`, so it is tested without touching the system clock, and the thresholds themselves are a parameter, not a constant on the code path.", "reusable": true },
+    { "name": "Topologia Fly.io i deploy sterowany tagiem", "path": "flyio", "description": "Four commented `fly.toml` files, a register of four secrets and the cost arithmetic. The workflow detects changes against the previous tag, always picks up a service whose Fly app does not exist yet, builds the image once to `registry.fly.io` and deploys in dependency order with an assertion of a non-empty JWKS after authservice.", "reusable": true },
+    { "name": "AutoVeritas.OffersService", "path": "src/AutoVeritas.OffersService", "description": "A .NET 10 Minimal API, owner of the `offersdb` database. `Program.cs` reads like a manifest: two `MapGroup` groups declare the authorisation triad, where `viewerApi` requires being logged in and `editorApi` the `Admin` or `SuperAdmin` role. Beyond CRUD it exposes `/verify`, the change history and the freshness policy.", "reusable": false },
+    { "name": "apps/web", "path": "apps/web", "description": "Next.js 15 in standalone mode, a Polish dark UI: two comparison tables, a freshness badge, a filter by status and an expandable History panel with the previous values. There is no write surface at all — a reader cannot break anything, because there is nothing to break it with.", "reusable": false },
+    { "name": "The integration-test suite", "path": "tests/AutoVeritas.OffersService.Tests", "description": "52 cases on `WebApplicationFactory` with SQLite, deliberately instead of EF InMemory, because that one ignores the unique index on the slug which the tests check. It covers the freshness thresholds, role enforcement (anonymous 401, a viewer writing 403), the seeder's idempotency and the history snapshots.", "reusable": false },
+    { "name": "Suite E2E Playwright", "path": "e2e", "description": "Seven smoke tests matching one to one the flows in `CHARTER.md`, written **before** the tests along with explicit non-goals. The charter forbids fixed `sleep` calls, and the ban is grepped in a separate CI job, so it cannot be broken quietly.", "reusable": false }
+  ],
+  "overlaps": [
+    { "slug": "authservice", "reason": "The only source of identity, pinned as the image `ghcr.io/konradcinkusz/authservice:v0.3.1` in compose, Aspire and `fly.toml`. The permission model rests directly on that service's platform roles `Admin` and `SuperAdmin` — this is the sixth consumer of the same image." },
+    { "slug": "architecture-standards", "reason": "The repository structure, the full set of `docs/architecture`, the mechanical CI guards and the security review are written against the P1-P15 checklist, and the standard is wired in as a plugin in `.claude/settings.json`. This is the cleanest existing implementation of that standard from scratch." },
+    { "slug": "copilot-scope", "reason": "The same pattern of a domain-neutral `ServiceDefaults` kernel alongside business services. There a hundred lines and a convention, here 361 lines and a limit enforced by a CI job — two data points for the same hypothesis about a shared substrate." },
+    { "slug": "dev-insight", "reason": "The `LICENSE` file carries `Copyright (c) 2026 dev_insight`, that is a template carried over from that repository without swapping the name. A trace of shared scaffolding ancestry, not an intended dependency." }
+  ],
+  "product": "There is no external buyer and there will not be one: this is a tool for one household choosing a car in Spain, with a few invited readers and one agent writing through the API. The value is purely referential — it is evidence that `architecture-standards` can be applied from an empty directory, with a full set of decisions, a register of deviations and a justification of infrastructure costs, rather than only described in a document. If anything here had a buyer, it would be the trust mechanism itself: a verification date on every value, and degradation instead of hiding. The car catalogue is the carrier here, not the product.",
+  "highlights": [
+    "The freshness thresholds are computed by the server and published under `/api/v1/meta/freshness-policy`, so the UI renders exactly what the backend enforces. One source of truth instead of two sets of constants that stop agreeing after three months (D-4).",
+    "The architectural guards are CI jobs, not prose: an 800-line limit on the kernel (361 today), a grep forbidding domain types in the kernel and a grep forbidding `waitForTimeout` in e2e. A rule that cannot be broken quietly is worth more than a paragraph in the README.",
+    "The change history is keyed by `Guid` rather than by the slug, precisely because `PUT` allows the slug to change — and decision D-13 lists four rejected alternatives with a reason for each.",
+    "Decision D-14 turns {{term:dependabot|Dependabot version updates}} off on evidence, not on convenience: of eight PRs, three were harmful and two would have broken `main` (Node 26 removes Corepack, which the web Dockerfile uses; Swashbuckle 10.x does not compile, on CS0234).",
+    "The security review goes through the full OWASP skeleton with an endpoint x role matrix, two findings and a priority ledger, including one knowingly accepted as NOT PLANNED. Naming a risk you are not removing is harder than removing it."
+  ],
+  "gaps": [
+    "**The first real deployment never happened.** No `v*` tag exists in the repository, and `flyio.yml` is triggered by a tag only — so 249 lines of workflow have not run once. The `auto-veritas-*.fly.dev` addresses in the README and AGENT-GUIDE are a declaration, not a working URL.",
+    "`02-GAP-ANALYSIS.md` and `04-MIGRATION-PLAN.md` still speak of 36 tests when there are in fact 52. Exactly the kind of stale number this repository's own consistency review warns against.",
+    "No OTLP collector in the Fly topology. The kernel exports telemetry only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set, so today it exports nowhere — the whole instrumentation is written and unused.",
+    "CodeQL analyses cleanly, but the SARIF upload step fails, because code scanning is not enabled in the repository settings. The badge in the README suggests a check that never completes.",
+    "The feature this was built for is missing: reverse search by monthly budget (how many cars fit into 500 EUR/month). The owner still works that out by hand, next to a working catalogue."
+  ],
+  "risks": [
+    "Open registration without e-mail verification (no SendGrid key) — anyone who finds the URL will create an account and pull both catalogues through the proxy. Finding F-2, medium risk, blocking a public address.",
+    "`LICENSE` declares `Copyright (c) 2026 dev_insight`, even though CODEOWNERS points at `@konradcinkusz`. A leftover from a template from another repository, the same one as in two other projects.",
+    "Weak local credentials are written straight into `docker-compose.yml`, `AppHost.cs`, the README and AGENT-GUIDE, and explicitly allowed in `.gitleaks.toml`. Deliberate and local, but that same allowlist will also hide an accidental real secret in those files.",
+    "Refresh token rotation is serialised in-process only: with more than one web machine, a race will trigger replay detection in authservice and log the user out (D-10). Acceptable at `min_machines_running = 0..1`, blocks horizontal scaling."
+  ],
+  "next": [
+    "Create the GitHub Environment `flyio` with the four secrets from `flyio/SECRETS.md`, push a `v0.1.0` tag and walk the registration → login → offers path on a public URL. Until the tag exists, the whole topology is a description.",
+    "Before giving the address to anyone, set `SendGrid__ApiKey` and `Auth__RequireConfirmedEmail=true` on the authservice app — that closes F-2 and is a precondition for the point above, not a separate task.",
+    "Enable code scanning in the repository settings, confirm the SARIF upload passes, and remove the matching row from `DEVIATIONS.md`.",
+    "Correct the test count from 36 to 52 in `02-GAP-ANALYSIS.md` and `04-MIGRATION-PLAN.md`, and the copyright line in `LICENSE`. Two edits, a quarter of an hour, and the stupidest reason to stop trusting the rest of the documents disappears.",
+    "Point at an OTLP endpoint and set `OTEL_EXPORTER_OTLP_ENDPOINT` in the `fly.toml` files, so the kernel telemetry that is already written has somewhere to go."
+  ],
+  "headline": "Four Fly apps specified down to the line, zero `v*` tags — the deployment never ran",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-25", "commits": 40, "files": 151 }
+}

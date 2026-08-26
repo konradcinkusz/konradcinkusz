@@ -1,0 +1,204 @@
+{
+  "slug": "csharp-flashcards",
+  "name": "CSharp FlashCards 2026",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P2",
+  "oneLiner": "A deck of 269 Q&A flashcards on C# and .NET built as a Beamer deck on a 1080x1920 pt page, compiled to PDF by GitHub Actions on a `v*` tag.",
+  "summary": "Every question gets its own slide, the answer is the next slide, and the whole lot sits in 24 `areas/*.tex` files pulled in by 24 `\\input` directives from `main.tex`. The presentation layer is carried by a bespoke class `mybeamer.cls` (24 section colours, shared `minted` and `listings` configuration, an automatic Outline frame at the start of a section) plus `mybeamer.sty` with the macros `\\QuestionSlide`, `\\CategoryBadge` and `\\TOCButtonTall`. The most interesting decision is in the geometry and it is unfinished: `main.tex` passes `paperwidth=1080pt` and `paperheight=1920pt` to the `geometry` package — phone-screen proportions — and the line below passes the `landscape` option to that same package, which swaps those dimensions round to 1920x1080. The repository holds neither a built PDF nor a LaTeX toolchain, so the final orientation cannot be confirmed from here — the source declares both at once. The second decision is already a failure, and you can see it in the code: `\\AnswerSlide` is defined and **never used once**, because 197 `minted` blocks force `frame[fragile]`, so all 269 answers were written by hand instead of through the macro. Delivery is {{term:tagdeploy|release on a tag}} — `xelatex` with `-shell-escape` in the `xu-cheng/latex-action@v4` action, publishing `CSharp_FlashCards.pdf` as a GitHub Release. The content and the pipeline are finished; the wrapping — landing page, title slide, footer links — comes from the previous edition and nobody has updated it.",
+  "stack": [
+    "LaTeX (Beamer)",
+    "XeLaTeX + latexmk",
+    "minted / listings",
+    "TikZ",
+    "fontawesome5",
+    "GitHub Actions (xu-cheng/latex-action@v4)",
+    "GitHub Pages",
+    "HTML/CSS/JS bez frameworka"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT-0 w pliku LICENSE, MIT na odznakach — rozjazd",
+  "tests": "No tests. There is no test framework and no verification script; the only check is the fact that the LaTeX compile in CI has to succeed, and that fires only on a tag.",
+  "ci": "Two workflows. `ci.yml` starts **only on a push of a `v*` tag**: it builds `main.tex` through `xu-cheng/latex-action@v4` with XeLaTeX and `shell_escape`, uploads the artefact and publishes a release through `softprops/action-gh-release@v2`. `pages.yml` deploys the `docs` directory to GitHub Pages on a change under `docs/**` or manually; neither workflow builds on an ordinary push or on a PR.",
+  "metrics": [
+    {
+      "label": "Question-answer pairs",
+      "value": "269"
+    },
+    {
+      "label": "Topic area files",
+      "value": "24"
+    },
+    {
+      "label": "LaTeX lines in areas/",
+      "value": "7,617"
+    },
+    {
+      "label": "minted code blocks",
+      "value": "197"
+    },
+    {
+      "label": "\\CategoryBadge calls in the content",
+      "value": "596"
+    },
+    {
+      "label": "Questions with a difficulty prefix",
+      "value": "262 of 269 (55 x *, 173 x **, 34 x ***) — counted by parsing the mandatory argument of every \\QuestionSlide with brace matching, including where the title sits on the line after the optional argument"
+    },
+    {
+      "label": "Files tracked by git",
+      "value": "36"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/csharp-flashcards",
+    "live": [
+      {
+        "label": "Landing page (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/csharp-flashcards/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "README",
+        "path": "README.md"
+      },
+      {
+        "label": "Generic prompt for the LaTeX repo generator",
+        "path": "MASTER_PROMPT.md"
+      },
+      {
+        "label": "Landing page",
+        "path": "docs/index.html"
+      },
+      {
+        "label": "Build and release workflow",
+        "path": ".github/workflows/ci.yml"
+      },
+      {
+        "label": "Licence (MIT No Attribution)",
+        "path": "LICENSE"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "mybeamer.sty",
+      "path": "mybeamer.sty",
+      "description": "A `qcounter` counter, a category badge drawn with TikZ, a fixed-height TOC tile and the slide macros. It contains not one string tied to C# or to this repository, so it moves verbatim into another deck — `MASTER_PROMPT.md` says so itself.",
+      "reusable": true
+    },
+    {
+      "name": "MASTER_PROMPT.md",
+      "path": "MASTER_PROMPT.md",
+      "description": "14 KB of specification for an LLM: how to generate a complete LaTeX repo from raw content — YAML metadata, a branch into book/article/flashcards/slides, a manifest of files in order, a Markdown-to-LaTeX mapping table and eight self-check points. Placeholders `{github_user}`, `{repo_name}`, `{pdf_name}` and an explicit ban on the subject matter leaking into the structural files.",
+      "reusable": true
+    },
+    {
+      "name": "Workflow buildu i wydania",
+      "path": ".github/workflows/ci.yml",
+      "description": "Two jobs: build compiles with XeLaTeX and saves the artefact, release downloads it and publishes. Apart from the PDF file name there is nothing about C# here, so it is a ready-made {{term:tagdeploy|release-on-a-tag pipeline}} for any repository holding a TeX document.",
+      "reusable": true
+    },
+    {
+      "name": "Motyw Beamer deepdiveinto",
+      "path": "presentations/theme/beamerthemedeepdiveinto.sty",
+      "description": "271 lines: a right-hand sidebar with a stack of steps, the `mbPrimary`/`mbAccent`/`mbSecondary` palette, `newunicodechar` mappings. Neutral on subject matter, but it drags along the macros `\\coords`, `\\mom`, `\\pphi` from general relativity — cut those out before reusing it.",
+      "reusable": true
+    },
+    {
+      "name": "Subject-area files",
+      "path": "areas/",
+      "description": "From `1-csharp-language-beginner.tex` to `24-tooling-agile.tex`. The distribution is heavily uneven: C# Intermediate has 52 questions, Threading/Async 23, OAuth 21, and most of the remaining areas between 4 and 9.",
+      "reusable": false
+    },
+    {
+      "name": "mybeamer.cls",
+      "path": "mybeamer.cls",
+      "description": "The class does not set the page size — it only does `\\RequirePackage{geometry}`, and the dimensions and the `landscape` option arrive from `main.tex`. It holds 22 category colours plus `sec1bg`–`sec24bg`, a shared `CodeBg` background for `minted` and `listings`, and bespoke navigation symbols with a Contents button. The number of section colours is hard-wired to this deck's 24 areas, and the footer links to the old repository name.",
+      "reusable": false
+    },
+    {
+      "name": "main.tex",
+      "path": "main.tex",
+      "description": "A title slide, an About slide and a contents grid of 24 clickable tiles leading to each section's `\\hypertarget`. It pulls in the 24 area files; the title still reads 'C# Flashcards 2025 edition'.",
+      "reusable": false
+    },
+    {
+      "name": "Landing page",
+      "path": "docs/index.html",
+      "description": "One file, 30,481 bytes, its own CSS tokens, light and dark mode, sample Q&A cards and quick-start tabs switched by a `switchTab` of a few lines. Zero external dependencies and zero figures that match the current state of the repo.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "llm-book",
+      "reason": "The same workshop: a long LaTeX document with its own preamble and class, built with `latexmk` and watched by CI. The conventions from one repo carry over to the other without translation."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "Also a technical book in LaTeX addressed to .NET engineers, so the C#, Azure and patterns areas overlap in content in part."
+    },
+    {
+      "slug": "black-hole-sim",
+      "reason": "`presentations/theme/beamerthemedeepdiveinto.sty` carries macros from general relativity, so the theme is either shared with or copied from the black-hole deck."
+    },
+    {
+      "slug": "landing-page",
+      "reason": "`docs/index.html` is the same class of artefact: a single-file static landing page published through GitHub Pages."
+    },
+    {
+      "slug": "dev-insight",
+      "reason": "The deck is signed with the dev_insight brand, so it works as a distribution channel for the same identity."
+    }
+  ],
+  "product": "No buyer. This is study material and interview preparation, given away free as a PDF under the {{term:mit|MIT-0 licence}}, so its function is channel and reputation: it builds recognition for the dev_insight brand and pulls traffic to GitHub. The real audience is a .NET developer ahead of an interview, or someone running a training course. Nobody will pay for the present form, because there is no spaced repetition here, no progress tracking and no interactive version — there is one static PDF, and that is the whole product.",
+  "highlights": [
+    "269 `\\QuestionSlide` calls across `areas/*.tex` and 270 answer `frame`s — the mapping is one to one apart from a single question in `8-design-patterns.tex`, which has two answer frames. Nothing checks this automatically.",
+    "197 C# code blocks typeset by `minted` with one configuration (`linenos`, `CodeBg` background, `breakanywhere`) defined once in the class rather than per slide.",
+    "`MASTER_PROMPT.md` pulls a **LaTeX repository generator** out of this repo: a manifest of files in order, a branch into four document types and a self-check list. A repo that described itself as a template.",
+    "The delivery path has no manual step: a `v*` tag runs XeLaTeX in Actions and pushes `CSharp_FlashCards.pdf` to Releases."
+  ],
+  "gaps": [
+    "**The landing page lies about the numbers.** `docs/index.html` claims a '300+ card Q&A deck' and 13 areas; there are 269 cards and 24 areas. This is a publicly visible page, so the {{term:drift|drift}} undermines the credibility of everything else written on it.",
+    "The year has drifted apart: the README says 2026, the title slide in `main.tex` and the landing page title still say 2025, and the `Copyright` in LICENSE is dated 2025 too.",
+    "`main.tex` and `mybeamer.cls` link to `konradcinkusz/CSharp-FlashCards-2025`, that is, **not to this repository**. The footer of each of several hundred PDF slides points at a name that does not exist.",
+    "The `\\AnswerSlide` macro is defined and used **zero times** — `minted` forces `frame[fragile]`, so all 269 answers go round the API and write the frame by hand. Dead code plus a mismatch between the declared interface and the practice.",
+    "262 of 269 questions carry a `*`, `**` or `***` prefix (55 / 173 / 34); 7 have none, and 6 of those are consecutive steps of a single OAuth flow. The asterisks render literally in the slide title and there is no legend anywhere, so the reader sees noise instead of a difficulty scale.",
+    "`main.tex` declares the orientation twice and contradicts itself: lines 1–3 pass `paperwidth=1080pt`/`paperheight=1920pt` to `geometry`, and line 4 passes `landscape`, which swaps the dimensions to 1920x1080. Without a built PDF there is no settling which declaration wins.",
+    "Links to `releases/latest` have been removed from the live section: `git tag` returns not one tag, `ci.yml` fires only on a push of a `v*` tag, and there is no built PDF in the repository — from the repository alone there is no confirming that any release was ever produced."
+  ],
+  "risks": [
+    "Licence mismatch: LICENSE is MIT No Attribution, while the badge in the README and on the landing page says MIT. Two different agreements in one repository.",
+    "CI builds only on a `v*` tag, and locally there is no tag at all — the repository gives no way to confirm whether any release was actually produced, or whether `main` compiles at all.",
+    "Name collision: the repository is `csharp-flashcards`, but the code inside links consistently to `CSharp-FlashCards-2025`, and the landing page footer leads to an entirely different project (AgentHelm).",
+    "`presentations/` is wired into no build and into no `main.tex`, and the theme drags in macros from another field. At the next edition this will be the first thing to mislead."
+  ],
+  "next": [
+    "Count the cards with a script and put the true 269 and 24 areas into the README, the landing page and the About slide. An inflated number on a public page costs more than everything else on this list.",
+    "Replace every reference to `CSharp-FlashCards-2025` in `main.tex` and `mybeamer.cls` with `konradcinkusz/csharp-flashcards` and settle the year at 2026 on the title slide and in the landing page title.",
+    "Add a job to `ci.yml` that compiles `main.tex` on a push to `main` and on a pull request, so broken LaTeX is caught before tagging rather than at release.",
+    "Settle `\\AnswerSlide`: either delete the dead macro, or rework it into a `fragile` variant that handles `minted` and rewrite the 269 frames onto it.",
+    "Align LICENSE with the badge — one or the other, MIT-0 or MIT — and fix the year on the copyright line."
+  ],
+  "headline": "Content finished; the landing says 300+ cards and 13 areas, it is 269 and 24",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 3,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-07-26",
+    "commits": 42,
+    "files": 36
+  }
+}
