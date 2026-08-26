@@ -72,7 +72,7 @@ setting `display`.
 For a copy you can open off a disk, attach to a message, or print:
 
 ```sh
-node scripts/build-standalone.mjs      # dist/portfolio.html, ~600 kB, no server needed
+node scripts/build-standalone.mjs      # dist/portfolio.html, ~1.2 MB, no server needed
 ```
 
 `site/data/portfolio.json` is **generated and committed**. It is committed because the site

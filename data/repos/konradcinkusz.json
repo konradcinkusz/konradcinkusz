@@ -6,7 +6,7 @@
   "state": "active",
   "tier": "P0",
   "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści pięć repozytoriów, plus strona, która go renderuje.",
-  "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium; `scripts/build-manifest.mjs` skleja je w `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści pięć repozytoriów naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
+  "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści pięć repozytoriów naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
   "stack": [
     "HTML5",
     "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -19,8 +19,8 @@
   ],
   "primaryLanguage": "JavaScript",
   "license": "MIT",
-  "tests": "Brak testów jednostkowych; zamiast nich siedem skryptów kontrolnych: dryf manifestu, walidator (schemat zamknięty plus integralność referencyjna), istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu, test renderowania w Chromium w trzech kombinacjach motywu i szerokości, oraz **test progów kolektora zdrowia wobec atrapy API** — każdy próg ma fixture, na którym musi się zapalić, i czyste repozytorium, na którym musi milczeć.",
-  "ci": "`validate-portfolio.yml` na push, PR i ręcznie, z filtrem obejmującym `data/**`, `site/**` i `scripts/**`: siedem kroków, od dryfu manifestu po renderowanie w przeglądarce i build jednopliku. `flyio.yml` na tagu `v*`: tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu pobiera serwowany manifest i żąda co najmniej trzydziestu repozytoriów — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
+  "tests": "Brak testów jednostkowych; zamiast nich dziewięć skryptów kontrolnych: dryf manifestu, walidator (zamknięty schemat, integralność referencyjna **oraz parzystość obu drzew językowych**), audyt i18n (żaden napis widoczny dla czytelnika poza `ui.json`, żadna nieznana wartość enuma), asercja serwowanego manifestu, istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu, test renderowania w Chromium w pięciu kombinacjach języka, motywu i szerokości, oraz **test progów kolektora zdrowia wobec atrapy API** — każdy próg ma fixture, na którym musi się zapalić, i czyste repozytorium, na którym musi milczeć.",
+  "ci": "`validate-portfolio.yml` na push, PR i ręcznie, z filtrem obejmującym `data/**`, `site/**` i `scripts/**`: dziesięć kroków (dziewięć z nich to kontrole), od dryfu manifestu po renderowanie w przeglądarce i build jednopliku. Drugie zadanie buduje obraz i sonduje kontener: nieuprzywilejowany użytkownik, `/healthz` poza fallbackiem SPA, nagłówki na każdej ścieżce i kompresja także dla żądania **przez proxy**. `flyio.yml` na tagu `v*`: najpierw `--check` na dryf, tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu żąda od serwowanego manifestu obu bundli językowych — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
   "metrics": [
     {
       "label": "Repozytoria na mapie",
@@ -40,7 +40,7 @@
     },
     {
       "label": "Słownik",
-      "value": "43 terminy, 247 odwołań z prozy (w każdym języku)"
+      "value": "43 terminy, 246 odwołań z prozy (w każdym języku)"
     },
     {
       "label": "Kod strony",
@@ -56,7 +56,7 @@
     },
     {
       "label": "Skrypty kontrolne",
-      "value": "13 (12 w `scripts/` plus wspólny akcesor `scripts/lib/manifest.mjs`)"
+      "value": "13 plików w `scripts/` (z akcesorem w `lib/`), z czego **9 to kontrole** w `npm run check` i w CI"
     }
   ],
   "links": {
@@ -105,13 +105,13 @@
     {
       "name": "Builder manifestu",
       "path": "scripts/build-manifest.mjs",
-      "description": "57 linii sklejających `data/` i `data/repos/*.json` w jeden artefakt, z wymuszeniem zgodności nazwy pliku ze slugiem. Tryb `--check` porównuje wygenerowany wynik z zacommitowaną kopią i wywala CI przy rozjeździe; komentarz w pliku wskazuje `architecture-standards` jako źródło wzorca.",
+      "description": "104 linie budujące **oba** bundle językowe: `data/` daje `pl`, `data/en/` daje `en`, a `ui.json` z każdego drzewa trafia do wspólnego bloku `ui`. Wymusza zgodność nazwy pliku ze slugiem. Tryb `--check` porównuje wynik z zacommitowaną kopią i wywala CI przy rozjeździe; komentarz w pliku wskazuje `architecture-standards` jako źródło wzorca, a drugi tłumaczy, dlaczego builder **nie** liczy własnych commitów.",
       "reusable": true
     },
     {
       "name": "Kontroler istnienia repozytoriów",
       "path": "scripts/check-repos.mjs",
-      "description": "Odpytuje `api.github.com` o każde repozytorium z manifestu i porównuje faktyczną widoczność oraz flagę `archived` z deklaracją. Bez tokenu wychodzi z kodem 0, zamiast fałszywie failować w forku.",
+      "description": "Odpytuje `api.github.com` o każde repozytorium z manifestu i porównuje faktyczną widoczność oraz flagę `archived` z deklaracją. Najpierw sprawdza jednak, **co ten token w ogóle widzi**: `GITHUB_TOKEN` z Actions jest ograniczony do tego jednego repozytorium, więc 404 na cudzym nic nie znaczy — takie wpisy są pomijane i zliczane, nie zgłaszane jako skasowane.",
       "reusable": true
     },
     {
@@ -135,19 +135,19 @@
     {
       "name": "Walidator manifestu",
       "path": "scripts/validate-portfolio.mjs",
-      "description": "Zamknięty zbiór `REPO_KEYS`, unikalność slugów, integralność referencyjna między repozytoriami, klastrami, kernelami i duplikacjami, przypisanie każdego repo do dokładnie jednego {{term:poziom|poziomu}} oraz rozwiązywalność każdego odwołania do słownika. Cała logika jest napisana pod ten jeden schemat.",
+      "description": "Zamknięty zbiór `REPO_KEYS`, unikalność slugów, integralność referencyjna, przypisanie każdego repo do dokładnie jednego {{term:poziom|poziomu}} i rozwiązywalność każdego odwołania do słownika — **wszystko to osobno dla każdego języka**. Potem porównuje oba drzewa element po elemencie: ta sama długość list, te same identyfikatory, te same ścieżki plików, i żaden angielski napis identyczny z polskim przy polskim ogonku.",
       "reusable": false
     },
     {
       "name": "Renderer manifestu",
       "path": "site/assets/app.js",
-      "description": "645 linii bez zależności: fetch manifestu, pięć zakładek, filtry po klastrze i widoczności, sortowanie indeksu, boczny panel repozytorium, podświetlanie konsumentów kernela i mikroskładnia linkująca prozę do słownika.",
+      "description": "769 linii bez zależności: pobranie manifestu, wybór języka i przełącznik bez przeładowania, pięć zakładek, filtry po klastrze i widoczności, sortowanie indeksu, boczny panel repozytorium, podświetlanie konsumentów kernela i mikroskładnia linkująca prozę do słownika.",
       "reusable": false
     },
     {
       "name": "Źródła danych",
       "path": "data/",
-      "description": "`meta.json` z nagłówkiem i linkami, `clusters.json` z sześcioma klastrami opisanymi przez {{term:substrat|substrat}} i barierę, `ops.json` (26 kB) z modelem operacyjnym, `glossary.json` (30 kB) z 43 terminami. To treść o tym konkretnym portfolio, nie schemat do ponownego użycia.",
+      "description": "Polskie źródło i jego angielski bliźniak w `data/en/`: `meta.json`, `clusters.json`, `consolidation.json`, `ops.json` z modelem operacyjnym, `glossary.json` z 43 terminami, `repos/<slug>.json` po jednym na repozytorium, oraz `ui.json` — 235 napisów, które strona mówi od siebie. To treść o tym konkretnym portfolio, nie schemat do ponownego użycia.",
       "reusable": false
     }
   ],
