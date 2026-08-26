@@ -108,9 +108,9 @@ jobs:
           body=$(curl -fsS http://127.0.0.1:8080/healthz)
           [ "$body" = "ok" ] || { echo "::error::/healthz returned '$body', not 'ok' — the SPA fallback probably swallowed it"; exit 1; }
 
-          echo "--- the manifest is served, with the repositories in it"
-          n=$(curl -fsS http://127.0.0.1:8080/data/portfolio.json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).repos.length))')
-          [ "$n" -ge 30 ] || { echo "::error::manifest served with only $n repositories"; exit 1; }
+          echo "--- the manifest is served, with both languages in it"
+          curl -fsS http://127.0.0.1:8080/data/portfolio.json -o /tmp/served.json
+          node scripts/assert-served-manifest.mjs /tmp/served.json
 
           echo "--- an unknown path falls back to the app, not to a 404"
           code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/nie-ma-takiej-sciezki)
