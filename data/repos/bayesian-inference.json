@@ -1,0 +1,123 @@
+{
+  "slug": "bayesian-inference",
+  "name": "WSB — Bayesian Network Inference",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Silnik dokładnego wnioskowania w sieciach Bayesa napisany od zera plus aplikacja Blazor, która go nie używa i liczy własne, błędne wyniki.",
+  "summary": "Repozytorium ma dwie połowy, które dzielą nazwę i nie dzielą kodu. Pierwsza to `WSB.BayesianNetwork.Logic`: algorytm Enumeration-Ask z Russella i Norviga napisany bez żadnej biblioteki probabilistycznej, z konsolowym harnessem liczącym pełny przegląd 6561 kombinacji dowodów. Druga to aplikacja pełnostackowa — Blazor WebAssembly (37 komponentów `.razor`) rozmawiający po REST z hostem ASP.NET Core (9 kontrolerów), CQRS na MediatR, EF Core 7 z Npgsql, tokeny RS256 walidowane wobec {{term:oidc|JWKS}} osobnej instancji `authservice`. Aplikacja webowa **nie referencjonuje przetestowanego silnika**, tylko duplikuje liczenie prawdopodobieństwa we własnej warstwie serwisowej. Najciekawsza decyzja nie jest w kodzie, tylko w `docs/research`: autor nie mógł uruchomić .NET w środowisku badania, więc napisał 229-liniową replikę silnika w Pythonie, zwalidował ją na istniejących testach jednostkowych, a dopiero potem użył jej jako instrumentu — i tym instrumentem wykazał, że sieć demo ma niedospecyfikowane CPT, a webowa ścieżka liczenia w ogóle nie zwraca posteriorów. To jest repozytorium, którego najlepszym produktem jest dowód na własne błędy.",
+  "stack": [".NET 7 (SDK 7.0.203)", "Blazor WebAssembly 7.0.5", "ASP.NET Core MVC + Swashbuckle 6.5.0", "EF Core 7.0.5 + Npgsql 7.0.4", "PostgreSQL 16", "MediatR 11.1.0 + AutoMapper 12.0.1", "xUnit 2.4.2", "Docker + Fly.io"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Dokładnie 4 testy `[Fact]` w jednym projekcie, wszystkie na silniku; wartości oczekiwane (0,461538 dla sieci WetRain, 0,336689 dla wariantu Alarm) wyprowadzone ręcznie z CPT w komentarzach, a nie skopiowane z wyjścia algorytmu. Webowa ścieżka liczenia nie ma żadnego testu, co README i analiza luk stwierdzają wprost. Przebiegu nie zweryfikowano — w środowisku przeglądu nie było SDK .NET.",
+  "ci": "Cztery workflowy. `build.yml` robi restore, build Release i `dotnet test` całej solucji, a następnie **stosuje ręcznie napisaną migrację EF Core wobec usługi `postgres:16`** — migracja powstała bez lokalnego dostępu do bazy i to jest jej jedyna weryfikacja. Pozostałe trzy (`deploy.yml` na flyctl, `pages.yml`, `reset-demo.yml` z cronem co 6 godzin) same się wyłączają, gdy brakuje sekretu albo zmiennej, więc dziś wszystkie kończą się no-opem.",
+  "metrics": [
+    { "label": "Commity", "value": "27" },
+    { "label": "Pliki w git", "value": "2264 (w tym ok. 2000 ikon bootstrap-icons)" },
+    { "label": "Projekty w solucji", "value": "9 csproj" },
+    { "label": "Testy xUnit", "value": "4 [Fact]" },
+    { "label": "Kontrolery API / komponenty .razor", "value": "9 / 37" },
+    { "label": "Handlery CQRS", "value": "28 plików .cs" },
+    { "label": "ADR-y", "value": "11 (ADR-001..ADR-011)" },
+    { "label": "Zapytania w przeglądzie konsolowym", "value": "6561 (3^8), z czego 648 daje sensowny posterior" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/bayesian-inference",
+    "live": [],
+    "docs": [
+      { "label": "Studium 01 — niedospecyfikowane CPT w sieci StockBN", "path": "docs/research/01-STOCKBN-CPT-UNDERSPECIFICATION.md" },
+      { "label": "Studium 02 — webowa ścieżka liczenia", "path": "docs/research/02-WEB-CALCULATION-PATH.md" },
+      { "label": "Artykuł LaTeX spinający oba studia", "path": "docs/research/papers/00-COMPREHENSIVE-REVIEW.tex" },
+      { "label": "Analiza 18 punktów zgodności ze standardem", "path": "docs/architecture/02-GAP-ANALYSIS.md" },
+      { "label": "Decyzje architektoniczne ADR-001..011", "path": "docs/architecture/05-DECISIONS.md" },
+      { "label": "Audyt gotowości do otwarcia źródeł", "path": "docs/architecture/06-OPEN-SOURCE-READINESS.md" }
+    ]
+  },
+  "deployment": { "fly": true, "docker": true, "ghcr": false, "pages": true, "packages": false },
+  "components": [
+    {
+      "name": "docs/research — studia, artefakty i artykuł",
+      "path": "docs/research",
+      "description": "Dwa formalne studia z metodą walidowanej repliki: 229 linii Pythona odtwarzających silnik, 56 linii analizy przeglądu, 295 linii transkrypcji webowego kalkulatora i 601-liniowy artykuł LaTeX. Wszystkie artefakty są zakomitowane, więc wynik da się odtworzyć bez SDK .NET.",
+      "reusable": true
+    },
+    {
+      "name": "Weryfikacja migracji EF Core w CI",
+      "path": ".github/workflows/build.yml",
+      "description": "Krok podnoszący `postgres:16` jako usługę i puszczający `dotnet ef database update` z przypiętym `dotnet-ef` 7.0.5 oraz atrapą adresu metadanych auth. Domenowo neutralny wzorzec dla każdego repo, w którym migracje pisze się ręcznie.",
+      "reusable": true
+    },
+    {
+      "name": "WSB.BayesianNetwork.Logic",
+      "path": "WSB.BayesianNetwork.Logic",
+      "description": "`BaseInference` z normalizacją i dziedziną, działający `Enumeration` oraz `Elimination` będący stubem rzucającym `NotImplementedException`. CPT siedzi w stałej tablicy `double[10,10,10,10]`, więc niezapisane komórki cicho zwracają 0,0 — to jest źródło defektu opisanego w studium 01.",
+      "reusable": false
+    },
+    {
+      "name": "WSB.Console",
+      "path": "WSB.Console",
+      "description": "Harness demo i benchmark: buduje sieci StockBN, Alarm i WetRain, mierzy `Stopwatch`-em pełny przegląd 3^8 kombinacji dowodów i zrzuca wynik do `output_<timestamp>.txt`. To on wyprodukował rozkład 4374 / 1539 / 648.",
+      "reusable": false
+    },
+    {
+      "name": "WSB.Service — warstwa CQRS",
+      "path": "Infrastructure/WSB.Service",
+      "description": "28 plików komend i zapytań na MediatR, a w środku obie równoległe ścieżki liczenia: żywy `EnumerationCalculator` i nieosiągalny z kontrolera `CalculateCommand`. Żadna z nich nie woła silnika z `WSB.BayesianNetwork.Logic`.",
+      "reusable": false
+    },
+    {
+      "name": "Server (WSB.Server)",
+      "path": "Server",
+      "description": "Host z wersjonowanym API, `/health` i `/alive`, `MigrationHostedService` stosującym migracje w tle oraz `WriteAccessAuthorizationFilter`. Bez ustawionego `Auth:MetadataAddress` proces w ogóle nie startuje — rzuca `InvalidOperationException` przy składaniu kontenera.",
+      "reusable": false
+    },
+    {
+      "name": "Client (WSB.Client)",
+      "path": "Client",
+      "description": "Edytor sieci i tablic prawdopodobieństwa, pole zapytania oraz żywy diagram Mermaid budowanej sieci. Strona logowania rozmawia bezpośrednio z `authservice`, z rotacją refresh tokenów i 2FA; `DataServiceBase` nie ma jednak żadnej polityki retry ani timeoutu.",
+      "reusable": false
+    },
+    {
+      "name": "docs/architecture — ADR-y i audyty",
+      "path": "docs/architecture",
+      "description": "Sześć dokumentów, w tym 11 ADR-ów zapisujących także decyzje o **niezrobieniu** czegoś (ADR-004 odłożenie eliminacji zmiennych, ADR-005 świadome pozostawienie zduplikowanej logiki) oraz {{term:audit|audyt}} gotowości do otwarcia źródeł z inwentarzem tego, co siedziało w wyczyszczonej historii gita.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "authservice", "reason": "Aplikacja nie ma własnego klucza podpisującego: waliduje RS256 wobec JWKS instancji tamtej usługi (ADR-010/ADR-011), a runbook wdrożenia stawia obie aplikacje obok siebie na Fly.io. Przy HS256 po tamtej stronie JWKS jest puste i każdy token leci w kosz przy pozornie zdrowych obu usługach." },
+    { "slug": "architecture-standards", "reason": "Całe `docs/architecture` i `docs/research` są pisane wprost pod tamtejszą checklistę zgodności i standard badawczy. To jest realny przypadek użycia tamtego repozytorium, nie deklaracja." }
+  ],
+  "product": "Brak kupującego, i README samo to przyznaje w sekcji *What this project is not* — projekt nie konkuruje z pgmpy ani z żadną biblioteką PGM. Punktem wyjścia była praca zaliczeniowa, rozbudowana potem do referencyjnej aplikacji pełnostackowej i do przypadku testowego dla własnego standardu dokumentacji. Wartość jest wiarygodnościowa i dydaktyczna: pokazuje algorytm dokładnego wnioskowania napisany ręcznie oraz autora, który publikuje formalne studium błędów we własnym kodzie zamiast je cicho poprawić.",
+  "gaps": [
+    "**Webowa ścieżka liczenia nie działa.** Studium 02 wykazało, że parser wywraca się na podpowiedziach generowanych przez serwer, wynik nigdy nie trafia do UI, nie ma normalizacji, a zwracane liczby (1,7 i 4,0) nie są prawdopodobieństwami. To jest główna funkcja aplikacji i najważniejszy niezałatany defekt.",
+    "Sieć demo StockBN ma niedospecyfikowane CPT dwurodzicielskie: z 6561 zapytań przeglądu 4374 są degeneracyjne, 1539 zwraca NaN przez dzielenie przez zero w `Normalization`, sensownych posteriorów jest 648. `P(b)` wychodzi 0 mimo prioru 0,99.",
+    "Dwie połowy repozytorium nie są połączone — aplikacja duplikuje logikę zamiast referencjonować przetestowany silnik, a `Elimination.cs` jest pustym stubem. ADR-004 i ADR-005 zapisują to jako świadome odłożenie, co nie zmienia stanu drzewa.",
+    "Latentny błąd konstruktora `BaseInference`: przy niepustej liście zmiennych `_vars` zostaje `null` i wnioskowanie rzuca `NullReferenceException`. Działa wyłącznie dlatego, że `Enumeration` zawsze przekazuje `null`. Do tego komentarze o kodowaniu dowodów są systematycznie odwrócone względem kodu (mówią 0 = true, kod używa 1 = true).",
+    "Brak zrzutów ekranu, brak telemetrii {{term:otel|OTLP}}, brak polityk retry i timeout na HttpClient, brak skanera sekretów w CI. Żaden z trzech deklarowanych adresów nie został potwierdzony jako żywy."
+  ],
+  "next": [
+    "Dopisz testy charakteryzacyjne dla `EnumerationCalculator`, a potem zastąp obie webowe ścieżki liczenia wywołaniem `WSB.BayesianNetwork.Logic`. To zamyka jednocześnie punkt 16 analizy luk i studium 02.",
+    "Uzupełnij CPT dwurodzicielskie w StockBN (osiem wywołań `SetProbabilities` na wzór sieci Alarm) i zabezpiecz `BaseInference.Normalization` przed dzieleniem przez zero. Bez tego 23,5 procent zapytań nadal zwraca NaN.",
+    "Domknij `06-OPEN-SOURCE-READINESS.md`: usuń albo przepnij tagi `v1.0.0` i `v1.0.1`, które wciąż wskazują na historię sprzed `git filter-repo`. Audyt sam nazywa to jedynym blokerem upublicznienia.",
+    "Rozstrzygnij kolizję nazw: `fly.toml` mówi `wsb-bayesian-inference`, `LABEL` w Dockerfile i link do Pages w README mówią `BayesianInference`, a slug repo to `bayesian-inference`. Włącz Pages i sprawdź, pod jakim adresem faktycznie ląduje one-pager.",
+    "Zaplanuj wyjście z .NET 7 na wersję LTS razem z EF Core i obrazami bazowymi — dziś cały stos siedzi na wydaniu bez wsparcia."
+  ],
+  "highlights": [
+    "Enumeration-Ask napisany od zera, bez żadnej biblioteki probabilistycznej, a wartości oczekiwane w testach (0,461538 i 0,336689) są **wyprowadzone ręcznie z CPT w komentarzach**, nie skopiowane z wyjścia algorytmu. To różnica między testem poprawności a przypięciem bieżącego zachowania.",
+    "Metoda badania kodu, którego nie da się uruchomić: replika w Pythonie najpierw zwalidowana na istniejących testach jednostkowych, dopiero potem użyta jako instrument. 580 linii artefaktów, wszystkie zakomitowane — i to jest jedyna rzecz w tym repozytorium, którą można przenieść gdziekolwiek indziej.",
+    "Dwa formalne studia badawcze znajdują poważne błędy we własnym kodzie autora, z liczbami: `P(b)` = 0 przy priorze 0,99 oraz rozkład 4374 / 1539 / 648 na 6561 zapytaniach przeglądu.",
+    "CI nie tylko buduje i testuje, ale stosuje ręcznie napisaną migrację EF Core wobec prawdziwego kontenera `postgres:16`. Migracja powstała bez lokalnego dostępu do bazy i ten krok jest jej jedyną weryfikacją.",
+    "README ma osobną sekcję *What this project is not* i wprost stwierdza, że obie połowy repozytorium nie są połączone, a webowa ścieżka liczenia jest niezweryfikowana."
+  ],
+  "risks": [
+    "Tagi `v1.0.0` i `v1.0.1` wciąż wskazują na historię sprzed przepisania (`git filter-repo`, 2026-08-15), więc po upublicznieniu prowadzą do usuniętych PDF-ów z numerem albumu studenckiego. Własny audyt nazywa to jedynym blokerem.",
+    "Publiczne demo jest projektowane bez logowania do odczytu i zapisu, chronione jedynie cyklicznym resetem danych co 6 godzin (ADR-008). Przy żywym wdrożeniu oznacza to otwarty zapis do bazy dla każdego.",
+    "Cały stos siedzi na .NET 7 — wydaniu poza wsparciem — łącznie z obrazami `sdk:7.0` i `aspnet:7.0`, więc luki bezpieczeństwa nie będą łatane. `appsettings.Development.json` niesie zakomitowane `postgres/postgres`, a w CI nie ma żadnego skanera sekretów.",
+    "Martwy kod zostaje w drzewie: `CalculateCommand` jest nieosiągalny z kontrolera i według studium 02 zwraca nieskończoność, `Elimination.cs` rzuca `NotImplementedException`."
+  ],
+  "headline": "Dwie połowy, które się nie znają — i autor sam to udowodnił dwoma studiami",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-15", "commits": 27, "files": 2264 }
+}

@@ -1,0 +1,464 @@
+[
+  {
+    "id": "substrat",
+    "term": "Substrat",
+    "tag": "pojęcie",
+    "body": [
+      "To, co dany zestaw narzędzi traktuje jako **jednostkę pracy**. W klastrze A jednostką jest *przebieg agenta* — sekwencja wywołań modelu zakończona wynikiem. W klastrze B jednostką jest *plik z kodem albo polityka*. W klastrze D — *dokument dla czytelnika*.",
+      "Substrat decyduje o tym, co da się współdzielić, i jest jedynym kryterium, które to przewiduje. Dwa projekty na tym samym substracie mogą mieć wspólny magazyn, wspólny scoring i wspólny replay. Dwa na różnych nie mogą mieć nic — poza infrastrukturą, która nie wie, czym są.",
+      "Praktyczna konsekwencja: pytanie „czy da się to połączyć” zawsze sprowadza się do pytania „czy oba zapisują to samo”. Jeśli nie, wspólny kod będzie miał w sygnaturach oba słowniki naraz i przestanie być czymkolwiek."
+    ],
+    "where": "podstawa całego podziału na klastry A–F"
+  },
+  {
+    "id": "kernel",
+    "term": "Kernel",
+    "tag": "pojęcie",
+    "body": [
+      "Wydzielona biblioteka albo usługa, z której korzysta **co najmniej dwa** projekty naraz. Powstaje przez wyjęcie komponentu, który już jest domenowo neutralny, do osobnego artefaktu z własną nazwą, własnym wersjonowaniem i własnym CI.",
+      "Kernel obniża koszt utrzymania i działa jako kanał dotarcia. **Nigdy nie jest ofertą sprzedażową.** „Platforma, która potrafi sześć rzeczy” nie ma kupującego, bo nie odpowiada żadnemu konkretnemu bólowi — a kupujący płaci za ból, nie za możliwości.",
+      "Test wystarczający: jeśli po wyjęciu biblioteka ma jednego użytkownika, to nie jest kernel, tylko projekt przeniesiony do innego katalogu. Jeśli w jej publicznych sygnaturach pojawia się typ domenowy, to nie jest kernel, tylko domena z inną nazwą."
+    ],
+    "where": "sekcja „Kernele do wydzielenia”"
+  },
+  {
+    "id": "playhead",
+    "term": "Playhead (kaseta record/replay)",
+    "tag": "komponent",
+    "body": [
+      "Warstwa nagrywania i odtwarzania wywołań modelu, wpięta na poziomie {{term:ichatclient}}. Kluczem jest skrót żądania — te same wiadomości i te same opcje zwracają tę samą zapisaną odpowiedź. Trzy tryby: `Record`, `ReplayOnly`, `ReplayOrRecord`.",
+      "Zamyka lukę, której nie zamyka checkpoint replay w żadnym z sześciu przebadanych frameworków (Agent Framework, LangGraph, CrewAI, OpenAI Agents SDK, Google ADK, Pydantic AI): przywrócenie checkpointu ponownie wykonuje graf, ale **nie serwuje poprzednich odpowiedzi modelu**. Odtwarza orkiestrację, nie model.",
+      "Daje cztery rzeczy naraz: tryb bez klucza API, hermetyczne testy, darmową próbę protokołu przed wydaniem budżetu i odtwarzalność każdego zapisanego przebiegu. Klucz obejmuje także `ChatOptions.Instructions` — bez tego jeden agent odtwarzałby odpowiedź drugiego, i to był realny błąd znaleziony w trakcie budowy."
+    ],
+    "where": "cognitive-multi-agent-simulation, `kernel/replay/` — jedyny komponent już fizycznie wydzielony wewnątrz repozytorium",
+    "slugs": ["cognitive-multi-agent-simulation"]
+  },
+  {
+    "id": "servicedefaults",
+    "term": "ServiceDefaults",
+    "tag": "komponent",
+    "body": [
+      "Projekt, który {{term:aspire}} generuje w każdym nowym rozwiązaniu: telemetria, health checks, resilience, service discovery. W szablonie ma około stu linii i jest kopiowany, nie referencowany.",
+      "W tym portfolio istnieje **jedenaście** takich projektów. W czterech z nich urosły równolegle te same pliki: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — i każda kopia jest już inna. To nie jest kod skopiowany raz; to jest cztery niezależnie utrzymywane implementacje jednej rzeczy.",
+      "Dlatego jest to największy nierozpoznany kernel w portfolio i jednocześnie najtrudniejszy: nie ma jednej wersji, którą można wyjąć — trzeba wybrać referencyjną i cofnąć rozjazd w pozostałych."
+    ],
+    "where": "jedenaście projektów `*.ServiceDefaults`; kernel K2",
+    "slugs": ["cognitive-multi-agent-simulation", "primates", "auto-veritas", "aurelius-promptus", "hydro-scope", "copilot-scope"]
+  },
+  {
+    "id": "runstore",
+    "term": "Magazyn przebiegów",
+    "tag": "komponent",
+    "body": [
+      "Magazyn, który przechowuje **przebieg**, a nie pojedyncze spany. To rozróżnienie jest celowe: magazyn spanów to backend tracingowy, a dashboard Aspire już nim jest — natomiast każde pytanie badawcze („która topologia planuje lepiej”, „czy ta zmiana promptu to regresja”) dotyczy przebiegu jako całości.",
+      "Kolumnami są rzeczy, po których się grupuje: topologia, model, ensemble i jego {{term:fingerprint}}, liczba tur, tokeny, czas. Artefakty leżą jako JSON, bo czyta się je w całości i nigdy nie odpytuje pole po polu.",
+      "Ten sam kształt danych powstał niezależnie dwa razy: raz jako funkcja badawcza, raz jako {{term:audit|ślad audytowy}} bramki uprawnień. To jedna z trzech duplikacji, których scalenie ma sens."
+    ],
+    "where": "cognitive-multi-agent-simulation / Observatory, AgentHelm / audit trail",
+    "slugs": ["cognitive-multi-agent-simulation", "AgentHelm"]
+  },
+  {
+    "id": "comparison",
+    "term": "Porównanie i rozkład",
+    "tag": "komponent",
+    "body": [
+      "Warstwa porównania wielu przebiegów. Raportuje **mediany i rozstępy, nigdy średnie i nigdy najlepszy przebieg** — porównanie best-of-N mierzy szczęście, a średnia po długoogonowym rozkładzie opóźnień mierzy ogon, nie typowy przypadek.",
+      "Dyscyplina jest wymuszona kształtem typu, nie konwencją: w typie porównania nie ma pola, w które dałoby się wstawić najlepszy przebieg. To jest właściwy sposób egzekwowania zasady metodologicznej — reguła w prozie nie przetrwa terminu."
+    ],
+    "where": "cognitive-multi-agent-simulation / Observatory",
+    "slugs": ["cognitive-multi-agent-simulation"]
+  },
+  {
+    "id": "ensemble",
+    "term": "Ensemble / definicje ról",
+    "tag": "komponent",
+    "body": [
+      "Rejestr wersjonowanych definicji ról agentów wraz z odciskiem ({{term:fingerprint}}) dokładnego zestawu, który wyprodukował dany przebieg. Bez tego nie da się powiedzieć, czy różnica między dwoma przebiegami wynika ze zmiany promptu, ze zmiany modelu, czy z losowości.",
+      "To ten sam problem, który po stronie szablonów promptów rozwiązuje aurelius-promptus — i dlatego oba są kandydatami do scalenia w jeden kernel."
+    ],
+    "where": "cognitive-multi-agent-simulation / Ensemble, aurelius-promptus",
+    "slugs": ["cognitive-multi-agent-simulation", "aurelius-promptus"]
+  },
+  {
+    "id": "fingerprint",
+    "term": "Fingerprint",
+    "tag": "pojęcie",
+    "body": [
+      "Skrót jednoznacznie identyfikujący zestaw definicji użytych w przebiegu. Pozwala odpowiedzieć na pytanie „czy te dwa wyniki są w ogóle porównywalne”, zanim zacznie się je porównywać.",
+      "Bez fingerprinta tabela wyników jest zbiorem liczb bez wspólnej podstawy — a to jest gorsze niż brak tabeli, bo wygląda na dowód."
+    ],
+    "where": "kolumna w magazynie przebiegów; warunek wstępny każdego eksperymentu"
+  },
+  {
+    "id": "determinizm",
+    "term": "Determinizm i replay",
+    "tag": "pojęcie",
+    "body": [
+      "Ten sam stan wejściowy daje ten sam wynik. Modele językowe są z natury niedeterministyczne, więc bez warstwy replay dwa uruchomienia tego samego testu mogą się różnić bez żadnej zmiany w kodzie.",
+      "Praktyczna konsekwencja jest ostra: **harness ewaluacyjny bez replay nie potrafi odróżnić regresji od losowości modelu.** Uruchamiasz kilkaset asercji, trzy padają — i nie wiesz, czy to zmiana w kodzie, w promptcie, czy model miał gorszy dzień. To jest dokładnie ta luka, którą zamyka {{term:playhead}}."
+    ],
+    "where": "podstawa kernela K1; luka w agent-eval-bench"
+  },
+  {
+    "id": "hermetyczny",
+    "term": "Test hermetyczny",
+    "tag": "pojęcie",
+    "body": [
+      "Test, który nie może dotknąć sieci. Nie „zwykle nie dotyka” — nie może, bo warstwa, przez którą musiałby wyjść, w trybie odtwarzania nie ma dokąd zadzwonić.",
+      "To rozróżnienie decyduje o dwóch rzeczach naraz: zestaw testów nie zacznie po cichu kosztować pieniędzy, i CI nie zacznie po cichu padać, bo dostawca miał incydent. Brak nagrania kończy się wyjątkiem, nie improwizacją."
+    ],
+    "where": "warunek, który każdy etap projektów agentowych musi spełniać"
+  },
+  {
+    "id": "topologie",
+    "term": "Topologie orkiestracji",
+    "tag": "pojęcie",
+    "body": [
+      "Warianty tego, jak agenci przekazują sobie głos: kto mówi następny, kiedy przebieg się kończy, czy jest arbiter. Sequential, Concurrent, RoundRobin, Director, Handoff, Magentic.",
+      "Uruchomienie tego samego scenariusza na każdej z nich i porównanie wyników to jednocześnie gotowy plan ablacji — porównanie topologii jest tym samym eksperymentem co porównanie architektur.",
+      "Kluczowa obserwacja kosztowa: liczba wywołań modelu jest **własnością topologii, nie modelu**. Da się ją policzyć fałszywym modelem w sekundę i wynik będzie identyczny jak u prawdziwego dostawcy. Jakość — nie."
+    ],
+    "where": "cognitive-multi-agent-simulation / Simulation",
+    "slugs": ["cognitive-multi-agent-simulation", "chess-mas"]
+  },
+  {
+    "id": "mutation",
+    "term": "Mutation testing",
+    "tag": "metoda",
+    "body": [
+      "Celowe wprowadzanie drobnych błędów do kodu, żeby sprawdzić, czy testy je wychwycą. Mutant, który przeżył, oznacza test, który niczego nie pilnuje. „Zero survivors” znaczy, że każdy wprowadzony błąd został złapany.",
+      "To jedyna metoda, która mierzy **jakość testów**, a nie jakość kodu — i dlatego jest jedynym argumentem, że zielone CI faktycznie coś znaczy. W tym portfolio zastosowana w trzech miejscach: do analizatorów, do sędziego LLM i do bramki CI."
+    ],
+    "where": "archgate, judge-worker, agent-eval-bench",
+    "slugs": ["archgate", "judge-worker", "agent-eval-bench"]
+  },
+  {
+    "id": "roslyn",
+    "term": "Roslyn",
+    "tag": "technologia",
+    "body": [
+      "Kompilator C# udostępniony jako biblioteka: daje dostęp do drzewa składni i pełnego modelu semantycznego. Analizator Roslyn „wie”, że dana nazwa to konkretny typ z konkretnej przestrzeni nazw — w przeciwieństwie do dopasowania tekstowego.",
+      "To jest różnica między bramką architektoniczną a konkurencją opartą na `glob` i `grep`: precyzja w zamian za jednojęzykowość, która nakłada twardy sufit na wielkość rynku. Ten sufit trzeba przyjąć świadomie, a nie odkryć po roku."
+    ],
+    "where": "archgate — analizatory bramki",
+    "slugs": ["archgate"]
+  },
+  {
+    "id": "diffgate",
+    "term": "Bramka zakresowana diffem",
+    "tag": "pojęcie",
+    "body": [
+      "Bramka CI, która sprawdza tylko to, co zmieniło się w danym pull requeście, a nie całe repozytorium.",
+      "Bez tego każda nowa reguła zapala tysiące ostrzeżeń w istniejącym kodzie, zespół wyłącza narzędzie w pierwszym tygodniu, i to jest koniec wdrożenia. Zakresowanie diffem nie jest optymalizacją wydajności — jest warunkiem adopcji."
+    ],
+    "where": "archgate",
+    "slugs": ["archgate"]
+  },
+  {
+    "id": "provenance",
+    "term": "Provenance kodu",
+    "tag": "pojęcie",
+    "body": [
+      "Odpowiedź na pytanie „które linie w tym pliku napisała AI, a które człowiek”, na poziomie diffu albo commita. Nie ma dziś standardu branżowego.",
+      "Pierwsze podejście w copilot-scope nie przeszło własnego audytu: było średnią sesyjną liczoną przez edytor, nie atrybucją linia po linii. Ten wynik jest wart więcej niż udane wdrożenie — pokazuje, że sygnał trzeba projektować od zera, i że autor potrafi odrzucić własną pracę."
+    ],
+    "where": "archgate (projektowane od zera), copilot-scope (nieudane pierwsze podejście)",
+    "slugs": ["archgate", "copilot-scope"]
+  },
+  {
+    "id": "audit",
+    "term": "Ślad audytowy",
+    "tag": "pojęcie",
+    "body": [
+      "Zapis tego, co agent zrobił, kiedy i z jakim uprawnieniem.",
+      "Warto rozróżnić dwa cele, bo mają różne wymogi retencji i formatu. *Debugowanie* odpowiada inżynierowi na „dlaczego to nie zadziałało” — potrzebuje szczegółu i krótkiego okna. *Dowód* odpowiada prawnikowi na „udowodnij, że agent działał w granicach uprawnienia” — potrzebuje niezmienności, powiązania z wersją i długiej retencji.",
+      "Kategoria observability zamknęła się wokół pierwszego. Drugie zostało puste, bo to nie jest kupujący tamtych zespołów."
+    ],
+    "where": "AgentHelm; ta sama struktura danych co magazyn przebiegów",
+    "slugs": ["AgentHelm", "cognitive-multi-agent-simulation"]
+  },
+  {
+    "id": "skille",
+    "term": "System skilli",
+    "tag": "pojęcie",
+    "body": [
+      "Mechanizm dostarczania agentowi instrukcji i procedur na żądanie, zamiast wpychania wszystkiego do promptu systemowego. Agent wczytuje opis umiejętności dopiero wtedy, gdy jest potrzebna — progresywne ujawnianie.",
+      "W tym portfolio format już istnieje i jest gotowy: {{term:plugins}}. Każde kolejne repozytorium, które zbuduje własny mechanizm skilli zamiast go użyć, jest duplikacją."
+    ],
+    "where": "architecture-standards; kandydat na wspólny format dla wszystkich agentów w portfolio",
+    "slugs": ["architecture-standards"]
+  },
+  {
+    "id": "plugins",
+    "term": "Agent Plugins 1.0.0",
+    "tag": "format",
+    "body": [
+      "Format pakowania zasad i procedur organizacyjnych w postaci, którą agent kodujący potrafi zainstalować — Claude Code, Copilot, VS Code i każdy inny zgodny klient. Do tego generator katalogu i walidator dryfu w CI, czyli mechaniczne sprawdzanie, czy opublikowane wtyczki nadal zgadzają się ze źródłem.",
+      "Pętla jest domknięta: polityka jest jednocześnie dokumentacją do przeczytania i regułą, którą agent wczytuje przed pracą. To jest jedyny artefakt w portfolio, który zmienia sposób, w jaki powstaje reszta portfolio."
+    ],
+    "where": "architecture-standards — pięć wtyczek, katalog, walidator dryfu",
+    "slugs": ["architecture-standards"]
+  },
+  {
+    "id": "drift",
+    "term": "Walidator dryfu",
+    "tag": "wzorzec",
+    "body": [
+      "Zadanie CI, które regeneruje plik pochodny ze źródła i przerywa build, jeśli wersja w repozytorium jest inna. Nie sprawdza poprawności — sprawdza, że wygenerowane i zacommitowane to to samo.",
+      "Wzorzec jest tani i rozwiązuje dokładnie jedną klasę problemów: pliki, które muszą być zacommitowane (bo coś je czyta bez builda), ale są generowane. Katalog wtyczek, manifest portfolio, tabela repozytoriów w README — wszystkie trzy są tym samym przypadkiem."
+    ],
+    "where": "architecture-standards; ta strona (`scripts/build-manifest.mjs --check`)",
+    "slugs": ["architecture-standards", "konradcinkusz"]
+  },
+  {
+    "id": "maf",
+    "term": "Microsoft Agent Framework",
+    "tag": "technologia",
+    "body": [
+      "Następca AutoGen i Semantic Kernel, powstały z ich konwergencji. Daje typowane workflow, checkpointing, human-in-the-loop, deklaratywne definicje w YAML i natywne wsparcie {{term:mcp}}. Dostępny dla .NET i Pythona.",
+      "W dobrze zbudowanym systemie jest odizolowany do jednego projektu — każdy inny serwis traktuje przebieg jako dane. Dzięki temu wymiana silnika jest realna, a nie teoretyczna."
+    ],
+    "where": "cognitive-multi-agent-simulation, chess-mas, maf-book",
+    "slugs": ["cognitive-multi-agent-simulation", "chess-mas", "maf-book"]
+  },
+  {
+    "id": "ichatclient",
+    "term": "IChatClient",
+    "tag": "technologia",
+    "body": [
+      "Abstrakcja z `Microsoft.Extensions.AI` reprezentująca „coś, do czego wysyłasz wiadomości i co odsyła odpowiedź”. Niezależna od dostawcy modelu i wspólna dla całego ekosystemu .NET AI.",
+      "Kaseta wpina się dokładnie na tym poziomie — dlatego nie wie nic o domenie, i dlatego da się ją wydzielić w godziny, a nie w tygodnie. Wybór szwu decyduje o koszcie ekstrakcji bardziej niż jakość kodu."
+    ],
+    "where": "warstwa, na której działa kernel K1"
+  },
+  {
+    "id": "mcp",
+    "term": "MCP — Model Context Protocol",
+    "tag": "protokół",
+    "body": [
+      "Standard podłączania narzędzi i źródeł danych do modeli. Przekazany do Agentic AI Foundation przy Linux Foundation; ponad tysiąc publicznych serwerów.",
+      "Dla tego portfolio ma dwa zastosowania: harness ewaluacyjny testuje agenta przez adapter MCP, a produkt hosted importuje przez MCP realny backlog z Jiry albo Azure DevOps. Pierwsze jest techniczne, drugie jest handlowe."
+    ],
+    "where": "agent-eval-bench; kanał integracji dla produktu hosted",
+    "slugs": ["agent-eval-bench"]
+  },
+  {
+    "id": "acp",
+    "term": "ACP — Agent Client Protocol",
+    "tag": "protokół",
+    "body": [
+      "Standard komunikacji między edytorem a agentem kodującym — „LSP dla agentów”. Współtworzony przez Zed i JetBrains.",
+      "Uwaga rynkowa: rejestr agentów ACP jest już oficjalny i wbudowany w Zed oraz JetBrains, więc warstwa protokołu przestała być wolną niszą. To, co zostaje, to nie protokół, tylko **polityka uprawnień i dowód** — a to jest inny produkt niż cockpit."
+    ],
+    "where": "AgentHelm",
+    "slugs": ["AgentHelm"]
+  },
+  {
+    "id": "otel",
+    "term": "Konwencje OpenTelemetry dla GenAI",
+    "tag": "standard",
+    "body": [
+      "Ustandaryzowane nazwy atrybutów telemetrycznych dla wywołań modeli (`gen_ai.*`). Wszystkie mają wciąż status roboczy — żaden nie jest stabilny.",
+      "Normalizacja telemetrii z kilku dostawców to dokładnie ta sama praca, wykonana prywatnie. To ścieżka reputacyjna — propozycja do konwencji, wystąpienie, wpis — a nie produkt. Wartość leży w tym, że nazwisko trafia do dokumentu, który przeżyje projekt."
+    ],
+    "where": "copilot-scope, hydro-scope",
+    "slugs": ["copilot-scope", "hydro-scope"]
+  },
+  {
+    "id": "aspire",
+    "term": ".NET Aspire",
+    "tag": "technologia",
+    "body": [
+      "Warstwa orkiestracji lokalnego uruchamiania wielu serwisów naraz, z dashboardem telemetrii. Generuje w każdym rozwiązaniu projekt {{term:servicedefaults}}, i to właśnie ta wygoda jest źródłem największej duplikacji w tym portfolio.",
+      "Świadome ograniczenie: Aspire opisuje development, a produkcję opisują osobne pliki wdrożeniowe. Trzymanie tych dwóch rzeczy osobno kosztuje trochę powtórzenia i oszczędza rozjazd między środowiskami."
+    ],
+    "where": "osiem systemów w portfolio",
+    "slugs": ["cognitive-multi-agent-simulation", "primates", "copilot-scope", "hydro-scope", "auto-veritas", "aurelius-promptus", "chess-mas", "black-hole-sim"]
+  },
+  {
+    "id": "oidc",
+    "term": "OIDC i JWKS",
+    "tag": "technologia",
+    "body": [
+      "OIDC to standard logowania nadbudowany nad OAuth 2.0; JWKS to publikowany zestaw kluczy publicznych, którymi weryfikuje się podpisy tokenów. RS256 to algorytm podpisu.",
+      "Ma jedną nieoczywistą konsekwencję operacyjną: serwis, którego JWKS pobierają wszystkie pozostałe, jest na ścieżce żądania każdego z nich — i to nie tylko przy pierwszym żądaniu, bo walidatory odświeżają cache. Taki serwis **nie może skalować się do zera**."
+    ],
+    "where": "authservice (K4) i sześć systemów, które go konsumują",
+    "slugs": ["authservice"]
+  },
+  {
+    "id": "ghcr",
+    "term": "GHCR",
+    "tag": "kanał",
+    "body": [
+      "Rejestr obrazów kontenerowych GitHuba. Opublikowanie tam wersjonowanego obrazu zamienia wewnętrzny komponent w artefakt, którego inny projekt używa **bez kopiowania kodu** — zależność artefaktowa zamiast źródłowej.",
+      "To jest jedyna zakończona ekstrakcja w tym portfolio i wzorzec do powtórzenia: jedna baza kodu, N niezależnych instancji, żadnego wspólnego runtime'u i żadnego wspólnego korzenia zaufania."
+    ],
+    "where": "authservice v0.3.1 i pięć innych obrazów",
+    "slugs": ["authservice", "archgate", "copilot-scope", "AgentHelm"]
+  },
+  {
+    "id": "nuget",
+    "term": "NuGet",
+    "tag": "kanał",
+    "body": [
+      "Rejestr pakietów dla .NET. Dla inżyniera bez dystrybucji i bez rozpoznawalnego nazwiska to najtańszy sposób stania się znajdywalnym — efekt kumuluje się bez dalszej pracy, w przeciwieństwie do wpisu, który trzeba promować co tydzień.",
+      "Stan faktyczny: w całym portfolio zadeklarowane są trzy identyfikatory pakietów i **żaden nie jest opublikowany**. To jest najtańszy niewykorzystany kanał w całej mapie."
+    ],
+    "where": "archgate deklaruje trzy pakiety; oś dystrybucji, wiersz 01",
+    "slugs": ["archgate"]
+  },
+  {
+    "id": "tagdeploy",
+    "term": "Wdrożenie sterowane tagiem",
+    "tag": "wzorzec",
+    "body": [
+      "Pipeline uruchamiany pushem tagu `v*`, nie pushem na gałąź. Wykrywanie zmian porównuje się z **poprzednim tagiem**, nie z poprzednim commitem; obraz buduje się raz i wdraża wielokrotnie; kolejność wdrożeń idzie za zależnościami, a pominięty serwis w środku łańcucha nie blokuje tego, co za nim.",
+      "Uzasadnienie jest jednozdaniowe: wdrożenie powinno być aktem, a tag jest jego zapisem. Reguła, o której najłatwiej zapomnieć: serwis, którego aplikacja Fly nie istnieje, musi być zawsze wybrany — to jest jedyne, co pozwala postawić zimny estate jednym tagiem."
+    ],
+    "where": "architecture-standards / FLY-IO-DEPLOYMENT.md; siedem repozytoriów ma taki workflow",
+    "slugs": ["architecture-standards"]
+  },
+  {
+    "id": "opencore",
+    "term": "Open core",
+    "tag": "model",
+    "body": [
+      "Silnik otwarty, warstwa komercyjna zamknięta. Linia biegnie nie między repozytoriami, tylko wewnątrz jednego: **otwarte jest to, co uruchamiasz lokalnie i co produkuje plik; płatne to, co pamięta, porównuje, integruje się z Twoimi systemami i przetrwa audyt.**",
+      "W skrócie: biblioteka nagrywa, usługa pamięta i eksportuje. Ta jedna linia rozstrzyga każdy przypadek graniczny bez dyskusji."
+    ],
+    "where": "sekcja „Model produktowy”"
+  },
+  {
+    "id": "mit",
+    "term": "MIT / CC-BY",
+    "tag": "licencja",
+    "body": [
+      "Licencje permisywne — pozwalają używać, modyfikować i wbudowywać komercyjnie. MIT dla kodu, CC-BY dla specyfikacji i dokumentów.",
+      "Wybór oparty na precedensie adopcyjnym, nie na ideologii: licencje typu AGPL skutecznie blokują adopcję w .NET-owych organizacjach enterprise, czyli dokładnie w segmencie docelowym. Ryzyko sklonowania solowego projektu bez klientów jest bliskie zeru; ryzyko odbicia się enterprise od licencji jest pewne."
+    ],
+    "where": "trzydzieści repozytoriów na MIT; pięć bez pliku licencji"
+  },
+  {
+    "id": "perseat",
+    "term": "Rozliczenie za stanowisko",
+    "tag": "rynek",
+    "body": [
+      "Model per-seat załamał się, gdy jeden agent zaczął wykonywać pracę wielu ludzi. Czyste per-seat to dziś niewielki ułamek rynku narzędzi agentowych, a dominującym wzorcem jest opłata platformowa plus warstwa mierzona.",
+      "Wniosek dla tego portfolio: rozliczaj za przebieg albo za miejsce w retencji, nie za użytkownika."
+    ],
+    "where": "uzasadnienie modelu cenowego"
+  },
+  {
+    "id": "outcome",
+    "term": "Rozliczenie za wynik",
+    "tag": "rynek",
+    "body": [
+      "Płacisz za rezultat, nie za dostęp. Działa tylko, gdy wynik jest policzalny w produkcie, odporny na manipulację, kontrolowany głównie przez software **i już mierzony przez klienta**.",
+      "Ostatni warunek jest tu blokujący i warto go zrozumieć dokładnie: metryka „niezadeklarowane zależności na przebieg” jest przekonująca właśnie dlatego, że nikt jej dziś nie liczy — i z tego samego powodu nie da się na niej fakturować. Nagłówek marketingowy tak, faktura za przebiegi."
+    ],
+    "where": "model cenowy produktu hosted"
+  },
+  {
+    "id": "evidence",
+    "term": "Eksport audytowy",
+    "tag": "produkt",
+    "body": [
+      "Wydanie zapisanych przebiegów w formacie, który przyjmuje audytor: z retencją, z powiązaniem przebiegu z wersją ról i modelu, z odtwarzalnością. Odpowiada na „udowodnij”, nie na „zdebuguj”.",
+      "To jest jedyne miejsce w tym portfolio, gdzie {{term:determinizm}}, {{term:audit|ślad audytowy}} i {{term:fingerprint}} spotykają się w jednym produkcie — i dlatego jest to najbardziej obronna pozycja, jaką ta mapa zawiera."
+    ],
+    "where": "produkt płatny; zasilany przez K1 i K3"
+  },
+  {
+    "id": "atestacja",
+    "term": "Atestacja zgodności",
+    "tag": "ryzyko",
+    "body": [
+      "Poświadczenie, że system spełnia wymóg — w odróżnieniu od dostarczenia narzędzia, które produkuje dowód. Atestacja oznacza przyjęcie odpowiedzialności, a odpowiedzialność wymaga podmiotu i ubezpieczenia OC.",
+      "Właściwy pierwszy ruch: **sprzedajesz narzędzie, atestuje audytor klienta.** Ta sama funkcjonalność, zero przeniesionego ryzyka. Zmiana tej decyzji jest możliwa później i nie jest odwracalna, więc nie robi się jej przez przypadek w treści strony sprzedażowej."
+    ],
+    "where": "ograniczenie produktu audytowego"
+  },
+  {
+    "id": "rte",
+    "term": "RTE — Release Train Engineer",
+    "tag": "SAFe",
+    "body": [
+      "Osoba odpowiedzialna za przebieg dużych wydarzeń planistycznych i za koordynację między zespołami.",
+      "Zastrzeżenie, które trzeba powiedzieć wprost: w modelu AI-native zespoły się kurczą, a cykle skracają — czyli budżet tej właśnie roli jest pod presją. Dlatego próba generalna jest dobrym klinem wejściowym i złym fundamentem."
+    ],
+    "where": "kupujący w osi dystrybucji"
+  },
+  {
+    "id": "spc",
+    "term": "SPC / SPCT",
+    "tag": "SAFe",
+    "body": [
+      "Certyfikowani konsultanci wdrażający SAFe w organizacjach. Mają relację z kupującym, której solowy twórca nie zbuduje — dlatego są kanałem, a nie konkurencją.",
+      "Okno jest teraz: całe portfolio szkoleniowe przechodzi na wydania AI-native, więc konsultanci szukają świeżego materiału i są nietypowo otwarci na cudze narzędzie."
+    ],
+    "where": "kanał w osi dystrybucji"
+  },
+  {
+    "id": "poziom",
+    "term": "Poziom uwagi",
+    "tag": "operacje",
+    "body": [
+      "Zadeklarowany poziom obsługi repozytorium: ile uwagi dostaje, jak szybko reaguje się na czerwone CI, czy w ogóle patrzy się na jego dependabota.",
+      "Repozytorium bez zadeklarowanego poziomu dostaje uwagę wtedy, kiedy akurat o nim pomyślisz — czyli losowo, a w praktyce wtedy, gdy już się zepsuło. Poziom jest przede wszystkim narzędziem do świadomego **niezajmowania się** dwudziestoma repozytoriami w danym tygodniu, bez poczucia winy."
+    ],
+    "where": "zakładka „operacje”, sekcja „poziomy uwagi”"
+  },
+  {
+    "id": "wip",
+    "term": "Limit pracy w toku",
+    "tag": "operacje",
+    "body": [
+      "Twardy limit liczby rzeczy zaczętych i nieskończonych. Nie wytyczna — limit: przekroczenie jest sygnałem, żeby coś **zamknąć**, a nie żeby pracować dłużej.",
+      "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu pięciu rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
+    ],
+    "where": "zakładka „operacje”, sekcja „limity”"
+  },
+  {
+    "id": "dependabot",
+    "term": "Dług dependabota",
+    "tag": "operacje",
+    "body": [
+      "Otwarte pull requesty od bota aktualizującego zależności. Pojedynczy jest darmowy; sto to zmiana natury repozytorium — lista PR-ów przestaje być czymś, co się czyta, i staje się czymś, co się przewija.",
+      "Konkretny koszt: kiedy w PR-ach siedzi wyłącznie bot, pierwszy prawdziwy pull request od człowieka utonie i nie zostanie zauważony. Dług dependabota nie jest długiem bezpieczeństwa — jest długiem uwagi, i to on niszczy kanał, a nie zależności."
+    ],
+    "where": "zakładka „operacje”, kontrole zdrowia"
+  },
+  {
+    "id": "blast",
+    "term": "Promień rażenia",
+    "tag": "operacje",
+    "body": [
+      "Ile innych rzeczy psuje się, kiedy psuje się ta jedna. Kernel konsumowany przez pięć repozytoriów ma promień pięć; poligon ma promień zero.",
+      "Promień rażenia, a nie wielkość ani świeżość, powinien decydować o {{term:poziom|poziomie uwagi}}. To dlatego mała biblioteka bywa ważniejsza od dużej aplikacji — i dlatego wydzielenie kernela **podnosi** wymagania wobec niego, zamiast je obniżać."
+    ],
+    "where": "kryterium przypisania poziomu uwagi"
+  },
+  {
+    "id": "kappa",
+    "term": "Zgodność sędziów (kappa Cohena)",
+    "tag": "metoda",
+    "body": [
+      "Miara zgodności dwóch oceniających, poprawiona o zgodność, która wyszłaby przez przypadek. Stosowana do skalibrowania sędziego LLM względem człowieka: bez tego „sędzia ocenił 8/10” jest liczbą bez jednostki.",
+      "To jest dokładnie ten rodzaj rzetelności, który odróżnia harness ewaluacyjny od dashboardu — i jednocześnie rzecz, której prawie nikt nie robi, bo wymaga ręcznego oznaczenia próbki."
+    ],
+    "where": "judge-worker",
+    "slugs": ["judge-worker"]
+  },
+  {
+    "id": "safe",
+    "term": "SAFe",
+    "tag": "kontekst",
+    "body": [
+      "Scaled Agile Framework — metodyka skalowania pracy zwinnej na wiele zespołów. Jej centralnym wydarzeniem jest PI Planning: dwa dni, kilkadziesiąt do kilkuset osób, wynik w postaci celów, zależności i ryzyk.",
+      "Dla tego portfolio istotne są dwie rzeczy: wydarzenie jest drogie i policzalne (co daje wycenę próby generalnej), a jego produktem są **artefakty, nie transkrypt** — co ustawia, co program w ogóle powinien zwracać."
+    ],
+    "where": "cognitive-multi-agent-simulation i jego praca badawcza",
+    "slugs": ["cognitive-multi-agent-simulation", "cognitive-multi-agent-simulation-analysis"]
+  }
+]

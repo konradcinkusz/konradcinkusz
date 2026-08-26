@@ -1,0 +1,86 @@
+{
+  "slug": "maf-book",
+  "name": "Microsoft Agent Framework for .NET Engineers",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "draft",
+  "tier": "P2",
+  "oneLiner": "Pełny draft książki o {{term:maf|Microsoft Agent Framework}} 1.0 dla inżynierów .NET, pisany przeciw źródłom frameworka, nie przeciw dokumentacji.",
+  "summary": "Dwanaście rozdziałów i cztery załączniki w LaTeX-u, adresowane do inżyniera, który wdrażał usługi ASP.NET Core i właśnie dostał zadanie postawienia agenta na produkcji: agenci i narzędzia, {{term:mcp}}, pamięć i stan, workflow jako graf wykonawców i krawędzi, pięć wzorców orkiestracji, middleware, {{term:otel|OpenTelemetry}}, ewaluacja, hosting i harness. Najciekawsza decyzja jest redakcyjna, nie typograficzna: każdy listing przepisany z dokumentacji zamiast skompilowany wobec SDK nosi widoczny w PDF-ie blok `verifybox`, a `build.yml` wypisuje liczbę takich bloków i listę brakujących zrzutów ekranu do podsumowania kroku. Dług nie może więc narosnąć po cichu, bo widzi go i czytelnik, i CI. Materiał powstawał przez czytanie kodu upstream, co wielokrotnie obaliło założenia briefu: `AgentThread` nie istnieje w wydanym pakiecie (127 wystąpień `AgentSession`, zero `AgentThread` w wygenerowanych XML-ach), niezgodność typów na krawędzi workflow to ciche zgubienie wiadomości bez wyjątku i bez zdarzenia, a workflow deklaratywne nie są grafem zapisanym w YAML-u, tylko listą akcji z wyrażeniami Power Fx. Build wywala się na nierozwiązanym `\\ref`, więc książka z zepsutą referencją nie zostanie wydana. Czego nie ma: katalog `code/` zawiera wyłącznie `.gitkeep`, a dwa w pełni zaprojektowane eksperymenty pomiarowe nie zostały uruchomione i tabele w załączniku B celowo stoją puste.",
+  "stack": ["LaTeX (pdflatex, latexmk)", "listings", "tcolorbox", "imakeidx", "microtype", "GitHub Actions", "Make", "HTML/CSS (GitHub Pages)"],
+  "primaryLanguage": "TeX",
+  "license": "Podwójna: MIT dla kodu, makr i narzędzi; CC BY-NC-SA 4.0 dla tekstu (LICENSE-CONTENT)",
+  "tests": "Testów nie ma i nie może być w tym kształcie repozytorium. Jedyna automatyczna weryfikacja to kompilacja `main.tex` z `-halt-on-error` plus grep `Reference.*undefined` w `main.log`, który zatrzymuje zarówno build PR-a, jak i release.",
+  "ci": "Trzy workflow: `build.yml` kompiluje PDF przy każdym push i PR przez `xu-cheng/latex-action`, bramkuje nierozwiązane referencje, wrzuca artefakt na 14 dni i publikuje dwa rejestry długu do `GITHUB_STEP_SUMMARY`; `release.yml` buduje z taga `v*` i dołącza PDF do wydania z uprawnieniem `contents:write` ograniczonym do jednego joba; `pages.yml` publikuje `docs/`. {{term:dependabot}} aktualizuje akcje raz w miesiącu.",
+  "metrics": [
+    { "label": "Rozdziały i załączniki", "value": "12 + 4, wszystkie zadraftowane" },
+    { "label": "Linie TeX-a w treści", "value": "9 055" },
+    { "label": "Słowa w treści", "value": "53 055 (wc -w)" },
+    { "label": "Listingi C#", "value": "92" },
+    { "label": "Wpisy \\index w źródle", "value": "364" },
+    { "label": "Bloki verifybox (dług)", "value": "23" },
+    { "label": "Brakujące zrzuty ekranu", "value": "27" },
+    { "label": "Brakujące diagramy", "value": "3" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/maf-book",
+    "live": [
+      { "label": "Strona książki (GitHub Pages)", "url": "https://konradcinkusz.github.io/maf-book/" }
+    ],
+    "docs": [
+      { "label": "README z rejestrem długu i strukturą", "path": "README.md" },
+      { "label": "Notatki robocze: ustalenia przeciw źródłom upstream", "path": "CLAUDE.md" },
+      { "label": "Konwencje pisania i zasady współpracy", "path": "CONTRIBUTING.md" },
+      { "label": "Załącznik A — pakiety i pociągi wydawnicze", "path": "appendices/appA-packages.tex" },
+      { "label": "Strona statyczna publikowana na Pages", "path": "docs/index.html" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "components": [
+    { "name": "preamble.tex", "path": "preamble.tex", "description": "Cała warstwa prezentacji i cała maszyneria długu w jednym pliku: pięć środowisk tcolorbox, w tym `verifybox` i `versionbox`, makro `\\needscreenshot` drukujące widoczny placeholder i jednocześnie dopisujące wpis do manifestu w załączniku D, oraz `\\mafcore` i `\\mafext` jako jedyne miejsce z numerami wersji. Mechanizm został już przeniesiony do `llm-book`, więc ma dwóch konsumentów, nie jednego.", "reusable": true },
+    { "name": "Pipeline LaTeX z bramką na referencje", "path": ".github/workflows", "description": "Kompilacja PDF-a to nie jedyne, co robi `build.yml`: grep na `Reference.*undefined` zamienia ostrzeżenie LaTeX-a w błąd CI, a dwa rejestry długu lądują w podsumowaniu kroku. Ten zestaw jest całkowicie niezależny od tematu książki.", "reusable": true },
+    { "name": "docs/index.html", "path": "docs/index.html", "description": "Jednoplikowa strona lądująca, 13 867 bajtów, zero zależności zewnętrznych i zero kroku build. Paleta CSS przepisana wprost z `preamble.tex`, obsługa trybu ciemnego i `prefers-reduced-motion`, plus sekcja z przypiętymi wersjami pakietów.", "reusable": true },
+    { "name": "Makefile — cel shots", "path": "Makefile", "description": "Cztery cele, z czego jeden nietrywialny: `shots` wypisuje klucze `\\needscreenshot`, dla których nie ma odpowiadającego PNG-a. To generyczny wzorzec liczenia brakujących zasobów figuralnych w dowolnym projekcie LaTeX.", "reusable": true },
+    { "name": "Szablony issue dla erraty", "path": ".github/ISSUE_TEMPLATE", "description": "`erratum.yml` wymusza podanie miejsca i rodzaju błędu zamiast wolnego tekstu, a README wskazuje erratę jako najbardziej wartościowy wkład. Formularz przenosi się do dowolnej książki technicznej bez zmian.", "reusable": true },
+    { "name": "chapters/", "path": "chapters", "description": "Dwanaście rozdziałów zakończonych podsumowaniem i ćwiczeniami; 18 bloków `exercisebox` i 49 bloków ostrzeżeń w całej treści. Rozdział 7 opisuje pięć wzorców orkiestracji, w tym Magentic, którego brief w ogóle nie przewidywał.", "reusable": false },
+    { "name": "appendices/", "path": "appendices", "description": "A to katalog około trzydziestu pakietów {{term:nuget}} pogrupowanych w cztery równoległe pociągi wydawnicze, B to matryca dostawców (Ollama, Azure OpenAI, OpenAI) plus celowo pusty szablon pomiarowy, C to katalog błędów z dosłownymi komunikatami, D to manifest zrzutów z checklistą redakcji.", "reusable": false },
+    { "name": "code/", "path": "code", "description": "Katalog zarezerwowany na kompilowalne projekty przykładowe wciągane makrem `\\csfile`. Zawiera wyłącznie `.gitkeep`, więc makro nie ma czego wciągać i żaden z 92 listingów nie przechodzi przez kompilator w tym repozytorium.", "reusable": false }
+  ],
+  "overlaps": [
+    { "slug": "llm-book", "reason": "Ta sama maszyneria książkowa — LaTeX, wersje wyłącznie w preambule, rejestry długu w CI, verifybox — i ten sam temat agentów, tylko dla ekosystemu LangChain zamiast .NET. `llm-book` ma już zaliczone 3,5 z 5 eksperymentów, ta książka zero z dwóch." },
+    { "slug": "AgentHelm", "reason": "Sekcja 11.6 zawiera oświadczenie o konflikcie interesów wobec produktu autora w tej samej przestrzeni narzędzi agentowych. Rozdziały 11 i 12 opisują dokładnie te luki, które produkt miałby zamykać." },
+    { "slug": "agent-eval-bench", "reason": "Rozdziały 9 i 12 projektują ten sam problem: mierzenie jakości agenta rubrykami i porównywanie {{term:topologie|topologii}} na powtarzalnym zestawie zadań." },
+    { "slug": "copilot-scope", "reason": "Capstone z rozdziału 12 (Ingest, Score, Compare, Surface) to na papierze ten sam system, który tam już działa: śladów OTLP wchodzące, ocena jakości sesji wychodząca." }
+  ],
+  "product": "Brak kupującego w sensie transakcyjnym. Tekst jest na CC BY-NC-SA 4.0, a PDF ma być rozdawany za darmo z GitHub Releases, więc wartość jest kanałowa i wiarygodnościowa: ustawia autora jako osobę, która przeczytała źródła frameworka zamiast dokumentacji, i trafia do inżyniera .NET z zadaniem postawienia agenta na produkcji. To jest też najkrótsza droga do AgentHelm, bo rozdziały 11 i 12 nazywają luki, które ten produkt adresuje. Klauzula NC wiąże odbiorców, nie autora, więc druk albo kurs pozostają otwarte, tylko nikt ich nie zaczął.",
+  "gaps": [
+    "**Dwa w pełni zaprojektowane eksperymenty nie zostały uruchomione**: benchmark pięciu wzorców orkiestracji (7.7) i pomiar zimnego startu (10.5.3). Tabele w załączniku B są puste, każde porównanie wydajnościowe w książce jest oznaczone jako osąd, nie pomiar, i tak ma zostać.",
+    "23 bloki `verifybox` to listingi przepisane z dokumentacji, a nie skompilowane wobec SDK. README sam mówi, że nic z takim znacznikiem nie powinno trafić do czytelnika, a `code/` z jednym `.gitkeep` gwarantuje, że stan się nie zmieni sam.",
+    "27 zrzutów ekranu i 3 diagramy nie istnieją; w PDF-ie drukują się widoczne placeholdery z instrukcją przechwycenia.",
+    "Przypięte wersje są dwa pociągi wydawnicze do tyłu: `preamble.tex` trzyma `\\mafcore` 1.10.0 i `\\mafdate` July 2026, podczas gdy CLAUDE.md odnotowuje core na 1.15.0. Tabela pociągów w załączniku A jest datowanym snapshotem.",
+    "Liczba stron nie zgadza się sama ze sobą: README i strona podają 236, CLAUDE.md 246. PDF jest w `.gitignore`, więc rozstrzygnięcie wymaga zbudowania."
+  ],
+  "next": [
+    "Uruchom tańszy eksperyment z zimnego startu (10.5.3) i wypełnij jego tabelę w załączniku B. Wymaga mniejszego budżetu niż benchmark orkiestracji, a odblokowuje pierwsze twarde liczby w książce.",
+    "Uruchom benchmark orkiestracji (7.7) i **zachowaj surowe strumienie zdarzeń**, nie tylko wiersze podsumowania: rozdziały 9 i 12 mają je ponownie ocenić, a odtworzenie śladów kosztuje drugi przebieg.",
+    "Zrób jeden dedykowany przebieg podbicia wersji: `\\mafcore` na 1.15.0, `\\mafdate`, tabela pociągów w załączniku A i oś czasu w rozdziale 1 naraz, nigdy przy okazji rozdziału.",
+    "Złóż minimalne projekty w `code/` dla listingów objętych `verifybox` i kasuj blok dopiero po faktycznej kompilacji.",
+    "Wypchnij tag z lokalnego klona ({{term:tagdeploy|push taga to jedyny wyzwalacz release'u}}), żeby link do PDF-a reklamowany w README zaczął cokolwiek zwracać."
+  ],
+  "highlights": [
+    "Dług jest liczony i publikowany automatycznie: `build.yml` wypisuje do podsumowania kroku listę brakujących zrzutów i liczbę bloków `verifybox`. Rejestr długu, który sam się aktualizuje przy każdym push, jest rzadszy niż powinien.",
+    "Build wywala się na nierozwiązanym `\\ref` — grep `Reference.*undefined` w `main.log` bramkuje zarówno PR, jak i release. Książka z zepsutą referencją nie zostanie wydana, nawet jeśli LaTeX ograniczy się do ostrzeżenia.",
+    "Ustalenia pochodzą z czytania kodu upstream, nie z docs: `AgentThread` nie istnieje w wydanym pakiecie (127 wystąpień `AgentSession` i zero `AgentThread` w wygenerowanych XML-ach), a niezgodność typów na krawędzi workflow to ciche zgubienie wiadomości, którego jedynym śladem jest tag `edge_group.delivery_status` na spanie.",
+    "Załącznik A opisuje pakiety {{term:nuget}} jako cztery równoległe pociągi wydawnicze z różnymi datami i stwierdza wprost, że jedna właściwość MSBuild nie przypnie ich wszystkich. Tej obserwacji nie ma w dokumentacji Microsoftu.",
+    "Numery wersji żyją wyłącznie jako `\\mafcore` i `\\mafext` w `preamble.tex`, a CONTRIBUTING zakazuje wpisania wersji do rozdziału — dzięki temu podbicie wersji jest jedną zmianą, a nie sweepem po 9 055 liniach."
+  ],
+  "risks": [
+    "Podwójna licencja jest pułapką dla czytelnika: proza na CC BY-NC-SA 4.0 z klauzulą NonCommercial, kod i makra na MIT. Kto skopiuje fragment rozdziału do materiału komercyjnego, złamie licencję bez ostrzeżenia.",
+    "README i strona reklamują stały link do najnowszego PDF-a, a w repozytorium **nie ma ani jednego taga**, więc `release.yml` nigdy się nie wyzwolił i wydanie prawdopodobnie nie istnieje.",
+    "23 nieskompilowane listingi to zobowiązanie wobec czytelnika, które starzeje się szybciej niż tekst: przy dwóch pociągach wydawniczych poślizgu część API mogła się już pod nimi zmienić.",
+    "Katalog roboczy jest wyewidencjonowany na gałęzi `claude/portfolio-html-app-w6306n`, nie na `main`, a ostatnie commity to wyłącznie merge'e {{term:dependabot|dependabota}}. Ostatnia praca merytoryczna to przebieg indeksu i spójności, więc projekt jest bliżej uśpienia niż aktywności."
+  ],
+  "headline": "Pełny draft i policzalny dług: 23 nieskompilowane listingi, zero z dwóch pomiarów",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-25", "commits": 29, "files": 38 }
+}

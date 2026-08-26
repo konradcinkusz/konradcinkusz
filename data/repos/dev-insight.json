@@ -1,0 +1,119 @@
+{
+  "slug": "dev-insight",
+  "name": "DevInsight",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "prototype",
+  "tier": "P2",
+  "oneLiner": "Trzy konsolowe dema C# na `net8.0` jako kod towarzyszący filmom kanału DevInsight, który nie ma jeszcze ani jednego odcinka.",
+  "summary": "Każdy katalog to samodzielny projekt `Exe`, ilustrujący dokładnie jedno zagadnienie językowe. `DevInsight.SOLID.LSP` modeluje `Rectangle` i `Square` jako równorzędne implementacje `IShape` zamiast dziedziczenia, więc omija klasyczne naruszenie LSP zamiast je opisywać. `DevInsight.BitShiftDemos` pokazuje enum `[Flags]` na `uint`, maskowanie licznika przesunięcia przez `0x1F` i pakowanie wersji firmware na bitach 31..16. `DevInsight.CSharpSamples` dotyka `TimeZoneInfo` dla Europe/London i wyznaczania daty sesji handlowej po odcięciu o 23:00. Najciekawsza decyzja siedzi w pierwszym z tych demo: enum `Features` **jawnie deklaruje** `Bit32`, `Bit33` i `Bit63` obok legalnych bitów, żeby kompilator sam wyliczył kolizję (1, 2 i `0x80000000`) zamiast zostawiać ją w komentarzu. Całość to 224 linie w trzech plikach `Program.cs`, zero zależności {{term:nuget|NuGet}} i zero testów. Realnie skończone są dwa dema; trzecie jest szkicem, który po całej arytmetyce stref czasowych wypisuje `Hello, World!`.",
+  "stack": [".NET 8 (net8.0)", "C# console apps", "ImplicitUsings enable", "Nullable enable", "Visual Studio solution 12.00 (VS 17.14)", "zero PackageReference"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Zero testów: nie ma projektu testowego ani żadnego pliku z `test` w nazwie, choć wszystkie trzy tematy (LSP, pakowanie bitowe, granice DST) są czysto jednostkowe i deterministyczne.",
+  "ci": "Brak CI. Katalog `.github` nie istnieje, więc na push nie wykonuje się nawet `dotnet build`.",
+  "metrics": [
+    { "label": "Projekty konsolowe", "value": "3" },
+    { "label": "Pliki w repozytorium", "value": "11" },
+    { "label": "Linie kodu w trzech `Program.cs`", "value": "224" },
+    { "label": "Zależności NuGet", "value": "0" },
+    { "label": "Testy", "value": "0" },
+    { "label": "Workflowy CI", "value": "0" },
+    { "label": "Podlinkowane odcinki wideo", "value": "0 z 3" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/dev-insight",
+    "live": [
+      { "label": "Kanał YouTube DevInsight", "url": "https://www.youtube.com/@_dev_insight" }
+    ],
+    "docs": [
+      { "label": "README z tabelą trzech projektów", "path": "README.md" },
+      { "label": "Licencja MIT (szablon niewypełniony)", "path": "LICENSE.txt" },
+      { "label": "Demo LSP, 73 linie", "path": "DevInsight.SOLID.LSP/Program.cs" },
+      { "label": "Kolizje bitów i pakowanie firmware", "path": "src/DevInsight.BitShiftDemos/Program.cs" },
+      { "label": "Szkic TimeZoneInfo i daty sesji", "path": "src/DevInsight.CSharpSamples/Program.cs" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "BitPacking",
+      "path": "src/DevInsight.BitShiftDemos/Program.cs",
+      "description": "Sześć statycznych funkcji na `uint`: `SetFirmware` najpierw czyści oba bajty maską `~((0xFF << 24) | (0xFF << 16))`, dopiero potem wpisuje wartości, więc powtórny zapis nie zostawia śmieci po poprzedniej wersji. `GetFirmware` zwraca krotkę `(Major, Minor)`, a `Enable`/`Disable`/`Toggle`/`HasFeature` operują na masce flag. Żadnego typu domenowego, żadnej zależności.",
+      "reusable": true
+    },
+    {
+      "name": "Enum `Features : uint`",
+      "path": "src/DevInsight.BitShiftDemos/Program.cs",
+      "description": "Czternaście wartości `[Flags]`, od `Bluetooth = 1u << 0` po `DeepSleep = 1u << 31`, a za nimi celowo `Bit32`, `Bit33` i `Bit63`. Kolizja z maskowania `0x1F` jest tu policzona przez kompilator, nie opisana prozą.",
+      "reusable": false
+    },
+    {
+      "name": "IShape + AreaCalculator",
+      "path": "DevInsight.SOLID.LSP/Program.cs",
+      "description": "Interfejs z jedną właściwością `Area`, dwie równorzędne implementacje i `TotalArea(IEnumerable<IShape>)` sumujące po abstrakcji. Komentarz w kodzie nazywa wprost powód, dla którego `Square` nie dziedziczy po `Rectangle`: niezależne settery `Width` i `Height` łamałyby podstawialność.",
+      "reusable": false
+    },
+    {
+      "name": "ResolveLondon",
+      "path": "src/DevInsight.CSharpSamples/Program.cs",
+      "description": "Osiem linii domykających różnicę między identyfikatorami IANA a Windows: `TryFindSystemTimeZoneById(\"Europe/London\")` z twardym fallbackiem na `GMT Standard Time`. Jedyny fragment tego projektu, który robi to, co obiecuje.",
+      "reusable": false
+    },
+    {
+      "name": "DetermineTradingDate",
+      "path": "src/DevInsight.CSharpSamples/Program.cs",
+      "description": "Funkcja lokalna przesuwająca datę o dobę, gdy godzina londyńska jest równa 23 lub większa. Reguła jest związana z konkretnym odcięciem sesji handlowej, a jej wynik nigdy nie trafia na wyjście programu.",
+      "reusable": false
+    },
+    {
+      "name": "DevInsight.sln",
+      "path": "DevInsight.sln",
+      "description": "Spina trzy projekty, z czego dwa leżą w `src/`, a demo LSP w katalogu głównym. Ta niespójność jest widoczna w README, bo tabela projektów miesza ścieżki `./DevInsight.SOLID.LSP` i `./src/...`.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "csharp-flashcards", "reason": "Ten sam materiał: detale języka C# podane w małych, samodzielnych porcjach. Tam w formie fiszek, tu w formie uruchamialnego demo pod film." },
+    { "slug": "architecture-standards", "reason": "Demo LSP dotyka zasad SOLID, które tam funkcjonują jako obowiązujący standard, a nie jako przykład dydaktyczny. Jeśli obie pozycje mają żyć, warto zdecydować, która jest źródłem definicji." }
+  ],
+  "product": "Brak kupującego i nie ma sensu go tu szukać. To czysty kanał: kod ma podeprzeć filmy i wiarygodność autora, a nie generować wartość sam z siebie. Problem w tym, że kanał jeszcze nie ruszył, więc dziś repozytorium podpiera coś, czego nie ma, i cała jego wartość jest odroczona do pierwszego opublikowanego odcinka.",
+  "highlights": [
+    "Enum `Features` deklaruje `Bit32 = 1u << 32`, `Bit33` i `Bit63` obok legalnych flag, więc kolizja wynikająca z maskowania licznika przesunięcia przez `0x1F` jest **policzona przez kompilator**, a nie opisana w komentarzu.",
+    "`BitPacking.SetFirmware` czyści oba bajty maską `~((0xFF << 24) | (0xFF << 16))` przed zapisem, zamiast samego `OR`. To jest poprawny wzorzec, którego brakuje w większości podobnych przykładów w sieci.",
+    "Demo LSP nie powtarza kanonicznego błędu `Square : Rectangle`; oba kształty są równorzędnymi implementacjami `IShape`, a `AreaCalculator` widzi wyłącznie abstrakcję.",
+    "`ResolveLondon` obsługuje rozjazd identyfikatorów IANA i Windows z fallbackiem na `GMT Standard Time`, czyli dokładnie ten szczegół, na którym demo strefowe zwykle pada na innej maszynie.",
+    "Zero `PackageReference` w trzech plikach `.csproj`: `git clone` i `dotnet run --project` działa bez żadnej konfiguracji."
+  ],
+  "gaps": [
+    "**`DevInsight.CSharpSamples` nie robi tego, co obiecuje README.** `windowLocal23_30`, `dstStart2024`, `dstEnd2024`, `dstStart2025` i `dstEnd2025` są nieużywane, `localNow` i `localNow2` liczą dokładnie to samo z tego samego wejścia, a jedynym wyjściem programu jest `Hello, World!`.",
+    "Nazwa `windowLocal23_00` sugeruje czas lokalny, ale wartość idzie do `TimeZoneInfo.ConvertTimeFromUtc` jako czas UTC. W szkicu to mylące, w nagranym odcinku byłoby po prostu błędne.",
+    "`LICENSE.txt` to niewypełniony szablon: `Copyright (c) [year] [fullname]`. README linkuje do niego jako do licencji {{term:mit|MIT}}, więc deklaracja jest słabsza, niż wygląda.",
+    "Wszystkie trzy wiersze tabeli projektów w README mają status `coming soon`. Zapowiadany związek z kanałem nie jest w repozytorium potwierdzony niczym poza linkiem do profilu.",
+    "Układ katalogów jest niespójny: dwa projekty w `src/`, jeden w katalogu głównym, i README wozi obie konwencje ścieżek naraz."
+  ],
+  "next": [
+    "Uzupełnij `LICENSE.txt` o rok i nazwisko. Jedna linia, a bez niej deklaracja MIT z README nie ma pokrycia.",
+    "Dokończ `DevInsight.CSharpSamples`: usuń martwe zmienne, rozdziel nazewnictwo UTC od czasu lokalnego i wypisz faktyczne wyniki konwersji zamiast `Hello, World!`.",
+    "Dodaj projekt xUnit z dwoma zestawami: round-trip `SetFirmware`/`GetFirmware` dla losowych par bajtów oraz `DetermineTradingDate` na obu granicach DST 2025. Oba są w pełni {{term:determinizm|deterministyczne}}, więc nie potrzebują żadnej atrapy.",
+    "Dodaj workflow GitHub Actions z `dotnet build` i `dotnet test` na push. Repozytorium z trzema projektami i zerem CI nie ma jak wykryć, że jeden z nich przestał się kompilować.",
+    "Przenieś `DevInsight.SOLID.LSP` do `src/`, zaktualizuj `DevInsight.sln` i ścieżki w README."
+  ],
+  "risks": [
+    "Nazwa `DevInsight` jest generyczna do granicy nieużyteczności; kolizja z innym projektem, kanałem lub produktem o tej nazwie jest praktycznie pewna, a repozytorium nigdzie tego nie adresuje.",
+    "Sześć commitów i ostatni z 2026-08-10. Jeśli kanał nie ruszy, to jest szkic, który zestarzeje się na `net8.0` bez żadnego sygnału, że został porzucony.",
+    "HEAD stoi na gałęzi `claude/portfolio-html-app-w6306n`, a nie na `master`, więc stan roboczy nie odpowiada domyślnej gałęzi repozytorium.",
+    "Pin na `net8.0` bez `global.json`: wynik kompilacji zależy od tego, jakie SDK ma maszyna czytelnika, co dla repozytorium dydaktycznego jest gorsze niż dla zwykłego."
+  ],
+  "headline": "Dwa dema skończone, trzecie wypisuje `Hello, World!`, kanał jeszcze nie ruszył",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-10",
+    "commits": 6,
+    "files": 11
+  }
+}

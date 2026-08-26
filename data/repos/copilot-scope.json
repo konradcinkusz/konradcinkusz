@@ -1,0 +1,84 @@
+{
+  "slug": "copilot-scope",
+  "name": "CopilotScope",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P1",
+  "oneLiner": "Kolektor OTLP i dashboard, które z telemetrii asystentów AI liczą **ocenę jakości sesji**, a nie zużycie tokenów.",
+  "summary": "Przyjmuje telemetrię {{term:otel|OpenTelemetry}} z pięciu powierzchni — VS Code Copilot, Copilot CLI, Claude Code, Claude Cowork, Cursor — na jednym endpointcie, agreguje ją w sesje i liczy złożony wynik jakości 0–100 wraz ze wskaźnikiem pewności. Wagi składowych są **opublikowane** i renormalizowane wyłącznie po tych składowych, które mają dane; obok każdego wyniku eksportowany jest współczynnik pokrycia, bo wersja pierwsza przypinała każdą sesję do okolic osiemdziesiątki i było to jawnie złe. Poza samym wynikiem liczone są: analiza tur (która tura się zepsuła i dlaczego), przeżywalność zaakceptowanych edycji, użyteczność latencji, ekonomika tokenów i heurystyka frustracji — ta ostatnia celowo poza składową oceny. Dekoder protobuf jest napisany w repozytorium, więc kolektor ma **dokładnie jedną zależność**, a dashboard nie ma żadnej.",
+  "stack": [".NET 10", "Blazor Server", ".NET Aspire 13.4.6", "Postgres 16", "OpenTelemetry 1.17.0", "Prometheus + Grafana", "Azure AI Foundry (opcjonalnie)"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "160 metod testowych (155 [Fact] + 5 [Theory]) w 20 plikach. Liczba przechodzących nie została zweryfikowana w tym przebiegu — policzone są atrybuty w kodzie.",
+  "ci": "Pięć workflowów: build i test całej solucji, macierz czterech obrazów na GHCR z testem dymnym **przed** publikacją, kompilacja dwóch artykułów LaTeX dołączanych do wydania, GitHub Pages, gitleaks. Do tego dependabot dla trzech ekosystemów.",
+  "metrics": [
+    { "label": "Wspierane emitery telemetrii", "value": "5" },
+    { "label": "Kod C#/Razor", "value": "13 204 linie łącznie, 6 205 w src" },
+    { "label": "Metody testowe", "value": "160" },
+    { "label": "Obrazy publikowane na GHCR", "value": "4" },
+    { "label": "Notebooki badawcze", "value": "8" },
+    { "label": "Artykuły LaTeX", "value": "2 (3 451 linii), budowane w CI" },
+    { "label": "Zależności NuGet w kolektorze", "value": "1" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/copilot-scope",
+    "live": [{ "label": "Strona (GitHub Pages)", "url": "https://konradcinkusz.github.io/copilot-scope/" }],
+    "docs": [
+      { "label": "Tutorial konfiguracji każdego asystenta", "path": "docs/TUTORIAL.md" },
+      { "label": "Kalibracja sędziego — kappa Cohena", "path": "docs/CALIBRATION.md" },
+      { "label": "Pozycjonowanie i strategia", "path": "docs/STRATEGY.md" },
+      { "label": "Samokrytyczny przegląd produktowy", "path": "docs/architecture/PRODUCT-REVIEW-2026-08.md" },
+      { "label": "Dziesięć propozycji badawczych", "path": "research/RESEARCH_PROPOSALS.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": true, "ghcr": true, "pages": true, "packages": false },
+  "components": [
+    { "name": "Dekoder OTLP", "path": "src/CopilotScope.Collector/Otlp", "description": "Ręcznie napisany czytnik protobuf (718 linii łącznie) z numerami pól zweryfikowanymi wobec oficjalnych plików `.proto`. Czyta ogólny format OTLP i nie zna pojęcia sesji — da się wyciąć jako mała biblioteka dla dowolnego odbiornika OTLP bez SDK.", "reusable": true },
+    { "name": "Pipeline insightów", "path": "src/CopilotScope.Collector/Quality/Insights.cs", "description": "Wtyczkowy kontrakt analizatorów: jedna klasa plus jedna rejestracja daje nowy algorytm, a dashboard renderuje wynik generycznie. Wyjątek analizatora jest łapany i raportowany jako brak danych zamiast wywracać ingest.", "reusable": true },
+    { "name": "Kalibracja sędziego (kappa Cohena)", "path": "src/CopilotScope.JudgeAgent/Calibration", "description": "670 linii: {{term:kappa|kappa}} nieważona, ważona liniowo i kwadratowo, każda z zasianym bootstrapem 2000 próbek. Mierzy najpierw **sufit zgodności samego panelu ludzi** i ma osobny werdykt „sufit za niski”. Arytmetyka na etykietach porządkowych — nadaje się do każdej kalibracji sędziego LLM.", "reusable": true },
+    { "name": "CopilotScope.ServiceDefaults", "path": "src/CopilotScope.ServiceDefaults", "description": "Sto linii czystej infrastruktury: samoinstrumentacja, health, service discovery, odporność HTTP. Świadomie bez żadnej encji domenowej.", "reusable": true },
+    { "name": "QualityEngine v2", "path": "src/CopilotScope.Collector/Quality/QualityEngine.cs", "description": "Sześć składowych o opublikowanych wagach, renormalizowanych tylko po tych z danymi, plus pewność = pokrycie razy rampa próbek.", "reusable": false },
+    { "name": "Normalizacja dialektów", "path": "src/CopilotScope.Collector/Domain", "description": "Sprowadza słownik `gen_ai.*` i starszy `copilot_chat.*` do jednej przestrzeni. Osobne 292 linie na Claude Code i Cowork, które domyślnie **nie emitują spanów w ogóle** — źródłem prawdy są zdarzenia logów.", "reusable": false },
+    { "name": "TelemetryGen", "path": "tools/CopilotScope.TelemetryGen", "description": "Odtwarza realistyczną sesję po prawdziwym OTLP/HTTP, z gzipem — ćwiczy faktyczną ścieżkę ingestu i dekodera, nie ich atrapę.", "reusable": false }
+  ],
+  "overlaps": [
+    { "slug": "hydro-scope", "reason": "Repozytorium siostrzane: ten sam kształt (kolektor OTLP, korelacja, dashboard), inna domena. Duża część infrastruktury jest wspólna z definicji." },
+    { "slug": "judge-worker", "reason": "Tamten worker to ta sama idea sędziego LLM nad zapisanymi przebiegami, wystawiona jako osobna usługa na kolejce — łącznie z tą samą arytmetyką kalibracji." },
+    { "slug": "AgentHelm", "reason": "Nazwany projektem siostrzanym z podziałem ról: Scope obserwuje sesje, Helm nimi steruje." },
+    { "slug": "agent-eval-bench", "reason": "Oba mierzą jakość agenta rubrykami; ten z telemetrii produkcyjnej, tamten na zadaniach testowych." },
+    { "slug": "archgate", "reason": "Sesyjne uśrednianie {{term:provenance}} stąd jest tam cytowane jako błąd, którego nie wolno powtórzyć." }
+  ],
+  "product": "Kupujący istnieje warunkowo: zespół platformowy albo lider inżynierii, który płaci za licencje asystenta i nie potrafi odpowiedzieć, czy sesje są cokolwiek warte. Repozytorium **jawnie odmawia bycia produktem** — strategia deklaruje brak open-core, brak płatnego poziomu i brak telemetrii wysyłanej do autora, a README zakazuje użycia wyniku do oceny ludzi, co odcina najłatwiejszy scenariusz sprzedażowy. Bez uruchomionej kalibracji kluczowa metryka nie ma zewnętrznej walidacji, więc dziś to przede wszystkim kanał wiarygodności — i w tej roli działa dobrze, bo nisza scoringu jakości sesji jest w otwartym kodzie pusta.",
+  "highlights": [
+    "Kolektor ma **jedną zależność**, bo dekoder protobuf jest napisany na miejscu; dashboard Blazor nie ma żadnej. To jest decyzja, którą widać w każdym późniejszym wyborze w tym repozytorium.",
+    "Claude Code i Cowork domyślnie nie emitują spanów — 292 linie traktują zdarzenia logów jako źródło prawdy dla wywołań, tokenów, narzędzi i decyzji o edycji. To jest praca, której nikt inny nie wykonał publicznie.",
+    "README ma sekcję **„jak nie używać”**, która zakazuje stosowania wyniku do ocen pracowniczych i tłumaczy, dlaczego wskaźnik akceptacji ma wagę tylko 0,20 i jest sparowany z przeżywalnością edycji jako kontrmetryką.",
+    "Samokrytyczny przegląd produktowy wskazuje własne błędy z nazwy — między innymi to, że opublikowane obrazy wtedy nie startowały, bo Dockerfile celował w inną wersję niż projekty — i te ustalenia zostały naprawione dwoma commitami.",
+    "Silnik kalibracji liczy sufit zgodności panelu ludzi **przed** oceną sędziego. To jest właściwa kolejność, którą prawie nikt nie stosuje."
+  ],
+  "gaps": [
+    "**Kalibracja nigdy nie została uruchomiona** — w repozytorium nie ma żadnych ludzkich etykiet, a plik przykładowy ma wartości celowo za małe, żeby cokolwiek certyfikować. Każdy wynik rubrykowy pozostaje kierunkowy i niczego nie bramkuje.",
+    "Trzy algorytmy sędziowskie działają wyłącznie z chmurą, więc instalacja lokalna — czyli ta reklamowana — nigdy ich nie widzi. To jest jedna trzecia opisu produktu bez pokrycia w scenariuszu, który ktokolwiek uruchomi.",
+    "Kolektor jest z założenia jednoinstancyjny; nie skaluje się poziomo bez kolejki partycjonowanej. ADR to zapisuje, README nie eksponuje.",
+    "Sekcja niewydanych zmian w CHANGELOG jest wewnętrznie sprzeczna — jeden blok mówi o starej wersji frameworka, drugi opisuje przejście na nową.",
+    "Bicep wystawia sam kolektor, bez bazy, dashboardu i magazynu sekretów; ADR nazywa to eksperymentem, ale plik nadal leży w repozytorium jako pozorny cel wdrożenia."
+  ],
+  "next": [
+    "Zbierz realne etykiety dla 50–100 sesji i uruchom raport kalibracyjny. Dopóki {{term:kappa|kappa}} nie ma wartości, każde zdanie o sędzim jest obietnicą, nie pomiarem.",
+    "Uporządkuj CHANGELOG — dwa sprzeczne bloki w jednej sekcji to dokładnie ten rodzaj drobiazgu, który każe czytelnikowi przestać ufać reszcie.",
+    "Rozstrzygnij niespójność nazwy: katalog to `copilot-scope`, a wszystkie badge'e i obrazy używają `copilotscope` bez myślnika.",
+    "Wyeksponuj ograniczenie jednoinstancyjności w tabeli wdrożeniowej README, nie tylko w ADR.",
+    "Zdecyduj o warstwie chmurowej: albo budżet i uruchomienie, albo jawne oznaczenie jako nieuruchomionej. Dziś to jedna trzecia opisu bez pokrycia."
+  ],
+  "risks": [
+    "Nazwa produktu zawiera znak towarowy — przy jakimkolwiek użyciu komercyjnym to realny problem, a repozytorium nigdzie tego nie adresuje.",
+    "Przechwytywanie treści zapisuje fragmenty promptów i odpowiedzi w bazie; przy włączonych seriach per-sesja endpoint metryk wystawia identyfikatory sesji.",
+    "Usługa budująca agenta-personę z transkryptów konkretnej osoby ma jako zabezpieczenie **wyłącznie ręcznie pisaną konfigurację ze zgodą**, nie mechanizm techniczny.",
+    "Plik konfiguracji skanera dopuszcza literał sekretu, bo klucz jest w historii gita — usunięty z kodu, nadal obecny w commitach.",
+    "Cztery obrazy publikowane są macierzą z wyłączonym zatrzymywaniem na pierwszym błędzie, więc nieudany przebieg może zostawić **częściowo opublikowany zestaw**; nagłówek workflowu sam to odnotowuje jako pułapkę z konkretnego wydania."
+  ],
+  "headline": "Silnik kalibracji gotowy, zero ludzkich etykiet — metryka bez zewnętrznej walidacji",
+  "headlineTone": "warn",
+  "github": { "stars": 1, "openIssues": 23, "openPrs": 5, "dependabotPrs": 5, "lastCommit": "2026-08-24", "commits": 152, "files": 188 }
+}
