@@ -5277,7 +5277,7 @@
         "Walidator ma **zamknięty** zestaw kluczy repozytorium i sprawdza integralność krzyżowo: nieznany slug w `overlaps`, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. {{term:kernel|Kernel}} z jednym konsumentem jest ostrzeżeniem, nie błędem — to jest osąd, nie naruszenie schematu.",
         "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 35 slugów bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
         "Strona nie ma kroku budowania i zero zależności w czasie działania. Jedyna zależność deweloperska to przeglądarka do testu renderowania — który złapał błąd kolejności bootu zostawiający pustą stronę, trzy przepełnienia layoutu i regułę `[hidden]` przegrywającą z `display: flex`.",
-        "Własne liczby tego repozytorium — commity, pliki, data ostatniego commitu — są **wyliczane z gita przy budowie manifestu**, nie wpisywane ręcznie. To jedyny wpis, w którym da się to zrobić, i jedyny, w którym ręczne wpisanie gwarantowałoby nieaktualność."
+        "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu czterech."
       ],
       "gaps": [
         "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
@@ -5302,8 +5302,8 @@
         "openPrs": 0,
         "dependabotPrs": 0,
         "lastCommit": "2026-08-26",
-        "commits": 17,
-        "files": 67
+        "commits": 19,
+        "files": 68
       }
     },
     {
