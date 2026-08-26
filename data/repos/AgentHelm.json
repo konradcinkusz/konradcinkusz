@@ -1,0 +1,190 @@
+{
+  "slug": "AgentHelm",
+  "name": "AgentHelm",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Kokpit webowy dla agentów kodujących: jedno GUI zamiast czterech terminali, z bramką uprawnień i audytem każdej decyzji.",
+  "summary": "Prowadzi sesje agentów kodujących (Copilot CLI, Claude Code, Gemini CLI i dowolnego agenta mówiącego {{term:acp|Agent Client Protocol}}) z poziomu przeglądarki zamiast z terminala. Rdzeniem jest proces Bridge — ASP.NET Core Minimal API z 32 endpointami — który uruchamia agenta jako podproces, rozmawia z nim JSON-RPC po stdio i przechwytuje każde żądanie użycia narzędzia, zanim cokolwiek się wykona. Najciekawsza decyzja siedzi w 69 liniach `PermissionPolicy.cs`: silnik polityk jest czystą funkcją, która **może tylko auto-zezwalać**, nigdy auto-odrzucić, preferuje `allow_once` nad `allow_always`, żeby agent nie utrwalił szerszej zgody po swojej stronie, i celowo nie auto-zezwala na `fetch`, bo wywołanie sieciowe potrafi wynieść to, co przed chwilą odczytano. Każda decyzja, także automatyczna, ląduje w transkrypcie jako wpis {{term:audit|audytowy}}. Wokół czatu narosła reszta warsztatu: przeglądarka diffów git rozstrzygana po stronie serwera, terminal xterm.js z prawdziwym PTY na Uniksie, wznawianie sesji przez `session/load`, handoff między agentami i panel wyników jakości pobieranych z siostrzanego CopilotScope. Helm jest płaszczyzną sterowania, Scope płaszczyzną obserwacji, i ten podział jest w repozytorium opisany wprost. Skończone jest wszystko, co README oznacza jako M0-M3; korelacja z Scope pozostaje heurystyką po nakładaniu się okien czasowych.",
+  "stack": [
+    ".NET 8",
+    "ASP.NET Core Minimal API",
+    "Blazor Server",
+    "Aspire 9.3.0 (SDK MSBuild, bez workloadu)",
+    "Npgsql 8.0.5 / PostgreSQL 16",
+    "xUnit 2.9.2",
+    "xterm.js",
+    "Docker / GHCR"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "43 atrybuty `[Fact]` i zero `[Theory]`, wszystkie w jednym pliku `CoreTests.cs` o długości 1 012 linii z 19 klasami; testów nie uruchomiono w tym przebiegu, policzone są atrybuty w kodzie.",
+  "ci": "Cztery workflowy: build i test całej solucji w Release, wydanie na tagu `v*` (testy, publish trzech projektów, zip i GitHub Release), budowa dwóch obrazów na {{term:ghcr}} oraz publikacja katalogu `docs` na GitHub Pages. Wszystkie działają, ale `ci.yml` i `pages.yml` nasłuchują pushu na `main`, a repozytorium pracuje na `master` — realnie na głównej gałęzi nie chodzi nic poza ścieżką `pull_request`.",
+  "metrics": [
+    {
+      "label": "Endpointy HTTP w Bridge",
+      "value": "32, w tym trzy niezależne strumienie SSE"
+    },
+    {
+      "label": "Zależności NuGet w Bridge",
+      "value": "1 (Npgsql 8.0.5)"
+    },
+    {
+      "label": "Testy [Fact]",
+      "value": "43 (README podaje 41)"
+    },
+    {
+      "label": "Kod C#",
+      "value": "ok. 4 796 linii bez plików .razor"
+    },
+    {
+      "label": "Klient ACP",
+      "value": "432 linie, silnik polityk 69 linii"
+    },
+    {
+      "label": "Projekty w solucji",
+      "value": "4 (Bridge, Web, AppHost, EchoAgent) + testy"
+    },
+    {
+      "label": "Agenci prekonfigurowani",
+      "value": "4 (copilot, claude, gemini, echo)"
+    },
+    {
+      "label": "Commity",
+      "value": "29, ostatni 2026-07-20"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/AgentHelm",
+    "live": [],
+    "docs": [
+      {
+        "label": "Tutorial krok po kroku (20 minut)",
+        "path": "docs/TUTORIAL.md"
+      },
+      {
+        "label": "Analiza i pozycjonowanie wobec CopilotScope",
+        "path": "docs/ANALYSIS.md"
+      },
+      {
+        "label": "Architektura Copilot CLI",
+        "path": "docs/copilot-architecture.html"
+      },
+      {
+        "label": "Checklista publikacji (zero odhaczonych pozycji)",
+        "path": "docs/RELEASE-CHECKLIST.md"
+      },
+      {
+        "label": "Landing page dla GitHub Pages",
+        "path": "docs/index.html"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": true,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "AcpClient",
+      "path": "src/AgentHelm.Bridge/Agents/Acp/AcpClient.cs",
+      "description": "Własna implementacja klienta Agent Client Protocol: JSON-RPC po stdio, `initialize`, `session/new`, `session/load`, `session/prompt`, obsługa `fs/read_text_file` i `fs/write_text_file` ze strażą ścieżek. Transport siedzi za `IAcpTransport`, więc protokół jest testowany na skryptowanych strumieniach w pamięci, bez uruchamiania jakiegokolwiek agenta.",
+      "reusable": true
+    },
+    {
+      "name": "PolicyEngine",
+      "path": "src/AgentHelm.Bridge/Sessions/PermissionPolicy.cs",
+      "description": "Bezstanowa funkcja decyzyjna nad żądaniem uprawnienia: zwraca albo auto-zgodę z wybraną opcją, albo „zapytaj człowieka”. Trzy polityki (`ask`, `auto_read`, `yolo`), read-only to wyłącznie `read`, `search` i `think`, a brak opcji zezwalającej po stronie agenta też degraduje do pytania.",
+      "reusable": true
+    },
+    {
+      "name": "GitService",
+      "path": "src/AgentHelm.Bridge/Workbench/GitService.cs",
+      "description": "Backend przeglądarki zmian: parsuje `git status --porcelain` łącznie z tokenem rename, liczy +/- z diffa, accept to `git add`, reject to `git checkout HEAD --` albo usunięcie pliku nieskatalogowanego. Status pliku ustala serwer, nie żądanie z przeglądarki, więc UI nie może wymusić usunięcia śledzonego pliku.",
+      "reusable": true
+    },
+    {
+      "name": "AgentHelm.EchoAgent",
+      "path": "tools/AgentHelm.EchoAgent",
+      "description": "Referencyjny agent mówiący pełnym ACP w 181 liniach: strumieniuje odpowiedź, a na słowo „tool” w promptcie wysyła żądanie uprawnienia. Pozwala przejść cały przepływ z bramką włącznie bez instalowania i logowania się do prawdziwego agenta, i nadaje się jako harness dla dowolnego innego klienta ACP.",
+      "reusable": true
+    },
+    {
+      "name": "TerminalService",
+      "path": "src/AgentHelm.Bridge/Workbench/TerminalService.cs",
+      "description": "Sesja powłoki obok czatu, 161 linii. Na Uniksie prawdziwy PTY uzyskany przez `script -qfe -c bash /dev/null` z util-linux, bez interopu i bez pakietu natywnego; bufor 64 kB, subskrybenci przez kanały, wyjście strumieniowane do xterm.js. Nie nadaje się do wydzielenia bez zmiany sygnatury: publiczna metoda subskrypcji zwraca `ChannelReader<SessionEventDto>`, a ten typ jest zadeklarowany w menedżerze sesji tego repozytorium.",
+      "reusable": false
+    },
+    {
+      "name": "AgentHelm.Bridge",
+      "path": "src/AgentHelm.Bridge",
+      "description": "Proces API i jednocześnie granica bezpieczeństwa: bind domyślnie na 127.0.0.1, opcjonalny nagłówek `x-helm-token`, trzy strumienie SSE (transkrypt, terminal, wyjście logowania dostawcy). Trzyma sesje, uprawnienia, git, terminal i zapis snapshotu jsonb do Postgresa w trybie write-behind co sekundę.",
+      "reusable": false
+    },
+    {
+      "name": "AgentHelm.Web",
+      "path": "src/AgentHelm.Web",
+      "description": "Blazor Server bez ani jednego `PackageReference`. Strona Home to 703 linie code-behind plus 447 linii razor: lista sesji, transkrypt, banner uprawnień, zakładki Changes i Terminal, historia i handoff. Cała logika celowo w code-behind, komunikacja wyłącznie przez `BridgeClient`.",
+      "reusable": false
+    },
+    {
+      "name": "ScopeClient",
+      "path": "src/AgentHelm.Bridge/Integrations/ScopeClient.cs",
+      "description": "Pobiera z kolektora CopilotScope sesje z wynikiem jakości i dopasowuje je do sesji Helma po nakładaniu się okien czasowych. Ma minutowy backoff, gdy Scope nie odpowiada, i tolerancyjne parsowanie DTO, ale samo dopasowanie pozostaje heurystyką i UI to przyznaje.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "copilot-scope",
+      "reason": "Projekt siostrzany i wprost zintegrowany: Helm odpytuje REST API Scope o wyniki jakości i preustawia zmienne {{term:otel}} agentów tak, żeby telemetria trafiała do kolektora Scope. Podział ról jest deklarowany: Scope obserwuje, Helm steruje."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "Rozdział 11 §11.6 tamtej książki zawiera nieskończone ujawnienie o nakładaniu się z AgentHelm. Dopóki nie zostanie dopisane, README Helma i notatki książki mówią o tej samej relacji dwoma różnymi głosami."
+    }
+  ],
+  "product": "Odbiorcą byłby zespół, który chce używać agentów kodujących pod kontrolą: bramka uprawnień z audytem, transkrypt każdej decyzji i jedno GUI zamiast czterech CLI to materiał na narzędzie wewnętrzne albo na argument dla compliance. Kanału sprzedaży dziś nie ma i nic w repozytorium go nie buduje: licencja {{term:mit}}, dystrybucja przez zip i obrazy GHCR, brak trybu wielodostępnego, brak uwierzytelniania poza jednym współdzielonym tokenem, zero rozliczania. To jest zatem wiarygodność techniczna, nie produkt, i w tej roli działa: kompletny klient publicznego protokołu, model bezpieczeństwa opisany wprost i ograniczenia nazwane po imieniu w README.",
+  "highlights": [
+    "Bridge ma **dokładnie jedną zależność NuGet** (Npgsql 8.0.5). Klient ACP, obsługa gita i terminal to kod własny na procesach systemowych.",
+    "Silnik polityk może tylko auto-zezwalać, nigdy auto-odrzucić, i celowo **nie** auto-zezwala na `fetch` — komentarz w kodzie tłumaczy dlaczego: wywołanie sieciowe wynosi to, co przed chwilą odczytano.",
+    "PTY na Uniksie zrobione bez interopu i bez pakietu natywnego, przez `script -qfe -c bash /dev/null` z util-linux. Na Windows to zwykły pipe i README tego nie ukrywa.",
+    "Wbudowany agent echo mówiący pełnym ACP pozwala przejść cały przepływ, z żądaniem uprawnienia włącznie, bez instalowania i logowania się do jakiegokolwiek prawdziwego agenta.",
+    "Transport ACP jest wstrzykiwany przez interfejs, więc 432 linie protokołu są testowane na skryptowanych strumieniach w pamięci zamiast na uruchomionym podprocesie."
+  ],
+  "gaps": [
+    "**`ci.yml` i `pages.yml` nasłuchują pushu na `main`, a repozytorium jest na `master`.** Push do głównej gałęzi nie uruchamia ani testów, ani publikacji Pages; działa wyłącznie ścieżka `pull_request`. Landing page z `docs/index.html` prawdopodobnie nigdy nie została opublikowana.",
+    "Adapter GitHub Copilot SDK to szkielet za flagą `COPILOT_SDK` z czterema TODO, a jego `PromptAsync(string, CancellationToken)` nie zgadza się z `IAgentAdapter`, który wymaga trzeciego parametru z załącznikami. Po włączeniu flagi kod się nie skompiluje.",
+    "README i `docs/ANNOUNCE-POST.md` mówią o 41 testach, a w kodzie są 43 atrybuty `[Fact]`. Cały kod testów siedzi w jednym pliku na 1 012 linii, bez podziału i bez pomiaru pokrycia.",
+    "Korelacja z CopilotScope jest heurystyką po nakładaniu się okien czasowych, a nie realnym dopasowaniem sesji. To jedyna funkcja odróżniająca ten projekt od innych GUI dla agentów, i jest niedomknięta.",
+    "Zero pomiarów. README nie podaje ani jednej liczby o opóźnieniu strumienia, koszcie sesji czy zużyciu zasobów, a `docs/RELEASE-CHECKLIST.md` nie ma odhaczonej ani jednej pozycji."
+  ],
+  "next": [
+    "Popraw trigger w `ci.yml` i `pages.yml` z `main` na `master` albo przemianuj gałąź. Bez tego CI nie chodzi na głównej gałęzi i to jest najtańsza naprawa w całym repozytorium.",
+    "Zsynchronizuj liczbę testów w README i `ANNOUNCE-POST.md` z rzeczywistością albo przestań podawać ją liczbowo.",
+    "Napraw sygnaturę `PromptAsync` w `CopilotSdkAdapter` albo usuń plik i zostaw sam opis w README. Szkielet, który się nie kompiluje po włączeniu własnej flagi, jest gorszy niż jego brak.",
+    "Wydaj tag `v*` i sprawdź, czy `release.yml` i `build-containers.yml` faktycznie publikują zip i oba obrazy GHCR. Dziś checklista wydania jest w całości nieodhaczona.",
+    "Domknij korelację Helm-Scope przez tagowanie telemetrii identyfikatorem sesji zamiast dopasowywania po czasie, i przy okazji dodaj pierwszy pomiar: opóźnienie od chunku agenta do renderu w UI."
+  ],
+  "risks": [
+    "Powierzchnia ataku jest z założenia duża: zakładka Terminal wykonuje dowolne polecenia na maszynie użytkownika, a UI na localhoście bywa celem drive-by. Obroną są bind na 127.0.0.1 i nagłówek `x-helm-token`, który w `appsettings.json` jest domyślnie pusty.",
+    "W obu plikach compose siedzą wpisane na stałe token `dev-secret-123` i hasło Postgresa `helm-dev`; ten sam token pojawia się w `scripts/run.sh` jako domyślny nagłówek OTEL. Wartości są demonstracyjne, ale nic w plikach nie wymusza ich zmiany.",
+    "Zależność od preview: adapter Copilot SDK czeka na pakiet w wersji preview, a samo Copilot CLI raz już usunęło interfejs programistyczny bez zapowiedzi. README ostrzega, ale ryzyko zostaje.",
+    "{{term:aspire|Aspire}} przypięte na 9.3.0 przy target framework `net8.0`, a wersje elementu `Sdk` i pakietów `Aspire.Hosting` muszą iść w górę razem. Repozytorium wygląda na wstrzymane od 2026-07-20 przy 29 commitach, więc ten pin postarzeje się bez opieki."
+  ],
+  "headline": "Bramka uprawnień gotowa, CI celuje w gałąź `main`, której w repozytorium nie ma",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 2,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-07-20",
+    "commits": 29,
+    "files": 64
+  }
+}

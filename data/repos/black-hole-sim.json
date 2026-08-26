@@ -1,0 +1,203 @@
+{
+  "slug": "black-hole-sim",
+  "name": "BlackHoleSim",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Raytracer czarnej dziury Schwarzschilda w C#: ten sam integrator RK4 zasila CLI, kolejkowane API i galerię w Blazor WASM.",
+  "summary": "Rdzeń całkuje geodezyjne fotonów w metryce Schwarzschilda w płaszczyźnie równikowej — zerowy hamiltonian, krok RK4 po parametrze afinicznym, klasyfikacja promienia na cień, dysk akrecyjny albo tło. Ten sam `Raytracer` obsługuje trzy wyjścia: konsolowy renderer zapisujący PPM, minimal API, które przyjmuje zlecenie do kolejki na `Channel` i liczy je w hostowanym `RenderWorkerze`, oraz UI Blazor WebAssembly z paskiem postępu i galerią. Stan zadań i gotowy PNG trzyma Postgres przez EF Core. Najciekawsza decyzja nie jest fizyczna, tylko rozruchowa: migracje idą w osobnym hosted service **po** podniesieniu listenera, `/health` jest czerwone dopóki schemat nie jest gotowy, a `RenderWorker` czeka na `DatabaseReadyGate` zamiast wywrócić hosta pierwszym zapytaniem. Rendery są prywatne dla konta, ale API nie posiada materiału klucza: tokeny wystawia osobna instancja obrazu {{term:ghcr|authservice z GHCR}}, API tylko weryfikuje je kluczami publicznymi z JWKS. Warstwa operacyjna jest napisana w całości — cztery pliki `fly.toml`, {{term:tagdeploy|deploy z taga}} z wykrywaniem zmian, workflowy scale i destroy, compose na cztery kontenery, AppHost {{term:aspire|Aspire}} — i w repozytorium nie ma ani jednego taga, więc nigdy nie została uruchomiona.",
+  "stack": [
+    ".NET 9",
+    "ASP.NET Core minimal API",
+    "Blazor WebAssembly",
+    "EF Core 9.0.18 + Npgsql",
+    "PostgreSQL 16",
+    ".NET Aspire 13.4.6",
+    "SixLabors.ImageSharp 3.1.11",
+    "Fly.io + Docker Compose"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "28 przypadków wykonywalnych w pięciu klasach: 23 atrybuty `[Fact]` plus jedna `[Theory]` z 5 wierszami `[InlineData]`. Z tego granica autoryzacji to 14 przypadków w `AuthorizationTests` (9 `[Fact]` oraz `[Theory]` z 5 wierszami) — wcześniejsza liczba 10 nie wynikała z żadnego liczenia. Reszta to zbieżność RK4, zachowanie hamiltonianu, testy stanu i testy dymne raytracera. Liczby pochodzą z atrybutów w kodzie (`grep` po `[Fact]`, `[Theory]`, `[InlineData]` z pominięciem `bin/` i `obj/`) — `dotnet test` nie był uruchamiany w tym przebiegu.",
+  "ci": "Cztery workflowy. Na push chodzi dokładnie jeden: `pages.yml` publikuje `docs/` na GitHub Pages przy push do `master`, ale z filtrem ścieżek — tylko `docs/**` i sam plik workflow. Na pull request nie chodzi żaden. `flyio.yml` (519 linii) startuje wyłącznie z taga `v*` albo z `workflow_dispatch`: build, testy, wykrywanie zmian względem poprzedniego taga, budowa obrazów prosto do `registry.fly.io` i deploy w kolejności postgres, auth, api, web; publikacji Pages nie ma w tym pliku. Do tego dwa workflowy `workflow_dispatch` — scale i destroy. Testy i gitleaks żyją więc w `scripts/ci-local.sh` i w pre-commit, co repozytorium samo nazywa luką w COMPLIANCE.md.",
+  "metrics": [
+    {
+      "label": "Projekty w solucji",
+      "value": "8"
+    },
+    {
+      "label": "Kod C#",
+      "value": "3 486 linii"
+    },
+    {
+      "label": "Przypadki testowe",
+      "value": "28"
+    },
+    {
+      "label": "Aplikacje Fly w konfiguracji",
+      "value": "4"
+    },
+    {
+      "label": "Workflowy GitHub Actions",
+      "value": "4"
+    },
+    {
+      "label": "Migracje EF Core",
+      "value": "2, obie z plikiem .Designer.cs"
+    },
+    {
+      "label": "Tagi git",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/black-hole-sim",
+    "live": [
+      {
+        "label": "One-pager (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/black-hole-sim/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Analiza infrastruktury i kosztów Fly",
+        "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
+      },
+      {
+        "label": "Gdzie mieszka każdy sekret",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Zgodność z architecture-standards",
+        "path": "docs/architecture/COMPLIANCE.md"
+      },
+      {
+        "label": "Changelog z opisem naprawionych defektów",
+        "path": "CHANGELOG.md"
+      },
+      {
+        "label": "Prezentacja beamer o rendererze",
+        "path": "docs/main.tex"
+      },
+      {
+        "label": "Skrypty onboardingu i lokalnego CI",
+        "path": "scripts/README.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "BlackHoleSim.ServiceDefaults",
+      "path": "BlackHoleSim.ServiceDefaults",
+      "description": "144 linie czystej infrastruktury: `AddServiceDefaults` spina {{term:otel|OpenTelemetry}} dla ASP.NET Core, HttpClient i runtime'u, service discovery i `AddStandardResilienceHandler`, a eksporter OTLP rejestruje się dopiero gdy ustawiono `OTEL_EXPORTER_OTLP_ENDPOINT`. Zero encji i zero DTO — przeniesienie to zmiana przestrzeni nazw.",
+      "reusable": true
+    },
+    {
+      "name": "Konfiguracja i workflowy Fly.io",
+      "path": "flyio",
+      "description": "Cztery pliki `fly.toml`, w których komentarze niosą uzasadnienia, a nie tylko wartości: dlaczego tylko API ma `min_machines_running = 1`, dlaczego JWKS idzie po publicznym hostname, dlaczego Postgres nie ma `[http_service]`. Sam wzorzec — deploy z taga, diff względem poprzedniego taga, brakująca apka traktowana jako zmieniona — jest przenośny po podmianie nazw.",
+      "reusable": true
+    },
+    {
+      "name": "Skrypty onboardingu i lokalnego CI",
+      "path": "scripts",
+      "description": "`setup.sh` generuje `.env`, hasło bazy i klucz podpisujący, instaluje pre-commit i buduje solucję; `ci-local.sh` przechodzi testy, format, gitleaks, audyt zależności, budowę obrazów i smoke test compose. To jest de facto brakujący workflow na PR, tyle że po stronie dewelopera.",
+      "reusable": true
+    },
+    {
+      "name": "BlackHoleSim.Core",
+      "path": "BlackHoleSim.Core",
+      "description": "`IMetric` i `Schwarzschild` z odwrotną metryką oraz jej pochodnymi radialnymi, `RK4.Step`, `Raytracer` zrównoleglony po wierszach przez `Parallel.For`, zapis do PPM i PNG. Powierzchnia jest przywiązana do jednej metryki: `State` ma pola t, r, phi, pt, pr, pphi.",
+      "reusable": false
+    },
+    {
+      "name": "BlackHoleSim.Api",
+      "path": "BlackHoleSim.Api",
+      "description": "Minimal API z kolejką `ChannelRenderJobQueue` i workerem, który po restarcie odzyskuje zadania zawieszone w stanie Running, plus `DatabaseMigrationService`, `DatabaseReadyGate`, rate limiting per konto i weryfikacja JWT przez JWKS. Wzorzec kolejka + worker + brama schematu jest przenośny, ale kod nie jest sparametryzowany.",
+      "reusable": false
+    },
+    {
+      "name": "BlackHoleSim.Web",
+      "path": "BlackHoleSim.Web",
+      "description": "Blazor WASM: Render, Gallery, Login, Register, About oraz warstwa `RenderApiClient`, `TokenStore`, `BearerTokenHandler`, `JwtAuthenticationStateProvider` i `AuthSession` z odświeżaniem tokenu po 401 zserializowanym pod blokadą, żeby równoległe żądania nie odpaliły trzech refreshy.",
+      "reusable": false
+    },
+    {
+      "name": "BlackHoleSim.Tests",
+      "path": "BlackHoleSim.Tests",
+      "description": "Obok testów numerycznych (rząd zbieżności RK4, zachowanie hamiltonianu wzdłuż geodezyjnej) siedzi `AuthorizationTests`, które bootują realne API przez `WebApplicationFactory` na SQLite z podstawionym tokenem i sprawdzają, że cudze zadanie zwraca 404, a nie 403.",
+      "reusable": false
+    },
+    {
+      "name": "One-pager i prezentacja beamer",
+      "path": "docs",
+      "description": "`docs/index.html` to 601 linii z własnym SVG topologii i wzorami metryki, publikowane na Pages; `docs/main.tex` to 450-liniowa prezentacja o implementacji renderera. Przenośny jest tylko motyw `beamerthemedeepdiveinto.sty`.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "authservice",
+      "reason": "Uruchamia własną instancję obrazu `ghcr.io/konradcinkusz/authservice:v0.3.0` i weryfikuje jego tokeny przez JWKS, bez żadnej zależności źródłowej. To ten sam wzorzec konsumpcji, co w `primates`."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "`docs/architecture/COMPLIANCE.md` mierzy to repozytorium wprost względem tamtych checklist, a `.claude/settings.json` włącza plugin `architecture-core` z tamtego marketplace."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Ten sam {{term:servicedefaults|wspólny projekt ServiceDefaults}} w praktycznie tym samym kształcie — dwie kopie stu kilkudziesięciu linii, które powinny być jedną paczką."
+    },
+    {
+      "slug": "landing-page",
+      "reason": "Ten sam format wizytówki: statyczny one-pager w `docs/index.html` publikowany przez GitHub Pages."
+    }
+  ],
+  "product": "Brak kupującego i nie ma sensu go szukać — nikt nie kupuje renderów Schwarzschilda. To projekt dowodowy: pokazuje, że fizyka numeryczna, praca w tle, uwierzytelnianie oparte na JWKS i wdrożenie czterech aplikacji da się złożyć w jedną spójną całość, w której każda decyzja infrastrukturalna ma zapisane uzasadnienie. Wartość leży w kanale i wiarygodności: one-pager, prezentacja beamer i CHANGELOG, w którym sekcja Fixed ma piętnaście punktów, a dziesięć z nich opisuje defekt wraz z mechanizmem. Jako P3 w E-lab jest dokładnie tym, czym ma być, pod warunkiem że pipeline wdrożeniowy kiedykolwiek zostanie uruchomiony.",
+  "highlights": [
+    "Jeden integrator RK4 obsługuje trzy ścieżki wyjścia — CLI, API i przeglądarkę — więc obraz z konsoli i z galerii pochodzi z identycznego kodu, a nie z dwóch implementacji tej samej fizyki.",
+    "API nie posiada materiału klucza: pobiera klucze publiczne z JWKS serwisu tożsamości, więc potrafi token zweryfikować, ale nie potrafi go wystawić. Kompromitacja API nie daje możliwości podpisywania.",
+    "Cudze zadanie zwraca **404, a nie 403** — świadoma decyzja przeciw enumeracji identyfikatorów, pokryta dziewięcioma faktami w `AuthorizationTests`.",
+    "CHANGELOG ma jedną sekcję Fixed z piętnastoma punktami najwyższego poziomu, z czego dziesięć to wpisy z wytłuszczonym defektem i opisanym mechanizmem — w tym migracja EF bez pliku `.Designer.cs` (`Database.Migrate` nie znajdował niczego) i dwa pliki `.dockerignore`, których Docker nigdy nie czytał, bo kontekstem budowania jest katalog główny.",
+    "`AppHost` rzuca wyjątek z nazwą brakującego pliku, gdy nie ma `secrets/jwt-signing.pem`, zamiast po cichu spaść do HS256. Awaria konfiguracji jest głośna z założenia."
+  ],
+  "gaps": [
+    "**Zero tagów git przy deployu wyzwalanym wyłącznie tagiem `v*`.** Najbardziej złożony element repozytorium — 519 linii `flyio.yml` — nie ma ani jednego udokumentowanego przebiegu, a istnienia apek `blackholesim-*` nie da się potwierdzić. Adresy `*.fly.dev` są konfiguracją, nie linkiem.",
+    "`docs/architecture/COMPLIANCE.md` pozycja 8 nadal twierdzi, że system nie ma uwierzytelniania i oznacza wymóg JWKS jako nieadekwatny. To przestało być prawdą wraz z dodaniem kont i nikt tego dokumentu nie przeliczył.",
+    "Brak workflow na pull request i brak testów na push: `dotnet test` oraz gitleaks chodzą tylko przy tagu `v*` albo lokalnie. Jedyny workflow reagujący na push to `pages.yml`, który publikuje `docs/` i niczego nie sprawdza. Kontrybutor, który nie zrobił `pre-commit install`, nie jest sprawdzany przez nic.",
+    "Telemetria jest zainstrumentowana, ale na Fly nie stoi żaden kolektor i `OTEL_EXPORTER_OTLP_ENDPOINT` jest nieustawione, więc w środowisku wdrożonym nie eksportuje się nic.",
+    "Rendery PNG leżą jako blob w tabeli `RenderJobs` na wolumenie 3 GB, którego nie da się zmniejszyć, i nie ma żadnej retencji ani limitu per konto."
+  ],
+  "risks": [
+    "Rozjazd nazw: repozytorium i katalog to `black-hole-sim`, ale instrukcja klonowania w README oraz `\\RepoURL` w `docs/main.tex` wskazują na `BlackHoleSim`. Badge nad instrukcją prowadzi pod inny adres niż sama instrukcja.",
+    "Twarde przypięcie do `ghcr.io/konradcinkusz/authservice:v0.3.0`: cofnięcie poniżej v0.3.0 psuje logowanie, bo starsze buildy podpisują HS256 i publikują pusty zbiór kluczy. Zależność jest świadoma, ale nieodporna na regresję u dostawcy.",
+    "Kilkanaście wersji pakietów rozsypanych po siedmiu plikach `csproj` bez `Directory.Packages.props`. {{term:dependabot|Dependabot}} jest skonfigurowany, ale bez CI na PR jego aktualizacje nie przechodzą przez żadną kontrolę.",
+    "Nie znalazłem wpisanego na stałe poświadczenia, ale sprawdzana była konfiguracja, nie historia gita — a gitleaks nigdy nie chodził na pełnej historii w CI."
+  ],
+  "next": [
+    "Wypchnij tag `v0.1.0` i sprawdź, czy `flyio.yml` faktycznie stawia całą czwórkę apek od zera. Dopiero to weryfikuje główną tezę repozytorium i dopiero wtedy adresy `*.fly.dev` mogą trafić na kartę jako linki.",
+    "Popraw pozycję 8 w COMPLIANCE.md na stan po dodaniu kont i przelicz podsumowanie w sekcji 1. Dokument, który opisuje nieistniejący już stan, podważa cały pozostały audyt.",
+    "Dodaj workflow na pull request z `dotnet test` i gitleaks — zamyka pozycję 7 z COMPLIANCE.md i sprawia, że aktualizacje Dependabota cokolwiek znaczą.",
+    "Ujednolić adres repozytorium w README i `docs/main.tex` na `black-hole-sim`.",
+    "Dodaj retencję albo limit renderów per konto, zanim wolumen 3 GB stanie się problemem bez drogi odwrotu."
+  ],
+  "headline": "Kompletny pipeline wdrożeniowy, zero tagów — nigdy nie został uruchomiony",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 9,
+    "openPrs": 9,
+    "dependabotPrs": 9,
+    "lastCommit": "2026-08-15",
+    "commits": 69,
+    "files": 132
+  }
+}

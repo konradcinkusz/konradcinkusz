@@ -1,0 +1,143 @@
+{
+  "slug": "cognitive-multi-agent-simulation-analysis",
+  "name": "CogniSim — praca magisterska i analiza 2026",
+  "cluster": "D-content",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P2",
+  "oneLiner": "Źródła LaTeX pracy magisterskiej o CogniSim plus audyt z 2026 roku tego, co pod nią przestało istnieć.",
+  "summary": "W `thesis/` leżą źródła pracy magisterskiej (PW, EiTI) opisującej CogniSim — system wieloagentowy na LLM, w którym agenci grają role organizacji software'owej i odgrywają ceremonie {{term:safe}} i Scruma. W `docs/` leży sześć ponumerowanych studiów z 2026 roku, które sprawdzają, co z tej pracy nadal się broni: audyt defektów w źródłach, audyt deprecacji ekosystemu, mapowanie migracji na {{term:maf}}, rekord publikacyjny, related work i audyt stacku platformy następczej. Najciekawsza decyzja nie dotyczy treści, tylko epistemologii: **każde twierdzenie zewnętrzne nosi {{term:poziom|poziom weryfikacji}}** — primary-artefact, primary-page, secondary albo unverified — bo dokumenty powstawały w sandboxie, który blokował `openai.com`, `learn.microsoft.com` i `scaledagile.com`, i autor zamiast to przemilczeć, oznaczył każdą taką lukę w tekście. Skończony jest stage 0 roadmapy: 22 defekty w tezie naprawione, instrument z 63 błędów zszedł do zera, oba checkery chodzą w CI i w pre-commit. Nieskończone jest to, na czym stopień naprawdę stoi — teza nadal nie stawia pytania badawczego i nie raportuje własnego pomiaru. Dwa studia zawierają jawne autokorekty, bo niezależna re-weryfikacja pokazała, że dwa wnioski były błędne.",
+  "stack": [
+    "LaTeX (klasa eiti-thesis.cls, PW/EiTI)",
+    "BibLaTeX",
+    "minted + Pygments (wymaga -shell-escape)",
+    "latexmk",
+    "Python 3.12 bez zależności zewnętrznych",
+    "GitHub Actions",
+    "gitleaks",
+    "CodeQL"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT w korzeniu, `thesis/` na GPL-3.0, `thesis/eiti/` bez określonej licencji (materiał trzeciej strony)",
+  "tests": "Brak testów jednostkowych, bo nie ma kodu aplikacyjnego. Rolę suity pełnią dwa checkery: `check-latex-hygiene.py` (424 linie) daje 0 błędów i 66 ostrzeżeń, co do znaku zgodnie ze skomitowanym `artifacts/01/hygiene-after.txt`, a `check-doc-links.py` (227 linii) daje 0 znalezisk na 23 plikach Markdown. Oba uruchomione ponownie przy przeglądzie.",
+  "ci": "Pięć workflowów: higiena LaTeX i linki w dokumentach odpalają dokładnie te same skrypty co pre-commit, `secret-scan.yml` uruchamia gitleaks na push, PR i cotygodniowo, CodeQL analizuje Pythona co tydzień, a `build-thesis-pdf.yml` jest wyłącznie `workflow_dispatch` i składa PDF przez `xu-cheng/latex-action` z `-shell-escape`. {{term:dependabot}} pilnuje wersji akcji miesięcznie.",
+  "metrics": [
+    { "label": "Commity", "value": "27, wszystkie z 2026-08-24" },
+    { "label": "Pliki śledzone przez git", "value": "98" },
+    { "label": "Studia badawcze", "value": "6 (01–06)" },
+    { "label": "Decyzje architektoniczne", "value": "10 (D-001 … D-010)" },
+    { "label": "Naprawione defekty w tezie", "value": "22" },
+    { "label": "Checker LaTeX", "value": "63 błędy → 0" },
+    { "label": "Wpisy bibliografii", "value": "161, z tego 96 cytowanych" },
+    { "label": "Objętość", "value": "1 715 linii .tex, 3 045 linii Markdown, 847 linii skryptów" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/cognitive-multi-agent-simulation-analysis",
+    "live": [],
+    "docs": [
+      { "label": "Analiza na jednej stronie", "path": "docs/README.md" },
+      { "label": "Audyt defektów w źródłach tezy", "path": "docs/research/01-THESIS-SOURCE-DEFECT-AUDIT.md" },
+      { "label": "Audyt deprecacji ekosystemu", "path": "docs/research/02-ECOSYSTEM-DEPRECATION-AUDIT.md" },
+      { "label": "Migracja LangChain → Microsoft Agent Framework", "path": "docs/research/03-LANGCHAIN-TO-MAF-MIGRATION.md" },
+      { "label": "Roadmapa v2 tezy", "path": "docs/architecture/04-THESIS-V2-ROADMAP.md" },
+      { "label": "Decyzje D-001 … D-010", "path": "docs/architecture/05-DECISIONS.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "check-latex-hygiene.py",
+      "path": "scripts/check-latex-hygiene.py",
+      "description": "424 linie czystego Pythona bez zależności, wykrywające defekty, których udany build LaTeX nie zgłasza: gołe `%` przyklejone do słowa, `\\cite` bez wpisu, zdublowany klucz bib, `\\ref` bez `\\label`, backtick w składanym tekście, ścieżka windowsowa w listingu. Maskuje wnętrza `verbatim`/`lstlisting`/`minted` i argumenty `\\url`, zanim zacznie liczyć procenty.",
+      "reusable": true
+    },
+    {
+      "name": "check-doc-links.py",
+      "path": "scripts/check-doc-links.py",
+      "description": "227 linii sprawdzających, czy każdy względny link i każda kotwica nagłówka w zbiorze Markdown się rozwiązuje. Druga połowa wymusza dziesięć wymaganych sekcji studium w kolejności narzuconej przez `architecture-standards`, więc przenosi się na całe to portfolio.",
+      "reusable": true
+    },
+    {
+      "name": "Runbook i skomitowane hooki",
+      "path": "scripts/0-setup-first-time.sh, scripts/hooks/pre-commit, scripts/verify-secret-scan.sh",
+      "description": "Jedna komenda ustawia `core.hooksPath` na skomitowany katalog, a hook pre-commit działa na snapshot z `git checkout-index`, nie na brudne drzewo robocze. `verify-secret-scan.sh` podkłada klucz w jednorazowym repozytorium i sprawdza, czy gitleaks faktycznie strzeli.",
+      "reusable": true
+    },
+    {
+      "name": "Workflowy LaTeX-owe",
+      "path": ".github/workflows/latex-hygiene.yml, .github/workflows/build-thesis-pdf.yml",
+      "description": "Higiena chodzi na filtrze ścieżkowym `thesis/**`, build PDF jest ręczny i podnosi `py3-pygments` oraz `latexmk_shell_escape`, bo bez tego rozdział 4 się nie składa. Każdy workflow ma na górze komentarz mówiący, po co istnieje. Gotowe do przeszczepu do `llm-book` i `maf-book`.",
+      "reusable": true
+    },
+    {
+      "name": "Źródła tezy",
+      "path": "thesis/",
+      "description": "`main.tex` plus osiem rozdziałów i aneks, klasa EiTI/PW, 27 grafik, 161 wpisów bibliografii i dwa opublikowane artykuły konferencyjne jako PDF. Rozkład objętości jest wymowny: rozdział 4 ma 722 linie, rozdział 6 — czterdzieści jeden.",
+      "reusable": false
+    },
+    {
+      "name": "Studia badawcze",
+      "path": "docs/research/",
+      "description": "Sześć studiów w stałym formacie pytanie–metoda–dowód–zagrożenia, każde twierdzenie zewnętrzne otagowane {{term:poziom|poziomem weryfikacji}}. Dwa studia zawierają autokorekty wpisane w tekst zamiast po cichu poprawionych.",
+      "reusable": false
+    },
+    {
+      "name": "Analiza produktowa",
+      "path": "docs/product/",
+      "description": "`MARKET-ANALYSIS.md` rozbiera powszechnie cytowane liczby o rynku agentów i pokazuje, które z nich nie przeżywają sprawdzenia. `PRODUCT-NICHES.md` wylicza pięć nisz i dwie pułapki, z warunkiem falsyfikacji dopisanym do każdej rekomendacji.",
+      "reusable": false
+    },
+    {
+      "name": "Warstwa zgodności ze standardami",
+      "path": "docs/architecture/02-STANDARDS-CONFORMANCE.md",
+      "description": "P1–P15 i checklista REPO-BASELINE odpowiedziane dla repozytorium bez kodu aplikacyjnego, z pięcioma otwartymi lukami zapisanymi zamiast przemilczanymi. Luka G-5 mówi wprost, że ten dokument raz skłamał sam o sobie.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "cognitive-multi-agent-simulation", "reason": "To repozytorium audytuje tamtą platformę w studium 06 i cytuje ją jako architekturę referencyjną v2, ale jej nie modyfikuje — decyzja D-009 zapisuje ten podział jawnie." },
+    { "slug": "architecture-standards", "reason": "Cała warstwa `docs/architecture/` mierzy to repozytorium względem tamtej konstytucji, a `.claude/settings.json` deklaruje jej marketplace i trzy pluginy." },
+    { "slug": "maf-book", "reason": "Studium 03 mapuje implementację tezy na {{term:maf}}, czyli dokładnie na przedmiot tamtej książki. Ta tabela migracji jest publikowalna osobno." },
+    { "slug": "llm-book", "reason": "Studium 02 audytuje deprecacje LangChaina i LangGraph 1.x na tych samych faktach, które tamta książka opisuje od strony API." },
+    { "slug": "llm-multi-agent-chess", "reason": "Ten sam temat — systemy wieloagentowe na LLM — tyle że tam jako działający eksperyment, a tu jako praca dyplomowa i jej krytyka." }
+  ],
+  "product": "**Brak kupującego** na samo repozytorium: to praca dyplomowa plus jej audyt, więc wartość jest akademicka i wiarygodnościowa. Kupujący pojawia się dopiero w `docs/product/` i dotyczy platformy następczej, nie tych dokumentów — {{term:rte}} albo biuro transformacji płacące za próbę generalną PI Planning, sprzedawane kanałem konsultantów {{term:spc}}. Same dokumenty mają za to dwa realne zastosowania kanałowe: tabela migracji LangChain 0.1 → Microsoft Agent Framework nadaje się do publikacji osobno, a metodologia studiów z poziomami weryfikacji jest lepszą wizytówką inżynierską niż większość kodu w portfolio.",
+  "highlights": [
+    "Najczęściej raportowany defekt tezy — 22 nierozwiązane klucze cytowań w rozdziale 2 — **nie istnieje**. Niezależne przeliczenie daje 96 cytowanych kluczy i wszystkie rozwiązują się do wpisów w bibliografii.",
+    "Studium 03 dowodzi z repozytorium, a nie z bloga, że cały katalog `cookbook/` LangChaina — 106 plików z wzorcami `DialogueAgent` i `DialogueSimulator`, na których stoi rozdział 4 — został usunięty commitem `a4c8baeb` 6 października 2025.",
+    "Workflow skanu sekretów nie tylko odpala gitleaks: podkłada klucz w listingu `minted` w jednorazowym repozytorium i failuje job, jeśli skaner go nie zgłosi. Zielony wynik znaczy, że kontrola **działa**, a nie że się wykonała.",
+    "Dwa studia zawierają jawne autokorekty. Defekty N3 i N4 zapisano najpierw jako nieodtwarzalne, potem znaleziono i skorygowano w tekście, z wnioskiem metodycznym: defektu w LaTeX-u szuka się po tym, jak się renderuje, nie jak go zapisano.",
+    "`THIRD-PARTY-NOTICES.md` rozdziela trzy pochodzenia i mówi wprost, że „Copyleft by …” w klasie EiTI to sentyment, a nie licencja, i że nic w repozytorium nie rozszerza na te pliki żadnego uprawnienia."
+  ],
+  "gaps": [
+    "**PDF tezy nie został ani razu zbudowany.** Każde twierdzenie o tym, jak dokument się składa, jest przewidziane ze źródeł, nie zaobserwowane (luka G-2). Zamyka to jedno uruchomienie `build-thesis-pdf.yml`.",
+    "Stage 1–4 roadmapy są tylko wycenione. Problem, na którym stopień naprawdę stoi — brak pytania badawczego i brak własnego pomiaru — jest nietknięty, a stage 0 dotyczył higieny źródeł.",
+    "Studium 04 ma status draft i w nim zostanie, dopóki ktoś nie odczyta rekordu pierwotnego: każdy identyfikator jest secondary-source, a audyt sam złapał jedną zmyśloną pozycję z 2026 roku.",
+    "Duża część twierdzeń zewnętrznych opiera się na źródłach wtórnych, bo sandbox blokował domeny producentów (luka G-3). Repozytorium to oznacza, ale nie naprawia.",
+    "`thesis/` może rozjechać się z kopią autorską na Overleaf i nic tego nie wykrywa — {{term:drift}}, którego żaden checker nie widzi (luka G-1)."
+  ],
+  "risks": [
+    "**Kolizja nazw:** `cognitive-multi-agent-simulation` i `cognitive-multi-agent-simulation-analysis` różnią się jednym sufiksem, a to dwa zupełnie inne artefakty — platforma .NET kontra teza i jej krytyka.",
+    "Nagłówek MIT LICENSE mówi „Copyright (c) 2026 dev_insight” — to nazwa innego projektu z portfolio, nie nazwisko autora. Skopiowany szablon podważa plik, który reszta repozytorium traktuje bardzo serio.",
+    "`thesis/eiti/` to materiał trzeciej strony bez określonej licencji, a dwa PDF-y konferencyjne w `thesis/articles/` są manuskryptami autorskimi włączonymi z prawa do samoarchiwizacji. Ryzyko przechodzi na każdego, kto skopiuje te katalogi dalej.",
+    "Całe 847 linii Pythona i shella powstało w jednej sesji, tego samego dnia co studia, które używają ich jako dowodu. Studium 01 samo wymienia to jako zagrożenie dla ważności."
+  ],
+  "next": [
+    "Uruchom `build-thesis-pdf.yml` raz i przeczytaj paragraf 6.1.2. Zamyka lukę G-2 i potwierdza naprawę defektu D1 — jedno kliknięcie za największy otwarty dług.",
+    "Popraw linię copyright w LICENSE na właściwego posiadacza praw. Ta sama usterka siedzi w co najmniej dwóch innych repozytoriach portfolio.",
+    "Poszukaj szesnastu katalogów wynikowych z marca 2024, widocznych na dwóch zrzutach w rozdziale 4. Jeśli przetrwały, uczciwy rozdział wyników z realnym n to dni pracy zamiast tygodni.",
+    "Odczytaj z nieograniczonej przeglądarki identyfikatory ze studium 04 i przenieś je z secondary na primary albo je wycofaj — inaczej dokument zostanie draftem na stałe.",
+    "Dopisz w rozdziale 5 jedno zdanie, że modelowany jest Core {{term:safe}} 6.0: PI Planning został przebudowany, a Inspect and Adapt jest zastępowany."
+  ],
+  "headline": "Stage 0 zamknięty i zmierzony; pytanie badawcze tezy nadal nie istnieje",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 4,
+    "openPrs": 4,
+    "dependabotPrs": 4,
+    "lastCommit": "2026-08-24",
+    "commits": 27,
+    "files": 98
+  }
+}

@@ -17,21 +17,77 @@ When I build something useful and repeatable, I open-source it. Right now that m
 
 I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** — a channel covering C#, .NET, and system design through deep dives, flashcards, and live coding.
 
-### 🛠️ Open source projects
+---
 
-Below are the open source projects I actively maintain, focused on AI tooling, developer experience, and educational .NET content.
+## 🗺️ Portfolio map
+
+This repository is the hub. It holds a single manifest describing every repository in the
+estate — what it is, what it is for, what is finished, what is not — plus the consolidation
+analysis and the operating model that keeps thirty-five repositories from rotting.
+
+The manifest renders as a small static site with four tabs: the **portfolio map**, the
+**consolidation analysis** (kernels, duplications, the open/paid line, the distribution
+axis), the **operating model** (attention tiers, cadence, health checks, WIP limits,
+automation, quarter plan) and a searchable **index** with a glossary.
+
+```sh
+# run it locally
+cd site && python3 -m http.server 8000     # then open http://localhost:8000
+
+# regenerate the manifest after editing data/
+node scripts/build-manifest.mjs
+node scripts/validate-portfolio.mjs
+```
+
+### How it is maintained
+
+| | |
+|---|---|
+| **Source of truth** | `data/` — one file per repository under `data/repos/<slug>.json`, plus `clusters`, `consolidation`, `ops`, `glossary` |
+| **Generated + committed** | `site/data/portfolio.json`, built by `scripts/build-manifest.mjs` |
+| **Guarded by** | `scripts/validate-portfolio.mjs` (schema + referential integrity), `scripts/check-repos.mjs` (a repo that vanished or flipped visibility fails the build), `scripts/smoke-site.mjs` |
+| **Drift** | CI runs the builder with `--check`; a stale committed manifest fails the build |
+
+Adding a repository to the map is one new file in `data/repos/`. Nothing in `site/` is
+edited by hand.
+
+### Deploying
+
+Static nginx image, deployed to Fly.io on a `v*` tag.
+
+```sh
+fly tokens create deploy -x 8760h -a konrad-portfolio   # store as FLY_API_TOKEN
+git tag -a v1.0.0 -m "portfolio map" && git push origin v1.0.0
+```
+
+`flyio/portfolio.fly.toml` scales to zero, checks `/healthz`, and carries no secrets —
+see [`flyio/SECRETS.md`](flyio/SECRETS.md) for why that property is worth keeping.
+
+---
+
+## 🛠️ Open source projects
+
+Below are the open source projects I actively maintain, focused on AI tooling, developer
+experience, and educational .NET content.
 
 | Project | Description |
 | --- | --- |
-| [CopilotScope](https://github.com/konradcinkusz/CopilotScope) | AI coding-session observability - OpenTelemetry collector, Postgres store, and Blazor Server dashboard with real-time quality scoring on .NET Aspire |
+| [architecture-standards](https://github.com/konradcinkusz/architecture-standards) | An architecture constitution for .NET Aspire on Fly.io and Azure - 15 principles and 17 operational guides, readable as documentation and installable as agent plugins for Claude Code, Copilot and VS Code |
+| [agent-eval-bench](https://github.com/konradcinkusz/agent-eval-bench) | A spec-first evaluation bench for tool-using agents: 35 YAML scenarios, 313 assertions over the execution trace, a deterministic layer that gates every pull request, and a rubric judge that reports `skipped` rather than green without credentials |
+| [CopilotScope](https://github.com/konradcinkusz/copilot-scope) | AI coding-session observability - an OTLP collector with a hand-written protobuf decoder, a Postgres store, and a Blazor dashboard that scores session quality rather than token spend, across five assistants |
 | [AgentHelm](https://github.com/konradcinkusz/AgentHelm) | Web cockpit for AI coding agents - drive GitHub Copilot CLI, Claude Code, and Gemini via the Agent Client Protocol with permission policies, audit trail, and git diff review |
+| [authservice](https://github.com/konradcinkusz/authservice) | Standalone auth microservice for ASP.NET Core: JWT with rotating refresh tokens and reuse detection, RS256 with published JWKS, Google/GitHub OAuth with provider-side email verification, multi-tenant organizations, and an append-only audit log |
 | [MAF for .NET Engineers](https://github.com/konradcinkusz/maf-book) | Practitioner's guide to Microsoft Agent Framework 1.0 for .NET - agents, tools, MCP, graph-based workflows, multi-agent orchestration, middleware, and hosting, with samples that run against a local model |
-| [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess) | Two LLM-powered chess agents battle through a Streamlit interface with configurable personalities and real-time board visualisation |
-| [TinyTransformer](https://github.com/konradcinkusz/TinyTransformer) | Minimal educational C# implementation of the Transformer architecture - encoder-decoder, multi-head attention, feed-forward layers, and positional encodings |
-| [agents-and-llms](https://github.com/konradcinkusz/agents-and-llms) | Searchable knowledge base for the Agents & LLMs shorts series - static, search-first page covering basics, foundations, model internals, and agent tooling, with content driven entirely from JSON |
+| [LangChain, LangGraph and Async Python](https://github.com/konradcinkusz/llm-book) | Practitioner's guide to LangChain 1.x and LangGraph for engineers arriving from .NET - async Python, cancellation, persistence, interrupts, context engineering, and five specified measurement experiments |
 | [csharp-flashcards](https://github.com/konradcinkusz/csharp-flashcards) | Beamer Q&A flashcard deck covering C# from fundamentals through cloud and leadership topics - built for interview prep, classes, and self-study |
-| [C# Dictionaries - Deep Dive](https://github.com/konradcinkusz/DeepDiveInto_CSharp_Dictionaries_presentation) | Deep dive into Dictionary internals - hashing, buckets, collisions, resizing, complexity analysis, and benchmarks |
+| [agents-and-llms](https://github.com/konradcinkusz/agents-and-llms) | Searchable knowledge base for the Agents & LLMs shorts series - static, search-first page covering basics, foundations, model internals, and agent tooling, with content driven entirely from JSON |
+| [bayesian-inference](https://github.com/konradcinkusz/bayesian-inference) | A from-scratch exact Bayesian-network inference engine (Enumeration-Ask, no probabilistic-reasoning library) in C#, wrapped in a Blazor WebAssembly and ASP.NET Core app |
+| [black-hole-sim](https://github.com/konradcinkusz/black-hole-sim) | A Schwarzschild black hole raytracer in C#: numerically integrates photon geodesics via RK4 and renders a thin accretion disk, with a console renderer and an ASP.NET Core API |
+| [TinyTransformer](https://github.com/konradcinkusz/tiny-transformer) | Minimal educational C# implementation of the Transformer architecture - encoder-decoder, multi-head attention, feed-forward layers, and positional encodings |
+| [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess) | Two LLM-powered chess agents battle through a Streamlit interface with configurable personalities and real-time board visualisation |
+| [chess-mas](https://github.com/konradcinkusz/chess-mas) | Multi-agent chess in C#, orchestrated with .NET Aspire and Microsoft Agent Framework, with cost tracking against Azure AI Foundry |
 | [IberiaFamilyCalculator](https://github.com/konradcinkusz/IberiaFamilyCalculator) | Interactive Spanish IRPF, autónomos, and payroll calculator - drag sliders, add entities, share the full setup via a single URL |
+| [dev-insight](https://github.com/konradcinkusz/dev-insight) | Practical coding examples and patterns featured on the Dev Insight channel - C#, .NET, Transformers, SOLID, and more |
 
 ## 💻 Tech Stack
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)

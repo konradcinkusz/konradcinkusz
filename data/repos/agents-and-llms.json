@@ -1,0 +1,123 @@
+{
+  "slug": "agents-and-llms",
+  "name": "Agents & LLMs",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P2",
+  "oneLiner": "Statyczna baza 41 pojęć o LLM i agentach plus esej o tym, co w warstwowym systemie zmienia się po dodaniu agenta.",
+  "summary": "Trzy pliki serwowane statycznie: `index.html` pobiera `concepts.json` fetchem i renderuje kafelki pojęć, `architecture.html` jest osobnym esejem, reszta to licencja i `.nojekyll`. Zero kroków budowania i zero instalowanych zależności, więc `git clone` plus `python3 -m http.server` wystarcza do uruchomienia. Treść jest w całości oddzielona od prezentacji: dodanie nowego shorta to jeden obiekt JSON o polach `id`, `title`, `kind`, `def`, `note`, `lang`, `code`, `videoUrl`, bez dotykania HTML. Najciekawsza decyzja inżynierska to potraktowanie stanu widoku jako adresu: aktywna kategoria i zapytanie lądują w query stringu przez `history.replaceState`, każdy kafelek ma kotwicę zbudowaną z `id`, a przycisk kopiuje bieżący adres do schowka. Dzięki temu przypięty komentarz pod filmem może linkować dokładnie w jedno pojęcie albo w jeden przefiltrowany widok, co jest całym powodem istnienia tej strony. Druga decyzja tego samego rodzaju to własny podświetlacz składni dla Pythona, JSON-a i śladów rozumowania, napisany na trzech funkcjach regexowych zamiast wciągnięcia Prisma. Rzecz jest skończona jako strona i nieskończona jako projekt medialny: żadne z 41 pól `videoUrl` nie jest wypełnione."
+  ,
+  "stack": [
+    "HTML5",
+    "Vanilla JavaScript (bez frameworka i bez bundlera)",
+    "CSS ze zmiennymi, motyw jasny/ciemny w localStorage",
+    "JSON jako jedyne źródło treści",
+    "Mermaid 10 z CDN jsDelivr",
+    "Google Fonts (Space Grotesk, IBM Plex Sans, JetBrains Mono)",
+    "GitHub Pages (.nojekyll)"
+  ],
+  "primaryLanguage": "HTML",
+  "license": "MIT",
+  "tests": "Brak testów: w 7 śledzonych plikach nie ma ani jednego pliku testowego, ani konfiguracji żadnego runnera.",
+  "ci": "brak CI. Katalog `.github` nie istnieje, więc nikt nie sprawdza nawet tego, czy `concepts.json` jest poprawnym JSON-em, a to jedyny plik przeznaczony do regularnej edycji.",
+  "metrics": [
+    { "label": "Pojęcia w concepts.json", "value": "41" },
+    { "label": "Kategorie", "value": "5 (agent 13, prod 10, basics 8, found 5, model 5)" },
+    { "label": "Kafelki ze snippetem", "value": "23 (10 Mermaid, 9 Python, 3 JSON, 1 ślad rozumowania)" },
+    { "label": "Wypełnione videoUrl", "value": "0 z 41" },
+    { "label": "Esej architecture.html", "value": "ok. 3 300 słów, 4 diagramy Mermaid" },
+    { "label": "Linie kodu stron", "value": "index.html 566, architecture.html 589" },
+    { "label": "Pliki śledzone w repo", "value": "7" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/agents-and-llms",
+    "live": [
+      { "label": "Kanał YouTube wpisany w CONFIG", "url": "https://www.youtube.com/@_dev_insight" }
+    ],
+    "docs": [
+      { "label": "README z formatem wpisu concepts.json", "path": "README.md" },
+      { "label": "Esej: od CRUD do agentów", "path": "architecture.html" },
+      { "label": "Źródło treści", "path": "concepts.json" },
+      { "label": "Strona bazy wiedzy", "path": "index.html" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "components": [
+    {
+      "name": "Podświetlacz składni bez zależności",
+      "path": "index.html",
+      "description": "Trzy funkcje tokenizujące regexem: `hlPython` (słowa kluczowe, stringi, liczby, komentarze, wywołania, typy), `hlJson` rozróżniający klucz od wartości i `hlTrace` dla śladów rozumowania. Czysto tekstowe, bez odwołania do domeny, więc wchodzą do dowolnej strony statycznej jako zamiennik Prisma czy highlight.js.",
+      "reusable": true
+    },
+    {
+      "name": "Stan filtra w adresie",
+      "path": "index.html",
+      "description": "`restoreFromURL` i `syncURL` zapisują kategorię i zapytanie jako `?kind=&q=` przez `history.replaceState`, zachowując hash, a przycisk kopiuje bieżący adres ze ścieżką awaryjną na `execCommand`. Zależy wyłącznie od mapy kategorii podanej z zewnątrz.",
+      "reusable": true
+    },
+    {
+      "name": "Baza wiedzy",
+      "path": "index.html",
+      "description": "Renderuje kafelki z `concepts.json`, filtruje po połączonym blobie tytułu, definicji, notatki i kodu z podświetleniem trafienia, liczy wpisy na chipach kategorii i obsługuje skrót `/` na pole wyszukiwania. Kategorie `KINDS`, branding kanału i blok `CONFIG` są wbudowane na sztywno, więc bez wydzielenia to strona jednego projektu.",
+      "reusable": false
+    },
+    {
+      "name": "Źródło treści",
+      "path": "concepts.json",
+      "description": "376 linii, 41 obiektów o ośmiu polach. Wszystkie 10 wpisów z diagramem Mermaid siedzi w kategorii `prod`, od `harness-engineering` po `observability-tracing`, więc najbardziej rysunkowa część materiału to akurat eksploatacja, a nie teoria modelu.",
+      "reusable": false
+    },
+    {
+      "name": "Esej: od CRUD do agentów",
+      "path": "architecture.html",
+      "description": "Teza o stratyfikacji zamiast zastąpienia: co przenosi się do agenta, co przeżywa bez zmian i gdzie autoryzacja, wersjonowanie, {{term:determinizm}} oraz idempotencja przestają wystarczać. Kończy się dwiema opcjami migracji, narzędzia przed API kontra obok API, i linkuje z powrotem w konkretne kafelki `index.html`.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "dev-insight", "reason": "Ta sama marka i ten sam kanał YouTube wpisany w `CONFIG`. To repozytorium jest zapleczem treści dla serii shortów, a nie osobnym bytem." },
+    { "slug": "llm-book", "reason": "Ten sam zestaw pojęć (tool use, RAG, {{term:mcp}}, checkpointing, evals, human-in-the-loop), tylko w formie kafelka na 40 słów zamiast rozdziału na 20 stron." },
+    { "slug": "maf-book", "reason": "Kafelki `workflow`, `executor-edge`, `handoff` i `orchestration-patterns` opisują dokładnie tę powierzchnię, którą tamta książka rozpisuje na {{term:maf|Microsoft Agent Framework}}." },
+    { "slug": "agent-eval-bench", "reason": "Kafelki `evals` i `agent-trajectory-evals` definiują pojęcia, które tamten projekt faktycznie mierzy. Jeden jest słownikiem drugiego." }
+  ],
+  "product": "Brak kupującego i nie ma sensu udawać, że jest. To kanał dystrybucji i wiarygodności: baza pojęć podpięta pod serię shortów, z anchorami do wklejania w przypiętych komentarzach, więc wartość mierzy się ruchem na kanał, a nie przychodem. Najbliżej materiału sprzedażowego jest `architecture.html`, bo czyta się jak wstęp do rozmowy o migracji do agentów, ale sam esej też niczego nie sprzedaje. Cała konstrukcja ma jeden warunek działania: seria musi ruszyć.",
+  "gaps": [
+    "**Zero z 41 pól `videoUrl` jest wypełnionych**, więc obiecany w README link `▶ watch` nie pojawia się na żadnym kafelku. Baza wiedzy istnieje bez serii, której miała towarzyszyć.",
+    "README linkuje do generycznego `https://www.youtube.com`, a `CONFIG` w `index.html` do `@_dev_insight`. Dwa różne adresy kanału w repozytorium na siedem plików.",
+    "README nadal instruuje „set channelUrl before you publish”, chociaż commit `944dccb` już to zrobił. Instrukcja jest nieaktualna wobec własnego kodu.",
+    "Blok `CONFIG` jest zduplikowany w obu stronach z komentarzem „keep the two in sync” zamiast jednego pliku ładowanego przez obie.",
+    "Nie da się z repozytorium potwierdzić, że GitHub Pages jest włączone: jest `.nojekyll` i akapit w README, nie ma workflow deployu ani zapisanego adresu produkcyjnego."
+  ],
+  "next": [
+    "Dodaj minimalny workflow walidujący `concepts.json`: parsowalność, unikalność `id`, dozwolone wartości `kind`, niepuste `def`. Jeden plik, dziesięć minut, zamyka jedyną realną awarię tej strony.",
+    "Popraw link kanału w README na ten z `CONFIG` i usuń nieaktualną instrukcję o `channelUrl`.",
+    "Uzupełnij `videoUrl` dla opublikowanych shortów albo skreśl obietnicę linku `▶ watch` z README, dopóki seria nie ruszy.",
+    "Wydziel `CONFIG` do jednego `config.js` ładowanego przez obie strony.",
+    "Przypnij Mermaid do konkretnej wersji z SRI albo trzymaj kopię lokalnie, i zapisz w README faktyczny adres Pages po włączeniu deployu."
+  ],
+  "highlights": [
+    "41 pojęć w pięciu kategoriach z 10 diagramami Mermaid renderowanymi per kafelek, przy czym wszystkie 10 należy do kategorii `prod`: to eksploatacja agentów dostała rysunki, nie teoria.",
+    "Własny podświetlacz składni dla Pythona, JSON-a i śladów rozumowania napisany od zera. Jedyne zewnętrzne zależności runtime tej strony to Mermaid i Google Fonts.",
+    "Stan widoku jest w pełni linkowalny: kategoria i zapytanie w query stringu, kotwica per pojęcie z pola `id`, przycisk kopiujący bieżący adres. Dokładnie ten mechanizm, którego wymaga przypięty komentarz pod shortem.",
+    "Esej na ok. 3 300 słów linkuje do źródeł pierwotnych, w tym specyfikacji {{term:mcp}} z 2026-07-28, MCP Apps i A2UI, i ma osobny rozdział „dwie tezy, które nie przeżywają kontaktu z rzeczywistością”.",
+    "Esej wprost zapisuje, że wcześniejsze liczby z wtórnych agregatorów usunięto, bo nie dało się ich sprowadzić do publikacji pierwotnej. Rzadka rzecz w tekście, który ma promować kanał."
+  ],
+  "risks": [
+    "Strona reklamuje się jako „companion to the shorts”, a nie linkuje ani jednego shorta. Czytelnik zobaczy niespełnioną obietnicę, zanim zobaczy treść.",
+    "Brak walidacji `concepts.json` oznacza, że jeden przecinek za dużo zamienia całą stronę w komunikat „Couldn't load concepts.json”. Awaria jest całkowita, nie częściowa.",
+    "Treść o ekosystemie agentów ma szybki {{term:drift}}: wpisy o MCP, A2A i evals nie mają ani daty, ani pinu wersji, więc nie widać, kiedy przestaną być prawdziwe.",
+    "10 commitów i ostatni z 2026-08-22. Sens projektu zależy w całości od kanału, więc bez serii to repozytorium umiera po cichu."
+  ],
+  "headline": "Strona skończona, seria nie ruszyła: 0 z 41 pól videoUrl wypełnionych",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-22",
+    "commits": 10,
+    "files": 7
+  }
+}

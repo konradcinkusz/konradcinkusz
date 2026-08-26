@@ -1,0 +1,380 @@
+{
+  "principles": [
+    {
+      "title": "Wąskim gardłem jest uwaga, nie kod",
+      "body": "Agent napisze więcej, niż zdążysz przejrzeć — to już jest prawda, nie prognoza. Każda decyzja w tym systemie optymalizuje jedną wielkość: **ile decyzji trzeba podjąć, żeby portfolio nie zgniło**. Wszystko, co zwiększa liczbę rzeczy wymagających spojrzenia, jest kosztem, choćby było darmowe w tokenach."
+    },
+    {
+      "title": "Repo bez zadeklarowanego poziomu obsługi nie istnieje",
+      "body": "Każde z trzydziestu pięciu repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
+    },
+    {
+      "title": "Poziom wyznacza promień rażenia, nie sympatia",
+      "body": "Kernel konsumowany przez pięć systemów ma {{term:blast|promień rażenia}} pięć; poligon ma zero. Dlatego dwustulinijkowa biblioteka bywa ważniejsza od dwudziestotysięcznej aplikacji, a wydzielenie czegoś jako kernela **podnosi** wymagania wobec tego czegoś zamiast je obniżać."
+    },
+    {
+      "title": "Publiczne repozytorium jest obietnicą; prywatne nie jest",
+      "body": "Otwarcie repozytorium to zaciągnięcie zobowiązania: README ma być prawdziwe, CI zielone, licencja obecna, a zgłoszenie ma dostać odpowiedź. Dlatego domyślną decyzją jest **prywatne**, a otwarcie jest osobnym aktem z listą kontrolną — nie odruchem po pierwszym udanym buildzie."
+    },
+    {
+      "title": "Konstytucja zamiast pamięci",
+      "body": "Najdroższa awaria w tym estate to agent rekonstruujący reguły architektoniczne z kodu, który akurat widzi, zamiast przeczytać te, które już są zapisane. Dlatego reguły mieszkają w jednym repozytorium, są instalowane jako {{term:plugins}}, i każdy nowy projekt zaczyna od ich wczytania."
+    },
+    {
+      "title": "Ekstrakcja artefaktowa, nigdy źródłowa",
+      "body": "Kiedy drugi system chce tego samego serwisu, dostaje **wersjonowany obraz albo pakiet**, nigdy submoduł ani referencję projektową. Jedna baza kodu, N niezależnych instancji, zero wspólnego runtime'u i zero wspólnego korzenia zaufania. Ten wzorzec zadziałał raz i jest udokumentowany — reszta konsolidacji to jego powtórzenia."
+    },
+    {
+      "title": "Nie wypełniaj pustych tabel prawdopodobnymi liczbami",
+      "body": "Kilka repozytoriów w tym portfolio ma w pełni zaprojektowane eksperymenty i puste tabele wyników. **Ta pustka jest funkcjonalna.** Liczba, której nikt nie zmierzył, jest gorsza niż jej brak, bo wygląda na dowód, przeżywa recenzję i wraca po roku jako cudzy cytat."
+    },
+    {
+      "title": "Każdy rytuał zostawia artefakt",
+      "body": "Rytuał, po którym nic nie zostaje w repozytorium, jest spotkaniem z samym sobą. Przegląd kończy się commitem, wpisem w dzienniku albo zamkniętym zgłoszeniem — i to on, a nie poczucie zrobienia czegoś, jest dowodem, że rytuał się odbył."
+    },
+    {
+      "title": "Zamknięcie liczy się tak samo jak start",
+      "body": "Archiwizacja repozytorium jest wynikiem, a nie porażką. Repozytorium, które nie ma kupującego, nie jest kanałem i nie jest kernelem, kosztuje uwagę i nie zwraca nic — a jedynym sposobem, żeby przestało kosztować, jest zamknąć je jawnie, z jednym akapitem wyjaśnienia w README."
+    }
+  ],
+  "tiers": [
+    {
+      "id": "P0",
+      "name": "Fundament",
+      "definition": "Rzeczy, od których zależy wszystko inne. Awaria tutaj propaguje się na resztę portfolio, więc obowiązuje tu najostrzejszy reżim, niezależnie od tego, jak małe jest samo repozytorium.",
+      "slo": "Czerwone CI naprawiane tego samego dnia. Zgłoszenie od kogoś z zewnątrz dostaje odpowiedź w 48 h. Wydanie zawsze otagowane i opisane w CHANGELOG.",
+      "budget": "Do 40% czasu portfolio. Zawsze mają pierwszeństwo przed wszystkim poniżej.",
+      "slugs": [
+        "authservice",
+        "architecture-standards",
+        "konradcinkusz"
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Produkt w budowie",
+      "definition": "Cztery rzeczy, które mają albo mogą mieć nazwanego kupującego. To jedyny poziom, na którym powstaje nowa funkcjonalność — wszystko poniżej jest utrzymywane, nie rozwijane.",
+      "slo": "Czerwone CI w 72 h. Aktywny cel kwartalny z testem „gotowe, gdy”. Publiczne README zgodne ze stanem faktycznym, łącznie z listą tego, co jeszcze nie działa.",
+      "budget": "Do 40% czasu, ale nigdy na więcej niż dwa naraz — reszta czeka w kolejce.",
+      "slugs": [
+        "cognitive-multi-agent-simulation",
+        "agent-eval-bench",
+        "archgate",
+        "copilot-scope"
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Kanał",
+      "definition": "Artefakty, które kumulują zasięg bez dalszej pracy: książki, talie, bazy wiedzy, praca badawcza, materiał kanału. Nie zarabiają i nie mają zarabiać — są jedyną drogą, którą ktokolwiek trafia na resztę.",
+      "slo": "Build musi przechodzić, bo publikacja jest automatyczna. Treść dotykana w rytmie własnym, nie tygodniowym. Zero zobowiązania do odpowiadania na zgłoszenia.",
+      "budget": "Do 15% czasu, w blokach — rozdrobniona godzina nie posuwa rozdziału.",
+      "slugs": [
+        "maf-book",
+        "llm-book",
+        "csharp-flashcards",
+        "agents-and-llms",
+        "cognitive-multi-agent-simulation-analysis",
+        "dev-insight",
+        "konrad-cinkusz-cv-maker"
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Utrzymanie",
+      "definition": "Działa, jest zbudowane, nie jest rozwijane. Zwykle duże systemy, w których zainwestowano najwięcej i z których wyciąga się dziś głównie dowody umiejętności i kod do kerneli.",
+      "slo": "Bez zobowiązania czasowego na CI. Aktualizacje zależności grupowane miesięcznie. Nowa funkcjonalność tylko wtedy, gdy jest testem przenośności kernela.",
+      "budget": "Do 5% czasu, w jednym bloku miesięcznie na całą grupę naraz.",
+      "slugs": [
+        "AgentHelm",
+        "judge-worker",
+        "hydro-scope",
+        "auto-veritas",
+        "cv-maker",
+        "primates",
+        "aurelius-promptus",
+        "aurelius-promptus-acceptance-tests",
+        "zoo-companion",
+        "bayesian-inference",
+        "black-hole-sim"
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Zamrożone",
+      "definition": "Skończone, porzucone albo cudze. Żadnej pracy poza bezpieczeństwem. Kandydaci do archiwizacji — i archiwizacja jest tutaj wynikiem, nie porażką.",
+      "slo": "Żadnego. Dependabot wyłączony albo zgrupowany do jednego PR-a kwartalnie. Zgłoszenia wyłączone tam, gdzie repozytorium nie ma opiekuna.",
+      "budget": "Zero. Jeden kwartalny przegląd całej grupy decyduje, co archiwizować.",
+      "slugs": [
+        "chess-mas",
+        "cards-game",
+        "llm-multi-agent-chess",
+        "tiny-transformer",
+        "IberiaFamilyCalculator",
+        "brain-train",
+        "ai-coding-assistant-article",
+        "agent-eval-bench-factorial",
+        "math-for-ai-engineers",
+        "landing-page"
+      ]
+    }
+  ],
+  "cadence": [
+    {
+      "when": "Codziennie · 10 minut",
+      "what": "Przejrzyj **wyłącznie** powiadomienia z P0 i P1. Nic więcej nie otwieraj. Jeśli coś jest czerwone na tych siedmiu repozytoriach, dziś nie robisz nic innego.",
+      "output": "Zero lub jeden commit naprawczy. Brak listy zadań na jutro — to nie jest planowanie.",
+      "timebox": "Twarde 10 minut. Po dziesiątej minucie zamykasz kartę, nawet w połowie."
+    },
+    {
+      "when": "Poniedziałek · 30 minut",
+      "what": "Odpal kolektor zdrowia i przeczytaj **tylko wiersze przekroczone**. Do każdego przekroczenia dopisz jedną z trzech decyzji: naprawiam w tym tygodniu, obniżam poziom repozytorium, archiwizuję.",
+      "output": "Zaktualizowany `data/repos/*.json` i przeliczony manifest — czyli ta strona pokazuje w poniedziałek prawdę.",
+      "timebox": "30 minut. Naprawy nie mieszczą się w tym oknie i nie mają się mieścić."
+    },
+    {
+      "when": "Środa · 2 godziny",
+      "what": "Jeden blok na **jedną** rzecz z P1 — tę, która jest najbliżej testu „gotowe, gdy”. Nie zaczynasz drugiej, nawet jeśli pierwsza się zablokuje; zablokowanie zapisujesz i kończysz blok.",
+      "output": "Commit albo wpis „zablokowane przez X” w dzienniku decyzji repozytorium.",
+      "timebox": "2 godziny, jedno repozytorium, zero przełączeń."
+    },
+    {
+      "when": "Sobota · 3 godziny",
+      "what": "Drugi blok produktowy plus jedna sesja kanałowa: rozdział, odcinek, wpis. Blok produktowy zawsze pierwszy — kanał jest przyjemniejszy i zjadłby całość.",
+      "output": "Postęp w P1 **i** jeden artefakt kanałowy. Jedno bez drugiego to nieudana sobota.",
+      "timebox": "2 h produkt + 1 h kanał, w tej kolejności."
+    },
+    {
+      "when": "Ostatnia niedziela miesiąca · 90 minut",
+      "what": "Pociąg zależności: jeden przebieg na całe P3 naraz. Grupowany dependabot, jeden merge na repozytorium, bez czytania diffów tam, gdzie CI jest zielone i testy istnieją.",
+      "output": "Wyzerowana kolejka bota w P3. Lista repozytoriów, w których CI padło — one wracają jako pojedyncze zadania.",
+      "timebox": "90 minut na jedenaście repozytoriów. Jeśli się nie mieści, problemem jest brak grupowania, nie brak czasu."
+    },
+    {
+      "when": "Koniec miesiąca · 45 minut",
+      "what": "Przegląd konsolidacji. Jedno pytanie: **czy któryś kernel zyskał drugiego odbiorcę?** Kernel z jednym odbiorcą wraca do repozytorium źródłowego, nie czeka.",
+      "output": "Zaktualizowana zakładka „konsolidacja” — albo decyzja o cofnięciu wydzielenia, zapisana wprost.",
+      "timebox": "45 minut. To jest przegląd, nie sesja projektowania."
+    },
+    {
+      "when": "Kwartalnie · pół dnia",
+      "what": "Przegląd poziomów i archiwizacji. Każde repozytorium dostaje trzy pytania: czy ma kupującego, czy jest kanałem, czy jest kernelem. Trzy razy „nie” oznacza P4, a drugie z rzędu „nie” w P4 oznacza archiwum.",
+      "output": "Zmienione poziomy w manifeście, zarchiwizowane repozytoria, jeden akapit w README każdego zamkniętego.",
+      "timebox": "Pół dnia raz na kwartał. To jest jedyny moment, w którym wolno przenieść coś w górę."
+    }
+  ],
+  "healthChecks": [
+    {
+      "name": "Czerwone CI na P0/P1",
+      "signal": "Ostatni przebieg workflowu `ci.yml` na gałęzi domyślnej, przez API GitHuba.",
+      "threshold": "P0: dowolna porażka. P1: porażka starsza niż 72 h.",
+      "action": "Zatrzymaj wszystko inne. Czerwone CI na fundamencie to nie zadanie w kolejce — to jedyne zadanie."
+    },
+    {
+      "name": "CI, które nie uruchamia się samo",
+      "signal": "Workflow, którego jedynym wyzwalaczem jest `workflow_dispatch`, mimo że w README wisi jego badge.",
+      "threshold": "Jakikolwiek przypadek na P0, P1 lub P2.",
+      "action": "Albo przywróć wyzwalacz `push`/`pull_request`, albo usuń badge. Zielona plakietka workflowu, który się nie uruchamia, jest fałszywym świadectwem."
+    },
+    {
+      "name": "Dług dependabota",
+      "signal": "Otwarte PR-y autorstwa `dependabot[bot]`, zliczone per repozytorium. Dziś: **83 otwarte PR-y w portfolio, 76 od bota — 92%**.",
+      "threshold": "Więcej niż 10 w jednym repozytorium, albo więcej niż 60 w całym portfolio.",
+      "action": "Włącz grupowanie w `dependabot.yml` (jeden PR na ekosystem, nie na pakiet) i zamknij zaległość jednym przebiegiem pociągu. {{term:dependabot|Dług dependabota}} jest długiem uwagi, nie bezpieczeństwa."
+    },
+    {
+      "name": "Bot zagłuszający człowieka",
+      "signal": "Udział PR-ów botowych we wszystkich otwartych PR-ach repozytorium.",
+      "threshold": "Powyżej 80% na repozytorium publicznym.",
+      "action": "Zamknij zaległość natychmiast. Przy tym udziale pierwszy prawdziwy pull request od obcej osoby utonie — a to jest jedyna rzecz, dla której repozytorium jest publiczne."
+    },
+    {
+      "name": "Wiek najstarszego otwartego PR-a",
+      "signal": "`created_at` najstarszego otwartego pull requesta.",
+      "threshold": "Powyżej 90 dni na dowolnym poziomie powyżej P4.",
+      "action": "Zamknij go z komentarzem albo scal. PR starszy niż kwartał jest decyzją, której nie podjęto — a niepodjęta decyzja kosztuje więcej niż zła."
+    },
+    {
+      "name": "Commity bez wydania",
+      "signal": "`git rev-list --count <ostatni-tag>..HEAD`.",
+      "threshold": "Powyżej 30 na repozytorium, które publikuje obraz albo pakiet.",
+      "action": "Otaguj. Konsument przypina wersję, więc niewydany commit jest kodem, którego nikt nie może użyć — czyli pracą, która jeszcze nie istnieje."
+    },
+    {
+      "name": "Dryf README",
+      "signal": "Liczby w README (testy, komponenty, wersje) porównane z tym, co faktycznie jest w repozytorium.",
+      "threshold": "Jakakolwiek rozbieżność na repozytorium publicznym.",
+      "action": "Napraw README, nie liczbę. To jest ta sama klasa błędu, co blok konsoli, którego nikt nie uruchomił — wygląda na dowód i przeżywa recenzję."
+    },
+    {
+      "name": "Martwe linki",
+      "signal": "Sprawdzenie każdego zewnętrznego URL-a w README i `docs/` oraz każdego adresu `*.fly.dev` obiecanego w dokumentacji.",
+      "threshold": "Dowolne 404, oraz **dowolny adres wdrożenia, pod którym nic nie stoi**.",
+      "action": "Napraw link albo napisz wprost, że wdrożenie jest opisane i nieuruchomione. Adres, który nie odpowiada, jest gorszy niż jego brak."
+    },
+    {
+      "name": "Widoczność niezgodna z mapą",
+      "signal": "`private` z API GitHuba porównane z polem `visibility` w manifeście.",
+      "threshold": "Jakakolwiek rozbieżność.",
+      "action": "Napraw manifest — automatycznie robi to `scripts/check-repos.mjs` w CI. Mapa pokazująca prywatne repo jako otwarte obiecuje czytelnikowi link, który zwróci 404."
+    },
+    {
+      "name": "Brak pliku licencji",
+      "signal": "Obecność `LICENSE` w repozytorium publicznym.",
+      "threshold": "Brak = natychmiastowe.",
+      "action": "Dodaj MIT albo cofnij repozytorium do prywatnego. Publiczny kod bez licencji jest formalnie zastrzeżony — czyli nikt nie może go legalnie użyć, co niweczy cały sens otwarcia."
+    },
+    {
+      "name": "Nieuruchomiony eksperyment",
+      "signal": "Zaprojektowany eksperyment z pustą tabelą wyników, obecny w repozytorium dłużej niż kwartał.",
+      "threshold": "Dwa kwartały bez uruchomienia.",
+      "action": "Albo zaplanuj budżet i datę, albo zapisz w dokumencie, że nie zostanie uruchomiony i dlaczego. **Nie wypełniaj tabeli.** Trzecia opcja nie istnieje."
+    },
+    {
+      "name": "Kernel z jednym odbiorcą",
+      "signal": "Liczba repozytoriów faktycznie konsumujących wydzieloną bibliotekę albo obraz.",
+      "threshold": "Mniej niż dwa przez dwa kwartały po wydzieleniu.",
+      "action": "Cofnij wydzielenie. Biblioteka z jednym użytkownikiem to nie kernel, tylko projekt przeniesiony do innego katalogu — i płacisz za nią osobnym CI, osobnym wydaniem i osobnym README."
+    }
+  ],
+  "wipRules": [
+    "**Najwyżej dwa repozytoria P1 są aktywne naraz.** Trzecie czeka w kolejce, i to jest cała reguła. Cztery jednocześnie aktywne produkty to cztery produkty w 25% gotowości, czyli zero produktów.",
+    "**Jedna ekstrakcja kernela naraz.** Wydzielanie jest zaraźliwe — po pierwszym udanym widać wszędzie kolejne. Drugie zaczyna się dopiero, gdy pierwsze ma **dwóch faktycznych konsumentów w mainie**, nie w planie.",
+    "**Nowe repozytorium tylko po zamknięciu innego** — zarchiwizowanego albo podniesionego do P1 i wydanego. Trzydzieści pięć to nie jest cel; to jest sufit, który już został osiągnięty.",
+    "**Najwyżej jeden otwarty pull request autorstwa człowieka na repozytorium.** Dwa oznaczają, że pierwszy jest zablokowany, a zablokowany PR gnije i rodzi konflikt scalania.",
+    "**Nie otwierasz repozytorium, dopóki nie przejdzie listy kontrolnej otwarcia.** Licencja, README zgodne z prawdą, zielone CI, skan sekretów, zamknięte zgłoszenia. Otwarcie jest zobowiązaniem, nie zdarzeniem.",
+    "**Nie zaczynasz eksperymentu, którego nie masz z czego opłacić.** Zaprojektowany i nieuruchomiony eksperyment to dług, który zapala się w kontroli zdrowia co kwartał, dopóki nie zapadnie decyzja.",
+    "**Godzina blokująca jest godziną straconą.** Jeśli blok utknął, zapisujesz blokadę i kończysz — nie przełączasz się na inne repozytorium. Przełączenie zamienia jedną zablokowaną rzecz w dwie rozgrzebane."
+  ],
+  "automation": [
+    {
+      "name": "Manifest portfolio jako źródło prawdy",
+      "how": "Każde repozytorium ma jeden plik `data/repos/<slug>.json`. `scripts/build-manifest.mjs` scala je w `site/data/portfolio.json`, który jest serwowany. Dodanie repozytorium to jeden nowy plik, nie edycja HTML-a. CI odrzuca manifest, który nie przechodzi schematu i integralności referencyjnej.",
+      "where": "konradcinkusz/data/, konradcinkusz/scripts/build-manifest.mjs"
+    },
+    {
+      "name": "Walidator dryfu na wygenerowanym manifeście",
+      "how": "`build-manifest.mjs --check` regeneruje plik i przerywa build, jeśli zacommitowana wersja jest inna. Ten sam {{term:drift|wzorzec}}, którym architecture-standards pilnuje katalogu wtyczek — i ta sama klasa problemu.",
+      "where": "konradcinkusz/.github/workflows/validate-portfolio.yml"
+    },
+    {
+      "name": "Sprawdzenie widoczności i istnienia repozytoriów",
+      "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy trzydziestu pięciu pozycjach.",
+      "where": "konradcinkusz/scripts/check-repos.mjs"
+    },
+    {
+      "name": "Nocny kolektor zdrowia",
+      "how": "Jeden zaplanowany workflow w repozytorium-hubie: dla każdego slugu pobiera status CI na gałęzi domyślnej, otwarte PR-y z podziałem na bota i człowieka, wiek najstarszego PR-a, commity od ostatniego tagu, datę ostatniego pusha, widoczność i archiwizację. Progi są **per poziom** — czerwone CI na P0 przekracza natychmiast, na P3 dopiero po sześćdziesięciu dniach. Zapisuje `data/health.json`, przelicza manifest i otwiera **jedno** zgłoszenie na cały estate, które samo się zamyka, gdy progi wrócą pod kreskę.",
+      "where": "konradcinkusz/scripts/collect-health.mjs · scripts/health-issue.mjs · .github/workflows/health.yml"
+    },
+    {
+      "name": "Grupowany dependabot",
+      "how": "Jeden PR na ekosystem zamiast jednego na pakiet, przez `groups:` w `dependabot.yml`, plus tygodniowy interwał zamiast dziennego. Na dwunastu repozytoriach, które mają dziś dependabota, to jest różnica między dziesięcioma PR-ami a jednym.",
+      "where": "do rozprowadzenia: <repo>/.github/dependabot.yml we wszystkich repozytoriach P1–P3"
+    },
+    {
+      "name": "Wielokrotnie używalne workflow CI",
+      "how": "Jeden `ci-dotnet.yml` z `workflow_call` w repozytorium-hubie; każde repozytorium .NET wywołuje go trzema linijkami zamiast kopiować sześćdziesiąt. Dziś `ci.yml` istnieje w szesnastu repozytoriach i każdy jest osobną kopią.",
+      "where": "do zbudowania: konradcinkusz/.github/workflows/ci-dotnet.yml"
+    },
+    {
+      "name": "Skan sekretów wszędzie, gdzie jest kod",
+      "how": "`secret-scan.yml` jest dziś w ośmiu repozytoriach. Powinien być we wszystkich, w których jest kod — to jest dokładnie ten rodzaj kontroli, którego brak zauważa się raz i jest za późno.",
+      "where": "do rozprowadzenia z: authservice/.github/workflows/secret-scan.yml"
+    },
+    {
+      "name": "Wdrożenie sterowane tagiem",
+      "how": "Push tagu `v*` uruchamia test, wykrycie zmian względem **poprzedniego tagu**, budowę obrazów i wdrożenie w kolejności zależności. Serwis, którego aplikacja Fly nie istnieje, jest zawsze wybierany — to jedyne, co pozwala postawić zimny estate jednym tagiem. {{term:tagdeploy|Wzorzec}} jest opisany i działa w ośmiu repozytoriach.",
+      "where": "architecture-standards/docs/guides/FLY-IO-DEPLOYMENT.md; <repo>/.github/workflows/flyio.yml"
+    },
+    {
+      "name": "Wtyczki agentowe jako sposób dystrybucji reguł",
+      "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu pięciu plików.",
+      "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
+    },
+    {
+      "name": "Publikacja obrazu niezależna od wdrożenia",
+      "how": "Zadanie publikujące obraz do {{term:ghcr}} nie może wymagać żadnego sekretu, którego potrzebuje wdrożenie — inaczej ktoś, kto nigdy nie stawia własnej instancji, nie może wydać wersji dla konsumentów. Ten błąd wystąpił raz w tym estate i został naprawiony tego samego dnia.",
+      "where": "authservice/.github/workflows/publish-image.yml"
+    },
+    {
+      "name": "Tabela projektów w profilu generowana z manifestu",
+      "how": "README profilu utrzymuje dziś ręcznie listę projektów i już się rozjechało: wskazuje repozytorium, którego nie ma na mapie, i pomija cztery, które są. Ta tabela powinna być generowana z tego samego manifestu, przez ten sam walidator dryfu.",
+      "where": "do zbudowania: konradcinkusz/scripts/build-readme.mjs"
+    },
+    {
+      "name": "Playbook uruchomienia agenta",
+      "how": "Jeden zapisany prompt na typ zadania — przegląd, modernizacja, odzyskiwanie — plus reguła, gdzie agent zapisuje wynik: zawsze w `docs/architecture/` **repozytorium docelowego**, nigdy w repozytorium reguł. Bez tego reguły zbierają treść o cudzych systemach i przestają być regułami.",
+      "where": "architecture-standards/docs/PLAYBOOK.md, catalog/agents/"
+    }
+  ],
+  "quarterPlan": [
+    {
+      "horizon": "Horyzont 0 · pierwszy tydzień",
+      "goal": "Mapa przestaje kłamać.",
+      "steps": [
+        "Uzupełnij `LICENSE` w każdym publicznym repozytorium, które go nie ma, albo cofnij je do prywatnego.",
+        "Napraw tabelę projektów w README profilu — dziś wskazuje repozytorium spoza mapy i pomija cztery obecne.",
+        "Przywróć automatyczne wyzwalacze wszędzie, gdzie badge CI wisi nad workflowem uruchamianym wyłącznie ręcznie.",
+        "Włącz grupowanie dependabota w dwunastu repozytoriach, które go mają, i zamknij zaległość jednym przebiegiem.",
+        "Zarchiwizuj dwa martwe repozytoria spoza tej mapy, w których siedzi czterdzieści jeden PR-ów bota z lat 2020–2023."
+      ],
+      "doneWhen": "Kolektor zdrowia przechodzi bez przekroczeń, a liczba otwartych PR-ów w portfolio spada poniżej dwudziestu."
+    },
+    {
+      "horizon": "Horyzont 1 · pierwszy miesiąc",
+      "goal": "Pierwszy kernel ma dwóch konsumentów w mainie.",
+      "steps": [
+        "Wypchnij kasetę record/replay na NuGet pod ostateczną nazwą, sprawdzoną wcześniej w rejestrze.",
+        "Podepnij ją w harnessie ewaluacyjnym — to jest odbiorca, który bez niej nie odróżnia regresji od losowości modelu.",
+        "Podepnij ją w najtańszym poligonie agentowym jako test przenośności; jeśli nie wejdzie w godzinę, kernel jest za mało neutralny i wraca do poprawki.",
+        "Napisz README z jedną tezą i zero intencji komercyjnej."
+      ],
+      "doneWhen": "Dwa repozytoria referencują opublikowany pakiet i ich testy przechodzą bez sieci."
+    },
+    {
+      "horizon": "Horyzont 2 · drugi miesiąc",
+      "goal": "Duplikacja plumbingu przestaje rosnąć.",
+      "steps": [
+        "Wybierz jedną referencyjną implementację `ServiceDefaults` spośród czterech rozjechanych i zapisz decyzję.",
+        "Wydziel z niej pakiet zawierający tylko to, co jest naprawdę wspólne: uwierzytelnianie, wybór dostawcy bazy, limitowanie i migracja w tle.",
+        "Przełącz dwa systemy, zaczynając od tego, który jest najbliżej wersji referencyjnej.",
+        "Dopisz test architektoniczny, który pilnuje, że pakiet nie zaczyna referencować niczego domenowego — ta zasada w prozie zawiodła już dwa razy w tym estate."
+      ],
+      "doneWhen": "Dwa systemy budują się na pakiecie, a ich lokalny `ServiceDefaults` schudł do rzeczy naprawdę specyficznych."
+    },
+    {
+      "horizon": "Horyzont 3 · trzeci miesiąc",
+      "goal": "Jeden eksperyment zostaje uruchomiony i opisany.",
+      "steps": [
+        "Wybierz najtańszy z zaprojektowanych eksperymentów — ten, który nie wymaga dostawcy, bo mierzy własność topologii, a nie modelu.",
+        "Uruchom go, zachowaj **surowe strumienie zdarzeń**, nie tylko wiersze podsumowania; odzyskiwanie śladów przez ponowne uruchomienie jest drogie.",
+        "Wpisz wyniki do tabeli, która była pusta, i zaznacz wprost, które liczby są twarde, a które orientacyjne.",
+        "Opublikuj jako wpis albo preprint — to jest jedyny kanał, który dociera do kupującego z ryzyka i zgodności."
+      ],
+      "doneWhen": "Jedna pusta tabela w portfolio przestaje być pusta, i to bez ani jednej liczby, której nikt nie zmierzył."
+    },
+    {
+      "horizon": "Horyzont 4 · drugi kwartał",
+      "goal": "Jeden produkt ma nazwanego kupującego i cenę.",
+      "steps": [
+        "Wybierz jeden z czterech projektów P1 i porzuć pozostałe trzy do P3 na czas trwania tego horyzontu.",
+        "Napisz jedno zdanie, którym się go sprzedaje, i sprawdź je na pięciu osobach z docelowej roli — nie na inżynierach.",
+        "Zbuduj warstwę płatną: retencja, historia, eksport. Nie funkcjonalność — pamięć.",
+        "Wyceń za przebieg albo za miejsce w retencji, nigdy {{term:perseat|za stanowisko}} i nigdy {{term:outcome|za wynik}}."
+      ],
+      "doneWhen": "Istnieje strona z ceną, a co najmniej jedna osoba spoza kręgu znajomych poprosiła o dostęp."
+    },
+    {
+      "horizon": "Horyzont 5 · trzeci kwartał",
+      "goal": "Portfolio kurczy się do rozmiaru, którym da się zarządzać.",
+      "steps": [
+        "Zarchiwizuj wszystko, co przez dwa kwartały odpowiedziało „nie” na wszystkie trzy pytania: kupujący, kanał, kernel.",
+        "Scal to, co przetrwało, w co najwyżej dwadzieścia aktywnych repozytoriów.",
+        "Przepisz README każdego zamkniętego repozytorium na jeden akapit: czym było, czego dowiodło, dlaczego się skończyło.",
+        "Ponownie przypisz poziomy uwagi do tego, co zostało — poziomy z poprzedniego kwartału są już nieaktualne."
+      ],
+      "doneWhen": "Aktywnych repozytoriów jest nie więcej niż dwadzieścia, a każde ma zapisany poziom i przechodzącą kontrolę zdrowia."
+    }
+  ]
+}

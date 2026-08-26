@@ -1,0 +1,209 @@
+{
+  "slug": "konradcinkusz",
+  "name": "konradcinkusz (profil GitHub + mapa portfolio)",
+  "cluster": "F-meta",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P0",
+  "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści pięć repozytoriów, plus strona, która go renderuje.",
+  "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium; `scripts/build-manifest.mjs` skleja je w `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści pięć repozytoriów naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
+  "stack": [
+    "HTML5",
+    "CSS3 z custom properties (motyw jasny/ciemny)",
+    "Vanilla JavaScript, moduły ES, zero zależności",
+    "Node.js 22",
+    "nginx 1.27-alpine",
+    "Docker",
+    "Fly.io",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "JavaScript",
+  "license": "MIT",
+  "tests": "Brak testów jednostkowych; zamiast nich siedem skryptów kontrolnych: dryf manifestu, walidator (schemat zamknięty plus integralność referencyjna), istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu, test renderowania w Chromium w trzech kombinacjach motywu i szerokości, oraz **test progów kolektora zdrowia wobec atrapy API** — każdy próg ma fixture, na którym musi się zapalić, i czyste repozytorium, na którym musi milczeć.",
+  "ci": "`validate-portfolio.yml` na push, PR i ręcznie, z filtrem obejmującym `data/**`, `site/**` i `scripts/**`: siedem kroków, od dryfu manifestu po renderowanie w przeglądarce i build jednopliku. `flyio.yml` na tagu `v*`: tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu pobiera serwowany manifest i żąda co najmniej trzydziestu repozytoriów — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
+  "metrics": [
+    {
+      "label": "Repozytoria na mapie",
+      "value": "35, w 6 klastrach"
+    },
+    {
+      "label": "Poziomy uwagi",
+      "value": "5 (P0–P4), pokrywają 35 slugów bez powtórzeń"
+    },
+    {
+      "label": "Model operacyjny",
+      "value": "9 zasad · 12 kontroli zdrowia · 7 limitów WIP · 12 automatów"
+    },
+    {
+      "label": "Kernele i duplikacje",
+      "value": "7 kerneli, 6 odrzuconych, 11 duplikacji"
+    },
+    {
+      "label": "Słownik",
+      "value": "43 terminy, 246 odwołań z prozy"
+    },
+    {
+      "label": "Kod strony",
+      "value": "648 linii JS + 586 linii CSS + 324 linie HTML (`wc -l`)"
+    },
+    {
+      "label": "Zależności runtime",
+      "value": "0; jedyna zależność deweloperska to Playwright do testu renderowania"
+    },
+    {
+      "label": "Wygenerowany manifest",
+      "value": "543 KiB, commitowany i sprawdzany na dryf"
+    },
+    {
+      "label": "Skrypty kontrolne",
+      "value": "7, w tym kolektor zdrowia i jego test wobec atrapy API"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/konradcinkusz",
+    "live": [
+      {
+        "label": "Kanał Dev Insight na YouTube",
+        "url": "https://www.youtube.com/@_dev_insight"
+      },
+      {
+        "label": "@dev_insight na X",
+        "url": "https://x.com/dev_insight"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Model operacyjny portfolio",
+        "path": "data/ops.json"
+      },
+      {
+        "label": "Definicje klastrów i ich substratów",
+        "path": "data/clusters.json"
+      },
+      {
+        "label": "Sekrety i zasady manifestu",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Konfiguracja wdrożenia Fly.io",
+        "path": "flyio/portfolio.fly.toml"
+      },
+      {
+        "label": "Walidator manifestu",
+        "path": "scripts/validate-portfolio.mjs"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Builder manifestu",
+      "path": "scripts/build-manifest.mjs",
+      "description": "57 linii sklejających `data/` i `data/repos/*.json` w jeden artefakt, z wymuszeniem zgodności nazwy pliku ze slugiem. Tryb `--check` porównuje wygenerowany wynik z zacommitowaną kopią i wywala CI przy rozjeździe; komentarz w pliku wskazuje `architecture-standards` jako źródło wzorca.",
+      "reusable": true
+    },
+    {
+      "name": "Kontroler istnienia repozytoriów",
+      "path": "scripts/check-repos.mjs",
+      "description": "Odpytuje `api.github.com` o każde repozytorium z manifestu i porównuje faktyczną widoczność oraz flagę `archived` z deklaracją. Bez tokenu wychodzi z kodem 0, zamiast fałszywie failować w forku.",
+      "reusable": true
+    },
+    {
+      "name": "Smoke test strony",
+      "path": "scripts/smoke-site.mjs",
+      "description": "Strukturalny test HTML bez przeglądarki: paruje zakładki z panelami, sprawdza istnienie każdego lokalnego assetu i bilansuje znaczniki sekcyjne. Nie zna ani jednego pojęcia z domeny portfolio, więc zadziała na dowolnej statycznej stronie z zakładkami.",
+      "reusable": true
+    },
+    {
+      "name": "Obraz i konfiguracja serwera",
+      "path": "Dockerfile, deploy/nginx.conf",
+      "description": "nginx 1.27-alpine serwujący `site/` jako pliki statyczne, z `/healthz` wyjętym spod fallbacku SPA, no-cache na manifeście, siedmiodniowym cache na assetach i nagłówkami bezpieczeństwa. Kontener chodzi jako nieuprzywilejowany użytkownik i ma własny HEALTHCHECK.",
+      "reusable": true
+    },
+    {
+      "name": "Wdrożenie Fly.io sterowane tagiem",
+      "path": "flyio/portfolio.fly.toml, .github/workflows/flyio.yml",
+      "description": "Aplikacja `konrad-portfolio` w regionie waw, shared-cpu-1x 256 MB, `min_machines_running = 0`. Workflow jawnie sprawdza obecność `FLY_API_TOKEN`, tworzy aplikację na żądanie i weryfikuje deploy przez pobranie manifestu, nie przez health check.",
+      "reusable": true
+    },
+    {
+      "name": "Walidator manifestu",
+      "path": "scripts/validate-portfolio.mjs",
+      "description": "Zamknięty zbiór `REPO_KEYS`, unikalność slugów, integralność referencyjna między repozytoriami, klastrami, kernelami i duplikacjami, przypisanie każdego repo do dokładnie jednego {{term:poziom|poziomu}} oraz rozwiązywalność każdego odwołania do słownika. Cała logika jest napisana pod ten jeden schemat.",
+      "reusable": false
+    },
+    {
+      "name": "Renderer manifestu",
+      "path": "site/assets/app.js",
+      "description": "645 linii bez zależności: fetch manifestu, pięć zakładek, filtry po klastrze i widoczności, sortowanie indeksu, boczny panel repozytorium, podświetlanie konsumentów kernela i mikroskładnia linkująca prozę do słownika.",
+      "reusable": false
+    },
+    {
+      "name": "Źródła danych",
+      "path": "data/",
+      "description": "`meta.json` z nagłówkiem i linkami, `clusters.json` z sześcioma klastrami opisanymi przez {{term:substrat|substrat}} i barierę, `ops.json` (26 kB) z modelem operacyjnym, `glossary.json` (30 kB) z 43 terminami. To treść o tym konkretnym portfolio, nie schemat do ponownego użycia.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "`build-manifest.mjs` cytuje wzorzec walidatora dryfu wprost z tamtego katalogu wtyczek, a `data/ops.json` wskazuje tamtejszy `FLY-IO-DEPLOYMENT.md` jako źródło schematu wdrożenia."
+    },
+    {
+      "slug": "landing-page",
+      "reason": "Dwie statyczne strony o autorze w tym samym klastrze, konkurujące o tę samą rolę wizytówki."
+    },
+    {
+      "slug": "konrad-cinkusz-cv-maker",
+      "reason": "Ten sam materiał rekrutacyjny w innym formacie, oba w klastrze F."
+    },
+    {
+      "slug": "cv-maker",
+      "reason": "Nakładająca się funkcja: generowanie materiału o autorze z danych strukturalnych."
+    },
+    {
+      "slug": "dev-insight",
+      "reason": "README i `meta.json` linkują do kanału jako głównej osi dystrybucji, więc oba opisują ten sam kanał dotarcia."
+    }
+  ],
+  "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu czterech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 35 repozytoriów, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
+  "highlights": [
+    "Walidator ma **zamknięty** zestaw kluczy repozytorium i sprawdza integralność krzyżowo: nieznany slug w `overlaps`, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. {{term:kernel|Kernel}} z jednym konsumentem jest ostrzeżeniem, nie błędem — to jest osąd, nie naruszenie schematu.",
+    "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 35 slugów bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
+    "Strona nie ma kroku budowania i zero zależności w czasie działania. Jedyna zależność deweloperska to przeglądarka do testu renderowania — który złapał błąd kolejności bootu zostawiający pustą stronę, trzy przepełnienia layoutu i regułę `[hidden]` przegrywającą z `display: flex`.",
+    "Własne liczby tego repozytorium — commity, pliki, data ostatniego commitu — są **wyliczane z gita przy budowie manifestu**, nie wpisywane ręcznie. To jedyny wpis, w którym da się to zrobić, i jedyny, w którym ręczne wpisanie gwarantowałoby nieaktualność."
+  ],
+  "gaps": [
+    "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
+    "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
+    "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
+    "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
+  ],
+  "next": [
+    "Wypuść pierwszy tag i sprawdź, czy wdrożenie faktycznie przechodzi — łącznie z krokiem weryfikującym serwowany manifest.",
+    "Zbuduj `scripts/build-readme.mjs` i generuj tabelę projektów w README z manifestu, żeby usunąć rozjazd u źródła.",
+    "Dodaj nocny kolektor zdrowia zapisujący `data/health.json` i otwierający **jedno** zgłoszenie z przekroczonymi progami.",
+    "Przenieś tu wielokrotnie używalny workflow CI dla .NET; szesnaście kopii `ci.yml` w estate to jeden `workflow_call` i trzy linijki u konsumenta."
+  ],
+  "risks": [
+    "Manifest jest serwowany publicznie i wymienia repozytoria prywatne z nazwy i opisu. To jest świadome ujawnienie, nie przypadek, a zamknięty schemat kluczy jest mechanizmem, który pilnuje, żeby nie doszło do niego nic więcej."
+  ],
+  "headline": "Jedyne miejsce, z którego widać całe portfolio naraz — i jedyne, które pilnuje, żeby nie kłamało",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-07-27",
+    "commits": 9,
+    "files": 19
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "slug": "konrad-cinkusz-cv-maker",
+  "name": "Konrad Cinkusz — CV (Switzerland)",
+  "cluster": "F-meta",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P2",
+  "oneLiner": "Repozytorium LaTeX z CV i listami motywacyjnymi, w którym tag gita jest przełącznikiem decydującym, co CI skompiluje.",
+  "summary": "Dokumenty rekrutacyjne w dwóch stylach składu: AltaCV (dwukolumnowy, wendowana klasa `altacv.cls` 1.7.4) i akademicki (klasa `curve`, rubryki w `academic/`, lista publikacji przez biblatex). Całość spina `build-matrix.json` — jedno źródło prawdy, które mapuje schemat taga `vMAJOR.MINOR.PATCH` na listę par źródło→PDF: MAJOR wybiera styl, MINOR specjalizację pod konkretną ofertę, PATCH nie zmienia planu budowania. `build.sh` odtwarza ten sam przełącznik lokalnie przez `jq`, a CI dokłada trzecią ścieżkę: na pull requeście `changed-docs.sh` parsuje `\\input`, `\\makerubric`, `\\addbibresource` i lokalne `\\usepackage`, żeby skompilować wyłącznie te dokumenty, których diff faktycznie dotyka. Najciekawsza decyzja jest właśnie tutaj: zamiast pełnego przebiegu regresyjnego repozytorium liczy graf zależności LaTeX-owych z treści plików, co jest tanie i świadomie niepełne. Efektem jest {{term:determinizm|odtwarzalny}} artefakt na tag zamiast pliku w chmurze, ale strona nietechniczna została z tyłu: zero testów, zero wypchniętych tagów i README, które linkuje do poprzedniej nazwy repozytorium.",
+  "stack": [
+    "LaTeX (LuaLaTeX)",
+    "altacv.cls 1.7.4",
+    "curve (CTAN)",
+    "biblatex + biber",
+    "jq",
+    "Bash",
+    "GitHub Actions",
+    "xu-cheng/latex-action@v4"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "Niespójna: `LICENSE.md` to LPPL 1.3 z LianTze Lim jako maintainerem (odziedziczona po AltaCV), README deklaruje MIT",
+  "tests": "Brak testów — `find` po wzorcu `*test*` nie zwraca żadnego pliku. Jedyną weryfikacją jest to, że LuaLaTeX skompiluje dokument w CI.",
+  "ci": "Jeden workflow `ci.yml` (252 linie), dwa joby. Push taga `v*` buduje plan z matrycy i publikuje release przez `softprops/action-gh-release@v2`; pull request kompiluje tylko dokumenty wskazane przez `changed-docs.sh` i aktualizuje jeden komentarz z linkiem do artefaktu; `workflow_dispatch` z inputami style/specialization pozwala zbudować dowolną kombinację z dowolnej gałęzi.",
+  "metrics": [
+    {
+      "label": "Unikalne dokumenty w matrycy",
+      "value": "32"
+    },
+    {
+      "label": "Wpisy w planie dla stylu 0",
+      "value": "35"
+    },
+    {
+      "label": "Specjalizacje pod nazwane oferty",
+      "value": "17 (8 AltaCV + 9 academic)"
+    },
+    {
+      "label": "Linie workflow CI",
+      "value": "252"
+    },
+    {
+      "label": "Linie `changed-docs.sh`",
+      "value": "72"
+    },
+    {
+      "label": "Pozycje w liście publikacji",
+      "value": "3 wpisy w `academic/own-bib.bib`"
+    },
+    {
+      "label": "Wypchnięte tagi",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/konrad-cinkusz-cv-maker",
+    "live": [],
+    "docs": [
+      {
+        "label": "README z tabelą aplikacji i opisem przełącznika wersji",
+        "path": "README.md"
+      },
+      {
+        "label": "Matryca budowania — jedyne źródło prawdy",
+        "path": "build-matrix.json"
+      },
+      {
+        "label": "Resolver zależności dla przyrostowego CI",
+        "path": "changed-docs.sh"
+      },
+      {
+        "label": "Notatki aplikacyjne Factorial (141 linii)",
+        "path": "application-notes-factorial.md"
+      },
+      {
+        "label": "Notatki aplikacyjne Anthropic",
+        "path": "application-notes-anthropic.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "changed-docs.sh",
+      "path": "changed-docs.sh",
+      "description": "Wylicza z diffa graf zależności LaTeX: czyta `\\input`, `\\include`, `\\makerubric`, `\\addbibresource` i lokalne `\\usepackage`, dokłada zasoby współdzielone (`photo.jpg`, `latexmkrc`) i wypisuje same dokumenty dotknięte zmianą. Edycja `academic/skills.tex` flaguje 7 z 11 akademickich CV, edycja `academic/education.tex` 10 z 11, a `academic/settings.sty` wszystkie 11; edycja README nie flaguje niczego.",
+      "reusable": true
+    },
+    {
+      "name": "build.sh",
+      "path": "build.sh",
+      "description": "52 linie generycznego runnera `latexmk -lualatex` sterowanego plikiem JSON: przyjmuje styl i specjalizację, liczy plan przez `jq`, kopiuje PDF-y do `dist/`, a dla stylu 0 pakuje całość do ZIP-a. Zaszyte na sztywno są tylko nazwa matrycy i katalog wyjściowy.",
+      "reusable": true
+    },
+    {
+      "name": "build-matrix.json",
+      "path": "build-matrix.json",
+      "description": "Deklaratywna mapa taga na listę par `source|output`, czytana identycznie przez `build.sh`, `changed-docs.sh` i CI. Struktura jest neutralna, zawartość nie: to imienne CV i listy pod nazwane firmy.",
+      "reusable": false
+    },
+    {
+      "name": "Workflow CI",
+      "path": ".github/workflows/ci.yml",
+      "description": "Trzy ścieżki w jednym pliku, z deduplikacją planu przez `awk` (ten sam list motywacyjny występuje w specjalizacjach obu stylów, a krok zbierania PDF-ów używa `mv` i wywróciłby się na drugim wystąpieniu) oraz fallbackiem do pełnej matrycy, gdy nie da się policzyć merge base.",
+      "reusable": false
+    },
+    {
+      "name": "Styl AltaCV",
+      "path": "sample.tex, altacv.cls, cv-*.tex, cover-letter-*.tex",
+      "description": "Dwukolumnowy układ ze zdjęciem, master to `sample.tex`; obok niego 10 CV i 11 listów motywacyjnych leżących płasko w korzeniu repozytorium. Klasa jest wendowana, więc build nie zależy od wersji na CTAN-ie.",
+      "reusable": false
+    },
+    {
+      "name": "Styl akademicki",
+      "path": "academic/",
+      "description": "Jednokolumnowe CV w klasie `curve`, złożone z wymiennych rubryk (summary, work_authorization, skills, employment, education, projects). Każda oferta dostaje własne warianty rubryk i własny plik `cv-swiss-<oferta>.tex`, który je składa — kompozycja zamiast kopiowania całych dokumentów.",
+      "reusable": false
+    },
+    {
+      "name": "Notatki aplikacyjne",
+      "path": "application-notes-anthropic.md, application-notes-factorial.md",
+      "description": "Odpowiedzi na pytania formularzy Greenhouse i careers.factorialhr.com trzymane obok CV, razem z warunkami wysyłki — w tym wymogiem upublicznienia `agent-eval-bench` i `architecture-standards` przed złożeniem aplikacji.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "cv-maker",
+      "reason": "Ta sama domena i mylnie bliska nazwa. Trzeba rozstrzygnąć, czy jedno nie jest starszą lub ogólniejszą wersją drugiego, bo dziś w portfolio stoją dwa repozytoria o CV."
+    },
+    {
+      "slug": "konradcinkusz",
+      "reason": "Oba są kanałem autoprezentacji i powielają tę samą listę projektów oraz publikacji, w dwóch niezależnie utrzymywanych formatach."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "CV i list do Factorial opierają się w całości na tym repozytorium i wymagają jego upublicznienia przed wysłaniem — zależność wypisana w notatkach aplikacyjnych."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Cytowane w CV i liście do Factorial jako publiczne źródło zasad stojących za benchem."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "Ten sam kształt techniczny: wielodokumentowe repozytorium LaTeX z pipeline'em latexmk w CI. Resolver zależności stąd rozwiązałby tam ten sam problem."
+    }
+  ],
+  "product": "Brak kupującego i nie ma sensu udawać, że jest. To narzędzie osobiste: wersjonowany zestaw dokumentów pod własne aplikacje, z 17 specjalizacjami pod nazwane firmy. Jedyna wartość na zewnątrz to sam mechanizm — matryca plus resolver zależności plus przyrostowy build — który da się wyciąć jako szablon dla dowolnego repozytorium LaTeX z wieloma dokumentami, ale nikt za to nie zapłaci. Realna funkcja repo jest inna: to dowód dyscypliny inżynierskiej zastosowanej do własnego procesu rekrutacji, czyli {{term:evidence|materiał dowodowy}} na rozmowę, a nie produkt.",
+  "highlights": [
+    "Tag gita jest przełącznikiem budowania: MAJOR wybiera styl, MINOR specjalizację, PATCH nie zmienia planu. Schemat jest opisany spójnie w README, w `build-matrix.json` i w nagłówku `ci.yml` — {{term:tagdeploy|wydanie sterowane tagiem}} zastosowane do dokumentów, nie do obrazów.",
+    "`changed-docs.sh` naprawdę parsuje zależności LaTeX zamiast zgadywać po katalogach, więc PR dotykający jednej rubryki kompiluje od 1 do 10 dokumentów zamiast pełnych 32 z matrycy. Liczone przebiegiem `changed-docs.sh -` dla każdego pliku z `academic/`: rubryka pod jedną ofertę (np. `skills_anthropic.tex`) daje 1, `summary.tex` 2, `work_authorization.tex` 6, `skills.tex` i `hobbies.tex` po 7, `employment.tex` i `projects.tex` po 8, `education.tex` 10. Żadna rubryka nie flaguje dokładnie trzech dokumentów.",
+    "Nagłówek workflow zawiera komentarz tłumaczący, dlaczego `fetch-depth: 0` jest bezwarunkowe: wyrażenie `${{ ... && 0 || 1 }}` w Actions zwraca 1, bo 0 jest falsy — co po cichu robiło shallow clone i psuło merge base.",
+    "Komentarz na PR jest aktualizowany, nie duplikowany: workflow szuka markera `<!-- cv-pdf-artifact-comment -->` wśród istniejących komentarzy zamiast dokładać kolejny przy każdym pushu.",
+    "Styl akademicki jest złożony z wymiennych rubryk, więc wariant pod ofertę to podmiana dwóch plików, a nie kopia całego CV — stąd 17 specjalizacji przy 32 unikalnych plikach źródłowych."
+  ],
+  "gaps": [
+    "**Zero wypchniętych tagów**, a cała tabela aplikacji w README odwołuje się do konkretnych `v1.x`/`v2.x` jako do już istniejących artefaktów. Mechanizm wydawania nigdy nie został uruchomiony na ostrym strzale.",
+    "Wszystkie badge'e i linki do release'ów w README wskazują na `Konrad_Cinkusz_CV_Swizterland` (z literówką w słowie Switzerland), podczas gdy `origin` to `konrad-cinkusz-cv-maker`. Link do CI, do PDF-a i do ZIP-a prowadzą pod inną nazwę.",
+    "`CHANGELOG.md` to changelog upstreamowego AltaCV, z ostatnim wpisem 1.7.4 z lipca 2025. Nie opisuje ani jednej zmiany autora, a nazwą pliku udaje historię tego repozytorium.",
+    "Kolumny osobiste w tabeli aplikacji (data aplikacji, data zakończenia, rozmowa telefoniczna, telefon rekrutera, URL) są puste we wszystkich 11 wierszach — tracker jest zadeklarowany i nieużywany.",
+    "Pełny build regresyjny całej matrycy jest świadomie zdjęty ze ścieżki PR, więc zmiana w `altacv.cls`, `academic/settings.sty` albo `photo.jpg` może zepsuć dokument, którego nikt nie obejrzał, dopóki ktoś ręcznie nie odpali stylu 0."
+  ],
+  "risks": [
+    "Dane osobowe w plikach źródłowych: dwa numery telefonu (polski i hiszpański, oba nadal obecne w `.tex`), adres e-mail i `photo.jpg`. Repozytorium jest dziś prywatne, ale nic w budowaniu tego nie wymusza.",
+    "Notatki aplikacyjne zawierają oczekiwania płacowe wobec nazwanych firm (m.in. 105 000 EUR brutto dla Factorial). Wyciek albo przypadkowe upublicznienie repo wpływa bezpośrednio na przyszłe negocjacje.",
+    "Konflikt licencyjny: `LICENSE.md` to LPPL 1.3 wskazująca cudzego maintainera dla całego „work”, a README obiecuje {{term:mit|MIT}}. Dla kogoś, kto chciałby ponownie użyć `build.sh` albo `changed-docs.sh`, stan prawny jest nierozstrzygnięty.",
+    "HEAD stoi na gałęzi `claude/portfolio-html-app-w6306n`, nie na `main`. Przy repozytorium, w którym tag uruchamia publikację, to gotowa pomyłka."
+  ],
+  "next": [
+    "Wypchnij tagi, na które powołuje się tabela aplikacji, albo oznacz w README, które z nich jeszcze nie istnieją. Dziś tabela obiecuje artefakty, których nie ma.",
+    "Przepisz badge'e i linki do release'ów na `konrad-cinkusz-cv-maker` albo potwierdź, że stara nazwa żyje jako redirect.",
+    "Rozdziel licencje: zostaw LPPL przy `altacv.cls` jako pliku upstreamowym, a dla własnej treści i skryptów dodaj osobny `LICENSE` zgodny z tym, co deklaruje README.",
+    "Zmień nazwę `CHANGELOG.md` na `CHANGELOG-altacv.md`, żeby przestał udawać historię tego repozytorium.",
+    "Ujednolić numer telefonu we wszystkich `.tex` i rozstrzygnąć, czy dane kontaktowe mają leżeć w repozytorium, czy być wstrzykiwane przy budowaniu."
+  ],
+  "headline": "Pipeline lepszy niż treść wokół niego: zero tagów, złe linki, sprzeczna licencja",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-17",
+    "commits": 104,
+    "files": 84
+  }
+}

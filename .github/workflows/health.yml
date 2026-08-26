@@ -1,0 +1,65 @@
+name: Estate health
+
+# The operating model asks twelve questions about thirty-five repositories.
+# Nobody answers those by hand, so without this the manifest's numbers are a
+# snapshot from the day they were typed.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # 03:17 UTC, off the hour so it does not queue behind everyone else's midnight jobs
+  workflow_dispatch:
+
+concurrency:
+  group: estate-health
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # The default GITHUB_TOKEN cannot read this account's other repositories.
+      # A fine-grained PAT with metadata + pull-requests + actions:read across the
+      # owner's repos is required; without it every private repo reports as deleted,
+      # which is worse than no data.
+      - name: Collect
+        env:
+          GH_TOKEN: ${{ secrets.ESTATE_READ_TOKEN }}
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::ESTATE_READ_TOKEN is not set. See flyio/SECRETS.md."
+            exit 1
+          fi
+          node scripts/collect-health.mjs
+
+      - name: Rebuild and validate the manifest
+        run: |
+          node scripts/build-manifest.mjs
+          node scripts/validate-portfolio.mjs
+
+      - name: Commit if anything changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- data/health.json site/data/portfolio.json; then
+            echo "No change in estate health."
+            exit 0
+          fi
+          git add data/health.json site/data/portfolio.json
+          git commit -m "chore: estate health $(date -u +%Y-%m-%d)"
+          git push
+
+      # ONE issue for the whole estate, not one per repository. Thirty-five issues
+      # is not a signal, it is a second inbox.
+      - name: Open one issue if any threshold is breached
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/health-issue.mjs

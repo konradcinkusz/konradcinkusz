@@ -1,0 +1,74 @@
+name: Validate portfolio manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # data/ is where all 35 entries, the ops model and the glossary live. Leaving
+      # it out meant an edit to any of them ran neither the drift check nor the
+      # validator, which is the whole point of this workflow.
+      - "data/**"
+      - "site/**"
+      - "scripts/**"
+      - ".github/workflows/validate-portfolio.yml"
+  pull_request:
+    paths:
+      - "data/**"
+      - "site/**"
+      - "scripts/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Schema and referential integrity
+        run: node scripts/validate-portfolio.mjs
+
+      - name: Every repository in the manifest still exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/check-repos.mjs
+
+      - name: The manifest is not stale
+        run: node scripts/build-manifest.mjs --check
+
+      - name: The site is valid HTML that parses
+        run: node scripts/smoke-site.mjs
+
+      # A colour defined only inside a theme block never applies to a viewer whose
+      # OS is on "system", which is the default. That is a whole-page failure and
+      # it is invisible on the machine that authored it.
+      - name: Every colour follows the theme
+        run: node scripts/theme-audit.mjs
+
+      # The collector cannot reach the real API from CI on a pull request, so its
+      # thresholds are exercised against a stub: every one must fire on its own
+      # fixture, and the clean repository must stay silent.
+      - name: Health collector thresholds
+        run: node scripts/health-selftest.mjs
+
+      - name: It actually renders
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          node scripts/render-check.mjs
+
+      # The single-file build has its own failure mode: a replacement string that
+      # eats "$$". The builder parses the inlined script and fails on that.
+      - name: The single-file build is valid
+        run: node scripts/build-standalone.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-standalone
+          path: dist/portfolio.html
+          retention-days: 30
