@@ -9,7 +9,6 @@
 //   node scripts/build-manifest.mjs --check    fails if the committed file is stale
 
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
-import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -27,22 +26,13 @@ const repos = repoFiles.map((f) => {
   return r;
 });
 
-// This repository's own counts change with every commit, so hand-entering them
-// guarantees they are stale by the time anyone reads them. Derive them instead.
-// Every other entry stays hand-written, because the numbers that matter there
-// are not derivable from git.
-const SELF = "konradcinkusz";
-const git = (...a) => execFileSync("git", ["-C", root, ...a], { encoding: "utf8" }).trim();
-try {
-  const self = repos.find((r) => r.slug === SELF);
-  if (self) {
-    self.github.commits = Number(git("rev-list", "--count", "HEAD"));
-    self.github.files = git("ls-files").split("\n").filter(Boolean).length;
-    self.github.lastCommit = git("log", "-1", "--format=%ad", "--date=short");
-  }
-} catch (e) {
-  console.warn(`Could not read git for the ${SELF} entry (${e.message.split("\n")[0]}); keeping the committed values.`);
-}
+// This deliberately does NOT fill in this repository's own commit count from git.
+// It did, briefly, to stop those numbers going stale — and that produced a chase:
+// the generated file is committed, so embedding the commit count meant every
+// commit invalidated the file it had just written, and --check failed on the next
+// run. A committed artefact cannot carry its own commit count without either
+// lying or chasing itself. The nightly collector owns those numbers instead, for
+// this repository on the same terms as the other thirty-four.
 
 const consolidation = read("consolidation.json");
 
