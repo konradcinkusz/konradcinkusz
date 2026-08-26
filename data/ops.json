@@ -37,7 +37,6 @@
       "body": "Archiwizacja repozytorium jest wynikiem, a nie porażką. Repozytorium, które nie ma kupującego, nie jest kanałem i nie jest kernelem, kosztuje uwagę i nie zwraca nic — a jedynym sposobem, żeby przestało kosztować, jest zamknąć je jawnie, z jednym akapitem wyjaśnienia w README."
     }
   ],
-
   "tiers": [
     {
       "id": "P0",
@@ -45,7 +44,11 @@
       "definition": "Rzeczy, od których zależy wszystko inne. Awaria tutaj propaguje się na resztę portfolio, więc obowiązuje tu najostrzejszy reżim, niezależnie od tego, jak małe jest samo repozytorium.",
       "slo": "Czerwone CI naprawiane tego samego dnia. Zgłoszenie od kogoś z zewnątrz dostaje odpowiedź w 48 h. Wydanie zawsze otagowane i opisane w CHANGELOG.",
       "budget": "Do 40% czasu portfolio. Zawsze mają pierwszeństwo przed wszystkim poniżej.",
-      "slugs": ["authservice", "architecture-standards", "konradcinkusz"]
+      "slugs": [
+        "authservice",
+        "architecture-standards",
+        "konradcinkusz"
+      ]
     },
     {
       "id": "P1",
@@ -53,7 +56,12 @@
       "definition": "Cztery rzeczy, które mają albo mogą mieć nazwanego kupującego. To jedyny poziom, na którym powstaje nowa funkcjonalność — wszystko poniżej jest utrzymywane, nie rozwijane.",
       "slo": "Czerwone CI w 72 h. Aktywny cel kwartalny z testem „gotowe, gdy”. Publiczne README zgodne ze stanem faktycznym, łącznie z listą tego, co jeszcze nie działa.",
       "budget": "Do 40% czasu, ale nigdy na więcej niż dwa naraz — reszta czeka w kolejce.",
-      "slugs": ["cognitive-multi-agent-simulation", "agent-eval-bench", "archgate", "copilot-scope"]
+      "slugs": [
+        "cognitive-multi-agent-simulation",
+        "agent-eval-bench",
+        "archgate",
+        "copilot-scope"
+      ]
     },
     {
       "id": "P2",
@@ -61,7 +69,15 @@
       "definition": "Artefakty, które kumulują zasięg bez dalszej pracy: książki, talie, bazy wiedzy, praca badawcza, materiał kanału. Nie zarabiają i nie mają zarabiać — są jedyną drogą, którą ktokolwiek trafia na resztę.",
       "slo": "Build musi przechodzić, bo publikacja jest automatyczna. Treść dotykana w rytmie własnym, nie tygodniowym. Zero zobowiązania do odpowiadania na zgłoszenia.",
       "budget": "Do 15% czasu, w blokach — rozdrobniona godzina nie posuwa rozdziału.",
-      "slugs": ["maf-book", "llm-book", "csharp-flashcards", "agents-and-llms", "cognitive-multi-agent-simulation-analysis", "dev-insight", "konrad-cinkusz-cv-maker"]
+      "slugs": [
+        "maf-book",
+        "llm-book",
+        "csharp-flashcards",
+        "agents-and-llms",
+        "cognitive-multi-agent-simulation-analysis",
+        "dev-insight",
+        "konrad-cinkusz-cv-maker"
+      ]
     },
     {
       "id": "P3",
@@ -69,7 +85,19 @@
       "definition": "Działa, jest zbudowane, nie jest rozwijane. Zwykle duże systemy, w których zainwestowano najwięcej i z których wyciąga się dziś głównie dowody umiejętności i kod do kerneli.",
       "slo": "Bez zobowiązania czasowego na CI. Aktualizacje zależności grupowane miesięcznie. Nowa funkcjonalność tylko wtedy, gdy jest testem przenośności kernela.",
       "budget": "Do 5% czasu, w jednym bloku miesięcznie na całą grupę naraz.",
-      "slugs": ["AgentHelm", "judge-worker", "hydro-scope", "auto-veritas", "cv-maker", "primates", "aurelius-promptus", "aurelius-promptus-acceptance-tests", "zoo-companion", "bayesian-inference", "black-hole-sim"]
+      "slugs": [
+        "AgentHelm",
+        "judge-worker",
+        "hydro-scope",
+        "auto-veritas",
+        "cv-maker",
+        "primates",
+        "aurelius-promptus",
+        "aurelius-promptus-acceptance-tests",
+        "zoo-companion",
+        "bayesian-inference",
+        "black-hole-sim"
+      ]
     },
     {
       "id": "P4",
@@ -77,10 +105,20 @@
       "definition": "Skończone, porzucone albo cudze. Żadnej pracy poza bezpieczeństwem. Kandydaci do archiwizacji — i archiwizacja jest tutaj wynikiem, nie porażką.",
       "slo": "Żadnego. Dependabot wyłączony albo zgrupowany do jednego PR-a kwartalnie. Zgłoszenia wyłączone tam, gdzie repozytorium nie ma opiekuna.",
       "budget": "Zero. Jeden kwartalny przegląd całej grupy decyduje, co archiwizować.",
-      "slugs": ["chess-mas", "cards-game", "llm-multi-agent-chess", "tiny-transformer", "IberiaFamilyCalculator", "brain-train", "ai-coding-assistant-article", "agent-eval-bench-factorial", "math-for-ai-engineers", "landing-page"]
+      "slugs": [
+        "chess-mas",
+        "cards-game",
+        "llm-multi-agent-chess",
+        "tiny-transformer",
+        "IberiaFamilyCalculator",
+        "brain-train",
+        "ai-coding-assistant-article",
+        "agent-eval-bench-factorial",
+        "math-for-ai-engineers",
+        "landing-page"
+      ]
     }
   ],
-
   "cadence": [
     {
       "when": "Codziennie · 10 minut",
@@ -125,7 +163,6 @@
       "timebox": "Pół dnia raz na kwartał. To jest jedyny moment, w którym wolno przenieść coś w górę."
     }
   ],
-
   "healthChecks": [
     {
       "name": "Czerwone CI na P0/P1",
@@ -141,7 +178,7 @@
     },
     {
       "name": "Dług dependabota",
-      "signal": "Otwarte PR-y autorstwa `dependabot[bot]`, zliczone per repozytorium.",
+      "signal": "Otwarte PR-y autorstwa `dependabot[bot]`, zliczone per repozytorium. Dziś: **83 otwarte PR-y w portfolio, 76 od bota — 92%**.",
       "threshold": "Więcej niż 10 w jednym repozytorium, albo więcej niż 60 w całym portfolio.",
       "action": "Włącz grupowanie w `dependabot.yml` (jeden PR na ekosystem, nie na pakiet) i zamknij zaległość jednym przebiegiem pociągu. {{term:dependabot|Dług dependabota}} jest długiem uwagi, nie bezpieczeństwa."
     },
@@ -200,7 +237,6 @@
       "action": "Cofnij wydzielenie. Biblioteka z jednym użytkownikiem to nie kernel, tylko projekt przeniesiony do innego katalogu — i płacisz za nią osobnym CI, osobnym wydaniem i osobnym README."
     }
   ],
-
   "wipRules": [
     "**Najwyżej dwa repozytoria P1 są aktywne naraz.** Trzecie czeka w kolejce, i to jest cała reguła. Cztery jednocześnie aktywne produkty to cztery produkty w 25% gotowości, czyli zero produktów.",
     "**Jedna ekstrakcja kernela naraz.** Wydzielanie jest zaraźliwe — po pierwszym udanym widać wszędzie kolejne. Drugie zaczyna się dopiero, gdy pierwsze ma **dwóch faktycznych konsumentów w mainie**, nie w planie.",
@@ -210,7 +246,6 @@
     "**Nie zaczynasz eksperymentu, którego nie masz z czego opłacić.** Zaprojektowany i nieuruchomiony eksperyment to dług, który zapala się w kontroli zdrowia co kwartał, dopóki nie zapadnie decyzja.",
     "**Godzina blokująca jest godziną straconą.** Jeśli blok utknął, zapisujesz blokadę i kończysz — nie przełączasz się na inne repozytorium. Przełączenie zamienia jedną zablokowaną rzecz w dwie rozgrzebane."
   ],
-
   "automation": [
     {
       "name": "Manifest portfolio jako źródło prawdy",
@@ -249,7 +284,7 @@
     },
     {
       "name": "Wdrożenie sterowane tagiem",
-      "how": "Push tagu `v*` uruchamia test, wykrycie zmian względem **poprzedniego tagu**, budowę obrazów i wdrożenie w kolejności zależności. Serwis, którego aplikacja Fly nie istnieje, jest zawsze wybierany — to jedyne, co pozwala postawić zimny estate jednym tagiem. {{term:tagdeploy|Wzorzec}} jest opisany i działa w siedmiu repozytoriach.",
+      "how": "Push tagu `v*` uruchamia test, wykrycie zmian względem **poprzedniego tagu**, budowę obrazów i wdrożenie w kolejności zależności. Serwis, którego aplikacja Fly nie istnieje, jest zawsze wybierany — to jedyne, co pozwala postawić zimny estate jednym tagiem. {{term:tagdeploy|Wzorzec}} jest opisany i działa w ośmiu repozytoriach.",
       "where": "architecture-standards/docs/guides/FLY-IO-DEPLOYMENT.md; <repo>/.github/workflows/flyio.yml"
     },
     {
@@ -273,7 +308,6 @@
       "where": "architecture-standards/docs/PLAYBOOK.md, catalog/agents/"
     }
   ],
-
   "quarterPlan": [
     {
       "horizon": "Horyzont 0 · pierwszy tydzień",

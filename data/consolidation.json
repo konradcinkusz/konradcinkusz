@@ -225,7 +225,7 @@
         "slug": "cognitive-multi-agent-simulation",
         "what": "to samo, ta sama linia"
       },
-      "resolution": "Dotyczy ośmiu repozytoriów, w tym trzech publicznych. To nie jest osiem literówek, tylko jeden szablon skopiowany osiem razy. **Jedna sesja, osiem commitów** — i to jest najtańsza naprawa o realnym skutku prawnym w całej mapie.",
+      "resolution": "Dotyczy ośmiu repozytoriów. Publiczne jest dziś jedno z nich — ale sześć pozostałych to kandydaci do otwarcia, więc wada wyjdzie na jaw dokładnie w momencie, w którym najbardziej przeszkadza. To nie jest osiem literówek, tylko jeden szablon skopiowany osiem razy: **jedna sesja, osiem commitów**, i jest to najtańsza naprawa o realnym skutku prawnym w całej mapie.",
       "severity": "wysoka"
     },
     {
