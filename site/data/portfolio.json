@@ -812,7 +812,7 @@
       "visibility": "private",
       "state": "active",
       "tier": "P3",
-      "oneLiner": "Symulowana sieć wodociągowa plus pełna platforma monitoringu wokół niej: OTLP, korelacja alertów i liczby wymuszane testem.",
+      "oneLiner": "Symulowana sieć wodociągowa plus pełna platforma monitoringu wokół niej: OTLP, korelacja alertów i liczby z replayu wymuszane w testach jako granice.",
       "summary": "Dziewięć projektów .NET 10 udaje sieć dystrybucji wody: dwie przepompownie, dwanaście czujników w trzech strefach, ingestor liczników i wstrzykiwacz awarii z trzema scenariuszami na żądanie. Cała telemetria idzie przez jeden {{term:otel|OpenTelemetry}} Collector, który rozgłasza ją równolegle do Prometheusa z Grafaną i do własnego backendu, gdzie ręcznie napisany dekoder OTLP zamienia batche na model aktywów. Nad tym modelem chodzi co pięć sekund pipeline pięciu analizatorów za jednym interfejsem `IIncidentAnalyzer`: progowy, świeżości, trendowy na EWMA i dryfie liniowym, korelacyjny po topologii oraz AI triage. Najciekawsza decyzja to `CorrelationAnalyzer`: 410 linii, które sklejają alerty w jeden incydent chodząc po grafie downstream w oknie 180 s i maksymalnie czterech skokach, a kandydata na przyczynę rankingują z czterech **jawnie zapisanych wag** (upstream 0,40, onset 0,30, typ 0,20, dystans 0,10), więc każdy ranking da się zakwestionować ręcznie zamiast wierzyć modelowi. Trzy nagłówkowe liczby nie są wpisane do README, tylko produkowane przez replay scenariuszy; `FindingsMeasurementTests` je drukuje, a pinuje je dolnymi granicami `FaultScenarioAcceptanceTests`. Repozytorium powstało wokół `docs/SPEC.md` napisanego przed kodem, którego historia rewizji ma cztery wiersze: wersję początkową i trzy rewizje z poprawkami znalezionymi przy implementacji (v1.2 deklaruje trzy, v1.3 cztery).",
       "stack": [
         ".NET 10 (SDK 10.0.100)",
@@ -1192,7 +1192,7 @@
       "state": "active",
       "tier": "P0",
       "oneLiner": "Konstytucja architektoniczna estate: piętnaście zasad i siedemnaście przewodników, wydawanych także jako {{term:plugins|wtyczki agentowe}}.",
-      "summary": "Jeden korpus w dwóch postaciach. Czterdzieści trzy tysiące słów prozy w `docs/` jest jednocześnie dokumentacją do czytania **i** źródłem, z którego generowanych jest pięć wtyczek i dwadzieścia jeden skilli w formacie {{term:plugins|Agent Plugins 1.0.0}}. Powód istnienia jest podany wprost: agent pracujący nad innym repozytorium ma **przeczytać** reguły, a nie odtwarzać je z kodu, który akurat widzi — bo to jest najdroższa awaria w całym estate. Skille są routerami: krótki opis „użyj, gdy…”, tabela trybów awarii i lista kontrolna, a pełny standard leży obok i ładuje się dopiero, gdy skill zadziała. Generator i walidator są celowo rozdzielone: pierwszy dowodzi, że drzewo zgadza się ze źródłami, drugi — niezależnie — że klient je przyjmie. To jedyne repozytorium w portfolio, które zmienia sposób, w jaki powstaje reszta portfolio.",
+      "summary": "Jeden korpus w dwóch postaciach. Blisko czterdzieści sześć tysięcy słów prozy w `docs/` (45 893 poza blokami kodu, 48 664 słowa łącznie) jest jednocześnie dokumentacją do czytania **i** źródłem, z którego generowanych jest pięć wtyczek i dwadzieścia jeden skilli w formacie {{term:plugins|Agent Plugins 1.0.0}}. Powód istnienia jest podany wprost: agent pracujący nad innym repozytorium ma **przeczytać** reguły, a nie odtwarzać je z kodu, który akurat widzi — bo to jest najdroższa awaria w całym estate. Skille są routerami: krótki opis „użyj, gdy…”, tabela trybów awarii i lista kontrolna, a pełny standard leży obok i ładuje się dopiero, gdy skill zadziała. Generator i walidator są celowo rozdzielone: pierwszy dowodzi, że drzewo zgadza się ze źródłami, drugi — niezależnie — że klient je przyjmie. To jedyne repozytorium w portfolio, które zmienia sposób, w jaki powstaje reszta portfolio.",
       "stack": [
         "Markdown",
         "Node.js 22 (ESM, zero zależności)",
@@ -1221,7 +1221,7 @@
         },
         {
           "label": "Słowa w docs/",
-          "value": "≈43 800"
+          "value": "48 664 słowa w 25 plikach `docs/**/*.md` (podział po białych znakach), z tego 45 893 poza blokami kodu"
         },
         {
           "label": "Punkty listy zgodności",
@@ -1334,7 +1334,7 @@
       ],
       "product": "{{term:kernel|Kanał i wiarygodność}}, nie transakcja. Publiczne, na MIT, i jednocześnie realne narzędzie obniżające koszt każdej sesji agentowej nad innym repozytorium estate. Potencjalny odbiorca komercyjny to zespół platformowy albo konsultant, który chciałby **własną** konstytucję spakowaną w ten sam sposób — wtedy sprzedaje się metodę (proza plus katalog plus generator), nie treść. Mechanizm dystrybucji na całą organizację już istnieje.",
       "highlights": [
-        "Jeden korpus, dwie postacie: czterdzieści trzy tysiące słów prozy jest jednocześnie dokumentacją i źródłem pięciu wtyczek — bez ani jednej linii skopiowanej ręcznie.",
+        "Jeden korpus, dwie postacie: 45 893 słowa prozy poza blokami kodu (48 664 słowa łącznie w `docs/**/*.md`) są jednocześnie dokumentacją i źródłem pięciu wtyczek — bez ani jednej linii skopiowanej ręcznie.",
         "Rozwiązany realny problem zgodności klientów: Copilot czyta `plugin.json` w korzeniu, Claude Code w `.claude-plugin/`, a agenci wymagają rozszerzenia `.agent.md` w jednym miejscu i zwykłego `.md` w drugim. Generator emituje obie pisownie, walidator pilnuje, żeby manifesty się nie rozjechały.",
         "Prywatne repozytoria są cytowane pod stabilnymi placeholderami z legendą — przykład pokazuje kształt bez ujawniania źródła.",
         "Skille są routerami, a nie standardem wklejonym do promptu: pełna treść ładuje się dopiero po zadziałaniu skilla. To jest różnica między kosztem stu tokenów a kosztem tysiąca na każdą sesję."
@@ -1377,8 +1377,8 @@
       "visibility": "private",
       "state": "active",
       "tier": "P3",
-      "oneLiner": "Wielodostępny SaaS do zarządzania promptami LLM: sześć usług .NET 9, cztery frontendy Next.js, dziesięć aplikacji na Fly.io.",
-      "summary": "Przechowywanie, wersjonowanie, recenzowanie i publikowanie promptów LLM, plus warstwa agentowa, która wyciąga master prompt z zapisanej rozmowy. Backend to sześć usług ASP.NET Core na `net9.0` złożonych przez .NET Aspire, każda z własną bazą (`authdb`, `prompttemplatesdb`, `agenticdb`, `marketplacedb`); frontend to cztery aplikacje Next.js 14 i ręcznie napisane rozszerzenie Manifest V3, które wstrzykuje prompty na ośmiu hostach czatów AI. Warstwa AI jest cieńsza, niż sugeruje nazwa: `FlowEngine.cs` to 229 linii interpretera kroków JSON, a własna ocena repozytorium z sierpnia 2026 stwierdza wprost, że „agent” oznacza tu prompt systemowy plus deployment modelu. Najciekawsza decyzja inżynierska leży w `DatabaseProviderExtensions.cs`: 188 linii, które przełączają SQL Server, PostgreSQL i InMemory jednym przełącznikiem i tłumaczą host `.flycast` na `.internal`. Dzięki nim migracja z Azure Container Apps na Fly.io odbyła się bez forkowania choćby jednej usługi. Realnym aktywem tego repozytorium jest więc wdrożenie, nie AI.",
+      "oneLiner": "Wielodostępny SaaS do zarządzania promptami LLM: pięć wdrażanych usług .NET 9, cztery frontendy Next.js, dziesięć aplikacji na Fly.io.",
+      "summary": "Przechowywanie, wersjonowanie, recenzowanie i publikowanie promptów LLM, plus warstwa agentowa, która wyciąga master prompt z zapisanej rozmowy. Backend to pięć usług ASP.NET Core na `net9.0`, które `AppHost.cs` rejestruje w .NET Aspire i które `flyio.yml` faktycznie wdraża (authservice, prompttemplatesservice, agenticservice, marketplaceservice, extensionservice); cztery z nich mają własną bazę (`authdb`, `prompttemplatesdb`, `agenticdb`, `marketplacedb`), ExtensionService nie ma żadnej; frontend to cztery aplikacje Next.js 14 i ręcznie napisane rozszerzenie Manifest V3, które wstrzykuje prompty na ośmiu hostach czatów AI. Warstwa AI jest cieńsza, niż sugeruje nazwa: `FlowEngine.cs` to 229 linii interpretera kroków JSON, a własna ocena repozytorium z sierpnia 2026 stwierdza wprost, że „agent” oznacza tu prompt systemowy plus deployment modelu. Najciekawsza decyzja inżynierska leży w `DatabaseProviderExtensions.cs`: 188 linii, które przełączają SQL Server, PostgreSQL i InMemory jednym przełącznikiem i tłumaczą host `.flycast` na `.internal`. Dzięki nim migracja z Azure Container Apps na Fly.io odbyła się bez forkowania choćby jednej usługi. Realnym aktywem tego repozytorium jest więc wdrożenie, nie AI.",
       "stack": [
         ".NET 9",
         ".NET Aspire",
@@ -1396,7 +1396,7 @@
       "metrics": [
         {
           "label": "Usługi backendu (.NET 9)",
-          "value": "6 wdrażanych + 1 wyłączona w `AppHost.cs:200`"
+          "value": "5 rejestrowanych w `AppHost.cs` i wdrażanych przez `flyctl deploy` w `flyio.yml` (authservice, prompttemplatesservice, agenticservice, marketplaceservice, extensionservice) + AgentTemplatesService zakomentowany w `AppHost.cs:200`"
         },
         {
           "label": "Aplikacje Fly.io",
@@ -1466,12 +1466,6 @@
       },
       "components": [
         {
-          "name": "AureliusPromptus.ServiceDefaults",
-          "path": "AureliusPromptus.ServiceDefaults",
-          "description": "1 365 linii rozszerzeń nad `IHostApplicationBuilder`. Poza szablonem {{term:servicedefaults}} ({{term:otel}}, health, discovery, resilience) dodaje uwierzytelnianie JWT, politykę CORS, Swagger z JWT, filtr walidacji i `DatabaseProviderExtensions` wybierający SQL Server, PostgreSQL albo InMemory z jednego przełącznika. Przenosi się na dowolny zestaw usług ASP.NET Core po wycięciu `KonradPromptSeeds.cs` (607 linii czystej domeny).",
-          "reusable": true
-        },
-        {
           "name": "Infrastruktura Bicep i skrypty Fly.io",
           "path": "infra",
           "description": "24 moduły Bicep, w których każda usługa dostaje własną tożsamość zarządzaną i własne przypisania ról do SQL, zamiast jednego wspólnego konta. Obok katalog `flyio/` ze skryptami PowerShell do setupu, skalowania, DNS i niszczenia środowisk.",
@@ -1482,6 +1476,12 @@
           "path": ".github/workflows",
           "description": "`flyio.yml` wykrywa zmienione usługi, buduje tylko je i wdraża w jawnej kolejności zależności, uruchamiając efemeryczną maszynę do provisioningu agentów jako wersjonowany artefakt deploymentu. `private-cloud-push.yml` celowo kończy się na pchnięciu obrazów do ACR klienta i zostawia deployment jego zespołowi.",
           "reusable": true
+        },
+        {
+          "name": "AureliusPromptus.ServiceDefaults",
+          "path": "AureliusPromptus.ServiceDefaults",
+          "description": "1 365 linii rozszerzeń nad `IHostApplicationBuilder`. Poza szablonem {{term:servicedefaults}} ({{term:otel}}, health, discovery, resilience) dodaje uwierzytelnianie JWT, politykę CORS, Swagger z JWT, filtr walidacji i `DatabaseProviderExtensions` wybierający SQL Server, PostgreSQL albo InMemory z jednego przełącznika. Same sygnatury rozszerzeń są czysto infrastrukturalne, ale publiczna powierzchnia biblioteki niesie typ domenowy: `public sealed record KonradPromptSeed(string Name, string Icon, string Content, string Tags)` oraz `public static class KonradPromptSeeds` z `public static readonly IReadOnlyList<KonradPromptSeed> Published` i `Internal` (607 linii treści promptów jednego autora). Do tego `Services/QuotaConsumptionService.cs` siedzi w namespace `PromptTemplatesService.Services` i wystawia `Task<bool> CheckAndConsumeAsync(string? authorizationHeader, string quotaType)`, które woła `POST /api/auth/quota/consume` w AuthService. Przeniesienie tego na inny produkt wymaga więc najpierw wycięcia domeny, a nie samego dodania referencji — dlatego `reusable: false`.",
+          "reusable": false
         },
         {
           "name": "FlowEngine",
@@ -1510,7 +1510,7 @@
         {
           "name": "Web.Portal",
           "path": "AureliusPromptus.Web.Portal",
-          "description": "Główna aplikacja w Next.js 14 App Router. Trasy API po stronie serwera działają jako proxy i trzymają JWT w ciasteczkach `HttpOnly` — czego Marketplace, budowany tym samym stackiem, nie robi.",
+          "description": "Główna aplikacja w Next.js 14 App Router. Trasy API po stronie serwera działają jako proxy i trzymają JWT w ciasteczkach `HttpOnly` (`app/api/auth/set-cookie/route.ts`). Marketplace robi to samo — ma własny `set-cookie` oraz `/api/auth/session`, oba wołane z `credentials: 'same-origin'`; w `localStorage` obie aplikacje trzymają wyłącznie `currentWorkspaceId`.",
           "reusable": false
         }
       ],
@@ -1549,7 +1549,7 @@
         "Brak pliku LICENSE w korzeniu, a sekcja licencji w README to dosłownie `[Add your license information here]`. Jedyny plik {{term:mit}} leży w podkatalogu frontendu i da się go przeczytać jako obejmujący całość.",
         "Testy E2E nie są podpięte do żadnego workflowu w żadnym z dwóch repozytoriów, a własny audyt szacuje, że około 45% z nich nie dochodzi do realnej asercji. Zielony przebieg nic by nie znaczył, a `playwright.config.ts` w korzeniu wskazuje na katalog, którego nie ma.",
         "Żaden adres nie został potwierdzony jako odpowiadający. Jest dziesięć plików `fly.toml`, równoległa ścieżka Azure Container Apps i wariant private cloud, ale nazwy aplikacji rozjeżdżają się między plikami toml (`aureliuspromptus-*`) a workflowem niszczącym (`aurelius-*`), więc `destroy` może nie trafić w to, co istnieje.",
-        "Martwy kod utrzymywany w CI: AgentTemplatesService zakomentowany w `AppHost.cs:200`, ale nadal budowany i testowany, oraz 37 KB workflowu środowisk per PR z zakomentowanym wyzwalaczem. Przy 74 dokumentach i jednym autorze {{term:drift}} jest już widoczny — dwa dokumenty same oznaczają się jako zastąpione."
+        "Martwy kod utrzymywany w CI: AgentTemplatesService zakomentowany w `AppHost.cs:200`, ale nadal budowany i testowany, oraz 37 KB workflowu środowisk per PR z zakomentowanym wyzwalaczem. Osobno leży `AureliusPromptus.ApiService/` — projekt bez wpisu w `AureliusPromptus.sln`, bez rejestracji w `AppHost.cs` i bez pliku `fly.toml`; występuje wyłącznie jako filtr ścieżki w `pr-validation.yml`, więc nic go nie buduje ani nie wdraża. Przy 74 dokumentach i jednym autorze {{term:drift}} jest już widoczny — dwa dokumenty same oznaczają się jako zastąpione."
       ],
       "next": [
         "Dodać `AuthorizationOptions.FallbackPolicy` z `RequireAuthenticatedUser` w PromptTemplatesService, AgentTemplatesService i MarketplaceService, i uzgodnić nazwę claimu `org_id` szukanego w `ApiControllerBase` z faktycznie emitowanym `organization`. To jedno posiedzenie i zamyka najpoważniejszą pozycję na tej liście.",
@@ -1560,7 +1560,7 @@
       ],
       "risks": [
         "**Potwierdzony brak autoryzacji.** `PromptTemplatesController` nie ma `[Authorize]` na klasie ani na `GetAll`/`GetPaged`, a grep za `FallbackPolicy` nie zwraca w całym rozwiązaniu niczego. `GetAll` przyjmuje `workspaceId` prosto z query stringa, więc treść szablonów jest czytelna przez granicę workspace'u bez uwierzytelnienia. {{term:blast|Zasięg}} obejmuje wszystkich najemców naraz.",
-        "Marketplace trzyma access i refresh token w `localStorage` — pozycja 1.1 w `PRODUCTION_READINESS.md`, status OTWARTE, priorytet KRYTYCZNY. To aplikacja z publicznymi treściami od innych użytkowników, czyli najgorsze możliwe miejsce na taką decyzję.",
+        "**Ten wpis powtarzał nieaktualny wiersz dokumentacji.** `docs/PRODUCTION_READINESS.md` pozycja 1.1 (status OTWARTE, priorytet KRYTYCZNY) nadal twierdzi, że Marketplace trzyma access i refresh token w `localStorage`. Kod tego nie robi: `AureliusPromptus.Web.Marketplace/contexts/auth-context.tsx` trzyma tokeny w pamięci i w ciasteczkach `HttpOnly` ustawianych przez `/api/auth/set-cookie` (`httpOnly: true` w trzech miejscach route'u), mówi to we własnym komentarzu, a przy starcie migruje starsze kopie z `localStorage` do ciasteczek i je usuwa. Jedyne `localStorage.setItem` w tej aplikacji to `currentWorkspaceId`, baner cookie i klucz rate-limitu formularza kontaktowego. Realnym ryzykiem jest rozjazd dokumentacji z kodem: pozycja 1.1 trafia na listę blokerów wdrożenia i kieruje uwagę na naprawiony problem.",
         "Potwierdzanie adresu e-mail jest wyłączone przy rejestracji (`EmailConfirmed = true` na sztywno, `RequireConfirmedEmail = false`). Przy produkcie płatnym to prosta droga do nadużyć konta darmowego i do problemów z RODO.",
         "Brak licencji w korzeniu przy jednoczesnej sprzedaży licencji private cloud to realna luka prawna. Do tego kolizja nazw: osobne repo `authservice` nazywa się tak samo jak usługa wewnątrz tego monorepo, co w mapie portfolio myli."
       ],
@@ -1597,7 +1597,7 @@
       ],
       "primaryLanguage": "C#",
       "license": "brak pliku LICENSE",
-      "tests": "449 metod testowych xUnit w 63 plikach (253 z bezwarunkową asercją, 196 z jawnym `Skip`) oraz 53 `[TestMethod]` w 17 plikach projektu MSTest; żaden przebieg nie został tu zweryfikowany, bo wszystkie wymagają żywej instancji Portalu, której to repo nie zawiera.",
+      "tests": "449 metod testowych xUnit w 52 plikach: 253 atrybuty `[Fact]` bez `Skip` plus 196 `[Fact(Skip = ...)]`, czyli 449 wystąpień `[Fact` policzonych greppem po drzewie z pominięciem `bin/` i `obj/`; zero `[Theory]` i zero `[InlineData]`. Projekt MSTest ma 53 `[TestMethod]` w 14 plikach. Wcześniejsze „63 i 17 plików” to liczby wszystkich plików `.cs` w obu projektach (63 + 17 = 80), a nie plików zawierających testy. Żaden przebieg nie został tu zweryfikowany, bo wszystkie wymagają żywej instancji Portalu, której to repo nie zawiera.",
       "ci": "Jeden workflow `e2e-manual.yml`, wyłącznie `workflow_dispatch` z wymaganym `base_url` i wyborem projektu, przeglądarki i filtra. Instaluje oba SDK (9.0.x i 10.0.x), buduje w Release, ściąga przeglądarkę przez `playwright.ps1 --with-deps`, uruchamia `dotnet test` z loggerem trx i wrzuca artefakty na 14 dni; nie ma żadnego wyzwalacza `push`, `pull_request` ani `schedule`.",
       "metrics": [
         {
@@ -1702,13 +1702,13 @@
         {
           "name": "AureliusPromptus.Web.Portal.E2ETests",
           "path": "AureliusPromptus.Web.Portal.E2ETests",
-          "description": "Równoległy projekt na MSTest 4 i `Playwright.MSTest` (.NET 10) z 53 testami: szablony promptów plus logowanie. Ma własną klasę bazową `PlaywrigthTestBase` z literówką w nazwie, własny prefiks `AP_PORTAL_*` i wstrzykiwany shim schowka. Audyt zaleca jego wchłonięcie.",
+          "description": "Równoległy projekt na MSTest 4 i `Playwright.MSTest` (.NET 10) z 53 `[TestMethod]` w 14 plikach: szablony promptów plus logowanie. Ma własną klasę bazową `PlaywrigthTestBase` z literówką w nazwie, własny prefiks `AP_PORTAL_*` i wstrzykiwany shim schowka. Audyt zaleca jego wchłonięcie.",
           "reusable": false
         },
         {
           "name": "setup.ps1",
           "path": "setup.ps1",
-          "description": "Skrypt do dot-source'owania, ustawiający siedem zmiennych `AP_AT_*` i `AP_PORTAL_BASE_URL` w bieżącej sesji PowerShella. Zawiera domyślny port 3003, przez co jest jedynym miejscem, gdzie zapisano, przeciwko czemu ta suita faktycznie chodzi.",
+          "description": "Skrypt do dot-source'owania, ustawiający sześć zmiennych `AP_AT_*` (`AP_AT_BASE_URL`, `AP_AT_BROWSER`, `AP_AT_HEADLESS`, `AP_AT_RECORD_VIDEO`, `AP_AT_SCREENSHOT_ON_FAIL`, `AP_AT_ARTIFACTS_DIR`) oraz `AP_PORTAL_BASE_URL` w bieżącej sesji PowerShella. `AP_AT_CLEANUP_ACCOUNTS` jest czytany w `PlaywrightTestBase`, ale ten skrypt go nie ustawia — działa tylko wartość domyślna. Domyślny port 3003 jest tu zapisany jako parametr `-BaseUrl`, ten sam fallback siedzi też w obu klasach bazowych i w README.",
           "reusable": false
         }
       ],
@@ -2174,8 +2174,8 @@
       ],
       "primaryLanguage": "C#",
       "license": "MIT",
-      "tests": "28 przypadków w pięciu klasach (23 `[Fact]` plus jedna `[Theory]` z 5 wierszami): zbieżność RK4, zachowanie hamiltonianu, testy dymne raytracera i 10 przypadków granicy autoryzacji. Liczby pochodzą z atrybutów w kodzie — `dotnet test` nie był uruchamiany w tym przebiegu.",
-      "ci": "Cztery workflowy, żaden nie chodzi na push ani na pull request. `flyio.yml` (519 linii) startuje wyłącznie z taga `v*`: build, testy, wykrywanie zmian względem poprzedniego taga, budowa obrazów prosto do `registry.fly.io` i deploy w kolejności postgres, auth, api, web; do tego ręczne scale i destroy oraz publikacja `docs/` na GitHub Pages. Testy i gitleaks żyją więc w `scripts/ci-local.sh` i w pre-commit, co repozytorium samo nazywa luką w COMPLIANCE.md.",
+      "tests": "28 przypadków wykonywalnych w pięciu klasach: 23 atrybuty `[Fact]` plus jedna `[Theory]` z 5 wierszami `[InlineData]`. Z tego granica autoryzacji to 14 przypadków w `AuthorizationTests` (9 `[Fact]` oraz `[Theory]` z 5 wierszami) — wcześniejsza liczba 10 nie wynikała z żadnego liczenia. Reszta to zbieżność RK4, zachowanie hamiltonianu, testy stanu i testy dymne raytracera. Liczby pochodzą z atrybutów w kodzie (`grep` po `[Fact]`, `[Theory]`, `[InlineData]` z pominięciem `bin/` i `obj/`) — `dotnet test` nie był uruchamiany w tym przebiegu.",
+      "ci": "Cztery workflowy. Na push chodzi dokładnie jeden: `pages.yml` publikuje `docs/` na GitHub Pages przy push do `master`, ale z filtrem ścieżek — tylko `docs/**` i sam plik workflow. Na pull request nie chodzi żaden. `flyio.yml` (519 linii) startuje wyłącznie z taga `v*` albo z `workflow_dispatch`: build, testy, wykrywanie zmian względem poprzedniego taga, budowa obrazów prosto do `registry.fly.io` i deploy w kolejności postgres, auth, api, web; publikacji Pages nie ma w tym pliku. Do tego dwa workflowy `workflow_dispatch` — scale i destroy. Testy i gitleaks żyją więc w `scripts/ci-local.sh` i w pre-commit, co repozytorium samo nazywa luką w COMPLIANCE.md.",
       "metrics": [
         {
           "label": "Projekty w solucji",
@@ -2316,18 +2316,18 @@
           "reason": "Ten sam format wizytówki: statyczny one-pager w `docs/index.html` publikowany przez GitHub Pages."
         }
       ],
-      "product": "Brak kupującego i nie ma sensu go szukać — nikt nie kupuje renderów Schwarzschilda. To projekt dowodowy: pokazuje, że fizyka numeryczna, praca w tle, uwierzytelnianie oparte na JWKS i wdrożenie czterech aplikacji da się złożyć w jedną spójną całość, w której każda decyzja infrastrukturalna ma zapisane uzasadnienie. Wartość leży w kanale i wiarygodności: one-pager, prezentacja beamer i CHANGELOG opisujący osiem realnych defektów wraz z mechanizmem. Jako P3 w E-lab jest dokładnie tym, czym ma być, pod warunkiem że pipeline wdrożeniowy kiedykolwiek zostanie uruchomiony.",
+      "product": "Brak kupującego i nie ma sensu go szukać — nikt nie kupuje renderów Schwarzschilda. To projekt dowodowy: pokazuje, że fizyka numeryczna, praca w tle, uwierzytelnianie oparte na JWKS i wdrożenie czterech aplikacji da się złożyć w jedną spójną całość, w której każda decyzja infrastrukturalna ma zapisane uzasadnienie. Wartość leży w kanale i wiarygodności: one-pager, prezentacja beamer i CHANGELOG, w którym sekcja Fixed ma piętnaście punktów, a dziesięć z nich opisuje defekt wraz z mechanizmem. Jako P3 w E-lab jest dokładnie tym, czym ma być, pod warunkiem że pipeline wdrożeniowy kiedykolwiek zostanie uruchomiony.",
       "highlights": [
         "Jeden integrator RK4 obsługuje trzy ścieżki wyjścia — CLI, API i przeglądarkę — więc obraz z konsoli i z galerii pochodzi z identycznego kodu, a nie z dwóch implementacji tej samej fizyki.",
         "API nie posiada materiału klucza: pobiera klucze publiczne z JWKS serwisu tożsamości, więc potrafi token zweryfikować, ale nie potrafi go wystawić. Kompromitacja API nie daje możliwości podpisywania.",
         "Cudze zadanie zwraca **404, a nie 403** — świadoma decyzja przeciw enumeracji identyfikatorów, pokryta dziewięcioma faktami w `AuthorizationTests`.",
-        "CHANGELOG opisuje osiem defektów wraz z mechanizmem, w tym migrację EF bez pliku `.Designer.cs` (`Database.Migrate` nie znajdował niczego) i dwa pliki `.dockerignore`, których Docker nigdy nie czytał, bo kontekstem budowania jest katalog główny.",
+        "CHANGELOG ma jedną sekcję Fixed z piętnastoma punktami najwyższego poziomu, z czego dziesięć to wpisy z wytłuszczonym defektem i opisanym mechanizmem — w tym migracja EF bez pliku `.Designer.cs` (`Database.Migrate` nie znajdował niczego) i dwa pliki `.dockerignore`, których Docker nigdy nie czytał, bo kontekstem budowania jest katalog główny.",
         "`AppHost` rzuca wyjątek z nazwą brakującego pliku, gdy nie ma `secrets/jwt-signing.pem`, zamiast po cichu spaść do HS256. Awaria konfiguracji jest głośna z założenia."
       ],
       "gaps": [
         "**Zero tagów git przy deployu wyzwalanym wyłącznie tagiem `v*`.** Najbardziej złożony element repozytorium — 519 linii `flyio.yml` — nie ma ani jednego udokumentowanego przebiegu, a istnienia apek `blackholesim-*` nie da się potwierdzić. Adresy `*.fly.dev` są konfiguracją, nie linkiem.",
         "`docs/architecture/COMPLIANCE.md` pozycja 8 nadal twierdzi, że system nie ma uwierzytelniania i oznacza wymóg JWKS jako nieadekwatny. To przestało być prawdą wraz z dodaniem kont i nikt tego dokumentu nie przeliczył.",
-        "Brak workflow na push i pull request: testy oraz gitleaks chodzą tylko przy tagu albo lokalnie. Kontrybutor, który nie zrobił `pre-commit install`, nie jest sprawdzany przez nic.",
+        "Brak workflow na pull request i brak testów na push: `dotnet test` oraz gitleaks chodzą tylko przy tagu `v*` albo lokalnie. Jedyny workflow reagujący na push to `pages.yml`, który publikuje `docs/` i niczego nie sprawdza. Kontrybutor, który nie zrobił `pre-commit install`, nie jest sprawdzany przez nic.",
         "Telemetria jest zainstrumentowana, ale na Fly nie stoi żaden kolektor i `OTEL_EXPORTER_OTLP_ENDPOINT` jest nieustawione, więc w środowisku wdrożonym nie eksportuje się nic.",
         "Rendery PNG leżą jako blob w tabeli `RenderJobs` na wolumenie 3 GB, którego nie da się zmniejszyć, i nie ma żadnej retencji ani limitu per konto."
       ],
@@ -2473,7 +2473,7 @@
         {
           "name": "areas/",
           "path": "areas",
-          "description": "Właściwa treść w pięciu plikach: arytmetyka podstawowa, kolejność działań, zagadki logiczne, ciągi i wzorce, wyzwania mieszane. Każde zadanie to dokładnie jedno wywołanie `\\ExerciseSlide` i jedno `\\AnswerSlide`, z badgem podkategorii; polskie znaki zapisane tu głównie akcentami LaTeX-owymi, inaczej niż w `main.tex`.",
+          "description": "Właściwa treść w pięciu plikach: arytmetyka podstawowa, kolejność działań, zagadki logiczne, ciągi i wzorce, wyzwania mieszane. Każde zadanie to dokładnie jedno wywołanie `\\ExerciseSlide` i jedno `\\AnswerSlide`, z badgem podkategorii. Kodowanie polskich znaków nie jest tu spójne: pliki 1 i 2 nie używają żadnej komendy akcentowej i stoją na surowym UTF-8, pliki 3-5 używają ich odpowiednio 32, 12 i 20 razy, ale każdy z nich ma też po kilka znaków surowych — łącznie 64 komendy akcentowe na 37 znaków UTF-8.",
           "reusable": false
         }
       ],
@@ -2504,7 +2504,7 @@
         "**Zero tagów w repo**, czyli pipeline release nigdy nie wystartował z tego drzewa, a README opisuje wydanie PDF jako proces, który działa.",
         "CI nie buduje niczego na push do `main` ani na pull request, więc zepsuty `.tex` wjedzie niezauważony i wyjdzie dopiero przy pierwszym tagu.",
         "Preambuła jest niespójna z buildem: brak `fontspec` i `polyglossia` mimo XeLaTeX-a, za to `inputenc utf8` i `fontenc T1`, które pod XeLaTeX-em są zbędne. Polskie dzielenie wyrazów nie jest włączone w ogóle.",
-        "Dwa zapisy polskich znaków w jednym repo: `main.tex` na surowym UTF-8, pliki zadań na akcentach LaTeX-owych typu `\\k{a}`; do tego literówka w `areas/3-zagadki-logiczne.tex:31` i nieużywane makro `\\ChunkedTOC`."
+        "**Zapis polskich znaków rozjeżdża się wewnątrz samego `areas/`, nie tylko między `main.tex` a zadaniami.** W pięciu plikach zadań jest 64 komendy akcentowe (`\\k{a}`, `\\'{o}`, `\\l{}`, `\\'c`, `\\'s`) i 37 surowych znaków UTF-8, ale podział idzie plik po pliku: `1-arytmetyka-podstawy.tex` i `2-kolejnosc-dzialan.tex` nie mają ani jednej komendy akcentowej (za to 1 i 25 znaków surowych), a `3-zagadki-logiczne.tex`, `4-ciagi-i-wzorce.tex` i `5-mieszane-wyzwania.tex` mają 32, 12 i 20 komend akcentowych i mimo to nadal 5, 2 i 4 znaki surowe. Żaden plik nie trzyma się jednej konwencji konsekwentnie. Do tego literówka w `areas/3-zagadki-logiczne.tex:31` („naprawde” zamiast „naprawdę”) i nieużywane makro `\\ChunkedTOC` zdefiniowane w `mybraintrainer.sty:91`."
       ],
       "next": [
         "Rozstrzygnij nazwę: zmień nazwę repozytorium na `BrainTrain` albo popraw trzy URL-e w README i stopce `.cls` na `brain-train`. Dziś badge kłamią przy pierwszym otwarciu strony.",
@@ -2516,7 +2516,7 @@
       "risks": [
         "Kolizja nazw w trzech miejscach naraz: `BrainTrain` w README, w stopce klasy i w nazwie artefaktu kontra `brain-train` jako faktyczny slug. To psuje badge i utrudnia znalezienie repozytorium.",
         "Sama nazwa jest generyczna i zajęta przez istniejące komercyjne aplikacje do treningu mózgu, a README powołuje się wprost na serię *Trening Mózgu*; przy jakiejkolwiek dystrybucji to ryzyko znakowe.",
-        "Repozytorium jest praktycznie porzucone: dwa commity z treścią, jeden merge PR, ostatni ruch 2026-07-19 i żadnego tagu.",
+        "Repozytorium jest praktycznie porzucone. Treść wniosły trzy commity bez merge'a, nie dwa: `bf4992b` (7 plików, +409), `e6e6cc5` (5 plików, +544) i `01c9d37` (6 plików, +99/-411), poprzedzone `a7ea22d` „Initial commit” (2 pliki, +23) i domknięte jednym merge'em PR #1 — razem 5 commitów, liczby z `git log --numstat --no-merges`. Ostatni ruch 2026-07-19, zero tagów.",
         "Obie akcje w workflow (`xu-cheng/latex-action@v4`, `softprops/action-gh-release@v2`) są przypięte do majora, więc pierwsze uruchomienie odbędzie się na wersji, której nikt tu nie widział."
       ],
       "headline": "Zero tagów, zero buildów na main — wydania PDF nigdy nie uruchomiono",
@@ -2563,7 +2563,7 @@
         },
         {
           "label": "Linie .tex razem z main.tex",
-          "value": "755"
+          "value": "677 (593 w dziesięciu rozdziałach + 84 w main.tex; bez 78-liniowego źródła PlantUML, które nie jest plikiem .tex)"
         },
         {
           "label": "Pozycje bibliografii",
@@ -2908,8 +2908,7 @@
       "risks": [
         "Kolizja nazw: katalog `cards-game`, a README, badge CI i polecenie `git clone` wskazują `https://github.com/konradcinkusz/CardsGame.git`.",
         "`FluentAssertions` zostało celowo usunięte, bo od wersji 8 ma licencję własnościową Xceed. Automatyczny bump Dependabota może to cofnąć do projektu na MIT bez żadnego sygnału.",
-        "Pinowanie jest wybiegające do przodu (Aspire 13.4.6, `Microsoft.Agents.AI` 1.15.0, SDK 10.0.100 z `rollForward latestMinor`) — bez okresowego sprawdzenia wobec NuGet zestarzeje się szybciej niż projekt zdąży zostać wznowiony.",
-        "Aktywna gałąź to `claude/portfolio-html-app-w6306n`, nie `master`; przy 17 commitach historia jest widocznie agentowa i nikt jej nie scalił."
+        "Pinowanie jest wybiegające do przodu (Aspire 13.4.6, `Microsoft.Agents.AI` 1.15.0, SDK 10.0.100 z `rollForward latestMinor`) — bez okresowego sprawdzenia wobec NuGet zestarzeje się szybciej niż projekt zdąży zostać wznowiony."
       ],
       "headline": "Granica trzyma i jest przetestowana; żaden żywy model nie zagrał ani jednego rozdania",
       "headlineTone": "warn",
@@ -2944,7 +2943,7 @@
       ],
       "primaryLanguage": "C#",
       "license": "MIT",
-      "tests": "Dziesięć funkcji testowych w pięciu plikach `tests/`, wszystkie w Pythonie; po stronie .NET zero projektów testowych. Uruchomienia nie udało się potwierdzić (brak pytest i modułu `chess` w środowisku), ale dwie funkcje wołają `pytest.patch`, które w API pytest nie istnieje, więc na pewno się wywracają.",
+      "tests": "Dziesięć funkcji testowych w czterech plikach `tests/`: `test_agents.py` 3, `test_game.py` 3, `test_utils.py` 3, `test_simulation.py` 1. Katalog ma sześć plików — pozostałe dwa to `conftest.py` i `__init__.py`, w którym `test_board` mimo nazwy jest fixture'em (`@pytest.fixture`), a nie testem. Wszystko w Pythonie; po stronie .NET zero projektów testowych. Uruchomienia nie udało się potwierdzić (brak pytest i modułu `chess` w środowisku), ale dwie funkcje w `test_agents.py` wołają `pytest.patch`, które w API pytest nie istnieje, więc na pewno się wywracają.",
       "ci": "Brak CI — w repozytorium nie ma katalogu `.github` ani żadnego workflowu. Nikt więc nie wie, czy stos .NET się kompiluje.",
       "metrics": [
         {
@@ -2961,7 +2960,7 @@
         },
         {
           "label": "Kod .NET bez migracji",
-          "value": "3 597 linii (API 1 730 + Blazor 1 867)"
+          "value": "3 768 linii — `wc -l` po plikach `.cs` w ChessApi bez katalogu `Migrations/` (1 801) plus `.cs` i `.razor` w ChessBlazor (1 967), z pominięciem `bin/` i `obj/`"
         },
         {
           "label": "Kod Python z testami",
@@ -2969,7 +2968,7 @@
         },
         {
           "label": "Funkcje testowe",
-          "value": "10, wszystkie w Pythonie"
+          "value": "10 w czterech plikach `tests/`, wszystkie w Pythonie"
         },
         {
           "label": "Kontenery w docker-compose",
@@ -3017,8 +3016,8 @@
         {
           "name": "Audyt promptów i panel admina",
           "path": "chess-dotnet/ChessApi/Controllers/AdminController.cs",
-          "description": "Encja `PromptLog` zapisuje dla **każdej próby** model, osobowość, pełny tekst promptu, odpowiedź i flagę sukcesu; kontroler wystawia statystyki, listę partii i stronicowany przegląd promptów z filtrem po graczu. Wzorzec prompt/response/success plus stronicowany przegląd jest neutralny domenowo — do przeniesienia wystarczy odciąć klucz obcy `GameId`.",
-          "reusable": true
+          "description": "Encja `PromptLog` zapisuje dla **każdej próby** model, osobowość, pełny tekst promptu, odpowiedź i flagę sukcesu; kontroler wystawia statystyki, listę partii i stronicowany przegląd promptów z filtrem po graczu. Do przeniesienia jednak nie wystarczy odciąć klucza obcego `GameId`: konstruktor to `AdminController(IDbContextFactory<AppDbContext> dbFactory)`, a `AppDbContext` wystawia wyłącznie `DbSet<Game>`, `DbSet<MoveRecord>` i `DbSet<PromptLog>`, których każda z pięciu akcji używa. Cztery z pięciu sygnatur zwracają typy domenowe — `Task<ActionResult<AdminStats>> GetStats()`, `Task<ActionResult<List<AdminGameSummary>>> GetGames(string?, int, int)`, `Task<ActionResult<AdminGameDetail>> GetGame(Guid)` i `Task<ActionResult<List<AdminPromptLogItem>>> GetPrompts(Guid?, string?, int, int)`; domenowo neutralna jest tylko `GetPlayers()` zwracająca `List<string>`. Przenośny jest sam wzorzec prompt/response/success, nie ten kod.",
+          "reusable": false
         },
         {
           "name": "ChessBoard — silnik szachowy w C#",
@@ -3135,7 +3134,7 @@
       "oneLiner": "Dwa agenty LLM grają w szachy, a o legalności ruchu decyduje wyłącznie deterministyczny silnik zasad.",
       "summary": "Port prototypu `llm-multi-agent-chess` z Pythona i Streamlita na .NET 10, złożony przez {{term:aspire|Aspire}} 13.4.6 z sześciu projektów źródłowych i dwóch testowych. Każda strona planszy to niezależny `AIAgent` z {{term:maf|Microsoft Agent Framework}} 1.15.0, a wybór backendu (Anthropic, Azure OpenAI, Azure AI Foundry, lokalna Ollama albo człowiek) jest wpisem w `appsettings`, nie gałęzią w kodzie. Najważniejsza decyzja jest jednozdaniowa: `ChessMas.Engine` to jedyny autorytet legalności. Agent woła `get_board_state`, dostaje FEN wraz z pełną listą legalnych ruchów w UCI i SAN, proponuje ruch przez `propose_move`, a `TryApplyMove` dopasowuje propozycję do obiektu `Move` wygenerowanego przez silnik zamiast parsować napis. To bezpośrednia odpowiedź na tryb awarii oryginalnego prototypu, w którym model odtwarzał pozycję z prozy i gubił stan planszy. Doklejone jest rozliczanie kosztów po realnym `AgentRunResponse.Usage` oraz cztery metryki {{term:otel|OTel}}, ale całość ma **cztery commity, zero persystencji i żadnego zapisanego dowodu, że rozegrano tu partię z prawdziwym modelem**.",
       "stack": [
-        ".NET 10 / C# 13",
+        ".NET 10",
         ".NET Aspire 13.4.6",
         "Microsoft.Agents.AI 1.15.0",
         "Microsoft.Extensions.AI 10.8.3",
@@ -3184,12 +3183,7 @@
       ],
       "links": {
         "repo": "https://github.com/konradcinkusz/chess-mas",
-        "live": [
-          {
-            "label": "Strona projektu (GitHub Pages)",
-            "url": "https://konradcinkusz.github.io/chess-mas/"
-          }
-        ],
+        "live": [],
         "docs": [
           {
             "label": "Strona projektu (źródło Pages)",
@@ -3213,7 +3207,7 @@
         "fly": false,
         "docker": false,
         "ghcr": false,
-        "pages": true,
+        "pages": false,
         "packages": false
       },
       "components": [
@@ -3224,16 +3218,16 @@
           "reusable": true
         },
         {
-          "name": "GameCostTracker + ModelPricingCatalog",
-          "path": "src/ChessMas.Orchestrator/GameCostTracker.cs",
-          "description": "Mnoży realne `AgentRunResponse.Usage` przez cennik z sekcji `ModelPricing` w konfiguracji. Model bez wpisu raportuje `null`, nigdy 0 USD, a każdy wpis cenowy niesie datowane pole `Note` ze źródłem. Jedyna zależność domenowa to enum `Side`.",
-          "reusable": true
-        },
-        {
           "name": "ChessMas.ServiceDefaults",
           "path": "src/ChessMas.ServiceDefaults",
           "description": "{{term:servicedefaults|Wspólny projekt Aspire}}: eksport traces i metryk po OTLP, health checki, service discovery i odporność `HttpClient`. Zero encji domenowych, kopiowalny do dowolnej solucji .NET.",
           "reusable": true
+        },
+        {
+          "name": "GameCostTracker + ModelPricingCatalog",
+          "path": "src/ChessMas.Orchestrator/GameCostTracker.cs",
+          "description": "Mnoży realne `AgentRunResponse.Usage` przez cennik z sekcji `ModelPricing` w konfiguracji. Model bez wpisu raportuje `null`, nigdy 0 USD, a każdy wpis cenowy niesie datowane pole `Note` ze źródłem. Nie jest przenośny bez przeróbki: `GameCostTracker.cs` ma `using ChessMas.Engine;`, a typ domenowy `ChessMas.Engine.Side` siedzi w publicznej powierzchni — `RecordPly(int plyNumber, Side side, long inputTokens, long outputTokens)`, rekord `PlyCost(int PlyNumber, Side Side, long InputTokens, long OutputTokens, decimal? EstimatedCostUsd)` i przez listę `ByPly` także `GameCostSummary`. Sam `ModelPricingCatalog` jest od tego wolny.",
+          "reusable": false
         },
         {
           "name": "ChessMas.Engine",
@@ -3288,7 +3282,7 @@
           "reason": "Komentarz w `ChessTools.cs` odwołuje się wprost do wzorca granicy narzędziowej przed akcją zapisu, użytego w tamtym przepływie provisioningu."
         }
       ],
-      "product": "Brak kupującego i README sam zamyka tę drogę, mówiąc, że to nie jest benchmark siły gry, jedna partia niczego nie dowodzi, a koszt jest szacunkiem wobec cennika, nie fakturą. To projekt kredytujący: pokazuje, że autor składa system agentowy w .NET z twardą granicą deterministyczną, telemetrią i rozliczaniem kosztów. Jeśli cokolwiek stąd ma wartość rynkową, to dwa kawałki niezwiązane z szachami: `GameCostTracker` z konfiguracyjnym cennikiem oraz `HumanMoveGate` jako wzorzec human-in-the-loop.",
+      "product": "Brak kupującego i README sam zamyka tę drogę, mówiąc, że to nie jest benchmark siły gry, jedna partia niczego nie dowodzi, a koszt jest szacunkiem wobec cennika, nie fakturą. To projekt kredytujący: pokazuje, że autor składa system agentowy w .NET z twardą granicą deterministyczną, telemetrią i rozliczaniem kosztów. Jeśli cokolwiek stąd ma wartość rynkową, to `HumanMoveGate` jako wzorzec human-in-the-loop, który o szachach nie wie nic, oraz `GameCostTracker` z konfiguracyjnym cennikiem — ale ten drugi dopiero po wycięciu z jego sygnatur enuma `Side`.",
       "highlights": [
         "`TryApplyMove` dopasowuje propozycję do obiektów `Move` wygenerowanych przez silnik, a nie parsuje napisu. Ruch człowieka i ruch agenta idą **dokładnie tą samą ścieżką**, bez osobnej gałęzi „zaufaj człowiekowi”.",
         "CHANGELOG dokumentuje, że projekt pierwotnie w ogóle się nie kompilował, bo powstał bez SDK i NuGeta, i wymienia z nazwy zgadnięte API `ChessDotNetCore`, które nie istniały: namespace, `CurrentPlayer`, `MoveType`, `Promotion` jako `char?`. Rzadka szczerość w publicznym repo.",
@@ -3301,7 +3295,8 @@
         "`GameOrchestrator` ma 276 linii i jest najbardziej złożonym plikiem w repo, a testów nie ma tam ani jednego. 26 testów pokrywa silnik, koszty i bramkę człowieka.",
         "Brak persystencji i brak ewikcji: gry, wyniki i trackery kosztów żyją w `ConcurrentDictionary`, który nigdy nie jest czyszczony. `SECURITY.md` sam nazywa to nieograniczonym wzrostem.",
         "Brak autentykacji na API orkiestratora i brak limitu równoległych gier. Limity 200 plyów i 5 odrzuceń chronią jedną partię, nic nie chroni rachunku.",
-        "`POST /games` startuje pętlę przez `Task.Run` bez obserwacji wyjątków, a workflow Pages wymaga jednorazowego ustawienia źródła w Settings, którego nie da się potwierdzić z repozytorium."
+        "`POST /games` startuje pętlę przez `Task.Run` bez obserwacji wyjątków, więc awaria pętli gry nie ma gdzie wypłynąć.",
+        "Strona GitHub Pages nie jest potwierdzalna z repozytorium, więc została zdjęta z linków: `pages.yml` w swoim własnym komentarzu mówi, że bez jednorazowego ustawienia Settings -> Pages -> Source: \"GitHub Actions\" workflow uruchamia się i dopiero wtedy nie wdraża. W repo nie ma gałęzi `gh-pages` ani żadnego zapisu udanego wdrożenia, a istnienie samego workflow to dowód na intencję, nie na opublikowaną stronę. Źródło strony leży w `docs/index.html` i tam da się je obejrzeć."
       ],
       "next": [
         "Napisz testy `GameOrchestrator` z podstawionym fake `AIAgent`. Pętla, limit odrzuceń, walkower i ścieżka człowieka są deterministyczne i nie potrzebują modelu; to największa dziura w pokryciu.",
@@ -3938,8 +3933,8 @@
       "visibility": "public",
       "state": "active",
       "tier": "P2",
-      "oneLiner": "Talia 269 fiszek Q&A o C# i .NET złożona jako pionowy deck Beamer, kompilowana do PDF przez GitHub Actions na tagu `v*`.",
-      "summary": "Każde pytanie ma własny slajd, odpowiedź jest slajdem następnym, a całość siedzi w 24 plikach `areas/*.tex` wciąganych 24 dyrektywami `\\input` z `main.tex`. Warstwę prezentacyjną niesie własna klasa `mybeamer.cls` (24 kolory sekcji, wspólna konfiguracja `minted` i `listings`, automatyczna ramka Outline na starcie sekcji) plus `mybeamer.sty` z makrami `\\QuestionSlide`, `\\CategoryBadge` i `\\TOCButtonTall`. Najciekawsza decyzja jest w geometrii: strona ma **1080x1920 pt**, czyli proporcje ekranu telefonu, więc PDF czyta się kciukiem w kolejce, a nie na rzutniku. Druga decyzja jest już porażką, którą widać w kodzie: `\\AnswerSlide` zdefiniowano i **nie użyto ani razu**, bo 197 bloków `minted` wymusza `frame[fragile]`, więc wszystkie 269 odpowiedzi napisano ręcznie zamiast przez makro. Dostawa to {{term:tagdeploy|wydanie na tagu}} — `xelatex` z `-shell-escape` w akcji `xu-cheng/latex-action@v4` i publikacja `CSharp_FlashCards.pdf` jako GitHub Release. Skończona jest treść i pipeline; opakowanie — landing, slajd tytułowy, linki w stopce — pochodzi z poprzedniej edycji i nikt go nie zaktualizował.",
+      "oneLiner": "Talia 269 fiszek Q&A o C# i .NET złożona jako deck Beamer na stronie 1080x1920 pt, kompilowana do PDF przez GitHub Actions na tagu `v*`.",
+      "summary": "Każde pytanie ma własny slajd, odpowiedź jest slajdem następnym, a całość siedzi w 24 plikach `areas/*.tex` wciąganych 24 dyrektywami `\\input` z `main.tex`. Warstwę prezentacyjną niesie własna klasa `mybeamer.cls` (24 kolory sekcji, wspólna konfiguracja `minted` i `listings`, automatyczna ramka Outline na starcie sekcji) plus `mybeamer.sty` z makrami `\\QuestionSlide`, `\\CategoryBadge` i `\\TOCButtonTall`. Najciekawsza decyzja jest w geometrii i jest niedokończona: `main.tex` przekazuje do pakietu `geometry` `paperwidth=1080pt` i `paperheight=1920pt`, czyli proporcje ekranu telefonu, a linia niżej przekazuje do tego samego pakietu opcję `landscape`, która te wymiary zamienia miejscami na 1920x1080. W repozytorium nie ma ani zbudowanego PDF-a, ani toolchainu LaTeX-a, więc końcowej orientacji nie da się stąd potwierdzić — źródło deklaruje obie naraz. Druga decyzja jest już porażką, którą widać w kodzie: `\\AnswerSlide` zdefiniowano i **nie użyto ani razu**, bo 197 bloków `minted` wymusza `frame[fragile]`, więc wszystkie 269 odpowiedzi napisano ręcznie zamiast przez makro. Dostawa to {{term:tagdeploy|wydanie na tagu}} — `xelatex` z `-shell-escape` w akcji `xu-cheng/latex-action@v4` i publikacja `CSharp_FlashCards.pdf` jako GitHub Release. Skończona jest treść i pipeline; opakowanie — landing, slajd tytułowy, linki w stopce — pochodzi z poprzedniej edycji i nikt go nie zaktualizował.",
       "stack": [
         "LaTeX (Beamer)",
         "XeLaTeX + latexmk",
@@ -3977,7 +3972,7 @@
         },
         {
           "label": "Pytania z prefiksem trudności",
-          "value": "189 z 269 (48 x *, 107 x **, 34 x ***)"
+          "value": "262 z 269 (55 x *, 173 x **, 34 x ***) — liczone przez sparsowanie argumentu obowiązkowego każdego \\QuestionSlide z dopasowaniem nawiasów, także tam, gdzie tytuł stoi w linii następnej po argumencie opcjonalnym"
         },
         {
           "label": "Pliki śledzone przez git",
@@ -3987,14 +3982,6 @@
       "links": {
         "repo": "https://github.com/konradcinkusz/csharp-flashcards",
         "live": [
-          {
-            "label": "Najnowszy PDF z Releases",
-            "url": "https://github.com/konradcinkusz/csharp-flashcards/releases/latest/download/CSharp_FlashCards.pdf"
-          },
-          {
-            "label": "Strona wydań",
-            "url": "https://github.com/konradcinkusz/csharp-flashcards/releases/latest"
-          },
           {
             "label": "Landing (GitHub Pages)",
             "url": "https://konradcinkusz.github.io/csharp-flashcards/"
@@ -4064,7 +4051,7 @@
         {
           "name": "mybeamer.cls",
           "path": "mybeamer.cls",
-          "description": "Geometria 1080x1920 pt, 22 kolory kategorii plus `sec1bg`–`sec24bg`, wspólne tło `CodeBg` dla `minted` i `listings`, własne navigation symbols z przyciskiem Contents. Liczba kolorów sekcji jest zaszyta pod 24 obszary tej talii, a stopka linkuje do starej nazwy repozytorium.",
+          "description": "Klasa nie ustawia rozmiaru strony — robi tylko `\\RequirePackage{geometry}`, a wymiary i opcja `landscape` przychodzą z `main.tex`. Zawiera 22 kolory kategorii plus `sec1bg`–`sec24bg`, wspólne tło `CodeBg` dla `minted` i `listings`, własne navigation symbols z przyciskiem Contents. Liczba kolorów sekcji jest zaszyta pod 24 obszary tej talii, a stopka linkuje do starej nazwy repozytorium.",
           "reusable": false
         },
         {
@@ -4104,8 +4091,7 @@
       ],
       "product": "Brak kupującego. To materiał do nauki i przygotowania do rekrutacji, rozdawany za darmo jako PDF na {{term:mit|licencji MIT-0}}, więc jego funkcja jest kanałowa i wizerunkowa: buduje rozpoznawalność marki dev_insight i ściąga ruch na GitHub. Realny odbiorca to programista .NET przed rozmową rekrutacyjną albo ktoś prowadzący szkolenie. Za obecną formę nikt nie zapłaci, bo nie ma tu ani powtórek z odstępami, ani śledzenia postępu, ani wersji interaktywnej — jest jeden statyczny PDF, i to jest cały produkt.",
       "highlights": [
-        "269 pytań w `areas/*.tex` i dokładnie **269 ramek odpowiedzi** — dopasowanie jest co do jednego, mimo że nic tego nie sprawdza automatycznie.",
-        "Strona ma **1080x1920 pt**, czyli proporcje telefonu. Deck jest celowo pionowy, żeby PDF czytało się na ekranie w ręce, a nie na rzutniku.",
+        "269 wywołań `\\QuestionSlide` w `areas/*.tex` i 270 ramek `frame` z odpowiedziami — przyporządkowanie jest jeden do jednego poza jednym pytaniem w `8-design-patterns.tex`, które ma dwie ramki odpowiedzi. Nic tego nie sprawdza automatycznie.",
         "197 bloków kodu C# składanych przez `minted` z jedną konfiguracją (`linenos`, tło `CodeBg`, `breakanywhere`) zdefiniowaną raz w klasie zamiast per slajd.",
         "`MASTER_PROMPT.md` wyciąga z tego repo **generator repozytoriów LaTeX**: manifest plików w kolejności, rozgałęzienie na cztery typy dokumentu i lista self-check. To repo, które opisało samo siebie jako szablon.",
         "Ścieżka dostawy nie ma ręcznego kroku: tag `v*` uruchamia XeLaTeX w Actions i wypycha `CSharp_FlashCards.pdf` do Releases."
@@ -4115,7 +4101,9 @@
         "Rok się rozjechał: README mówi 2026, slajd tytułowy `main.tex` i tytuł landingu nadal mówią 2025, a `Copyright` w LICENSE też jest datowany na 2025.",
         "`main.tex` i `mybeamer.cls` linkują do `konradcinkusz/CSharp-FlashCards-2025`, czyli **nie do tego repozytorium**. Stopka każdego z kilkuset slajdów PDF prowadzi pod nieistniejącą nazwę.",
         "Makro `\\AnswerSlide` jest zdefiniowane i użyte **zero razy** — `minted` wymusza `frame[fragile]`, więc wszystkie 269 odpowiedzi obchodzą API i piszą ramkę ręcznie. Martwy kod plus rozjazd deklarowanego interfejsu z praktyką.",
-        "189 z 269 pytań ma prefiks `*`, `**` lub `***`, 80 nie ma żadnego. Gwiazdki renderują się dosłownie w tytule slajdu i nigdzie nie ma legendy, więc czytelnik widzi szum zamiast skali trudności."
+        "262 z 269 pytań ma prefiks `*`, `**` lub `***` (55 / 173 / 34); bez prefiksu jest 7, z czego 6 to kolejne kroki jednego przepływu OAuth. Gwiazdki renderują się dosłownie w tytule slajdu i nigdzie nie ma legendy, więc czytelnik widzi szum zamiast skali trudności.",
+        "`main.tex` deklaruje orientację dwa razy i sprzecznie: linie 1–3 przekazują do `geometry` `paperwidth=1080pt`/`paperheight=1920pt`, a linia 4 przekazuje `landscape`, który zamienia wymiary na 1920x1080. Bez zbudowanego PDF-a nie da się rozstrzygnąć, która deklaracja wygrywa.",
+        "Linki do `releases/latest` zostały usunięte z sekcji live: `git tag` nie zwraca ani jednego tagu, `ci.yml` odpala się wyłącznie na push tagu `v*`, a w repozytorium nie ma zbudowanego PDF-a — z samego repozytorium nie da się potwierdzić, że jakiekolwiek wydanie kiedykolwiek powstało."
       ],
       "risks": [
         "Rozjazd licencyjny: LICENSE to MIT No Attribution, a odznaka w README i na landingu mówi MIT. Dwie różne umowy w jednym repozytorium.",
@@ -4232,7 +4220,7 @@
       "deployment": {
         "fly": true,
         "docker": true,
-        "ghcr": true,
+        "ghcr": false,
         "pages": false,
         "packages": false
       },
@@ -4570,7 +4558,7 @@
         },
         {
           "label": "Kluczy tłumaczeń na język",
-          "value": "106"
+          "value": "109 na język, identyczny zbiór w es, pl i en (parsowanie obiektu I18N jako JS)"
         },
         {
           "label": "Warianty skal IRPF",
@@ -4639,7 +4627,7 @@
         {
           "name": "Warstwa i18n (I18N + applyLanguage)",
           "path": "index.html, ok. linie 1080-1566",
-          "description": "Trzy słowniki po 106 kluczy, podmieniane po atrybutach `data-i18n` (62 wystąpienia w markupie) oraz `data-i18n-attr` dla atrybutów. Wybór języka startuje od `navigator.language` i ląduje w tym samym stanie co reszta ustawień.",
+          "description": "Trzy słowniki po 109 kluczy każdy, policzone przez sparsowanie obiektu `I18N` jako JavaScriptu, a nie przez grep. Zbiory kluczy są identyczne we wszystkich trzech językach: żaden klucz nie jest obecny w jednym słowniku i nieobecny w innym. Podmiana idzie po atrybutach `data-i18n` (62 wystąpienia w markupie) oraz `data-i18n-attr` dla atrybutów. Wybór języka startuje od `navigator.language` i ląduje w tym samym stanie co reszta ustawień.",
           "reusable": true
         },
         {
@@ -4651,7 +4639,7 @@
         {
           "name": "Silnik IRPF (applyScale, calcIRPF, calcMinimo)",
           "path": "index.html, ok. linie 1632-1660",
-          "description": "Nalicza podatek po tabeli progów: skala państwowa plus autonomiczna, a dla Kraju Basków i Nawarry wyłącznie skala foralna. `calcMinimo` dzieli minimum osobiste i minima na dzieci 50/50, gdy w gospodarstwie są dwa źródła dochodu.",
+          "description": "Nalicza podatek po tabeli progów: skala państwowa plus autonomiczna, a dla Kraju Basków i Nawarry wyłącznie skala foralna. `calcMinimo(family, splitFactor)` zwraca `MIN_PERSONAL + descTotal * splitFactor`, więc przy dwóch źródłach dochodu dzieli się 50/50 wyłącznie minimum na dzieci; minimum osobiste 5 550 EUR trafia w pełnej wysokości do każdego dochodu z osobna.",
           "reusable": false
         },
         {
@@ -4683,7 +4671,7 @@
         "Kwota autónomo jest wyznaczana **iteracyjnie**, bo składka i dochód netto zależą od siebie nawzajem. Pięć przebiegów po 15-progowej tabeli z RD 504/2022 zamiast jednego mnożenia.",
         "Osiem wariantów skal IRPF, w tym Nawarra z 11 progami i Kraj Basków z 8, obok państwowej kończącej się progiem 300 000 EUR przy stawce 24,5 %.",
         "Stan siedzi równolegle w `localStorage` i w hashu URL, więc pełny scenariusz budżetowy przenosi się między ludźmi jednym linkiem, bez serwera i bez konta.",
-        "Trzy pełne tłumaczenia po 106 kluczy każde, z podmianą także atrybutów przez `data-i18n-attr` i autodetekcją `navigator.language` przy pierwszej wizycie."
+        "Trzy pełne tłumaczenia po 109 kluczy, w idealnej parze: parsowanie obiektu `I18N` jako JavaScriptu daje ten sam zbiór kluczy w es, pl i en, zero brakujących i zero nadmiarowych w którąkolwiek stronę. Do tego podmiana atrybutów przez `data-i18n-attr` i autodetekcja `navigator.language` przy pierwszej wizycie."
       ],
       "gaps": [
         "**Zero testów dla silnika podatkowego.** Cztery funkcje fiskalne to arytmetyka na tablicach progów, czyli najłatwiejsza rzecz do przetestowania regresyjnie w całym portfolio, i żadna z nich nie ma ani jednego przypadku odniesienia.",
@@ -5006,7 +4994,7 @@
         {
           "name": "changed-docs.sh",
           "path": "changed-docs.sh",
-          "description": "Wylicza z diffa graf zależności LaTeX: czyta `\\input`, `\\include`, `\\makerubric`, `\\addbibresource` i lokalne `\\usepackage`, dokłada zasoby współdzielone (`photo.jpg`, `latexmkrc`) i wypisuje same dokumenty dotknięte zmianą. Edycja `academic/skills.tex` flaguje CV, które go wciągają; edycja README nie flaguje niczego.",
+          "description": "Wylicza z diffa graf zależności LaTeX: czyta `\\input`, `\\include`, `\\makerubric`, `\\addbibresource` i lokalne `\\usepackage`, dokłada zasoby współdzielone (`photo.jpg`, `latexmkrc`) i wypisuje same dokumenty dotknięte zmianą. Edycja `academic/skills.tex` flaguje 7 z 11 akademickich CV, edycja `academic/education.tex` 10 z 11, a `academic/settings.sty` wszystkie 11; edycja README nie flaguje niczego.",
           "reusable": true
         },
         {
@@ -5071,7 +5059,7 @@
       "product": "Brak kupującego i nie ma sensu udawać, że jest. To narzędzie osobiste: wersjonowany zestaw dokumentów pod własne aplikacje, z 17 specjalizacjami pod nazwane firmy. Jedyna wartość na zewnątrz to sam mechanizm — matryca plus resolver zależności plus przyrostowy build — który da się wyciąć jako szablon dla dowolnego repozytorium LaTeX z wieloma dokumentami, ale nikt za to nie zapłaci. Realna funkcja repo jest inna: to dowód dyscypliny inżynierskiej zastosowanej do własnego procesu rekrutacji, czyli {{term:evidence|materiał dowodowy}} na rozmowę, a nie produkt.",
       "highlights": [
         "Tag gita jest przełącznikiem budowania: MAJOR wybiera styl, MINOR specjalizację, PATCH nie zmienia planu. Schemat jest opisany spójnie w README, w `build-matrix.json` i w nagłówku `ci.yml` — {{term:tagdeploy|wydanie sterowane tagiem}} zastosowane do dokumentów, nie do obrazów.",
-        "`changed-docs.sh` naprawdę parsuje zależności LaTeX zamiast zgadywać po katalogach, więc PR dotykający jednej rubryki kompiluje trzy CV, a nie trzydzieści dwa.",
+        "`changed-docs.sh` naprawdę parsuje zależności LaTeX zamiast zgadywać po katalogach, więc PR dotykający jednej rubryki kompiluje od 1 do 10 dokumentów zamiast pełnych 32 z matrycy. Liczone przebiegiem `changed-docs.sh -` dla każdego pliku z `academic/`: rubryka pod jedną ofertę (np. `skills_anthropic.tex`) daje 1, `summary.tex` 2, `work_authorization.tex` 6, `skills.tex` i `hobbies.tex` po 7, `employment.tex` i `projects.tex` po 8, `education.tex` 10. Żadna rubryka nie flaguje dokładnie trzech dokumentów.",
         "Nagłówek workflow zawiera komentarz tłumaczący, dlaczego `fetch-depth: 0` jest bezwarunkowe: wyrażenie `${{ ... && 0 || 1 }}` w Actions zwraca 1, bo 0 jest falsy — co po cichu robiło shallow clone i psuło merge base.",
         "Komentarz na PR jest aktualizowany, nie duplikowany: workflow szuka markera `<!-- cv-pdf-artifact-comment -->` wśród istniejących komentarzy zamiast dokładać kolejny przy każdym pushu.",
         "Styl akademicki jest złożony z wymiennych rubryk, więc wariant pod ofertę to podmiana dwóch plików, a nie kopia całego CV — stąd 17 specjalizacji przy 32 unikalnych plikach źródłowych."
@@ -5129,7 +5117,7 @@
       ],
       "primaryLanguage": "JavaScript",
       "license": "MIT",
-      "tests": "Brak testów jednostkowych; zamiast nich sześć skryptów kontrolnych uruchamianych w CI: dryf manifestu, walidator (schemat zamknięty plus integralność referencyjna), istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu i test renderowania w Chromium w trzech kombinacjach motywu i szerokości (jasny 1440, ciemny 1440, jasny 390).",
+      "tests": "Brak testów jednostkowych; zamiast nich siedem skryptów kontrolnych: dryf manifestu, walidator (schemat zamknięty plus integralność referencyjna), istnienie i widoczność repozytoriów przez API GitHuba, smoke test struktury strony, audyt tokenów motywu, test renderowania w Chromium w trzech kombinacjach motywu i szerokości, oraz **test progów kolektora zdrowia wobec atrapy API** — każdy próg ma fixture, na którym musi się zapalić, i czyste repozytorium, na którym musi milczeć.",
       "ci": "`validate-portfolio.yml` na push, PR i ręcznie, z filtrem obejmującym `data/**`, `site/**` i `scripts/**`: siedem kroków, od dryfu manifestu po renderowanie w przeglądarce i build jednopliku. `flyio.yml` na tagu `v*`: tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu pobiera serwowany manifest i żąda co najmniej trzydziestu repozytoriów — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
       "metrics": [
         {
@@ -5163,6 +5151,10 @@
         {
           "label": "Wygenerowany manifest",
           "value": "543 KiB, commitowany i sprawdzany na dryf"
+        },
+        {
+          "label": "Skrypty kontrolne",
+          "value": "7, w tym kolektor zdrowia i jego test wobec atrapy API"
         }
       ],
       "links": {
@@ -5287,7 +5279,7 @@
         "Własne liczby tego repozytorium — commity, pliki, data ostatniego commitu — są **wyliczane z gita przy budowie manifestu**, nie wpisywane ręcznie. To jedyny wpis, w którym da się to zrobić, i jedyny, w którym ręczne wpisanie gwarantowałoby nieaktualność."
       ],
       "gaps": [
-        "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Liczby PR-ów, gwiazdek i dat ostatniego commitu są wpisane ręcznie; nocny kolektor zdrowia opisany w modelu operacyjnym jest zaprojektowany i niezbudowany.",
+        "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
         "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
         "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
         "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
@@ -5309,7 +5301,7 @@
         "openPrs": 0,
         "dependabotPrs": 0,
         "lastCommit": "2026-08-26",
-        "commits": 15,
+        "commits": 16,
         "files": 63
       }
     },
@@ -5321,10 +5313,10 @@
       "state": "dormant",
       "tier": "P4",
       "oneLiner": "Statyczna jednostronicowa witryna sprzedażowa dla klientki zewnętrznej, zbudowana na gotowym szablonie i porzucona po pięciu dniach.",
-      "summary": "Jeden plik `index.html` (621 linii) plus trzy arkusze CSS, pięć skryptów i dziewięć obrazów. Strona jest w całości po polsku i sprzedaje usługi jednej osoby: audyt konta TikTok, szkolenia z nagrywania wideo i pakiety od 400 do 3000 PLN, z sekcjami banner, o mnie, liczniki, oferta, cennik, kontakt. Baza wizualna pochodzi z szablonu LayoutFlow, co jest uczciwie odnotowane w pierwszej linii `style-global.css` i w stopce, więc własnego kodu jest tu około 60 linii JavaScriptu w `js/scripts.js`. Najciekawsza decyzja jest w warstwie stylów: 63 wymiary w `style.css` są liczone w jednostkach `vw`, przez co layout skaluje się ciągle, a osobny `style-responsive.css` z trzema breakpointami odpowiada wyłącznie za przełamania. To rozdzielenie skalowania od przełamań jest sensowne i rzadko spotykane w szablonach tej klasy. Reszta repozytorium to biblioteki wgrane lokalnie: jQuery 2.2.0, counterUp, Waypoints, Font Awesome Free 6.1.1 i Linearicons, dzięki czemu strona jest prawie {{term:hermetyczny|hermetyczna}} i zależy z sieci tylko od Google Fonts.",
+      "summary": "Jeden plik `index.html` (621 linii) plus trzy arkusze CSS, pięć skryptów i dziewięć obrazów. Strona jest w całości po polsku i sprzedaje usługi jednej osoby: audyt konta TikTok, szkolenia z nagrywania wideo i pakiety od 400 do 3000 PLN, z sekcjami banner, o mnie, liczniki, oferta, cennik, kontakt. Baza wizualna pochodzi z szablonu LayoutFlow, co jest uczciwie odnotowane w pierwszej linii `style-global.css` i w stopce. Autorstwo da się rozstrzygnąć z historii i wypada ostrożniej, niż sugerowałby sam kod: cały katalog `js/` — wszystkie pięć plików, w tym `scripts.js` i `bliss.js` — wszedł jednym commitem `13493ae` razem z paczką szablonu (`read-license-and-terms.txt`, `owl-slider`, `contactform`) i żaden z nich nie ma ani jednego późniejszego commitu, więc nie ma podstaw, by przypisać autorowi jakąkolwiek linię JavaScriptu. Autorskie jest to, co widać w diffie od importu: treść i układ sekcji `index.html` oraz cięcia w `style.css`, razem 704 wstawienia i 576 usunięć. W warstwie stylów 63 wymiary w `style.css` są liczone w jednostkach `vw`, a osobny `style-responsive.css` z trzema breakpointami odpowiada wyłącznie za przełamania; to rozdzielenie skalowania od przełamań też przyszło z szablonem — import miał 91 wymiarów `vw` i te same trzy breakpointy — autor je tylko przyciął. Reszta repozytorium to biblioteki wgrane lokalnie: jQuery 2.2.0, counterUp, Waypoints, Font Awesome Free 6.1.1 i Linearicons, dzięki czemu strona jest prawie {{term:hermetyczny|hermetyczna}} i zależy z sieci tylko od Google Fonts.",
       "stack": [
         "HTML5",
-        "CSS3 (3 ręcznie pisane arkusze, 1083 linie)",
+        "CSS3 (3 arkusze z szablonu, 1083 linie, style.css przycięty przez autora)",
         "jQuery 2.2.0",
         "jquery.counterup 1.0",
         "Waypoints 2.0.3",
@@ -5358,12 +5350,12 @@
           "value": "1083"
         },
         {
-          "label": "Własny JavaScript",
-          "value": "1440 B (scripts.js) + 679 B (bliss.js)"
+          "label": "Zmiany autora po imporcie szablonu",
+          "value": "0 linii w `js/`; `index.html` + CSS: 704 wstawienia, 576 usunięć (git diff --stat 13493ae..HEAD)"
         },
         {
           "label": "Wymiary w jednostkach vw",
-          "value": "63 w style.css"
+          "value": "63 w style.css, przy 91 w wersji szablonu z commitu 13493ae"
         },
         {
           "label": "Rozmiar repo bez .git",
@@ -5387,7 +5379,7 @@
             "path": "style-global.css"
           },
           {
-            "label": "Własny JavaScript wraz z martwymi wywołaniami",
+            "label": "Skrypt strony z martwymi wywołaniami (z szablonu, nietknięty od importu)",
             "path": "js/scripts.js"
           },
           {
@@ -5413,25 +5405,25 @@
         {
           "name": "js/bliss.js",
           "path": "js/bliss.js",
-          "description": "Scrollspy plus płynne przewijanie do kotwic w 679 bajtach zminifikowanego kodu. Konfiguruje się globalnymi zmiennymi `menuid`, `gaptop`, `scrollspeed` i `menu_active_class` ustawianymi w HTML, więc nie zna żadnego selektora tego konkretnego szablonu.",
+          "description": "Scrollspy plus płynne przewijanie do kotwic w 679 bajtach zminifikowanego kodu. Konfiguruje się globalnymi zmiennymi `menuid`, `gaptop`, `scrollspeed` i `menu_active_class` ustawianymi w HTML, więc nie zna żadnego selektora tego konkretnego szablonu. Przyszedł z paczką szablonu w commicie `13493ae` i nie ma żadnej późniejszej zmiany — nadaje się do przeniesienia, ale nie jest kodem autora.",
           "reusable": true
         },
         {
           "name": "Fonty ikonowe wgrane lokalnie",
           "path": "fonts/",
-          "description": "Font Awesome Free 6.1.1 i Linearicons Free w komplecie formatów, trzymane w repo zamiast ładowane z CDN. To jedyny powód, dla którego strona renderuje się poprawnie bez sieci poza żądaniem do Google Fonts.",
+          "description": "Font Awesome Free 6.1.1 i Linearicons Free w komplecie formatów, trzymane w repo zamiast ładowane z CDN. Dzięki temu ikony renderują się bez sieci; jedyne żądanie na zewnątrz zostaje do Google Fonts.",
           "reusable": true
         },
         {
           "name": "index.html",
           "path": "index.html",
-          "description": "Topbar, przyklejony nagłówek z nawigacją kotwicową, banner, sekcja o autorce, liczniki, cztery karty oferty, tabele pakietów i stopka. Cała treść, łącznie z cennikiem 400–3000 PLN, jest wpisana na sztywno w znaczniki.",
+          "description": "Topbar, przyklejony nagłówek z nawigacją kotwicową, banner, sekcja o autorce, liczniki, cztery karty oferty, trzy tabele pakietów (1100 / 1900 / 3000 PLN) i stopka. Cała treść, łącznie z cennikiem 400–3000 PLN, jest wpisana na sztywno w znaczniki.",
           "reusable": false
         },
         {
           "name": "js/scripts.js",
           "path": "js/scripts.js",
-          "description": "Menu mobilne z blokadą scrolla na `body` i klasa `.fixed` na nagłówku po 100 px przewinięcia. Poniżej nich leżą wywołania `owlCarousel` i `datepicker` do bibliotek, których w repo już nie ma; ponieważ są na końcu callbacku, psują tylko konsolę i siebie nawzajem.",
+          "description": "Menu mobilne z blokadą scrolla na `body` i klasa `.fixed` na nagłówku po 100 px przewinięcia — 65 linii, które weszły z szablonem w commicie `13493ae` i nigdy nie były zmieniane. Poniżej nich leżą wywołania `owlCarousel` i `datepicker` do bibliotek, których w repo już nie ma; ponieważ są na końcu callbacku, psują tylko konsolę i siebie nawzajem.",
           "reusable": false
         },
         {
@@ -5451,12 +5443,12 @@
           "reason": "Identyczny produkt końcowy, jednostronicowa prezentacja osoby w HTML, tylko tam generowana z danych, a tutaj pisana ręcznie. Porównanie obu pokazuje, ile z tej strony dałoby się wyrazić jako szablon plus dane."
         }
       ],
-      "product": "Brak kupującego. To skończona robota freelancerska dla konkretnej klientki, marki Franke label, a nie produkt ani biblioteka. Wartość portfolio jest tu najniższa w całym zestawie, bo warstwa wizualna pochodzi z zewnętrznego szablonu, a autorskiego kodu jest około 60 linii JavaScriptu. Jedyne, czego dowodzi, to że projekt dla klienta zewnętrznego został dowieziony w całości w pięć dni.",
+      "product": "Brak kupującego. To skończona robota freelancerska dla konkretnej klientki, marki Franke label, a nie produkt ani biblioteka. Wartość portfolio jest tu najniższa w całym zestawie, bo warstwa wizualna pochodzi z zewnętrznego szablonu, a autorski wkład sprowadza się do treści i układu sekcji w `index.html` oraz cięć w `style.css` — katalog `js/` stoi dokładnie w stanie, w jakim przyszedł z szablonem. Jedyne, czego dowodzi, to że projekt dla klienta zewnętrznego został dowieziony w całości w pięć dni.",
       "highlights": [
-        "Kompletna strona sprzedażowa z ofertą, licznikami i dwiema tabelami pakietów dowieziona w **13 commitach między 11 a 15 czerwca 2024**, z czytelną historią: `remove contact form`, `add pricing`, `deleted reviews slider`.",
+        "Kompletna strona sprzedażowa z ofertą, licznikami i **trzema tabelami pakietów** (trzy bloki `div.pricing-table` w `index.html`, linie 250, 351 i 472: STANDARD 1100, PREMIUM 1900, VIP 3000 PLN) dowieziona w **13 commitach między 11 a 15 czerwca 2024**, z czytelną historią: `remove contact form`, `add pricing`, `deleted reviews slider`.",
         "Zero procesu budowania. Nie ma `package.json`, bundlera ani kroku kompilacji, więc strona działa po skopiowaniu katalogu na dowolny serwer statyczny i będzie działać dokładnie tak samo za pięć lat.",
-        "**63 wymiary liczone w `vw`** w `style.css`, a wszystkie przełamania układu wyniesione do osobnego `style-responsive.css` z trzema breakpointami. Skalowanie ciągłe jest tu oddzielone od skoków, co w szablonach tej klasy jest wyjątkiem.",
-        "Scrollspy z podświetlaniem aktywnej pozycji menu i płynnym przewijaniem mieści się w **679 bajtach** `js/bliss.js` i konfiguruje się wyłącznie zmiennymi globalnymi z HTML.",
+        "**63 wymiary liczone w `vw`** w `style.css`, a wszystkie przełamania układu wyniesione do osobnego `style-responsive.css` z trzema breakpointami. Skalowanie ciągłe jest tu oddzielone od skoków, ale zasługa nie jest autorska: import szablonu w `13493ae` miał 91 wymiarów `vw` i te same trzy breakpointy.",
+        "Scrollspy z podświetlaniem aktywnej pozycji menu i płynnym przewijaniem mieści się w **679 bajtach** `js/bliss.js` i konfiguruje się wyłącznie zmiennymi globalnymi z HTML. Plik przyszedł z szablonem w commicie `13493ae`, jest zminifikowany, nie niesie znacznika autorstwa i nie ma późniejszych zmian, więc nie jest to kod autora.",
         "Pochodzenie szablonu jest zadeklarowane w dwóch miejscach: w pierwszej linii `style-global.css` i w stopce strony. Nikt nie udaje, że warstwa wizualna jest autorska."
       ],
       "gaps": [
@@ -5464,7 +5456,7 @@
         "`index.html` linkuje w linii 19 arkusz `bxslider/jquery.bxslider.css`, a katalogu `bxslider` w repo nie ma. Każde załadowanie strony kończy się widocznym w konsoli 404.",
         "Pozycja menu **Cennik prowadzi do `#testimonials`** (linia 74), bo sekcja cennika w linii 245 odziedziczyła identyfikator po usuniętym sliderze opinii. Nawigacja działa przypadkiem, nie z projektu.",
         "Adres `franke.label@gmail.com` stoi w dwóch miejscach w tagu `<a>` bez atrybutu `href`, a `<span class=\"year\"></span>` w stopce nie jest przez nic wypełniany, więc renderuje się `Copyright ©  | Template By`. To dwa najbardziej widoczne elementy strony kontaktowej.",
-        "Martwe wywołania `owlCarousel` i `datepicker` w `js/scripts.js` to {{term:drift}} po dwóch usuniętych funkcjach: znaczniki zniknęły, skrypt został."
+        "Martwe wywołania `owlCarousel` i `datepicker` w `js/scripts.js` to {{term:drift}} po dwóch funkcjach szablonu, które autor wyciął: znaczniki oraz katalogi `owl-slider` i `contactform` zniknęły z repo w commitach `remove contact form` i `remove unnecessary files`, a `scripts.js` został nietknięty od importu."
       ],
       "risks": [
         "Repozytorium publikuje dane osobowe i biznesowe osoby trzeciej: imię, zdjęcia, adres e-mail, konta TikTok i Instagram oraz pełny cennik. Zgody na to nie da się potwierdzić z repozytorium, a cennik z czerwca 2024 może być już nieaktualny.",
@@ -5479,7 +5471,7 @@
         "Dodaj `href=\"mailto:...\"` przy obu wystąpieniach adresu i wpisz rok w stopce na sztywno. To trzy linie, które naprawiają jedyną ścieżkę konwersji na tej stronie.",
         "Dopisz NOTICE wyliczający licencje wgranych bibliotek i szablonu LayoutFlow, albo potwierdź u klientki, czy strona ma dalej publicznie stać z tym cennikiem."
       ],
-      "headline": "Dowód roboty freelancerskiej, nie inżynierii: 60 linii własnego JS na cudzym szablonie",
+      "headline": "Dowód roboty freelancerskiej, nie inżynierii: treść i sekcje na cudzym szablonie, zero własnego JS",
       "headlineTone": "warn",
       "github": {
         "stars": 0,
@@ -5499,7 +5491,7 @@
       "state": "active",
       "tier": "P2",
       "oneLiner": "Źródła książki o LangChain 1.x, LangGraph i async Pythonie dla inżyniera przychodzącego z .NET: 17 rozdziałów, 6 dodatków.",
-      "summary": "Repozytorium to 8 698 linii LaTeX-a: 17 rozdziałów, 6 dodatków, front matter i pipeline budujący PDF. Teza jest jedna i konsekwentnie broniona: po wydaniu 1.0 z 17 października 2025 `langchain` stał się cienką warstwą nad runtime'em `langgraph`, więc większość materiałów w sieci opisuje architekturę, której już nie ma. Najciekawsza decyzja inżynierska nie dotyczy treści, tylko **dyscypliny**: cały dług redakcyjny jest policzalny i liczony przez CI. Cel `make debt` zlicza rozdziały-stuby, brakujące zrzuty ekranu, bloki `verifybox` i diagramy, a workflow `build.yml` publikuje te same liczniki do GitHub Step Summary przy każdym buildzie. Blok `verifybox` oznacza listing, którego nie uruchomiono przeciwko przypiętym wersjom, i w całym repozytorium jest ich **zero**, co znaczy, że autor sam wyegzekwował własną regułę zamiast ją zadeklarować. Diagramy są tekstem: 45 źródeł Mermaid jest commitowanych, wyrenderowane PDF-y gitignorowane, a przy braku renderu makro drukuje źródło diagramu, więc build bez `mermaid-cli` nadal pokazuje czytelnikowi strukturę.",
+      "summary": "Repozytorium to 8 698 linii LaTeX-a w rozdziałach, dodatkach i front matterze (17 rozdziałów, 6 dodatków), plus preambuła i pipeline budujący PDF. Teza jest jedna i konsekwentnie broniona: po wydaniu 1.0 z 17 października 2025 `langchain` stał się cienką warstwą nad runtime'em `langgraph`, więc większość materiałów w sieci opisuje architekturę, której już nie ma. Najciekawsza decyzja inżynierska nie dotyczy treści, tylko **dyscypliny**: cały dług redakcyjny jest policzalny i liczony przez CI. Cel `make debt` zlicza rozdziały-stuby, brakujące zrzuty ekranu, bloki `verifybox` i diagramy, a workflow `build.yml` publikuje te same liczniki do GitHub Step Summary przy każdym buildzie. Blok `verifybox` oznacza listing, którego nie uruchomiono przeciwko przypiętym wersjom, i w 8 450 liniach rozdziałów i dodatków jest ich **zero**. Jedyne wystąpienie w repozytorium to okaz w legendzie ramek we `frontmatter/introduction.tex:157`, który Makefile świadomie wyłącza z licznika i opisuje to komentarzem. Autor sam wyegzekwował własną regułę zamiast ją zadeklarować. Diagramy są tekstem: 45 źródeł Mermaid jest commitowanych, wyrenderowane PDF-y gitignorowane, a przy braku renderu makro drukuje źródło diagramu, więc build bez `mermaid-cli` nadal pokazuje czytelnikowi strukturę.",
       "stack": [
         "LaTeX (latexmk, pdflatex, klasa book)",
         "tcolorbox / listings / imakeidx / microtype",
@@ -5521,7 +5513,7 @@
         },
         {
           "label": "Linie .tex",
-          "value": "8 698"
+          "value": "8 698 (chapters + appendices + frontmatter; z main.tex i preamble.tex 9 222)"
         },
         {
           "label": "Wpisy indeksu",
@@ -5537,7 +5529,7 @@
         },
         {
           "label": "Bloki verifybox",
-          "value": "0"
+          "value": "0 w rozdziałach i dodatkach (8 450 linii, `grep -rc 'begin{verifybox}' chapters appendices`); 1 okaz w legendzie wstępu"
         },
         {
           "label": "Skrypty pomiarowe",
@@ -5613,8 +5605,8 @@
         },
         {
           "name": "Pipeline diagramów Mermaid",
-          "path": "Makefile + figures/mermaid/",
-          "description": "Reguła renderuje każdy `.mmd` przez `npx @mermaid-js/mermaid-cli@11` z `--pdfFit`, autowykrywa przeglądarkę i sama generuje `.puppeteer.json`. Wejściem jest dowolny katalog źródeł, a wspólny `config.json` trzyma paletę poza pojedynczymi diagramami.",
+          "path": "Makefile",
+          "description": "Reguła `figures/diagrams/%.pdf: figures/mermaid/%.mmd` renderuje każde z 45 źródeł przez `npx @mermaid-js/mermaid-cli@11` z `--pdfFit`, autowykrywa przeglądarkę i sama generuje `figures/mermaid/.puppeteer.json`. Wejściem jest dowolny katalog źródeł, a wspólny `figures/mermaid/config.json` trzyma paletę poza pojedynczymi diagramami.",
           "reusable": true
         },
         {
@@ -5664,7 +5656,7 @@
       ],
       "product": "Brak kupującego w sensie transakcyjnym i licencja to przesądza: proza jest na CC BY-NC-SA 4.0, więc komercyjna redystrybucja tekstu jest wykluczona, a w repozytorium nie ma żadnej ścieżki sprzedaży. Realna wartość to {{term:evidence|materiał dowodowy}} pod rekrutację i konsulting w obszarze agentów LLM, oparty na weryfikowanym API i własnych pomiarach zamiast przepisanej dokumentacji. Kanałem zarobkowym mogłoby być szkolenie albo wydanie papierowe, ale nic w repozytorium tego nie przygotowuje: nie ma ani wersji do druku, ani listy mailingowej, ani strony z ofertą.",
       "highlights": [
-        "**Zero bloków `verifybox` w 8 698 liniach tekstu.** Środowisko istnieje w preambule i jest liczone przez CI, a mimo to nie użyto go ani razu, bo każdy z 82 listingów przepuszczono przez przypięte wersje. Konwencja została wyegzekwowana, nie ogłoszona.",
+        "**Zero bloków `verifybox` w 8 450 liniach rozdziałów i dodatków.** Środowisko istnieje w preambule i jest liczone przez CI (`grep -rc 'begin{verifybox}' chapters appendices`), a mimo to nie oznaczono nim ani jednego z 82 listingów — każdy przepuszczono przez przypięte wersje. Jedyne `\\begin{verifybox}` w repozytorium to okaz w legendzie ramek we `frontmatter/introduction.tex:157`, czyli tekst tłumaczący czytelnikowi, co ta ramka znaczy, a nie nieuruchomiony listing; Makefile wyłącza go z licznika i mówi dlaczego. Konwencja została wyegzekwowana, nie ogłoszona.",
         "Przebieg spójnościowy wyłapał **własny błąd książki**: domyślny `recursion_limit` w `langgraph` to 10007, nie 25. Stara wartość przetrwała cały szkic w bloku `console`, którego nikt nigdy nie uruchomił, i została poprawiona w rozdziale oraz w dodatku (commit 9435b1f).",
         "Cztery skrypty pomiarowe (702 linie) są {{term:hermetyczny|hermetyczne}}: żaden nie potrzebuje dostawcy modelu. Eksperyment 1 uderza w ręcznie napisany serwer HTTP na localhost zamiast w `asyncio.sleep`, bo sen dowodzi tylko tego, że scheduler potrafi planować.",
         "Eksperyment 5 rozdzielono na część strukturalną i jakościową, i tylko druga wymaga budżetu. Liczba wywołań modelu jest własnością {{term:topologie|topologii}}, więc licznik na fake'u daje tę samą odpowiedź co realny dostawca: nadzorca robi pięć wywołań przy dwóch pojedynczego agenta, a trzy z nich są routingiem, nie pracą.",
@@ -5788,7 +5780,7 @@
       "highlights": [
         "Całe repozytorium waży **49 bajtów** i mieści się w dwóch liniach. To jedyny wpis w portfolio, dla którego pełny listing treści zajmuje mniej miejsca niż jego własny opis.",
         "Wszystkie cztery referencje git — `main`, `claude/portfolio-html-app-w6306n` i ich odpowiedniki na `origin` — wskazują dokładnie to samo drzewo. Gałąź robocza nigdy nie dostała ani jednego commita.",
-        "Jedyny commit jest podpisany autorem `dev_insight`, a nie kontem osobowym, co odróżnia go od reszty historii w portfolio i wskazuje na utworzenie przez automat, nie przez człowieka siadającego do pisania."
+        "Jedyny commit powstał przez interfejs webowy GitHuba: committerem jest `GitHub <noreply@github.com>`, a autorem `dev_insight <34044180+konradcinkusz@users.noreply.github.com>` — czyli osobiste konto autora pod nazwą wyświetlaną, która występuje w 31 lokalnych repozytoriach portfolio (m.in. `copilot-scope` 64 commity, `konrad-cinkusz-cv-maker` 48, `agent-eval-bench` 33). Autor niczego tu nie wyróżnia; wyróżnia to, że jest to commit zakładający repozytorium, a nie ślad pracy nad treścią."
       ],
       "gaps": [
         "Brakuje wszystkiego poza tytułem: zero stron treści, zero notatników, zero plików źródłowych.",
@@ -6051,7 +6043,7 @@
       "metrics": [
         {
           "label": "Projekty w solucji",
-          "value": "10 .NET + 1 Angular"
+          "value": "11 projektów .NET w `Primates.sln` (10 w `src/`, 1 w `tests/`); Angular `src/Primates.Web` nie ma pliku projektu i nie jest w solucji"
         },
         {
           "label": "Linie wspólnego jądra",
@@ -6067,7 +6059,7 @@
         },
         {
           "label": "Strony .razor w BlazorWeb",
-          "value": "26"
+          "value": "18 plików `.razor` z dyrektywą `@page` (20 tras); 26 to liczba wszystkich plików `.razor`"
         },
         {
           "label": "Pliki TypeScript (Angular 10)",
@@ -6158,7 +6150,7 @@
         {
           "name": "Primates.BlazorWeb",
           "path": "src/Primates.BlazorWeb",
-          "description": "Drugi frontend zbudowany pod wzorzec BFF (ADR-014): przeglądarka rozmawia wyłącznie z własnym originem, tokeny siedzą w serwerowej sesji ciasteczkowej, obrazy idą przez własne `/media/{id}`. 26 stron `.razor`, w tym płatne odblokowanie kontaktu i UI czatu agenta, których Angular nigdy nie dowiózł.",
+          "description": "Drugi frontend zbudowany pod wzorzec BFF (ADR-014): przeglądarka rozmawia wyłącznie z własnym originem, tokeny siedzą w serwerowej sesji ciasteczkowej, obrazy idą przez własne `/media/{id}`. 18 routowalnych stron (pliki `.razor` z `@page`, razem 20 tras) z 26 plików `.razor` w projekcie, w tym płatne odblokowanie kontaktu i UI czatu agenta, których Angular nigdy nie dowiózł.",
           "reusable": false
         },
         {
@@ -6198,12 +6190,12 @@
         "Testów poza jądrem nie ma. Sześć przypadków dotyczy reguł ADR-002; pozycja 16 checklisty standardów jest czerwona dla wszystkich siedmiu deployowalnych i dokumentacja sama to odnotowuje.",
         "**Zero tagów git w tym klonie, przy deployu wyzwalanym wyłącznie tagiem `v*`.** Z repozytorium nie da się potwierdzić, że jakikolwiek release faktycznie poszedł, a adresy `primates-*.fly.dev` pochodzą z linii `app=` w fly.toml i z `docs/deployment.md`, nie z odpytania. Historia zawiera poprawki błędów deployu, więc coś było uruchamiane, ale to poszlaka.",
         "Eksport {{term:otel|OTLP}} jest okablowany w jądrze, a żaden fly.toml nie ustawia `OTEL_EXPORTER_OTLP_ENDPOINT`. Wdrożone środowisko nie eksportuje telemetrii nigdzie i mówi to wprost pozycja 4 audytu standardów.",
-        "Sześć z ośmiu Dockerfile'i ma `org.opencontainers.image.source` wskazujący na `konradcinkusz/FSE`, czyli na źródło, którego już nie ma. Obrazy w registry.fly.io podpisują się nieistniejącym repozytorium."
+        "Siedem z ośmiu Dockerfile'i ma `org.opencontainers.image.source` wskazujący na `konradcinkusz/FSE`, czyli na źródło, którego już nie ma; tylko `src/Primates.AgentService/Dockerfile` wskazuje na `konradcinkusz/primates`. Obrazy w registry.fly.io podpisują się nieistniejącym repozytorium."
       ],
       "next": [
         "Dopisz deploy BlazorWeb i authservice do `flyio.yml` albo usuń ich pliki fly.toml. Obecny stan obiecuje wdrożenie, którego nie ma.",
         "Usuń klucz Google Maps z czterech modułów Angulara do istniejącego `assets/config.json` i dodaj gitleaks do workflow. Klucz jest w historii, więc rotacja i tak jest konieczna.",
-        "Dodaj plik LICENSE i popraw `org.opencontainers.image.source` w sześciu Dockerfile'ach na to repozytorium.",
+        "Dodaj plik LICENSE i popraw `org.opencontainers.image.source` w siedmiu Dockerfile'ach na to repozytorium.",
         "Wypchnij tag `v*` i potwierdź, że reguła zimnego środowiska faktycznie podnosi cały estate od zera. Dziś to nieprzetestowana z repozytorium obietnica.",
         "Napisz testy charakteryzujące księgę punktów i pipeline publikacji, zanim cokolwiek w nich się zmieni."
       ],
@@ -6396,8 +6388,8 @@
       "gaps": [
         "**README ma jedną linię**, `# TinyTransformer`, 17 bajtów. Ani opisu, ani sposobu uruchomienia, ani powodu istnienia repozytorium.",
         "Brak propagacji wstecznej, gradientów i pętli treningowej. Model liczy na losowych wagach, więc wyjście nie ma znaczenia semantycznego, a `ILayer` w obecnym kształcie tego nie udźwignie.",
-        "Kodowanie pozycyjne nie istnieje, choć diagram koncepcyjny je pokazuje, a `Program.cs` niesie martwą zmienną `posEncoding` i komentarz o jej budowie. To jedyna luka między kodem a własnym diagramem.",
-        "`diagram_solution.puml` opisuje nieistniejący pakiet `TinyTransformer.Autograd` oraz klasy `EmbeddingAuto`, `SelfAttentionAuto` i `TransformerEncoderBlockAuto`. Projekt zamiaru podany jako opis stanu.",
+        "Kodowanie pozycyjne nie istnieje, choć diagram koncepcyjny je pokazuje, a `Program.cs` niesie martwą zmienną `posEncoding` i komentarz o jej budowie. To jedna z kilku rozbieżności między kodem a własnymi diagramami, a nie jedyna; resztę zbiera punkt niżej.",
+        "`diagram_solution.puml` opisuje nieistniejący pakiet `TinyTransformer.Autograd` z klasami `Tensor` i `TensorOps`, warstwy `EmbeddingAuto`, `SelfAttentionAuto` i `TransformerEncoderBlockAuto` (w kodzie są `Embedding`, `SelfAttention` i `TransformerEncoderBlock`, sufiks `Auto` nosi wyłącznie `FeedForwardAuto`) oraz testy `FeedForwardTests` i `TransformerBlockTests` (w repozytorium jest `FeedForwardAutoTests`, a testów bloku nie ma wcale). Siedem nazw klas i cały pakiet bez odpowiednika wśród 35 plików w gicie. Projekt zamiaru podany jako opis stanu.",
         "Demo konsolowe wypisuje sam nagłówek i nie drukuje macierzy wyjściowej, a `TransformerEncoderBlock` jest jedyną warstwą bez pliku testowego. Kto sklonuje repo i uruchomi projekt, nie zobaczy niczego."
       ],
       "next": [
@@ -6447,7 +6439,7 @@
       "primaryLanguage": "C#",
       "license": "MIT",
       "tests": "Dokładnie 4 testy `[Fact]` w jednym projekcie, wszystkie na silniku; wartości oczekiwane (0,461538 dla sieci WetRain, 0,336689 dla wariantu Alarm) wyprowadzone ręcznie z CPT w komentarzach, a nie skopiowane z wyjścia algorytmu. Webowa ścieżka liczenia nie ma żadnego testu, co README i analiza luk stwierdzają wprost. Przebiegu nie zweryfikowano — w środowisku przeglądu nie było SDK .NET.",
-      "ci": "Cztery workflowy. `build.yml` robi restore, build Release i `dotnet test` całej solucji, a następnie **stosuje ręcznie napisaną migrację EF Core wobec usługi `postgres:16`** — migracja powstała bez lokalnego dostępu do bazy i to jest jej jedyna weryfikacja. Pozostałe trzy (`deploy.yml` na flyctl, `pages.yml`, `reset-demo.yml` z cronem co 6 godzin) same się wyłączają, gdy brakuje sekretu albo zmiennej, więc dziś wszystkie kończą się no-opem.",
+      "ci": "Cztery workflowy. `build.yml` robi restore, build Release i `dotnet test` całej solucji, a następnie **stosuje ręcznie napisaną migrację EF Core wobec usługi `postgres:16`** — migracja powstała bez lokalnego dostępu do bazy i to jest jej jedyna weryfikacja. Tylko dwa z pozostałych trzech same się wyłączają: `deploy.yml` (flyctl) sprawdza w skrypcie `if [ -z \"$FLY_API_TOKEN\" ]` i kończy `exit 0`, a `reset-demo.yml` (cron co 6 godzin) ma na krokach `if: ${{ vars.DEMO_APP_URL != '' }}` z gałęzią „not configured yet”; bez sekretu i bez zmiennej oba kończą się no-opem. `pages.yml` nie ma żadnego takiego zabezpieczenia — w pliku nie występuje ani jeden `if:`, ani odwołanie do `vars.` czy `secrets.` — więc odpala się przy każdym pushu ruszającym `html/` i zgodnie z własnym nagłówkiem krok `actions/deploy-pages@v4` **kończy się błędem** „Pages site not found”, dopóki właściciel repozytorium nie przestawi Settings → Pages → Source na „GitHub Actions”. To jest czerwony bieg, a nie ciche pominięcie.",
       "metrics": [
         {
           "label": "Commity",
@@ -7576,8 +7568,8 @@
       },
       {
         "name": "Nocny kolektor zdrowia",
-        "how": "Jeden zaplanowany workflow w repozytorium-hubie: dla każdego slugu pobiera status CI, otwarte PR-y z podziałem na bota i człowieka, wiek najstarszego PR-a, commity od ostatniego tagu i datę ostatniego pusha. Zapisuje `data/health.json` i otwiera **jedno** zgłoszenie z przekroczonymi progami — nie jedno na repozytorium.",
-        "where": "do zbudowania: konradcinkusz/.github/workflows/health.yml"
+        "how": "Jeden zaplanowany workflow w repozytorium-hubie: dla każdego slugu pobiera status CI na gałęzi domyślnej, otwarte PR-y z podziałem na bota i człowieka, wiek najstarszego PR-a, commity od ostatniego tagu, datę ostatniego pusha, widoczność i archiwizację. Progi są **per poziom** — czerwone CI na P0 przekracza natychmiast, na P3 dopiero po sześćdziesięciu dniach. Zapisuje `data/health.json`, przelicza manifest i otwiera **jedno** zgłoszenie na cały estate, które samo się zamyka, gdy progi wrócą pod kreskę.",
+        "where": "konradcinkusz/scripts/collect-health.mjs · scripts/health-issue.mjs · .github/workflows/health.yml"
       },
       {
         "name": "Grupowany dependabot",
@@ -8230,5 +8222,6 @@
         "cognitive-multi-agent-simulation-analysis"
       ]
     }
-  ]
+  ],
+  "health": null
 }

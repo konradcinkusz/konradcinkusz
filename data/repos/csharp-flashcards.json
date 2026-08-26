@@ -5,8 +5,8 @@
   "visibility": "public",
   "state": "active",
   "tier": "P2",
-  "oneLiner": "Talia 269 fiszek Q&A o C# i .NET złożona jako pionowy deck Beamer, kompilowana do PDF przez GitHub Actions na tagu `v*`.",
-  "summary": "Każde pytanie ma własny slajd, odpowiedź jest slajdem następnym, a całość siedzi w 24 plikach `areas/*.tex` wciąganych 24 dyrektywami `\\input` z `main.tex`. Warstwę prezentacyjną niesie własna klasa `mybeamer.cls` (24 kolory sekcji, wspólna konfiguracja `minted` i `listings`, automatyczna ramka Outline na starcie sekcji) plus `mybeamer.sty` z makrami `\\QuestionSlide`, `\\CategoryBadge` i `\\TOCButtonTall`. Najciekawsza decyzja jest w geometrii: strona ma **1080x1920 pt**, czyli proporcje ekranu telefonu, więc PDF czyta się kciukiem w kolejce, a nie na rzutniku. Druga decyzja jest już porażką, którą widać w kodzie: `\\AnswerSlide` zdefiniowano i **nie użyto ani razu**, bo 197 bloków `minted` wymusza `frame[fragile]`, więc wszystkie 269 odpowiedzi napisano ręcznie zamiast przez makro. Dostawa to {{term:tagdeploy|wydanie na tagu}} — `xelatex` z `-shell-escape` w akcji `xu-cheng/latex-action@v4` i publikacja `CSharp_FlashCards.pdf` jako GitHub Release. Skończona jest treść i pipeline; opakowanie — landing, slajd tytułowy, linki w stopce — pochodzi z poprzedniej edycji i nikt go nie zaktualizował.",
+  "oneLiner": "Talia 269 fiszek Q&A o C# i .NET złożona jako deck Beamer na stronie 1080x1920 pt, kompilowana do PDF przez GitHub Actions na tagu `v*`.",
+  "summary": "Każde pytanie ma własny slajd, odpowiedź jest slajdem następnym, a całość siedzi w 24 plikach `areas/*.tex` wciąganych 24 dyrektywami `\\input` z `main.tex`. Warstwę prezentacyjną niesie własna klasa `mybeamer.cls` (24 kolory sekcji, wspólna konfiguracja `minted` i `listings`, automatyczna ramka Outline na starcie sekcji) plus `mybeamer.sty` z makrami `\\QuestionSlide`, `\\CategoryBadge` i `\\TOCButtonTall`. Najciekawsza decyzja jest w geometrii i jest niedokończona: `main.tex` przekazuje do pakietu `geometry` `paperwidth=1080pt` i `paperheight=1920pt`, czyli proporcje ekranu telefonu, a linia niżej przekazuje do tego samego pakietu opcję `landscape`, która te wymiary zamienia miejscami na 1920x1080. W repozytorium nie ma ani zbudowanego PDF-a, ani toolchainu LaTeX-a, więc końcowej orientacji nie da się stąd potwierdzić — źródło deklaruje obie naraz. Druga decyzja jest już porażką, którą widać w kodzie: `\\AnswerSlide` zdefiniowano i **nie użyto ani razu**, bo 197 bloków `minted` wymusza `frame[fragile]`, więc wszystkie 269 odpowiedzi napisano ręcznie zamiast przez makro. Dostawa to {{term:tagdeploy|wydanie na tagu}} — `xelatex` z `-shell-escape` w akcji `xu-cheng/latex-action@v4` i publikacja `CSharp_FlashCards.pdf` jako GitHub Release. Skończona jest treść i pipeline; opakowanie — landing, slajd tytułowy, linki w stopce — pochodzi z poprzedniej edycji i nikt go nie zaktualizował.",
   "stack": [
     "LaTeX (Beamer)",
     "XeLaTeX + latexmk",
@@ -22,30 +22,73 @@
   "tests": "Brak testów. Nie ma frameworka testowego ani skryptu weryfikującego; jedyna kontrola to fakt, że kompilacja LaTeX-a w CI musi się powieść, a ta odpala się wyłącznie na tagu.",
   "ci": "Dwa workflowy. `ci.yml` startuje **tylko na push tagu `v*`**: buduje `main.tex` przez `xu-cheng/latex-action@v4` z XeLaTeX-em i `shell_escape`, wrzuca artefakt i publikuje release przez `softprops/action-gh-release@v2`. `pages.yml` deployuje katalog `docs` na GitHub Pages przy zmianie w `docs/**` lub ręcznie; żaden workflow nie buduje na zwykłym pushu ani na PR.",
   "metrics": [
-    { "label": "Pary pytanie-odpowiedź", "value": "269" },
-    { "label": "Pliki obszarów tematycznych", "value": "24" },
-    { "label": "Linie LaTeX w areas/", "value": "7 617" },
-    { "label": "Bloki kodu minted", "value": "197" },
-    { "label": "Wywołania \\CategoryBadge w treści", "value": "596" },
-    { "label": "Pytania z prefiksem trudności", "value": "189 z 269 (48 x *, 107 x **, 34 x ***)" },
-    { "label": "Pliki śledzone przez git", "value": "36" }
+    {
+      "label": "Pary pytanie-odpowiedź",
+      "value": "269"
+    },
+    {
+      "label": "Pliki obszarów tematycznych",
+      "value": "24"
+    },
+    {
+      "label": "Linie LaTeX w areas/",
+      "value": "7 617"
+    },
+    {
+      "label": "Bloki kodu minted",
+      "value": "197"
+    },
+    {
+      "label": "Wywołania \\CategoryBadge w treści",
+      "value": "596"
+    },
+    {
+      "label": "Pytania z prefiksem trudności",
+      "value": "262 z 269 (55 x *, 173 x **, 34 x ***) — liczone przez sparsowanie argumentu obowiązkowego każdego \\QuestionSlide z dopasowaniem nawiasów, także tam, gdzie tytuł stoi w linii następnej po argumencie opcjonalnym"
+    },
+    {
+      "label": "Pliki śledzone przez git",
+      "value": "36"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/csharp-flashcards",
     "live": [
-      { "label": "Najnowszy PDF z Releases", "url": "https://github.com/konradcinkusz/csharp-flashcards/releases/latest/download/CSharp_FlashCards.pdf" },
-      { "label": "Strona wydań", "url": "https://github.com/konradcinkusz/csharp-flashcards/releases/latest" },
-      { "label": "Landing (GitHub Pages)", "url": "https://konradcinkusz.github.io/csharp-flashcards/" }
+      {
+        "label": "Landing (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/csharp-flashcards/"
+      }
     ],
     "docs": [
-      { "label": "README", "path": "README.md" },
-      { "label": "Generyczny prompt generatora repo LaTeX", "path": "MASTER_PROMPT.md" },
-      { "label": "Landing page", "path": "docs/index.html" },
-      { "label": "Workflow buildu i wydania", "path": ".github/workflows/ci.yml" },
-      { "label": "Licencja (MIT No Attribution)", "path": "LICENSE" }
+      {
+        "label": "README",
+        "path": "README.md"
+      },
+      {
+        "label": "Generyczny prompt generatora repo LaTeX",
+        "path": "MASTER_PROMPT.md"
+      },
+      {
+        "label": "Landing page",
+        "path": "docs/index.html"
+      },
+      {
+        "label": "Workflow buildu i wydania",
+        "path": ".github/workflows/ci.yml"
+      },
+      {
+        "label": "Licencja (MIT No Attribution)",
+        "path": "LICENSE"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
   "components": [
     {
       "name": "mybeamer.sty",
@@ -80,7 +123,7 @@
     {
       "name": "mybeamer.cls",
       "path": "mybeamer.cls",
-      "description": "Geometria 1080x1920 pt, 22 kolory kategorii plus `sec1bg`–`sec24bg`, wspólne tło `CodeBg` dla `minted` i `listings`, własne navigation symbols z przyciskiem Contents. Liczba kolorów sekcji jest zaszyta pod 24 obszary tej talii, a stopka linkuje do starej nazwy repozytorium.",
+      "description": "Klasa nie ustawia rozmiaru strony — robi tylko `\\RequirePackage{geometry}`, a wymiary i opcja `landscape` przychodzą z `main.tex`. Zawiera 22 kolory kategorii plus `sec1bg`–`sec24bg`, wspólne tło `CodeBg` dla `minted` i `listings`, własne navigation symbols z przyciskiem Contents. Liczba kolorów sekcji jest zaszyta pod 24 obszary tej talii, a stopka linkuje do starej nazwy repozytorium.",
       "reusable": false
     },
     {
@@ -97,16 +140,30 @@
     }
   ],
   "overlaps": [
-    { "slug": "llm-book", "reason": "Ten sam warsztat: długi dokument LaTeX z własnym preamble i klasą, budowany `latexmk` i pilnowany przez CI. Konwencje z jednego repo dają się przenieść do drugiego bez tłumaczenia." },
-    { "slug": "maf-book", "reason": "Również książka techniczna w LaTeX-u adresowana do inżynierów .NET, więc obszary C#, Azure i wzorce częściowo pokrywają się treściowo." },
-    { "slug": "black-hole-sim", "reason": "`presentations/theme/beamerthemedeepdiveinto.sty` niesie makra z ogólnej teorii względności, więc motyw jest wspólny albo skopiowany z decku o czarnych dziurach." },
-    { "slug": "landing-page", "reason": "`docs/index.html` to ta sama klasa artefaktu: jednoplikowy statyczny landing publikowany przez GitHub Pages." },
-    { "slug": "dev-insight", "reason": "Deck podpisuje się marką dev_insight, więc działa jako kanał dystrybucji tej samej tożsamości." }
+    {
+      "slug": "llm-book",
+      "reason": "Ten sam warsztat: długi dokument LaTeX z własnym preamble i klasą, budowany `latexmk` i pilnowany przez CI. Konwencje z jednego repo dają się przenieść do drugiego bez tłumaczenia."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "Również książka techniczna w LaTeX-u adresowana do inżynierów .NET, więc obszary C#, Azure i wzorce częściowo pokrywają się treściowo."
+    },
+    {
+      "slug": "black-hole-sim",
+      "reason": "`presentations/theme/beamerthemedeepdiveinto.sty` niesie makra z ogólnej teorii względności, więc motyw jest wspólny albo skopiowany z decku o czarnych dziurach."
+    },
+    {
+      "slug": "landing-page",
+      "reason": "`docs/index.html` to ta sama klasa artefaktu: jednoplikowy statyczny landing publikowany przez GitHub Pages."
+    },
+    {
+      "slug": "dev-insight",
+      "reason": "Deck podpisuje się marką dev_insight, więc działa jako kanał dystrybucji tej samej tożsamości."
+    }
   ],
   "product": "Brak kupującego. To materiał do nauki i przygotowania do rekrutacji, rozdawany za darmo jako PDF na {{term:mit|licencji MIT-0}}, więc jego funkcja jest kanałowa i wizerunkowa: buduje rozpoznawalność marki dev_insight i ściąga ruch na GitHub. Realny odbiorca to programista .NET przed rozmową rekrutacyjną albo ktoś prowadzący szkolenie. Za obecną formę nikt nie zapłaci, bo nie ma tu ani powtórek z odstępami, ani śledzenia postępu, ani wersji interaktywnej — jest jeden statyczny PDF, i to jest cały produkt.",
   "highlights": [
-    "269 pytań w `areas/*.tex` i dokładnie **269 ramek odpowiedzi** — dopasowanie jest co do jednego, mimo że nic tego nie sprawdza automatycznie.",
-    "Strona ma **1080x1920 pt**, czyli proporcje telefonu. Deck jest celowo pionowy, żeby PDF czytało się na ekranie w ręce, a nie na rzutniku.",
+    "269 wywołań `\\QuestionSlide` w `areas/*.tex` i 270 ramek `frame` z odpowiedziami — przyporządkowanie jest jeden do jednego poza jednym pytaniem w `8-design-patterns.tex`, które ma dwie ramki odpowiedzi. Nic tego nie sprawdza automatycznie.",
     "197 bloków kodu C# składanych przez `minted` z jedną konfiguracją (`linenos`, tło `CodeBg`, `breakanywhere`) zdefiniowaną raz w klasie zamiast per slajd.",
     "`MASTER_PROMPT.md` wyciąga z tego repo **generator repozytoriów LaTeX**: manifest plików w kolejności, rozgałęzienie na cztery typy dokumentu i lista self-check. To repo, które opisało samo siebie jako szablon.",
     "Ścieżka dostawy nie ma ręcznego kroku: tag `v*` uruchamia XeLaTeX w Actions i wypycha `CSharp_FlashCards.pdf` do Releases."
@@ -116,7 +173,9 @@
     "Rok się rozjechał: README mówi 2026, slajd tytułowy `main.tex` i tytuł landingu nadal mówią 2025, a `Copyright` w LICENSE też jest datowany na 2025.",
     "`main.tex` i `mybeamer.cls` linkują do `konradcinkusz/CSharp-FlashCards-2025`, czyli **nie do tego repozytorium**. Stopka każdego z kilkuset slajdów PDF prowadzi pod nieistniejącą nazwę.",
     "Makro `\\AnswerSlide` jest zdefiniowane i użyte **zero razy** — `minted` wymusza `frame[fragile]`, więc wszystkie 269 odpowiedzi obchodzą API i piszą ramkę ręcznie. Martwy kod plus rozjazd deklarowanego interfejsu z praktyką.",
-    "189 z 269 pytań ma prefiks `*`, `**` lub `***`, 80 nie ma żadnego. Gwiazdki renderują się dosłownie w tytule slajdu i nigdzie nie ma legendy, więc czytelnik widzi szum zamiast skali trudności."
+    "262 z 269 pytań ma prefiks `*`, `**` lub `***` (55 / 173 / 34); bez prefiksu jest 7, z czego 6 to kolejne kroki jednego przepływu OAuth. Gwiazdki renderują się dosłownie w tytule slajdu i nigdzie nie ma legendy, więc czytelnik widzi szum zamiast skali trudności.",
+    "`main.tex` deklaruje orientację dwa razy i sprzecznie: linie 1–3 przekazują do `geometry` `paperwidth=1080pt`/`paperheight=1920pt`, a linia 4 przekazuje `landscape`, który zamienia wymiary na 1920x1080. Bez zbudowanego PDF-a nie da się rozstrzygnąć, która deklaracja wygrywa.",
+    "Linki do `releases/latest` zostały usunięte z sekcji live: `git tag` nie zwraca ani jednego tagu, `ci.yml` odpala się wyłącznie na push tagu `v*`, a w repozytorium nie ma zbudowanego PDF-a — z samego repozytorium nie da się potwierdzić, że jakiekolwiek wydanie kiedykolwiek powstało."
   ],
   "risks": [
     "Rozjazd licencyjny: LICENSE to MIT No Attribution, a odznaka w README i na landingu mówi MIT. Dwie różne umowy w jednym repozytorium.",

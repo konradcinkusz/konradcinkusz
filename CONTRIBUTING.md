@@ -21,6 +21,10 @@ scripts/
   check-repos.mjs         every slug still exists with the claimed visibility
   smoke-site.mjs          structural check of site/index.html
   render-check.mjs        drives the built site in Chromium, 3 viewports, both themes
+  theme-audit.mjs         every colour resolves on bare :root, none only inside a theme block
+  collect-health.mjs      nightly: reads every repo in the estate -> data/health.json
+  health-selftest.mjs     exercises every collector threshold against a stub API
+  health-issue.mjs        one issue for the whole estate, closed again when clean
 site/                     the served artefact; never hand-edit site/data/
 deploy/nginx.conf         listens on 8080, serves /healthz outside the SPA fallback
 flyio/portfolio.fly.toml  one app, scale to zero, no secrets
@@ -33,6 +37,7 @@ node scripts/build-manifest.mjs      # regenerate
 node scripts/validate-portfolio.mjs  # schema + cross-references
 node scripts/smoke-site.mjs          # tabs, panels, local assets
 node scripts/render-check.mjs         # real browser, both themes, 3 viewports
+npm run check                        # everything CI runs, except the browser
 cd site && python3 -m http.server 8000
 ```
 
@@ -80,6 +85,23 @@ Inside any string you may use `**bold**`, `` `code` `` and `{{term:id}}` /
 plausible one — the same rule the books in this estate apply to their measurement tables,
 for the same reason: a fabricated number looks exactly like a measured one and survives
 review.
+
+## The nightly collector
+
+`data/health.json` is written by `scripts/collect-health.mjs` and merged into the manifest
+when it exists. The site renders the panel only when it does; on a fresh clone it says so
+rather than showing an empty box.
+
+It needs `ESTATE_READ_TOKEN` — a fine-grained, read-only token spanning the account, because
+the default `GITHUB_TOKEN` cannot see this account's other repositories and an
+unauthenticated run would report every private one as deleted. See
+[`flyio/SECRETS.md`](flyio/SECRETS.md) for the exact three permissions.
+
+**Never commit a hand-written `data/health.json`.** It is collector output; a hand-written
+one is a fabricated measurement wearing the costume of a real one, which is the single thing
+this repository's own operating principles forbid. The collector's thresholds are tested
+against a stub instead — `scripts/health-selftest.mjs` asserts each one fires on its own
+fixture and stays silent on a clean repository.
 
 ## Deploying
 

@@ -264,8 +264,8 @@
     },
     {
       "name": "Nocny kolektor zdrowia",
-      "how": "Jeden zaplanowany workflow w repozytorium-hubie: dla każdego slugu pobiera status CI, otwarte PR-y z podziałem na bota i człowieka, wiek najstarszego PR-a, commity od ostatniego tagu i datę ostatniego pusha. Zapisuje `data/health.json` i otwiera **jedno** zgłoszenie z przekroczonymi progami — nie jedno na repozytorium.",
-      "where": "do zbudowania: konradcinkusz/.github/workflows/health.yml"
+      "how": "Jeden zaplanowany workflow w repozytorium-hubie: dla każdego slugu pobiera status CI na gałęzi domyślnej, otwarte PR-y z podziałem na bota i człowieka, wiek najstarszego PR-a, commity od ostatniego tagu, datę ostatniego pusha, widoczność i archiwizację. Progi są **per poziom** — czerwone CI na P0 przekracza natychmiast, na P3 dopiero po sześćdziesięciu dniach. Zapisuje `data/health.json`, przelicza manifest i otwiera **jedno** zgłoszenie na cały estate, które samo się zamyka, gdy progi wrócą pod kreskę.",
+      "where": "konradcinkusz/scripts/collect-health.mjs · scripts/health-issue.mjs · .github/workflows/health.yml"
     },
     {
       "name": "Grupowany dependabot",

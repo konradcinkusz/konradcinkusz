@@ -7,46 +7,146 @@
   "tier": "P3",
   "oneLiner": "449 testów Playwright w .NET dla Portalu AureliusPromptus plus audyt, który wykazał, że 196 z nich nic nie sprawdzało.",
   "summary": "Dwa projekty testów akceptacyjnych Playwright wymierzone w jedną aplikację Portal, domyślnie pod `http://localhost:3003`. Główny projekt to xUnit v3 na .NET 9 i Playwright 1.52: `BrowserFixture` trzyma jeden proces przeglądarki na kolekcję, `PlaywrightTestBase` daje świeży kontekst i stronę na test z nagrywaniem wideo oraz zrzutem ekranu przy porażce, a `AuthTestBase` zakłada unikalne konto przez UI i kasuje je w teardownie. Obok stoi drugi, mniejszy projekt na MSTest 4 i .NET 10 z 53 testami, który duplikuje tę samą infrastrukturę przeciw tej samej aplikacji. Najciekawszą rzeczą w repozytorium nie jest jednak kod testów, tylko `E2E_Tests_analysis.md`: audyt, który skatalogował wzorce testów pozornych i policzył je pojedynczo, w tym 196 pustych ciał metod, 186 miejsc guard-then-bail i jeden mechaniczny błąd API Playwright (`HasText` z listą po przecinku) unieruchamiający 13 wywołań. Faza 1 planu naprawczego została faktycznie wykonana 2026-08-14: żaden test nie został skasowany, 196 zostało jawnie oznaczonych `Skip` z indywidualnym powodem, a 253 mają bezwarunkową asercję. To jest rzadka rzecz w portfolio: repozytorium, które samo udokumentowało własną nieszczerość i podało liczbę zamiast przymiotnika.",
-  "stack": [".NET 9", ".NET 10", "xUnit v3 1.1.0", "MSTest 4.0.1", "Microsoft.Playwright 1.52.0", "Microsoft.Playwright.MSTest.v4 1.55.0", "FluentAssertions 7.0.0", "GitHub Actions"],
+  "stack": [
+    ".NET 9",
+    ".NET 10",
+    "xUnit v3 1.1.0",
+    "MSTest 4.0.1",
+    "Microsoft.Playwright 1.52.0",
+    "Microsoft.Playwright.MSTest.v4 1.55.0",
+    "FluentAssertions 7.0.0",
+    "GitHub Actions"
+  ],
   "primaryLanguage": "C#",
   "license": "brak pliku LICENSE",
-  "tests": "449 metod testowych xUnit w 63 plikach (253 z bezwarunkową asercją, 196 z jawnym `Skip`) oraz 53 `[TestMethod]` w 17 plikach projektu MSTest; żaden przebieg nie został tu zweryfikowany, bo wszystkie wymagają żywej instancji Portalu, której to repo nie zawiera.",
+  "tests": "449 metod testowych xUnit w 52 plikach: 253 atrybuty `[Fact]` bez `Skip` plus 196 `[Fact(Skip = ...)]`, czyli 449 wystąpień `[Fact` policzonych greppem po drzewie z pominięciem `bin/` i `obj/`; zero `[Theory]` i zero `[InlineData]`. Projekt MSTest ma 53 `[TestMethod]` w 14 plikach. Wcześniejsze „63 i 17 plików” to liczby wszystkich plików `.cs` w obu projektach (63 + 17 = 80), a nie plików zawierających testy. Żaden przebieg nie został tu zweryfikowany, bo wszystkie wymagają żywej instancji Portalu, której to repo nie zawiera.",
   "ci": "Jeden workflow `e2e-manual.yml`, wyłącznie `workflow_dispatch` z wymaganym `base_url` i wyborem projektu, przeglądarki i filtra. Instaluje oba SDK (9.0.x i 10.0.x), buduje w Release, ściąga przeglądarkę przez `playwright.ps1 --with-deps`, uruchamia `dotnet test` z loggerem trx i wrzuca artefakty na 14 dni; nie ma żadnego wyzwalacza `push`, `pull_request` ani `schedule`.",
   "metrics": [
-    { "label": "Testy xUnit z realną asercją", "value": "253" },
-    { "label": "Testy xUnit oznaczone Skip", "value": "196" },
-    { "label": "Testy MSTest", "value": "53" },
-    { "label": "Pliki .cs", "value": "80" },
-    { "label": "Linie kodu C#", "value": "11 475" },
-    { "label": "Commity", "value": "32" },
-    { "label": "Dokument audytu", "value": "37 528 bajtów" }
+    {
+      "label": "Testy xUnit z realną asercją",
+      "value": "253"
+    },
+    {
+      "label": "Testy xUnit oznaczone Skip",
+      "value": "196"
+    },
+    {
+      "label": "Testy MSTest",
+      "value": "53"
+    },
+    {
+      "label": "Pliki .cs",
+      "value": "80"
+    },
+    {
+      "label": "Linie kodu C#",
+      "value": "11 475"
+    },
+    {
+      "label": "Commity",
+      "value": "32"
+    },
+    {
+      "label": "Dokument audytu",
+      "value": "37 528 bajtów"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/aurelius-promptus-acceptance-tests",
     "live": [],
     "docs": [
-      { "label": "Audyt suity i czterofazowy plan naprawczy", "path": "E2E_Tests_analysis.md" },
-      { "label": "Uruchamianie i zmienne środowiskowe AP_AT_*", "path": "README.md" },
-      { "label": "Gotowe zadania refaktoryzacyjne per obszar", "path": "AureliusPromptus.Web.NextJs.E2ETests/docs/MASTER_PROMPTS.md" },
-      { "label": "Inwentarz plików testowych (liczby nieaktualne)", "path": "AureliusPromptus.Web.NextJs.E2ETests/docs/TEST_FILES_INVENTORY.md" },
-      { "label": "Ręczny workflow uruchomienia suity", "path": ".github/workflows/e2e-manual.yml" }
+      {
+        "label": "Audyt suity i czterofazowy plan naprawczy",
+        "path": "E2E_Tests_analysis.md"
+      },
+      {
+        "label": "Uruchamianie i zmienne środowiskowe AP_AT_*",
+        "path": "README.md"
+      },
+      {
+        "label": "Gotowe zadania refaktoryzacyjne per obszar",
+        "path": "AureliusPromptus.Web.NextJs.E2ETests/docs/MASTER_PROMPTS.md"
+      },
+      {
+        "label": "Inwentarz plików testowych (liczby nieaktualne)",
+        "path": "AureliusPromptus.Web.NextJs.E2ETests/docs/TEST_FILES_INVENTORY.md"
+      },
+      {
+        "label": "Ręczny workflow uruchomienia suity",
+        "path": ".github/workflows/e2e-manual.yml"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
   "components": [
-    { "name": "BrowserFixture", "path": "AureliusPromptus.Web.NextJs.E2ETests/BrowserFixture.cs", "description": "`IAsyncLifetime` podnoszący jeden proces przeglądarki na całą kolekcję xUnit zamiast na test, z wyborem chromium/firefox/webkit i trybu headless przez `AP_AT_BROWSER` i `AP_AT_HEADLESS`. Kod nie zna żadnego typu domenowego.", "reusable": true },
-    { "name": "PlaywrightTestBase", "path": "AureliusPromptus.Web.NextJs.E2ETests/PlaywrightTestBase.cs", "description": "Świeży `IBrowserContext` i `IPage` na test, wideo kasowane przy sukcesie i zachowywane przy porażce, pełnostronicowy zrzut ekranu, plus punkt rozszerzenia `BeforeContextCloseAsync` wywoływany po zrzucie a przed zamknięciem kontekstu. Jedyny ślad domeny to selektor toasta `[data-sonner-toast]`.", "reusable": true },
-    { "name": "Workflow e2e-manual.yml", "path": ".github/workflows/e2e-manual.yml", "description": "Szkielet zadania dla dowolnej suity Playwright w .NET: dwa SDK, restore, build Release, instalacja przeglądarki z zależnościami systemowymi, `dotnet test` z trx i upload wideo oraz zrzutów. Parametr `base_url` jest wymagany, więc nic nie ma zaszytego środowiska.", "reusable": true },
-    { "name": "E2E_Tests_analysis.md", "path": "E2E_Tests_analysis.md", "description": "Audyt w wersji 2.0 z 2026-08-14: ustalenie, która aplikacja jest w ogóle żywa, katalog wzorców testu pozornego z liczbą wystąpień każdego, plan w czterech fazach i raport z wykonanej Fazy 1. Uogólnione reguły z niego wyniesiono do repozytorium architecture-standards.", "reusable": false },
-    { "name": "AuthTestBase", "path": "AureliusPromptus.Web.NextJs.E2ETests/UserProfileTests/AuthTestBase.cs", "description": "`RegisterAndLoginAsync` zakłada unikalne konto przez formularz rejestracji, a nadpisany `BeforeContextCloseAsync` kasuje je tym samym przepływem, który weryfikują `AccountDeletionTests`. Awaria sprzątania jest celowo połykana, żeby nie przewracała zielonego testu.", "reusable": false },
-    { "name": "Suity funkcjonalne xUnit", "path": "AureliusPromptus.Web.NextJs.E2ETests", "description": "Osiem obszarów, każdy z własną klasą bazową. Rozpiętość pokrycia jest ekstremalna: `RegistrationTests` ma 19 realnych asercji i zero `Skip`, `LoginTests` 15/0, a `QuotaEnforcementTests` 0/10 i `OrganizationInvitationReceivingTests` 0/11.", "reusable": false },
-    { "name": "AureliusPromptus.Web.Portal.E2ETests", "path": "AureliusPromptus.Web.Portal.E2ETests", "description": "Równoległy projekt na MSTest 4 i `Playwright.MSTest` (.NET 10) z 53 testami: szablony promptów plus logowanie. Ma własną klasę bazową `PlaywrigthTestBase` z literówką w nazwie, własny prefiks `AP_PORTAL_*` i wstrzykiwany shim schowka. Audyt zaleca jego wchłonięcie.", "reusable": false },
-    { "name": "setup.ps1", "path": "setup.ps1", "description": "Skrypt do dot-source'owania, ustawiający siedem zmiennych `AP_AT_*` i `AP_PORTAL_BASE_URL` w bieżącej sesji PowerShella. Zawiera domyślny port 3003, przez co jest jedynym miejscem, gdzie zapisano, przeciwko czemu ta suita faktycznie chodzi.", "reusable": false }
+    {
+      "name": "BrowserFixture",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests/BrowserFixture.cs",
+      "description": "`IAsyncLifetime` podnoszący jeden proces przeglądarki na całą kolekcję xUnit zamiast na test, z wyborem chromium/firefox/webkit i trybu headless przez `AP_AT_BROWSER` i `AP_AT_HEADLESS`. Kod nie zna żadnego typu domenowego.",
+      "reusable": true
+    },
+    {
+      "name": "PlaywrightTestBase",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests/PlaywrightTestBase.cs",
+      "description": "Świeży `IBrowserContext` i `IPage` na test, wideo kasowane przy sukcesie i zachowywane przy porażce, pełnostronicowy zrzut ekranu, plus punkt rozszerzenia `BeforeContextCloseAsync` wywoływany po zrzucie a przed zamknięciem kontekstu. Jedyny ślad domeny to selektor toasta `[data-sonner-toast]`.",
+      "reusable": true
+    },
+    {
+      "name": "Workflow e2e-manual.yml",
+      "path": ".github/workflows/e2e-manual.yml",
+      "description": "Szkielet zadania dla dowolnej suity Playwright w .NET: dwa SDK, restore, build Release, instalacja przeglądarki z zależnościami systemowymi, `dotnet test` z trx i upload wideo oraz zrzutów. Parametr `base_url` jest wymagany, więc nic nie ma zaszytego środowiska.",
+      "reusable": true
+    },
+    {
+      "name": "E2E_Tests_analysis.md",
+      "path": "E2E_Tests_analysis.md",
+      "description": "Audyt w wersji 2.0 z 2026-08-14: ustalenie, która aplikacja jest w ogóle żywa, katalog wzorców testu pozornego z liczbą wystąpień każdego, plan w czterech fazach i raport z wykonanej Fazy 1. Uogólnione reguły z niego wyniesiono do repozytorium architecture-standards.",
+      "reusable": false
+    },
+    {
+      "name": "AuthTestBase",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests/UserProfileTests/AuthTestBase.cs",
+      "description": "`RegisterAndLoginAsync` zakłada unikalne konto przez formularz rejestracji, a nadpisany `BeforeContextCloseAsync` kasuje je tym samym przepływem, który weryfikują `AccountDeletionTests`. Awaria sprzątania jest celowo połykana, żeby nie przewracała zielonego testu.",
+      "reusable": false
+    },
+    {
+      "name": "Suity funkcjonalne xUnit",
+      "path": "AureliusPromptus.Web.NextJs.E2ETests",
+      "description": "Osiem obszarów, każdy z własną klasą bazową. Rozpiętość pokrycia jest ekstremalna: `RegistrationTests` ma 19 realnych asercji i zero `Skip`, `LoginTests` 15/0, a `QuotaEnforcementTests` 0/10 i `OrganizationInvitationReceivingTests` 0/11.",
+      "reusable": false
+    },
+    {
+      "name": "AureliusPromptus.Web.Portal.E2ETests",
+      "path": "AureliusPromptus.Web.Portal.E2ETests",
+      "description": "Równoległy projekt na MSTest 4 i `Playwright.MSTest` (.NET 10) z 53 `[TestMethod]` w 14 plikach: szablony promptów plus logowanie. Ma własną klasę bazową `PlaywrigthTestBase` z literówką w nazwie, własny prefiks `AP_PORTAL_*` i wstrzykiwany shim schowka. Audyt zaleca jego wchłonięcie.",
+      "reusable": false
+    },
+    {
+      "name": "setup.ps1",
+      "path": "setup.ps1",
+      "description": "Skrypt do dot-source'owania, ustawiający sześć zmiennych `AP_AT_*` (`AP_AT_BASE_URL`, `AP_AT_BROWSER`, `AP_AT_HEADLESS`, `AP_AT_RECORD_VIDEO`, `AP_AT_SCREENSHOT_ON_FAIL`, `AP_AT_ARTIFACTS_DIR`) oraz `AP_PORTAL_BASE_URL` w bieżącej sesji PowerShella. `AP_AT_CLEANUP_ACCOUNTS` jest czytany w `PlaywrightTestBase`, ale ten skrypt go nie ustawia — działa tylko wartość domyślna. Domyślny port 3003 jest tu zapisany jako parametr `-BaseUrl`, ten sam fallback siedzi też w obu klasach bazowych i w README.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "aurelius-promptus", "reason": "To jest system pod testem. Bez uruchomionego Portalu z tamtego repozytorium ta suita nie ma żadnej wartości wykonawczej, a automatyzacja CI zależy od wyłączonego tam workflowu środowisk PR." },
-    { "slug": "architecture-standards", "reason": "Uogólnione reguły z audytu (dyscyplina asercji, konwencje lokatorów, CI jako część definicji ukończenia) zostały przeniesione do `docs/guides/E2E-ACCEPTANCE-TESTING.md` tamtego repo." },
-    { "slug": "ai-coding-assistant-article", "reason": "Audyt jest policzonym przypadkiem suity wygenerowanej jednym przebiegiem AI, opisanej jako gotowa do produkcji i niesprawdzającej niczego. To jest materiał dowodowy dokładnie na temat tamtego tekstu." }
+    {
+      "slug": "aurelius-promptus",
+      "reason": "To jest system pod testem. Bez uruchomionego Portalu z tamtego repozytorium ta suita nie ma żadnej wartości wykonawczej, a automatyzacja CI zależy od wyłączonego tam workflowu środowisk PR."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Uogólnione reguły z audytu (dyscyplina asercji, konwencje lokatorów, CI jako część definicji ukończenia) zostały przeniesione do `docs/guides/E2E-ACCEPTANCE-TESTING.md` tamtego repo."
+    },
+    {
+      "slug": "ai-coding-assistant-article",
+      "reason": "Audyt jest policzonym przypadkiem suity wygenerowanej jednym przebiegiem AI, opisanej jako gotowa do produkcji i niesprawdzającej niczego. To jest materiał dowodowy dokładnie na temat tamtego tekstu."
+    }
   ],
   "product": "Brak kupującego. To wewnętrzna warstwa jakości jednego prywatnego produktu i nikt z zewnątrz nie kupi ani nie sklonuje testów cudzego Portalu. Jedyna wartość eksportowalna leży w `E2E_Tests_analysis.md`: konkretny, policzony przypadek {{term:evidence|dowodu}}, że zielony przebieg suity potrafi nie znaczyć nic. To materiał na artykuł albo rozdział, nie na produkt, i warto go traktować jak wsad do tekstu, a nie jak repozytorium do rozwijania.",
   "highlights": [
@@ -78,5 +178,13 @@
   ],
   "headline": "Audyt policzył 196 pozornych testów; suita wciąż nie ma zielonego przebiegu",
   "headlineTone": "warn",
-  "github": { "stars": 0, "openIssues": 9, "openPrs": 1, "dependabotPrs": 0, "lastCommit": "2026-08-14", "commits": 32, "files": 96 }
+  "github": {
+    "stars": 0,
+    "openIssues": 9,
+    "openPrs": 1,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-14",
+    "commits": 32,
+    "files": 96
+  }
 }

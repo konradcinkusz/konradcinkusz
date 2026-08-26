@@ -20,27 +20,72 @@
   "tests": "Brak testów: w repozytorium nie ma kodu wykonywalnego ani projektu testowego. Nie zweryfikowano również, czy dokument się składa, bo w środowisku nie było ani `latexmk`, ani `xelatex`, ani `plantuml`.",
   "ci": "Jeden workflow `ci.yml` na 53 linie: instaluje plantuml i graphviz, renderuje `figures/*.plantuml` do PNG, składa dokument XeLaTeX-em, zmienia nazwę na `AI_Coding_Assistant.pdf` i publikuje go jako GitHub Release. Odpala się wyłącznie na push tagu `v*` ({{term:tagdeploy|wydanie na tag}}), więc zwykły commit ani pull request nie są w ogóle sprawdzane.",
   "metrics": [
-    { "label": "Pliki rozdziałów", "value": "10 (.tex)" },
-    { "label": "Słowa w rozdziałach", "value": "6 964" },
-    { "label": "Linie .tex razem z main.tex", "value": "755" },
-    { "label": "Pozycje bibliografii", "value": "22 (1 niecytowana)" },
-    { "label": "Listingi kodu", "value": "5, wszystkie w rozdziale 6" },
-    { "label": "Tabele / rysunki", "value": "1 / 1" },
-    { "label": "Commity / pliki", "value": "1 / 17" }
+    {
+      "label": "Pliki rozdziałów",
+      "value": "10 (.tex)"
+    },
+    {
+      "label": "Słowa w rozdziałach",
+      "value": "6 964"
+    },
+    {
+      "label": "Linie .tex razem z main.tex",
+      "value": "677 (593 w dziesięciu rozdziałach + 84 w main.tex; bez 78-liniowego źródła PlantUML, które nie jest plikiem .tex)"
+    },
+    {
+      "label": "Pozycje bibliografii",
+      "value": "22 (1 niecytowana)"
+    },
+    {
+      "label": "Listingi kodu",
+      "value": "5, wszystkie w rozdziale 6"
+    },
+    {
+      "label": "Tabele / rysunki",
+      "value": "1 / 1"
+    },
+    {
+      "label": "Commity / pliki",
+      "value": "1 / 17"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/ai-coding-assistant-article",
     "live": [],
     "docs": [
-      { "label": "README z quick startem i strukturą repo", "path": "README.md" },
-      { "label": "Rdzeń merytoryczny: RAG dla kodu i LspRag", "path": "chapters/04-retrieval.tex" },
-      { "label": "MCP jako warstwa integracji", "path": "chapters/05-mcp.tex" },
-      { "label": "Ścieżka implementacji w C# z pięcioma listingami", "path": "chapters/06-csharp-implementation.tex" },
-      { "label": "Teza falsyfikowalna i projekt eksperymentu", "path": "chapters/08-discussion.tex" },
-      { "label": "Pipeline składania i wydania PDF", "path": ".github/workflows/ci.yml" }
+      {
+        "label": "README z quick startem i strukturą repo",
+        "path": "README.md"
+      },
+      {
+        "label": "Rdzeń merytoryczny: RAG dla kodu i LspRag",
+        "path": "chapters/04-retrieval.tex"
+      },
+      {
+        "label": "MCP jako warstwa integracji",
+        "path": "chapters/05-mcp.tex"
+      },
+      {
+        "label": "Ścieżka implementacji w C# z pięcioma listingami",
+        "path": "chapters/06-csharp-implementation.tex"
+      },
+      {
+        "label": "Teza falsyfikowalna i projekt eksperymentu",
+        "path": "chapters/08-discussion.tex"
+      },
+      {
+        "label": "Pipeline składania i wydania PDF",
+        "path": ".github/workflows/ci.yml"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
   "components": [
     {
       "name": "main.tex: preambuła i sterownik dokumentu",
@@ -86,10 +131,22 @@
     }
   ],
   "overlaps": [
-    { "slug": "maf-book", "reason": "Ta sama domena .NET plus MCP i ten sam format LaTeX-owy. Artykuł streszcza na kilkunastu stronach to, co maf-book rozwija na 246. Obie prace niosą też ten sam dług: zaprojektowany i nieprzeprowadzony eksperyment." },
-    { "slug": "llm-book", "reason": "Oba teksty opisują warstwę orkiestracji nad modelami fundamentalnymi, retrieval i zarządzanie kontekstem, tylko z dwóch stron: llm-book od Pythona i LangGraph, artykuł od C# i Semantic Kernel." },
-    { "slug": "copilot-scope", "reason": "Ten sam przedmiot z drugiej strony: artykuł opisuje, jak asystent kodowania jest zbudowany, CopilotScope mierzy telemetrię z pięciu takich asystentów. Trójwarstwowy model z rozdziału 3 to gotowy słownik dla tamtego kolektora." },
-    { "slug": "agents-and-llms", "reason": "Pokrycie tematyczne po nazwie: pętla agentowa i wywołania narzędzi z rozdziału 3. Zawartości tamtego repozytorium nie weryfikowano." }
+    {
+      "slug": "maf-book",
+      "reason": "Ta sama domena .NET plus MCP i ten sam format LaTeX-owy. Artykuł streszcza na kilkunastu stronach to, co maf-book rozwija na 246. Obie prace niosą też ten sam dług: zaprojektowany i nieprzeprowadzony eksperyment."
+    },
+    {
+      "slug": "llm-book",
+      "reason": "Oba teksty opisują warstwę orkiestracji nad modelami fundamentalnymi, retrieval i zarządzanie kontekstem, tylko z dwóch stron: llm-book od Pythona i LangGraph, artykuł od C# i Semantic Kernel."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Ten sam przedmiot z drugiej strony: artykuł opisuje, jak asystent kodowania jest zbudowany, CopilotScope mierzy telemetrię z pięciu takich asystentów. Trójwarstwowy model z rozdziału 3 to gotowy słownik dla tamtego kolektora."
+    },
+    {
+      "slug": "agents-and-llms",
+      "reason": "Pokrycie tematyczne po nazwie: pętla agentowa i wywołania narzędzi z rozdziału 3. Zawartości tamtego repozytorium nie weryfikowano."
+    }
   ],
   "product": "Brak kupującego. To materiał kanałowy i dowód kompetencji: pokazuje, że autor rozumie architekturę asystentów kodowania, MCP i RAG od strony .NET, czyli od strony, z której prawie nikt o tym nie pisze. Realna wartość pojawia się dopiero po przeprowadzeniu eksperymentu z rozdziału 8, bo danych o dominacji retrievalu nad jakością modelu, zmierzonych na konkretnym repozytorium, nikt dobrze nie opublikował, a projekt badania jest tu już gotowy. Do tego czasu artykuł jest dobrym przeglądem, którego teza pozostaje deklaracją.",
   "highlights": [

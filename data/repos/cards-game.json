@@ -116,8 +116,7 @@
   "risks": [
     "Kolizja nazw: katalog `cards-game`, a README, badge CI i polecenie `git clone` wskazują `https://github.com/konradcinkusz/CardsGame.git`.",
     "`FluentAssertions` zostało celowo usunięte, bo od wersji 8 ma licencję własnościową Xceed. Automatyczny bump Dependabota może to cofnąć do projektu na MIT bez żadnego sygnału.",
-    "Pinowanie jest wybiegające do przodu (Aspire 13.4.6, `Microsoft.Agents.AI` 1.15.0, SDK 10.0.100 z `rollForward latestMinor`) — bez okresowego sprawdzenia wobec NuGet zestarzeje się szybciej niż projekt zdąży zostać wznowiony.",
-    "Aktywna gałąź to `claude/portfolio-html-app-w6306n`, nie `master`; przy 17 commitach historia jest widocznie agentowa i nikt jej nie scalił."
+    "Pinowanie jest wybiegające do przodu (Aspire 13.4.6, `Microsoft.Agents.AI` 1.15.0, SDK 10.0.100 z `rollForward latestMinor`) — bez okresowego sprawdzenia wobec NuGet zestarzeje się szybciej niż projekt zdąży zostać wznowiony."
   ],
   "headline": "Granica trzyma i jest przetestowana; żaden żywy model nie zagrał ani jednego rozdania",
   "headlineTone": "warn",
