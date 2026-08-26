@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa portfolio</title>
+<meta name="description" content="Mapa portfolio agentic AI i .NET: co da się scalić, co jest zbudowane dwa razy, gdzie biegnie granica substratów, co otwarte, co płatne — oraz system, którym jedna osoba prowadzi trzydzieści pięć repozytoriów.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Portfolio, konsolidacja i operacje">
+<meta property="og:description" content="Mapa trzydziestu pięciu repozytoriów, cztery kernele do wydzielenia, oś dystrybucji i model operacyjny dla jednoosobowego portfolio.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230f6b57'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Przejdź do treści</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="stamp" id="mast-stamp">&nbsp;</p>
+    <div class="mast-top">
+      <div>
+        <h1 id="mast-title">&nbsp;</h1>
+        <p class="sub" id="mast-sub">&nbsp;</p>
+      </div>
+    </div>
+    <div class="mast-links" id="mast-links"></div>
+  </div>
+</header>
+
+<nav class="tabbar" aria-label="Główne sekcje">
+  <div class="wrap">
+    <div class="tabrow" role="tablist">
+      <button role="tab" data-tab="portfolio" aria-selected="true" aria-controls="panel-portfolio">portfolio</button>
+      <button role="tab" data-tab="konsolidacja" aria-selected="false" aria-controls="panel-konsolidacja">konsolidacja</button>
+      <button role="tab" data-tab="operacje" aria-selected="false" aria-controls="panel-operacje">operacje</button>
+      <button role="tab" data-tab="indeks" aria-selected="false" aria-controls="panel-indeks">indeks</button>
+      <button role="tab" data-tab="slownik" aria-selected="false" aria-controls="panel-slownik">słownik</button>
+    </div>
+
+    <div class="subnav" id="subnav-portfolio">
+      <a href="#sec-przeglad">przegląd</a>
+      <a href="#sec-substraty">substraty</a>
+    </div>
+    <div class="subnav" id="subnav-konsolidacja" hidden>
+      <a href="#sec-kernele">kernele</a>
+      <a href="#sec-duplikacje">duplikacje</a>
+      <a href="#sec-granice">granice</a>
+      <a href="#sec-model">model produktowy</a>
+      <a href="#sec-dystrybucja">dystrybucja</a>
+    </div>
+    <div class="subnav" id="subnav-operacje" hidden>
+      <a href="#sec-zasady">zasady</a>
+      <a href="#sec-poziomy">poziomy uwagi</a>
+      <a href="#sec-rytm">rytm</a>
+      <a href="#sec-stan">stan</a>
+      <a href="#sec-zdrowie">progi</a>
+      <a href="#sec-wip">limity</a>
+      <a href="#sec-automaty">automaty</a>
+      <a href="#sec-plan">plan</a>
+    </div>
+    <div class="subnav" id="subnav-indeks" hidden>
+      <a href="#sec-tabela">tabela</a>
+    </div>
+    <div class="subnav" id="subnav-slownik" hidden>
+      <a href="#sec-terminy">terminy</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap" id="main">
+
+<div id="boot" class="loading">Wczytywanie manifestu portfolio…</div>
+
+<!-- =================================================== 1 — PORTFOLIO ==== -->
+<div class="panel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
+
+  <section id="sec-przeglad">
+    <div class="sec-head"><h2>Przegląd</h2><span class="tag">stan na dziś, liczony z repozytoriów</span></div>
+    <p class="sec-lede">Każda liczba na tej stronie pochodzi z odczytu repozytorium albo z API GitHuba, nie z pamięci.
+      Tam, gdzie czegoś nie dało się zweryfikować, jest to napisane wprost zamiast wypełnione prawdopodobną wartością.</p>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section id="sec-substraty">
+    <div class="sec-head"><h2>Substraty</h2><span class="tag">podział według jednostki pracy, nie według stacku</span></div>
+    <p class="sec-lede">Podział nie przebiega według języka ani frameworka, tylko według tego, <em>co dany zestaw narzędzi
+      traktuje jako jednostkę pracy</em>. To jedyne kryterium, które przewiduje, co da się współdzielić: dwa projekty na tym
+      samym substracie mogą mieć wspólny magazyn, wspólny scoring i wspólny replay — dwa na różnych nie mogą mieć nic.</p>
+
+    <div class="toolbar" id="pf-filters">
+      <input type="search" id="pf-search" placeholder="Szukaj repozytorium, stacku, opisu…" aria-label="Szukaj w portfolio">
+      <span class="rail-label">klaster</span>
+      <button class="chip" data-f="c:A-runtime" aria-pressed="false">runtime</button>
+      <button class="chip" data-f="c:B-static" aria-pressed="false">kod i polityki</button>
+      <button class="chip" data-f="c:C-infra" aria-pressed="false">infrastruktura</button>
+      <button class="chip" data-f="c:D-content" aria-pressed="false">treść</button>
+      <button class="chip" data-f="c:E-lab" aria-pressed="false">poligon</button>
+      <button class="chip" data-f="c:F-meta" aria-pressed="false">meta</button>
+      <span class="rail-label">widoczność</span>
+      <button class="chip" data-f="v:public" aria-pressed="false">publiczne</button>
+      <button class="chip" data-f="v:private" aria-pressed="false">prywatne</button>
+      <button class="chip" data-f="kernel" aria-pressed="false">ma kernel</button>
+      <span class="count" id="pf-count"></span>
+    </div>
+
+    <div id="clusters"></div>
+  </section>
+
+  <section class="legend">
+    <div class="sec-head"><h2>Legenda</h2></div>
+    <div class="leg-grid">
+      <div>
+        <h4>Odznaki</h4>
+        <div class="leg-row"><span class="badge badge-pub">publiczne</span><span class="txt">Repozytorium otwarte, licencja permisywna.<em>Rola: kanał, wiarygodność, cytowalność — nie przychód.</em></span></div>
+        <div class="leg-row"><span class="badge badge-priv">prywatne</span><span class="txt">Repozytorium zamknięte.<em>Widnieje na mapie, ale żaden link do jego wnętrza nie zadziała dla czytelnika.</em></span></div>
+        <div class="leg-row"><span class="badge badge-accent">do wydzielenia</span><span class="txt">Komponent domenowo neutralny.<em>Kandydat na kernel — ma co najmniej dwóch odbiorców.</em></span></div>
+      </div>
+      <div>
+        <h4>Symbole</h4>
+        <div class="leg-row"><span class="sym" style="color:var(--good)">★</span><span class="txt">Komponent do wydzielenia jako kernel</span></div>
+        <div class="leg-row"><span class="sym" style="color:var(--alert)">⟂</span><span class="txt">Granica substratów<em>Nic jej nie przekracza. Najedź na kernel w zakładce „konsolidacja”, żeby to zobaczyć.</em></span></div>
+        <div class="leg-row"><span class="sym" style="color:var(--accent)">↗</span><span class="txt">Link wychodzący na zewnątrz</span></div>
+        <div class="leg-row"><span class="sym"><span style="border-bottom:1px dotted var(--accent)">abc</span></span><span class="txt">Termin ze słownika<em>Klik otwiera definicję w panelu bocznym, bez utraty miejsca na stronie.</em></span></div>
+      </div>
+      <div>
+        <h4>Jak czytać kartę</h4>
+        <div class="leg-row"><span class="sym">1</span><span class="txt">Kliknięcie karty otwiera pełny opis repozytorium<em>Liczby, komponenty, luki, ryzyka, następne kroki.</em></span></div>
+        <div class="leg-row"><span class="sym">2</span><span class="txt">Gwiazdki to komponenty nadające się do wydzielenia</span></div>
+        <div class="leg-row"><span class="sym">3</span><span class="txt">Linia pod kartą to jedna rzecz, którą trzeba z tym repo zrobić</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ================================================ 2 — KONSOLIDACJA ==== -->
+<div class="panel" id="panel-konsolidacja" role="tabpanel" hidden>
+
+  <section id="sec-kernele">
+    <div class="sec-head"><h2>Kernele do wydzielenia</h2><span class="tag">najedź, żeby zobaczyć, co zasilają</span></div>
+    <p class="sec-lede">Jedna baza kodu — tak. Jeden produkt — nie. Kernel obniża koszt utrzymania i jest kanałem dotarcia;
+      nigdy nie jest ofertą sprzedażową. „Platforma, która potrafi sześć rzeczy” nie ma kupującego, bo nie odpowiada
+      żadnemu konkretnemu bólowi.</p>
+    <div class="grid g-auto-lg" id="kernels"></div>
+
+    <div class="sec-head" style="margin-top:34px"><h2>Odrzucone</h2><span class="tag">wygląda na kernel, nie jest nim</span></div>
+    <p class="sec-lede">Komponenty, które kuszą, żeby je wyjąć, i których wyjęcie skończyłoby się biblioteką z jednym
+      użytkownikiem albo z domeną wciągniętą do środka. Przy każdym jest nazwany typ, który go trzyma.</p>
+    <div id="kernels-rejected"></div>
+  </section>
+
+  <section id="sec-duplikacje">
+    <div class="sec-head"><h2>Zbudowane dwa razy</h2><span class="tag">ten sam problem, dwa rozwiązania</span></div>
+    <p class="sec-lede">Pary, w których ten sam problem został rozwiązany dwukrotnie — bo mieszka w dwóch różnych
+      repozytoriach i nikt nie stanął w miejscu, z którego widać oba naraz.</p>
+    <div id="duplications"></div>
+  </section>
+
+  <section id="sec-granice">
+    <div class="sec-head"><h2>Granice, których nie wolno przekroczyć</h2><span class="tag">wygląda na scalalne, nie jest</span></div>
+    <p class="sec-lede">Sklejenie dwóch substratów daje produkt, którego nie da się opisać jednym zdaniem — a produkt,
+      którego nie da się opisać jednym zdaniem, nie ma kupującego.</p>
+    <div id="boundaries"></div>
+  </section>
+
+  <section id="sec-model">
+    <div class="sec-head"><h2>Model produktowy</h2><span class="tag">gdzie biegnie linia otwarte / płatne</span></div>
+    <p class="rule-line" id="rule-line"></p>
+    <div class="split">
+      <div class="pane open" id="pane-open"></div>
+      <div class="pane sold" id="pane-paid"></div>
+    </div>
+    <div style="margin-top:16px" id="pricing-notes"></div>
+  </section>
+
+  <section id="sec-dystrybucja">
+    <div class="sec-head"><h2>Oś dystrybucji</h2><span class="tag">od artefaktu do faktury</span></div>
+    <p class="sec-lede">Każdy otwarty artefakt zasila jeden kanał, który dociera do jednego kupującego, który kupuje
+      jeden produkt. Kolejność wierszy to kolejność uruchomienia, nie ważności.</p>
+    <div class="axis-head">
+      <span>1 · artefakt otwarty</span><span>2 · kanał</span><span>3 · kupujący</span><span>4 · produkt płatny</span>
+    </div>
+    <div id="axis"></div>
+  </section>
+</div>
+
+<!-- =================================================== 3 — OPERACJE ===== -->
+<div class="panel" id="panel-operacje" role="tabpanel" hidden>
+
+  <section id="sec-zasady">
+    <div class="sec-head"><h2>Jak to się prowadzi</h2><span class="tag">system, nie lista dobrych chęci</span></div>
+    <p class="sec-lede">Trzydzieści pięć repozytoriów, jedna osoba, wieczory i weekendy. Wąskim gardłem nie jest pisanie
+      kodu — agenty piszą go szybciej, niż da się go przejrzeć. Wąskim gardłem jest <b>uwaga i decyzja</b>, więc cały
+      poniższy system optymalizuje jedną wielkość: ile decyzji trzeba podjąć, żeby portfolio nie zgniło.</p>
+    <div class="stats" id="ops-stats"></div>
+    <div class="grid g-3" id="principles"></div>
+  </section>
+
+  <section id="sec-poziomy">
+    <div class="sec-head"><h2>Poziomy uwagi</h2><span class="tag">każde repo ma dokładnie jeden</span></div>
+    <p class="sec-lede">Repozytorium bez zadeklarowanego poziomu obsługi dostaje uwagę wtedy, kiedy akurat o nim
+      pomyślisz — czyli losowo, a w praktyce wtedy, gdy już się zepsuło. Poziom jest obietnicą złożoną samemu sobie i
+      jedyną rzeczą, która pozwala świadomie <em>nie</em> zajmować się dwudziestoma repozytoriami w danym tygodniu.</p>
+    <div id="tiers"></div>
+  </section>
+
+  <section id="sec-rytm">
+    <div class="sec-head"><h2>Rytm</h2><span class="tag">rytuał, timebox, artefakt na wyjściu</span></div>
+    <p class="sec-lede">Rytuał bez artefaktu na wyjściu jest spotkaniem z samym sobą. Każdy poniższy ma jedną rzecz,
+      która po nim zostaje w repozytorium — i to ona, nie poczucie zrobienia czegoś, jest dowodem, że się odbył.</p>
+    <div class="grid g-auto" id="cadence"></div>
+  </section>
+
+  <section id="sec-stan">
+    <div class="sec-head"><h2>Stan estate</h2><span class="tag">z nocnego kolektora</span></div>
+    <p class="sec-lede">Ta sekcja pojawia się dopiero wtedy, gdy <code>scripts/collect-health.mjs</code> zapisał
+      <code>data/health.json</code>. Dopóki jej nie ma, model operacyjny obok jest opisem tego, co należy mierzyć —
+      nie tego, co zmierzono.</p>
+    <div id="health-live"></div>
+  </section>
+
+  <section id="sec-zdrowie">
+    <div class="sec-head"><h2>Kontrole zdrowia</h2><span class="tag">sygnał, próg, akcja</span></div>
+    <p class="sec-lede">Miara bez progu jest wykresem, a próg bez zapisanej akcji jest wyrzutem sumienia. Każdy wiersz
+      poniżej ma wszystkie trzy części, żeby przekroczenie progu kończyło się czynnością, a nie zmartwieniem.</p>
+    <div id="health"></div>
+  </section>
+
+  <section id="sec-wip">
+    <div class="sec-head"><h2>Limity równoległej pracy</h2><span class="tag">to, co powstrzymuje 35 połówek</span></div>
+    <p class="sec-lede">Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu pięciu rzeczy
+      zaczętych i żadnej skończonej. Poniższe limity są twarde: przekroczenie ich jest sygnałem, żeby coś zamknąć,
+      a nie żeby pracować dłużej.</p>
+    <div class="wip" id="wip"></div>
+  </section>
+
+  <section id="sec-automaty">
+    <div class="sec-head"><h2>Automaty</h2><span class="tag">gdzie mieszka każdy z nich</span></div>
+    <p class="sec-lede">Wszystko poniżej istnieje po to, żeby zdjąć decyzję z człowieka albo postawić ją przed nim
+      w momencie, w którym da się ją podjąć w minutę. Przy każdym jest ścieżka w repozytorium — jeśli jej nie ma,
+      to znaczy, że automat jest do zbudowania, i to jest część planu.</p>
+    <div class="grid g-auto" id="automation"></div>
+  </section>
+
+  <section id="sec-plan">
+    <div class="sec-head"><h2>Plan</h2><span class="tag">horyzont, kroki, test zakończenia</span></div>
+    <p class="sec-lede">Każdy horyzont ma test „gotowe, gdy”, który da się sprawdzić bez dyskusji. Cel bez takiego
+      testu przesuwa się w nieskończoność, bo zawsze można zrobić jeszcze jedną rzecz.</p>
+    <div id="plan"></div>
+  </section>
+</div>
+
+<!-- ===================================================== 4 — INDEKS ===== -->
+<div class="panel" id="panel-indeks" role="tabpanel" hidden>
+  <section id="sec-tabela">
+    <div class="sec-head"><h2>Indeks repozytoriów</h2><span class="tag">klik w wiersz otwiera pełny opis</span></div>
+    <p class="sec-lede">Pełna lista z linkami, poziomem uwagi i stanem. Kolumny są sortowalne; wiersz otwiera panel
+      z liczbami, komponentami, lukami i następnymi krokami.</p>
+
+    <div class="toolbar" id="ix-filters">
+      <input type="search" id="ix-search" placeholder="Szukaj…" aria-label="Szukaj w indeksie">
+      <span class="rail-label">klaster</span>
+      <button class="chip" data-f="c:A-runtime" aria-pressed="false">runtime</button>
+      <button class="chip" data-f="c:B-static" aria-pressed="false">kod</button>
+      <button class="chip" data-f="c:C-infra" aria-pressed="false">infra</button>
+      <button class="chip" data-f="c:D-content" aria-pressed="false">treść</button>
+      <button class="chip" data-f="c:E-lab" aria-pressed="false">poligon</button>
+      <button class="chip" data-f="c:F-meta" aria-pressed="false">meta</button>
+      <span class="rail-label">widoczność</span>
+      <button class="chip" data-f="v:public" aria-pressed="false">publiczne</button>
+      <button class="chip" data-f="v:private" aria-pressed="false">prywatne</button>
+      <span class="count" id="ix-count"></span>
+    </div>
+
+    <div class="table-scroll">
+    <table class="rt">
+      <thead>
+        <tr>
+          <th class="sortable" data-k="name" aria-sort="ascending">Repozytorium</th>
+          <th class="sortable" data-k="cluster" aria-sort="none">Klaster</th>
+          <th>Czym jest</th>
+          <th class="sortable" data-k="tier" aria-sort="none">Poziom</th>
+          <th class="sortable" data-k="state" aria-sort="none">Stan</th>
+          <th class="sortable" data-k="vis" aria-sort="none">Widoczność</th>
+          <th class="sortable" data-k="commits" aria-sort="none">Commity</th>
+          <th class="sortable" data-k="prs" aria-sort="none">PR-y</th>
+          <th class="sortable" data-k="last" aria-sort="none">Ostatni</th>
+        </tr>
+      </thead>
+      <tbody id="index-body"></tbody>
+    </table>
+    </div>
+  </section>
+</div>
+
+<!-- ==================================================== 5 — SŁOWNIK ===== -->
+<div class="panel" id="panel-slownik" role="tabpanel" hidden>
+  <section id="sec-terminy">
+    <div class="sec-head"><h2>Słownik</h2><span class="tag">definicje wszystkich terminów z mapy</span></div>
+    <p class="sec-lede">Każdy termin z kropkowanym podkreśleniem na tej stronie ma tu pełną definicję wraz z miejscem,
+      w którym występuje w portfolio.</p>
+    <div class="toolbar">
+      <input type="search" id="gl-search" placeholder="Szukaj terminu…" aria-label="Szukaj w słowniku">
+      <span class="count" id="gl-count"></span>
+    </div>
+    <div class="gloss-grid" id="glossary"></div>
+  </section>
+</div>
+
+<footer>
+  <p>Jedna baza kodu — tak. Jeden produkt — nie.</p>
+  <p class="fine">Kernel to biblioteka z jedną tezą w README, nigdy oferta sprzedażowa. Platforma jest konsekwencją
+    sprzedania dwóch produktów, nie warunkiem wstępnym. Ta strona jest statyczna i czyta jeden plik —
+    <code>data/portfolio.json</code>; zmiana portfolio to zmiana tego pliku, a CI odrzuca manifest, który przestał się
+    zgadzać z rzeczywistością.</p>
+</footer>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-kicker" hidden>
+  <div class="drawer-head">
+    <p class="drawer-kicker" id="drawer-kicker"></p>
+    <button class="drawer-close" id="drawer-close" aria-label="Zamknij panel" type="button">×</button>
+  </div>
+  <div id="drawer-body"></div>
+</aside>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

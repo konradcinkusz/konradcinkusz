@@ -1,0 +1,186 @@
+{
+  "slug": "agent-eval-bench",
+  "name": "agent-eval-bench",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P1",
+  "oneLiner": "Stanowisko ewaluacyjne, które ocenia **ślad wykonania** agenta narzędziowego, a nie tekst jego odpowiedzi.",
+  "summary": "Kontrakt powstał przed kodem: `docs/SPEC.md` to 55 kB specyfikacji z szesnastoma zachowaniami i siedmioma twardymi ograniczeniami, każde cytujące scenariusze, które je dowodzą. Trzydzieści pięć scenariuszy leży jako dane YAML walidowane ścisłym JSON Schema, w pięciu klasach: happy, ambiguity, denied, adversarial, degradation. Warstwa 1 to dwanaście deterministycznych typów asercji nad przechwyconym śladem — bez modelu, bez sieci, bez poświadczeń — więc może blokować każdy pull request. Warstwa 2 to sędzia LLM z zakotwiczonymi rubrykami, przypiętym modelem i hashem promptu w raporcie. Demonstracja to agent HR składający wniosek urlopowy, który zatrzymuje się przed zapisem: brama zatwierdzenia jest wymuszona **jednorazowym tokenem z CSPRNG**, a nie instrukcją w promptcie — agenta można namówić na zapis, ale nie na wyprodukowanie tokenu, którego nigdy nie wydano. Scenariusz jedzie przez prawdziwy composition root usługi; awarie wstrzykiwane są na szwie narzędzi, więc scenariusz degradacyjny przechodzi tę samą ścieżkę kodu co realny timeout.",
+  "stack": [
+    ".NET 10",
+    "C# 14",
+    "OpenTelemetry",
+    "Node 22",
+    "Playwright",
+    "Azure Bicep",
+    "LaTeX/Beamer"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "235 atrybutów [Fact]/[Theory] w źródłach (221 Fact, 14 Theory) plus 10 testów Playwright; 35 scenariuszy / 313 asercji, baseline 35/35 pass",
+  "ci": "Dziewięć workflowów. `ci.yml` ma siedem zadań — lint-docs, lint-actions, lint-shell, architecture, coupling, build-test, e2e (policzone z kluczy `jobs:` po sparsowaniu pliku) — w tym kontrolę sprzężenia: zmiana promptu wymaga zmiany specyfikacji, zmiana rubryki wymaga bumpa wersji. Do tego nocny przebieg sędziowany i pętla produkcyjna scorująca realne spany.",
+  "metrics": [
+    {
+      "label": "Scenariusze",
+      "value": "35 (8 happy · 9 ambiguity · 7 adversarial · 6 denied · 5 degradation)"
+    },
+    {
+      "label": "Asercje",
+      "value": "313"
+    },
+    {
+      "label": "Asercje nieobecności",
+      "value": "60 (19%)"
+    },
+    {
+      "label": "Zepsute warianty agenta",
+      "value": "4"
+    },
+    {
+      "label": "Defekty złapane przez suitę",
+      "value": "14, w tym 7 w samym instrumencie"
+    },
+    {
+      "label": "Kod C#",
+      "value": "16 733 linii"
+    },
+    {
+      "label": "Diagramy Mermaid",
+      "value": "22"
+    },
+    {
+      "label": "Workflowy CI",
+      "value": "9"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/agent-eval-bench",
+    "live": [],
+    "docs": [
+      {
+        "label": "Kontrakt zachowań (SPEC)",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "Co suita faktycznie złapała",
+        "path": "docs/FINDINGS.md"
+      },
+      {
+        "label": "Odchylenia od standardu",
+        "path": "docs/DEVIATIONS.md"
+      },
+      {
+        "label": "Protokół kalibracji sędziego",
+        "path": "docs/CALIBRATION.md"
+      },
+      {
+        "label": "Całość w jednym dokumencie",
+        "path": "docs/OVERVIEW.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "AssertionEvaluator — warstwa 1",
+      "path": "tests/AbsenceConcierge.Evals/Assertions",
+      "description": "Dwanaście deterministycznych typów asercji nad śladem. Żadna nie przechodzi pusto, a nieznany typ jest błędem, nie zaliczeniem.",
+      "reusable": true
+    },
+    {
+      "name": "ConfirmationTokenStore",
+      "path": "src/AbsenceConcierge.AgentService/Workforce/Confirmation",
+      "description": "Brama zapisu wymuszona 256-bitowym tokenem z CSPRNG, wydawanym przy pokazaniu draftu i realizowanym dokładnie raz. Wzorzec jest niezależny od domeny — zależność od draftu to cztery pola.",
+      "reusable": true
+    },
+    {
+      "name": "Walidatory repozytorium",
+      "path": "scripts/",
+      "description": "Skrypty Node w CI: walidacja scenariuszy, kontrola linków, parytet diagramów, parytet dokumentów EN/PL, kontrola sprzężenia zmian.",
+      "reusable": true
+    },
+    {
+      "name": "Schemat scenariusza (JSON Schema)",
+      "path": "evals/schema/scenario.schema.json",
+      "description": "Ścisły kontrakt pliku scenariusza: klasy, delta fixture, dozwolone typy asercji. Nie jest przenośny między domenami: `$defs/toolName` to zamknięty enum pięciu narzędzi HR (`get_current_user`, `find_employee`, `list_leave_types`, `list_leaves`, `request_time_off`), odwzorowujący interfejs `IWorkforceTools` i referencowany z siedmiu miejsc w schemacie (`fixture.tool_behaviour` oraz `tool`/`source_tool` w asercjach); `$defs/eventName` jest zamknięty tak samo. Sam format jest niezależny od .NET, ale inna domena musi edytować oba enumy.",
+      "reusable": false
+    },
+    {
+      "name": "RubricJudge i kalibracja",
+      "path": "tests/AbsenceConcierge.Evals/Judging",
+      "description": "Sędzia z rubrykami zakotwiczonymi per poziom, przypiętym modelem, hashem promptu i arytmetyką {{term:kappa|kappy Cohena}}. Bez poświadczeń raportuje `skipped`, nigdy ciche zielone.",
+      "reusable": false
+    },
+    {
+      "name": "BrokenAgents — pass mutacyjny",
+      "path": "tests/AbsenceConcierge.Evals/Mutations",
+      "description": "Cztery celowo zepsute warianty agenta i scenariusz, który musi każdy złapać. Przy pierwszym uruchomieniu wariant zapisujący dwa razy przeszedł dwa scenariusze — i to poprawiono w scenariuszach, nie w wariancie.",
+      "reusable": false
+    },
+    {
+      "name": "AgentOrchestrator (11 kroków)",
+      "path": "src/AbsenceConcierge.AgentService/Agent",
+      "description": "Kolejność kroków **jest** specyfikacją: EstablishActor → … → ConfirmationGate → ExecuteWrite, z dokładnie jednym zapisanym wynikiem i powodem zakończenia.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "To referencyjna implementacja standardu AI-EVALS z tamtego repozytorium; `DEVIATIONS.md` jest rozliczeniem linia po linii, a poprawki wracają do standardu."
+    },
+    {
+      "slug": "judge-worker",
+      "reason": "Też robi sędziego LLM nad śladem agenta, z kalibracją i mutation testingiem — tyle że jako asynchroniczny worker na kolejce zamiast harnessu w CI."
+    },
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "Ma {{term:playhead|kasetę record/replay}}, której temu repozytorium brakuje — a bez niej warstwa 2 nie odróżni regresji od losowości modelu."
+    },
+    {
+      "slug": "agent-eval-bench-factorial",
+      "reason": "Prywatne repozytorium rekrutacyjne towarzyszące temu projektowi, z tą samą sprawą jako celem integracji."
+    }
+  ],
+  "product": "Kupujący jest realny, ale nie jest nim zespół, który buduje agenta — jest nim ktoś, kto musi **udowodnić**, że agent nie robi rzeczy, których nie wolno. To jest {{term:evidence|eksport audytowy}}, nie kolejny dashboard. Samo repozytorium jest dziś najlepszym artefaktem wiarygodnościowym w portfolio: kontrakt przed kodem, asercje nieobecności, pass mutacyjny i jawny rejestr odchyleń to komplet, którego prawie nikt nie pokazuje publicznie.",
+  "highlights": [
+    "Dziewiętnaście procent asercji to **asercje nieobecności** — sprawdzanie, czego agent nie zrobił. To jest najrzadsza i najtrudniejsza część ewaluacji agentów, i tutaj jest wymuszona schematem: scenariusz `denied` albo `adversarial` bez asercji nieobecności jest odrzucany w CI.",
+    "Brama zatwierdzenia jest wymuszona w trzech niezależnych miejscach: jednorazowym tokenem w kodzie, deklaracją agenta w `definition.json` i asercją w scenariuszu. Prompt jest czwartym i najsłabszym.",
+    "Suita złapała czternaście defektów, z czego **siedem w samym instrumencie albo w specyfikacji** — czyli narzędzie pomiarowe zostało przetestowane przeciw sobie.",
+    "Sędzia bez poświadczeń raportuje `skipped:no-credential`. Nigdy zielone. To jedna linia decyzji projektowej, która odróżnia harness od teatru.",
+    "CI pilnuje sprzężenia dokumentów: nie da się zmienić promptu bez zmiany specyfikacji ani rubryki bez bumpa wersji."
+  ],
+  "gaps": [
+    "Brak {{term:determinizm|warstwy replay}}. Bez niej warstwa 2 nie odróżni regresji od losowości modelu — a to jest dokładnie ta luka, którą zamyka kernel K1, i to jest jego pierwszy odbiorca.",
+    "Warstwa 2 nigdy nie działała przeciw żywemu modelowi, adapter MCP nigdy nie odezwał się do prawdziwego serwera, wdrożenie na Fly nigdy nie nastąpiło. Wszystko trzy są uczciwie opisane jako odchylenia — ale to nadal są obietnice, nie fakty.",
+    "Dwadzieścia jeden otwartych zgłoszeń przy jednym pull requeście — to jest backlog, nie ruch.",
+    "Kalibracja sędziego ma czterdzieści pięć etykiet od **jednego** oceniającego, i to AI. {{term:kappa|Kappa}} przy jednym raterze mierzy spójność, nie zgodność z człowiekiem."
+  ],
+  "next": [
+    "Wepnij {{term:playhead|kasetę}} z K1 i przestaw warstwę 2 na tryb odtwarzania. To jedna zależność i jedna zmiana konfiguracji, a odblokowuje CI dla warstwy sędziowskiej.",
+    "Uruchom warstwę 2 raz przeciw żywemu modelowi, nagraj przebieg i od tej pory odtwarzaj. Jeden koszt zamiast kosztu ciągłego.",
+    "Dodaj drugiego, ludzkiego oceniającego dla kalibracji — bez tego liczba kappy jest technicznie poprawna i pusta.",
+    "Zamknij albo posprzątaj dwadzieścia jeden zgłoszeń; publiczne repo z takim stosunkiem zgłoszeń do PR-ów wygląda na porzucone."
+  ],
+  "risks": [
+    "Adres `agent-eval-bench-demo.fly.dev` jest zadeklarowany w konfiguracji i nic pod nim nie stoi. Adres wdrożenia, który nie odpowiada, jest gorszy niż jego brak."
+  ],
+  "headline": "Pierwszy odbiorca kernela K1 — bez replay nie odróżni regresji od losowości",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 21,
+    "openPrs": 1,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-25",
+    "commits": 122,
+    "files": 292
+  }
+}

@@ -1,0 +1,38 @@
+# Portfolio map + operating model, served as static files by nginx.
+# Deployed by .github/workflows/flyio.yml on a v* tag.
+app = "konrad-portfolio"
+primary_region = "waw"
+
+[build]
+  dockerfile = "../Dockerfile"
+  context = ".."
+
+[env]
+  # Nothing secret here and nothing runtime-configurable: the site is static and
+  # its only data source is site/data/portfolio.json, baked into the image.
+  SITE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  # Entered only from a browser, so a cold start is a slow first page, never a
+  # failed service-to-service call. Scale to zero. (FLY-IO-DEPLOYMENT.md §7)
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+  # Dedicated endpoint, not "/" — an index page returns 200 over a broken bundle.
+  [[http_service.checks]]
+    path = "/healthz"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

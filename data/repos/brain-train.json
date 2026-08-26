@@ -1,0 +1,175 @@
+{
+  "slug": "brain-train",
+  "name": "BrainTrain 2025",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "draft",
+  "tier": "P4",
+  "oneLiner": "Zbiór 38 zadań na liczenie i logikę, złożony w Beamerze XeLaTeX-em i wydawany jako PDF w GitHub Releases.",
+  "summary": "Jednoplikowy projekt LaTeX: `main.tex` składa prezentację Beamer z pięciu plików w `areas/`, w których siedzi 38 zadań w pięciu kategoriach. Każde zadanie to para slajdów generowana dwoma makrami z `mybraintrainer.sty`: pierwszy slajd niesie treść, badge kategorii, gwiazdki trudności i limit czasu, drugi wyłącznie odpowiedź plus opcjonalną jednolinijkową wskazówkę. Ciekawa jest tu jedna decyzja układu: format strony jest ustawiony ręcznie na 1080pt × 1920pt z opcją `landscape`, czyli plansza 16:9 zamiast domyślnej ramki Beamera, więc slajd czyta się jak karta do wydruku, nie jak folia z konferencji. Osobny commit `01c9d37` wyciął rozwiązania krok po kroku i zostawił sam wynik, co jest świadomym wyborem dydaktycznym, a nie skrótem. Cała warstwa wydawnicza to jeden {{term:tagdeploy|tag}}: push `v*` buduje PDF w akcji i publikuje go w Releases, a `.gitignore` celowo trzyma `*.pdf` poza repozytorium. Problem w tym, że w repo nie ma ani jednego tagu i w tym drzewie nikt nigdy nie sprawdził, czy skład w ogóle przechodzi.",
+  "stack": [
+    "LaTeX (Beamer)",
+    "XeLaTeX",
+    "latexmk",
+    "TikZ",
+    "fontawesome5",
+    "xparse / etoolbox / pgffor",
+    "GitHub Actions (xu-cheng/latex-action@v4)"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT No Attribution (MIT-0)",
+  "tests": "Brak testów i brak jakiejkolwiek weryfikacji składu. W środowisku przeglądu nie ma `latexmk` ani `xelatex`, więc nie potwierdziłem, że `main.tex` kompiluje się bez błędów.",
+  "ci": "Jeden workflow `.github/workflows/ci.yml`, wyzwalany wyłącznie pushem tagu `v*`: job `build` składa `main.tex` przez `xu-cheng/latex-action@v4` z XeLaTeX-em, zmienia nazwę na `BrainTrain.pdf` i wrzuca artefakt, job `release` publikuje go przez `softprops/action-gh-release@v2`. Nie ma buildu na push do `main` ani na pull request, więc zwykły commit nie jest sprawdzany w ogóle.",
+  "metrics": [
+    {
+      "label": "Zadania",
+      "value": "38 (10 + 8 + 7 + 8 + 5)"
+    },
+    {
+      "label": "Sekcje tematyczne",
+      "value": "5"
+    },
+    {
+      "label": "Linie LaTeX-a",
+      "value": "477 w ośmiu plikach"
+    },
+    {
+      "label": "Pliki w repo",
+      "value": "12 (git ls-files)"
+    },
+    {
+      "label": "Commity",
+      "value": "5, ostatni 2026-07-19"
+    },
+    {
+      "label": "Tagi w repo",
+      "value": "0"
+    },
+    {
+      "label": "Format slajdu",
+      "value": "1080pt × 1920pt, landscape"
+    },
+    {
+      "label": "Poziomy trudności",
+      "value": "3 (gwiazdki)"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/brain-train",
+    "live": [],
+    "docs": [
+      {
+        "label": "README — struktura i tabela poziomów",
+        "path": "README.md"
+      },
+      {
+        "label": "Główny plik składu",
+        "path": "main.tex"
+      },
+      {
+        "label": "Makra zadań i odpowiedzi",
+        "path": "mybraintrainer.sty"
+      },
+      {
+        "label": "Klasa Beamer z kolorami kategorii",
+        "path": "mybraintrainer.cls"
+      },
+      {
+        "label": "Workflow build & release",
+        "path": ".github/workflows/ci.yml"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "mybraintrainer.sty",
+      "path": "mybraintrainer.sty",
+      "description": "Warstwa makr w 101 liniach: licznik `excounter`, `\\DifficultyStars` na `ifcase` 1–3, badge czasu i kategorii rysowane TikZ-em oraz para `\\ExerciseSlide[badge]{gwiazdki}{czas}{treść}` i `\\AnswerSlide[badge]{odpowiedź}{wskazówka}`, która sama numeruje zadania i zakłada `subsection` na każde. Parametryzacja nie zna arytmetyki ani polskiego poza słowami w tytułach ramek.",
+      "reusable": true
+    },
+    {
+      "name": "mybraintrainer.cls",
+      "path": "mybraintrainer.cls",
+      "description": "Klasa dziedzicząca po `beamer`: pięć kolorów kategorii podanych wprost jako HTML (6BAED6, FD8D3C, 9C27B0, 388E3C, D81B60), pasujące kolory przycisków sekcji, stopka z linkiem do repozytorium i podmiana symboli nawigacyjnych Beamera na przycisk powrotu do spisu treści. Poza jednym zaszytym URL-em jest to neutralny szkielet pod dowolny zbiór kart.",
+      "reusable": true
+    },
+    {
+      "name": "Workflow build & release",
+      "path": ".github/workflows/ci.yml",
+      "description": "Wzorzec „tag → PDF w Releases” w dwóch jobach, bez commitowania artefaktu do repozytorium. Do przeniesienia gdzie indziej wystarczy podmienić `root_file` i nazwę pliku wyjściowego; obie akcje są przypięte tylko do majora.",
+      "reusable": true
+    },
+    {
+      "name": "main.tex",
+      "path": "main.tex",
+      "description": "Spina całość: ustawia geometrię przez `PassOptionsToPackage` przed `documentclass`, składa slajd tytułowy, slajd wprowadzający z czterema blokami i klikalny spis treści z pięciu kolorowych przycisków, po czym wciąga pięć plików z `areas/`. Liczba 38 jest wpisana na sztywno w tekst slajdu.",
+      "reusable": false
+    },
+    {
+      "name": "areas/",
+      "path": "areas",
+      "description": "Właściwa treść w pięciu plikach: arytmetyka podstawowa, kolejność działań, zagadki logiczne, ciągi i wzorce, wyzwania mieszane. Każde zadanie to dokładnie jedno wywołanie `\\ExerciseSlide` i jedno `\\AnswerSlide`, z badgem podkategorii. Kodowanie polskich znaków nie jest tu spójne: pliki 1 i 2 nie używają żadnej komendy akcentowej i stoją na surowym UTF-8, pliki 3-5 używają ich odpowiednio 32, 12 i 20 razy, ale każdy z nich ma też po kilka znaków surowych — łącznie 64 komendy akcentowe na 37 znaków UTF-8.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "llm-book",
+      "reason": "Ten sam kształt: źródło w LaTeX-u z własnym preamble i makrami, build PDF w CI, treść jako jedyny produkt. Tylko o rząd wielkości mniejsze i bez żadnej weryfikacji składu."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "Również książka LaTeX z własnymi makrami i pipeline'em `latexmk`, więc konwencje składu, kodowania i CI są wspólne i warto je ujednolicić w jednym miejscu."
+    },
+    {
+      "slug": "csharp-flashcards",
+      "reason": "Ta sama mechanika nauki — para pytanie/odpowiedź powtórzona kilkadziesiąt razy — tylko w innym medium i bez ścieżki postępu w obu przypadkach."
+    }
+  ],
+  "product": "Brak kupującego i nie ma sensu udawać, że jest inaczej. 38 zadań bez aplikacji, bez pomiaru czasu innego niż stoper w ręku, bez ścieżki postępu i bez licencjonowanej marki to materiał na jeden wieczór, a nie produkt; żeby cokolwiek tu sprzedać, trzeba by kilkuset zadań i generatora wariantów zamiast ręcznie wpisanej treści. Realna wartość jest osobista (materiał do wydruku dla siebie lub dla dziecka) oraz portfolio-techniczna: to najmniejszy w zestawie, czytelny w kwadrans przykład pipeline'u LaTeX z automatycznym wydaniem. Licencja {{term:mit|MIT-0}} zdejmuje nawet wymóg atrybucji, więc autor świadomie zrezygnował z jedynego zwrotu, jaki taki zbiór mógłby dawać.",
+  "highlights": [
+    "38 zadań policzonych wywołaniami `\\ExerciseSlide` w `areas/` zgadza się co do jednego z liczbą deklarowaną na slajdzie wprowadzającym i z liczbą `\\AnswerSlide`.",
+    "Cała mechanika zbioru mieści się w **101 liniach** `mybraintrainer.sty` i sprowadza się do dwóch makr z automatycznym licznikiem zadań.",
+    "Slajdy odpowiedzi pokazują wyłącznie wynik — commit `01c9d37` celowo usunął rozwiązania krok po kroku, żeby nie dało się podejrzeć drogi.",
+    "Kolorowy spis treści jest klikalny w obie strony: pięć przycisków `hyperlink` do `hypertarget`, a powrót podmienia symbole nawigacyjne Beamera zamiast dokładać własny pasek.",
+    "Cały kanał dystrybucji to jeden {{term:tagdeploy|tag}} `v*`; `.gitignore` wyklucza `*.pdf` z komentarzem, że artefakt idzie wyłącznie przez Releases."
+  ],
+  "gaps": [
+    "**Nazwa repozytorium nie zgadza się sama ze sobą.** README i stopka klasy linkują do `konradcinkusz/BrainTrain`, a remote to `konradcinkusz/brain-train`, więc oba badge (CI i wersja wydania) pokazują nieprawdę albo nie renderują się wcale.",
+    "**Zero tagów w repo**, czyli pipeline release nigdy nie wystartował z tego drzewa, a README opisuje wydanie PDF jako proces, który działa.",
+    "CI nie buduje niczego na push do `main` ani na pull request, więc zepsuty `.tex` wjedzie niezauważony i wyjdzie dopiero przy pierwszym tagu.",
+    "Preambuła jest niespójna z buildem: brak `fontspec` i `polyglossia` mimo XeLaTeX-a, za to `inputenc utf8` i `fontenc T1`, które pod XeLaTeX-em są zbędne. Polskie dzielenie wyrazów nie jest włączone w ogóle.",
+    "**Zapis polskich znaków rozjeżdża się wewnątrz samego `areas/`, nie tylko między `main.tex` a zadaniami.** W pięciu plikach zadań jest 64 komendy akcentowe (`\\k{a}`, `\\'{o}`, `\\l{}`, `\\'c`, `\\'s`) i 37 surowych znaków UTF-8, ale podział idzie plik po pliku: `1-arytmetyka-podstawy.tex` i `2-kolejnosc-dzialan.tex` nie mają ani jednej komendy akcentowej (za to 1 i 25 znaków surowych), a `3-zagadki-logiczne.tex`, `4-ciagi-i-wzorce.tex` i `5-mieszane-wyzwania.tex` mają 32, 12 i 20 komend akcentowych i mimo to nadal 5, 2 i 4 znaki surowe. Żaden plik nie trzyma się jednej konwencji konsekwentnie. Do tego literówka w `areas/3-zagadki-logiczne.tex:31` („naprawde” zamiast „naprawdę”) i nieużywane makro `\\ChunkedTOC` zdefiniowane w `mybraintrainer.sty:91`."
+  ],
+  "next": [
+    "Rozstrzygnij nazwę: zmień nazwę repozytorium na `BrainTrain` albo popraw trzy URL-e w README i stopce `.cls` na `brain-train`. Dziś badge kłamią przy pierwszym otwarciu strony.",
+    "Dodaj do `ci.yml` job budujący `main.tex` na `push` i `pull_request`, żeby złamany skład był widoczny przed tagiem, a nie w trakcie wydania.",
+    "Uruchom build (lokalnie albo z gałęzi w CI) i dopiero potem wypchnij `v1.0.0`. Dziś nie istnieje żaden dowód, że PDF w ogóle powstaje.",
+    "Uporządkuj preambułę pod XeLaTeX: `fontspec` plus `polyglossia` z polskim, precz z `inputenc` i `fontenc T1`, i ujednolic zapis znaków na surowy UTF-8 we wszystkich plikach.",
+    "Zdecyduj o losie zbioru: albo dopisz kolejne sekcje, albo napisz generator zadań arytmetycznych produkujący pliki do `areas/`. Ręczne wpisywanie nie doprowadzi do liczby, która ma sens."
+  ],
+  "risks": [
+    "Kolizja nazw w trzech miejscach naraz: `BrainTrain` w README, w stopce klasy i w nazwie artefaktu kontra `brain-train` jako faktyczny slug. To psuje badge i utrudnia znalezienie repozytorium.",
+    "Sama nazwa jest generyczna i zajęta przez istniejące komercyjne aplikacje do treningu mózgu, a README powołuje się wprost na serię *Trening Mózgu*; przy jakiejkolwiek dystrybucji to ryzyko znakowe.",
+    "Repozytorium jest praktycznie porzucone. Treść wniosły trzy commity bez merge'a, nie dwa: `bf4992b` (7 plików, +409), `e6e6cc5` (5 plików, +544) i `01c9d37` (6 plików, +99/-411), poprzedzone `a7ea22d` „Initial commit” (2 pliki, +23) i domknięte jednym merge'em PR #1 — razem 5 commitów, liczby z `git log --numstat --no-merges`. Ostatni ruch 2026-07-19, zero tagów.",
+    "Obie akcje w workflow (`xu-cheng/latex-action@v4`, `softprops/action-gh-release@v2`) są przypięte do majora, więc pierwsze uruchomienie odbędzie się na wersji, której nikt tu nie widział."
+  ],
+  "headline": "Zero tagów, zero buildów na main — wydania PDF nigdy nie uruchomiono",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-07-19",
+    "commits": 5,
+    "files": 12
+  }
+}

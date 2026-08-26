@@ -1,0 +1,124 @@
+{
+  "slug": "cards-game",
+  "name": "CardsGame",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P4",
+  "oneLiner": "Silnik pokera five-card draw, w którym model, heurystyka i człowiek siadają przy stole przez tę samą granicę narzędziową.",
+  "summary": "Rozgrywka pokera dobieranego, w której `CardsGame.Engine` nie ma żadnego I/O ani zależności i jest jedynym autorytetem w sprawie legalności dobrania oraz siły układu — wszystko pozostałe go pyta. Agent LLM dostaje dokładnie dwa narzędzia, `GetHandState` i `ProposeDiscard`, a `PokerTools` jest klasą instancyjną z numerem miejsca domkniętym w konstruktorze, więc nie istnieje argument, którym model mógłby zagrać za kogoś innego; kart pozostałych graczy nie ma w zwracanym obiekcie. Najciekawsza decyzja jest jednak w `AgentPlayer`: po turze **pyta silnik, czy dobranie faktycznie nastąpiło**, zamiast parsować ruch z prozy modelu, a odrzucenie jest normalnym wynikiem z powodem zwrotnym — trzy próby i miejsce pasuje. Kto siedzi na miejscu (Foundry, Azure OpenAI, heurystyka, człowiek) to wpis w sekcji `PokerPlayers:<klucz>`, a nie kod, i nieznany klucz spada do heurystyki z ostrzeżeniem zamiast rzucać wyjątkiem. Poza rozgrywką jest `POST /simulations`: jedna obsada przez maksymalnie 1000 rozdań, win rate z podziałem remisów, odsetek odrzuceń, forfeity i p95 latencji tury, powtarzalne przez seed. Całość składa {{term:aspire|Aspire}} — serwer, Blazor Server, klient konsolowy — i uruchamia się bez konta, klucza i Dockera. Jedyne, czego nigdy nie zrobiono, to zagranie choćby jednego rozdania przeciwko żywemu modelowi.",
+  "stack": [".NET 10", "ASP.NET Core Minimal API", "Blazor Server", ".NET Aspire 13.4.6", "Microsoft.Agents.AI 1.15.0", "Microsoft.Agents.AI.Foundry 1.5.0", "OpenTelemetry 1.17.0", "xunit 2.9.3"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Trzy projekty testowe (Engine, Agents, Server): 102 `[Fact]`, 32 `[Theory]`, 134 `[InlineData]` i 2 `[MemberData]` rozwijane po dziewięciu regułach układów, czyli około 254 przypadki — zgodne z deklarowanym w README „250+”. Liczba pochodzi z policzenia atrybutów w źródłach, nie z przebiegu `dotnet test`.",
+  "ci": "Trzy workflowy. `ci.yml` ma osobny job `dotnet format --verify-no-changes`, macierz build+test na ubuntu/windows/macos z `fail-fast: false`, smoke test CLI podający stdin, publish check dla czterech RID-ów i `permissions: contents: read`. `codeql.yml` ma tygodniowy cron, ale job `analyze` jest warunkowy, bo repozytorium jest prywatne i nie ma code scanning; `release.yml` czeka na tag `v*`, którego nigdy nie było.",
+  "metrics": [
+    { "label": "Projekty w src / testowe", "value": "8 / 3" },
+    { "label": "Linie C# i Razor (src + testy)", "value": "6 075" },
+    { "label": "Przypadki testowe (policzone)", "value": "~254" },
+    { "label": "Reguły układów w silniku", "value": "9, każda z własnym tiebreakerem" },
+    { "label": "Endpointy HTTP", "value": "6" },
+    { "label": "Instrumenty OTel gry", "value": "7" },
+    { "label": "Limit rozdań w symulacji", "value": "1 000 (rejestr trzyma 200)" },
+    { "label": "Tagi git", "value": "0, mimo gotowego release.yml" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/cards-game",
+    "live": [],
+    "docs": [
+      { "label": "Architektura i uzasadnienie decyzji", "path": "docs/ARCHITECTURE.md" },
+      { "label": "Changelog z siedmioma błędami poprawności", "path": "CHANGELOG.md" },
+      { "label": "Reguły architektoniczne dla kontrybutorów", "path": "CONTRIBUTING.md" },
+      { "label": "Polityka bezpieczeństwa", "path": "SECURITY.md" },
+      { "label": "README z sekcją „Deliberately not done”", "path": "README.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "CardsGame.AppHost i ServiceDefaults",
+      "path": "src/CardsGame.ServiceDefaults",
+      "description": "116 linii wspólnej infrastruktury: samoinstrumentacja {{term:otel|OTel}}, health checks, service discovery i odporność HTTP, bez jednej encji domenowej. AppHost czeka na `/health` serwera, zanim wpuści UI i klienta konsolowego.",
+      "reusable": true
+    },
+    {
+      "name": "CardsGame.Engine",
+      "path": "src/CardsGame.Engine",
+      "description": "1 193 linie bez zależności i bez I/O: `Card` jako `readonly record struct`, dziewięć reguł `IHandRule` z osobnymi tiebreakerami, `Deck` z realnym stosem dobierania i `DrawPokerGame` jako maszyna stanu. Precedencja układów wynika z `HandCategory`, a nie z osobnego pola `Priority`, które w poprzedniej wersji zdążyło się rozjechać z pokerem.",
+      "reusable": false
+    },
+    {
+      "name": "PokerTools",
+      "path": "src/CardsGame.Agents/PokerTools.cs",
+      "description": "Dwie metody z atrybutami `[Description]` i nic więcej. Klasa jest instancyjna i trzyma numer miejsca z konstruktora, więc powierzchnia narzędziowa modelu jest {{term:hermetyczny|hermetyczna}} wobec pozostałych graczy na poziomie typu, nie walidacji.",
+      "reusable": false
+    },
+    {
+      "name": "AgentPlayer i PokerAgentFactory",
+      "path": "src/CardsGame.Agents/AgentPlayer.cs",
+      "description": "Pętla tury z budżetem trzech prób i weryfikacją po stronie silnika zamiast parsowania odpowiedzi modelu. Fabryka ma dwie ścieżki, bo `AIProjectClient.AsAIAgent` buduje `AIAgent` z pominięciem pośredniego `IChatClient`.",
+      "reusable": false
+    },
+    {
+      "name": "PokerPlayerFactory",
+      "path": "src/CardsGame.Agents/PokerPlayerFactory.cs",
+      "description": "Jedyne miejsce, które decyduje, co obsadza dane krzesło — Foundry, Azure OpenAI, heurystyka albo człowiek — na podstawie konfiguracji. Brakujący klucz degraduje do heurystyki z ostrzeżeniem, więc świeży klon gra bez żadnego konta.",
+      "reusable": false
+    },
+    {
+      "name": "SimulationRunner",
+      "path": "src/CardsGame.Server/SimulationRunner.cs",
+      "description": "Harness porównawczy: rozdania idą sekwencyjnie, bo równoległość zafałszowałaby latencję miejsc modelowych, remisy dzielone tak, żeby win rate sumował się do jedynki, p95 metodą nearest-rank. Miejsce ludzkie jest odrzucane, bo nie ma kto odpowiedzieć.",
+      "reusable": false
+    },
+    {
+      "name": "HumanDrawGate",
+      "path": "src/CardsGame.Agents/HumanDrawGate.cs",
+      "description": "`TaskCompletionSource` z `RunContinuationsAsynchronously`, żeby reszta rozdania nie dokończyła się inline na wątku żądania HTTP. Niesie `RejectionReason` z silnika z powrotem do widoku miejsca, więc człowiek dostaje ten sam komunikat co model.",
+      "reusable": false
+    },
+    {
+      "name": "ScriptedAgent",
+      "path": "tests/CardsGame.Agents.Tests/ScriptedAgent.cs",
+      "description": "Atrapa `AIAgent` odgrywająca zaplanowaną sekwencję wywołań narzędzi. Daje determinizm w testach ponowień i forfeitów bez sieci i subskrypcji Azure, łącznie z przypadkiem agenta, który nigdy nie działa.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "chess-mas", "reason": "Ten sam wzorzec przeniesiony na inną grę: `HumanMoveGate` kontra `HumanDrawGate`, `ChessMetrics` kontra `GameMetrics`, granica narzędziowa związana z jedną stroną. Komentarze w kodzie odwołują się do ChessMas wprost." },
+    { "slug": "llm-multi-agent-chess", "reason": "Również gra o pełnej informacji prowadzona przez modele, z walidacją ruchu po stronie silnika zamiast zaufania do wyjścia modelu." },
+    { "slug": "agent-eval-bench", "reason": "`SimulationRunner` jest de facto benchmarkiem agenta: win rate, odsetek odrzuceń, forfeity i latencja przy powtarzalnym seedzie. Tamten mierzy to samo na zadaniach, ten na rozdaniach." },
+    { "slug": "maf-book", "reason": "Repozytorium jedzie na `Microsoft.Agents.AI` 1.15.0 i `.Foundry`, czyli dokładnie na API, które książka opisuje — i na wersji, do której książka jeszcze nie zdążyła się zaktualizować." },
+    { "slug": "copilot-scope", "reason": "Wzorzec układu src/tests, gołego xunit i rozdziału DTO serwera od DTO UI jest stamtąd skopiowany; changelog i komentarze mówią to wprost." }
+  ],
+  "product": "Brak kupującego i nie ma sensu udawać, że jest. To projekt {{term:evidence|dowodowy}}: pokazuje, jak zamknąć model językowy w granicy, której nie da się obejść argumentem, i jak mierzyć jakość gry zamiast tego, czy HTTP zwróciło 200. Najbliżej wartości użytkowej stoi runner symulacji, ale dopóki nie przepuszczono przez niego żywego modelu, nie ma z niego ani jednej liczby do opublikowania. Wartość portfolio jest realna, wartość produktowa zerowa.",
+  "gaps": [
+    "**Miejsca modelowe nigdy nie zagrały przeciwko żywemu wdrożeniu Foundry ani Azure OpenAI.** README mówi to uczciwie, ale to znaczy, że główna teza repozytorium nie ma ani jednego pomiaru z prawdziwym modelem — pokrywają ją tylko testy konstrukcyjne i `ScriptedAgent`.",
+    "Przykładowy wynik symulacji w README to cztery kopie heurystyki grające przeciwko sobie. To demonstracja mechaniki podana w miejscu, w którym czytelnik spodziewa się wyniku.",
+    "Repozytorium jest prywatne, więc job `analyze` w `codeql.yml` jest warunkowy i analiza nigdy się nie wykonuje. Badge CodeQL w README opisuje więc workflow, który nic nie robi.",
+    "Zero tagów git przy w pełni napisanym `release.yml` — żaden artefakt CLI nigdy nie powstał, a README nadal pisze „Not yet released”.",
+    "Brak konteneryzacji, uwierzytelniania i persystencji; `HandRegistry` trzyma 200 rozdań w pamięci. Wszystko trzy są wymienione w sekcji „Deliberately not done”, więc to dług świadomy, nie przeoczony."
+  ],
+  "next": [
+    "Postaw jedno wdrożenie Foundry i przepuść kilkaset rozdań obsady model kontra trzy heurystyki. **Zachowaj surowe strumienie zdarzeń, nie tylko wiersze zbiorcze** — powtórka przebiegu tylko po to, żeby odzyskać ślady, kosztuje drugi raz tyle samo.",
+    "Wstaw ten wynik do README zamiast czterech heurystyk i wprost oznacz, czego nadal nie zmierzono.",
+    "Uzgodnij nazwę: katalog to `cards-game`, a badge, `git clone` i URL w README wskazują `konradcinkusz/CardsGame`. Dwie nazwy jednego projektu w jednym README.",
+    "Otaguj `v0.1.0`, żeby `release.yml` przestał być deklaracją, i sprawdź przy okazji, ile naprawdę ważą binaria bez trimmingu.",
+    "Otwórz repozytorium albo włącz code scanning — inaczej usuń badge CodeQL, bo obiecuje kontrolę, której nie ma."
+  ],
+  "highlights": [
+    "Changelog spisuje **siedem realnych błędów poprawności** z poprzedniej wersji, w tym parser rejestrujący trzy z dziewięciu reguł (royal flush raportowany jako `Flush`) i `Rank.Ace` o wartości 0, przez co strit do asa był niewykrywalny. To rzadkość: repozytorium, które publikuje własne pomyłki domenowe zamiast je przepisać po cichu.",
+    "`PokerTools` jest instancyjny i domyka numer miejsca w konstruktorze, a karty pozostałych graczy nie trafiają do zwracanego obiektu. Granica jest własnością typu, nie warunkiem w walidatorze.",
+    "`AgentPlayer` po turze pyta silnik, czy dobranie faktycznie nastąpiło, zamiast parsować ruch z prozy modelu; trzy odrzucenia z powodem zwrotnym i miejsce pasuje.",
+    "CI buduje i testuje na ubuntu, windows i macos, sprawdza formatowanie osobnym jobem, robi smoke test CLI podając stdin i publish check dla czterech RID-ów. `TreatWarningsAsErrors` jest włączone globalnie w `Directory.Build.props`.",
+    "Około 254 przypadki testowe bez sieci i bez poświadczeń — każde miejsce przy stole to heurystyka albo `ScriptedAgent`, łącznie z agentem proponującym nielegalne dobranie i agentem, który nigdy nie działa."
+  ],
+  "risks": [
+    "Kolizja nazw: katalog `cards-game`, a README, badge CI i polecenie `git clone` wskazują `https://github.com/konradcinkusz/CardsGame.git`.",
+    "`FluentAssertions` zostało celowo usunięte, bo od wersji 8 ma licencję własnościową Xceed. Automatyczny bump Dependabota może to cofnąć do projektu na MIT bez żadnego sygnału.",
+    "Pinowanie jest wybiegające do przodu (Aspire 13.4.6, `Microsoft.Agents.AI` 1.15.0, SDK 10.0.100 z `rollForward latestMinor`) — bez okresowego sprawdzenia wobec NuGet zestarzeje się szybciej niż projekt zdąży zostać wznowiony."
+  ],
+  "headline": "Granica trzyma i jest przetestowana; żaden żywy model nie zagrał ani jednego rozdania",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 5, "openPrs": 5, "dependabotPrs": 5, "lastCommit": "2026-08-09", "commits": 17, "files": 99 }
+}

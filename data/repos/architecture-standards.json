@@ -1,0 +1,186 @@
+{
+  "slug": "architecture-standards",
+  "name": "architecture-standards",
+  "cluster": "B-static",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P0",
+  "oneLiner": "Konstytucja architektoniczna estate: piętnaście zasad i siedemnaście przewodników, wydawanych także jako {{term:plugins|wtyczki agentowe}}.",
+  "summary": "Jeden korpus w dwóch postaciach. Blisko czterdzieści sześć tysięcy słów prozy w `docs/` (45 893 poza blokami kodu, 48 664 słowa łącznie) jest jednocześnie dokumentacją do czytania **i** źródłem, z którego generowanych jest pięć wtyczek i dwadzieścia jeden skilli w formacie {{term:plugins|Agent Plugins 1.0.0}}. Powód istnienia jest podany wprost: agent pracujący nad innym repozytorium ma **przeczytać** reguły, a nie odtwarzać je z kodu, który akurat widzi — bo to jest najdroższa awaria w całym estate. Skille są routerami: krótki opis „użyj, gdy…”, tabela trybów awarii i lista kontrolna, a pełny standard leży obok i ładuje się dopiero, gdy skill zadziała. Generator i walidator są celowo rozdzielone: pierwszy dowodzi, że drzewo zgadza się ze źródłami, drugi — niezależnie — że klient je przyjmie. To jedyne repozytorium w portfolio, które zmienia sposób, w jaki powstaje reszta portfolio.",
+  "stack": [
+    "Markdown",
+    "Node.js 22 (ESM, zero zależności)",
+    "Agent Plugins 1.0.0",
+    "GitHub Actions",
+    "GitHub Pages",
+    "LaTeX/Beamer",
+    "Mermaid"
+  ],
+  "primaryLanguage": "Markdown",
+  "license": "MIT",
+  "tests": "Brak testów jednostkowych. Jedyna automatyczna weryfikacja to walidator manifestów (234 linie), który raportuje „5 plugins, 21 skills, 2 manifests”, oraz {{term:drift|walidator dryfu}} — a ten na HEAD zawodzi.",
+  "ci": "Dwa workflowy. `validate-marketplace.yml` uruchamia generator w trybie `--check` i walidator; pierwszy krok na HEAD kończy się kodem 1, więc **CI jest czerwone**. `deploy-pages.yml` publikuje stronę jednostronicową.",
+  "metrics": [
+    {
+      "label": "Zasady P1–P15",
+      "value": "15"
+    },
+    {
+      "label": "Przewodniki operacyjne",
+      "value": "17"
+    },
+    {
+      "label": "Wtyczki / skille",
+      "value": "5 / 21"
+    },
+    {
+      "label": "Słowa w docs/",
+      "value": "48 664 słowa w 25 plikach `docs/**/*.md` (podział po białych znakach), z tego 45 893 poza blokami kodu"
+    },
+    {
+      "label": "Punkty listy zgodności",
+      "value": "18"
+    },
+    {
+      "label": "Generator + walidator",
+      "value": "597 linii JS, zero zależności"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/architecture-standards",
+    "live": [
+      {
+        "label": "Strona (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/architecture-standards/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Konstytucja: 15 zasad i lista zgodności",
+        "path": "docs/architecture/00-REFERENCE-ARCHITECTURE.md"
+      },
+      {
+        "label": "Playbook sesji REVIEW/MODERNIZE/RECOVER",
+        "path": "docs/PLAYBOOK.md"
+      },
+      {
+        "label": "Marketplace: instalacja i koszt tokenów",
+        "path": "MARKETPLACE.md"
+      },
+      {
+        "label": "Punkt wejścia dla agenta",
+        "path": "AGENTS.md"
+      },
+      {
+        "label": "Wzorzec ekstrakcji wspólnej usługi",
+        "path": "docs/proposals/EXTRACT-SHARED-SERVICE-PATTERN.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Konstytucja (P1–P15)",
+      "path": "docs/architecture/00-REFERENCE-ARCHITECTURE.md",
+      "description": "667 linii: diagram całego kształtu systemu, piętnaście zasad i osiemnastopunktowa lista zgodności. Każda zasada ma zacytowany przykład z **działającego** systemu — dokument jest opisowy, nie życzeniowy.",
+      "reusable": true
+    },
+    {
+      "name": "Siedemnaście przewodników operacyjnych",
+      "path": "docs/guides/",
+      "description": "Ustalony kształt: wstęp, ponumerowane sekcje, tabela trybów awarii, lista kontrolna, na końcu cytowane przykłady. Największe to wdrożenie na Fly.io (522 linie) i agenty Azure AI Foundry (508).",
+      "reusable": true
+    },
+    {
+      "name": "Standard dokumentacji badawczej",
+      "path": "docs/research/",
+      "description": "Definiuje układ, kształt dokumentu badania i reguły dowodowe: każda liczba do prześledzenia, reprodukcja jako komenda, walidacja przyrządu przed zaufaniem odczytom, wyniki negatywne też się opisuje.",
+      "reusable": true
+    },
+    {
+      "name": "Generator pakowania",
+      "path": "scripts/build-marketplace.mjs",
+      "description": "363 linie czystego Node. Parsuje sekcje markdown z pominięciem bloków kodu, wycina fragment do budżetu 1400 znaków, przepisuje linki i emituje całe drzewo wtyczek. Tryb `--check` porównuje wygenerowane z zatwierdzonym.",
+      "reusable": true
+    },
+    {
+      "name": "Walidator manifestów",
+      "path": "scripts/validate-marketplace.mjs",
+      "description": "234 linie, celowo niezależne od generatora. Generator dowodzi, że drzewo zgadza się ze źródłami; walidator dowodzi, że klient je przyjmie. To rozdzielenie jest tu najważniejszą decyzją projektową.",
+      "reusable": true
+    },
+    {
+      "name": "Wygenerowane drzewo wtyczek",
+      "path": "plugins/",
+      "description": "Pięć wtyczek, dwadzieścia jeden skilli. Każda ma `plugin.json` w korzeniu **i** w `.claude-plugin/`, bo różne klienty czytają różne ścieżki — realny problem zgodności rozwiązany raz.",
+      "reusable": false
+    },
+    {
+      "name": "Propozycje niezmergowane",
+      "path": "docs/proposals/",
+      "description": "Trzy dokumenty jawnie oznaczone jako jeszcze-nie-standard, w tym wzorzec ekstrakcji wspólnej usługi z uczciwą notką, że ma **jeden punkt danych**.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "authservice",
+      "reason": "Cytowany czterdzieści razy; playbook każe go przyjąć jako jedynego dostawcę tożsamości, a osobna propozycja opisuje jego ekstrakcję jako wzorzec."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Cytowany trzydzieści jeden razy jako publiczny przykład roboczy; część standardów została z niego wyekstrahowana."
+    },
+    {
+      "slug": "archgate",
+      "reason": "Tamto repozytorium egzekwuje sześć z tych piętnastu zasad w kodzie. Pętla polityka → reguła → CI jest domknięta."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Referencyjna implementacja tutejszego standardu ewaluacji, z rozliczeniem odchyleń linia po linii i poprawkami wracającymi do standardu."
+    }
+  ],
+  "product": "{{term:kernel|Kanał i wiarygodność}}, nie transakcja. Publiczne, na MIT, i jednocześnie realne narzędzie obniżające koszt każdej sesji agentowej nad innym repozytorium estate. Potencjalny odbiorca komercyjny to zespół platformowy albo konsultant, który chciałby **własną** konstytucję spakowaną w ten sam sposób — wtedy sprzedaje się metodę (proza plus katalog plus generator), nie treść. Mechanizm dystrybucji na całą organizację już istnieje.",
+  "highlights": [
+    "Jeden korpus, dwie postacie: 45 893 słowa prozy poza blokami kodu (48 664 słowa łącznie w `docs/**/*.md`) są jednocześnie dokumentacją i źródłem pięciu wtyczek — bez ani jednej linii skopiowanej ręcznie.",
+    "Rozwiązany realny problem zgodności klientów: Copilot czyta `plugin.json` w korzeniu, Claude Code w `.claude-plugin/`, a agenci wymagają rozszerzenia `.agent.md` w jednym miejscu i zwykłego `.md` w drugim. Generator emituje obie pisownie, walidator pilnuje, żeby manifesty się nie rozjechały.",
+    "Prywatne repozytoria są cytowane pod stabilnymi placeholderami z legendą — przykład pokazuje kształt bez ujawniania źródła.",
+    "Skille są routerami, a nie standardem wklejonym do promptu: pełna treść ładuje się dopiero po zadziałaniu skilla. To jest różnica między kosztem stu tokenów a kosztem tysiąca na każdą sesję."
+  ],
+  "gaps": [
+    "**CI jest czerwone na HEAD.** Jeden commit zmienił dokument źródłowy bez regeneracji drzewa, więc {{term:drift|walidator dryfu}} kończy się błędem. Repozytorium, którego główna teza brzmi „żadnego dryfu kopiuj-wklej”, właśnie dryfuje — i to jest najlepszy możliwy dowód, że mechanizm działa.",
+    "MARKETPLACE.md podaje trzy skille tam, gdzie są cztery, i dwadzieścia tam, gdzie jest dwadzieścia jeden. Tabela jest pisana ręcznie — czyli dokładnie ten problem, który generator już rozwiązał dla drzewa wtyczek.",
+    "Wszystkie wtyczki mają na sztywno wersję 1.0.0 od początku, a marketplace jest serwowany z gałęzi domyślnej — konsument nie ma jak wykryć, że zawartość się zmieniła.",
+    "Brak testów generatora. Jedyną weryfikacją, że parser markdown działa, jest to, że wyjście zgadza się z zatwierdzonym drzewem.",
+    "Liczby kosztu tokenów są podane jako zmierzone, ale nie ma w repozytorium ani skryptu, ani zapisu pomiaru — sprzeczne z własną regułą standardu badawczego o odtwarzalności."
+  ],
+  "next": [
+    "Uruchom generator i zacommituj zregenerowane drzewo, żeby CI wróciło do zieleni. To jedna komenda i jest pierwsza na liście całego portfolio.",
+    "Wygeneruj tabelę skilli w MARKETPLACE.md z katalogu zamiast pisać ją ręcznie.",
+    "Dodaj do walidatora sprawdzenie, że każde odwołanie do zasady ma odpowiadający nagłówek w konstytucji.",
+    "Wprowadź tagowanie wydań marketplace — dziś każdy merge do gałęzi domyślnej natychmiast zmienia to, co dostają wszyscy instalujący.",
+    "Zapisz metodę pomiaru kosztu tokenów jako komendę albo usuń liczby, zgodnie z własną regułą."
+  ],
+  "risks": [
+    "Wygenerowane drzewo rozjechało się ze źródłem na HEAD — to nie tylko czerwone CI, ale realne ryzyko, że ktoś zainstaluje skill niosący starszą wersję standardu niż dokumentacja.",
+    "Brak wersjonowania wydań przy manifestach deklarujących 1.0.0 od początku.",
+    "Redakcja nazw prywatnych repozytoriów obejmuje HEAD; własny przewodnik o wydaniu open source wymaga audytu **historii**, nie tylko bieżącego stanu."
+  ],
+  "headline": "Walidator dryfu jest czerwony — repozytorium o niedryfowaniu właśnie dryfuje",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 1,
+    "openPrs": 1,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-24",
+    "commits": 54,
+    "files": 106
+  }
+}
