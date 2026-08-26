@@ -6,7 +6,7 @@
     },
     {
       "title": "A repository with no declared level of service does not exist",
-      "body": "Each of the thirty-five repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
+      "body": "Each of the thirty-four repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
     },
     {
       "title": "The tier follows blast radius, not affection",
@@ -92,7 +92,6 @@
         "auto-veritas",
         "cv-maker",
         "primates",
-        "aurelius-promptus",
         "aurelius-promptus-acceptance-tests",
         "zoo-companion",
         "bayesian-inference",
@@ -259,7 +258,7 @@
     },
     {
       "name": "A check on repository visibility and existence",
-      "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across thirty-five entries.",
+      "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across thirty-four entries.",
       "where": "konradcinkusz/scripts/check-repos.mjs"
     },
     {
@@ -289,7 +288,7 @@
     },
     {
       "name": "Agent plugins as the way to distribute rules",
-      "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching thirty-five files.",
+      "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching thirty-four files.",
       "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
     },
     {

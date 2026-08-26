@@ -136,10 +136,6 @@
   ],
   "overlaps": [
     {
-      "slug": "aurelius-promptus",
-      "reason": "To jest system pod testem. Bez uruchomionego Portalu z tamtego repozytorium ta suita nie ma żadnej wartości wykonawczej, a automatyzacja CI zależy od wyłączonego tam workflowu środowisk PR."
-    },
-    {
       "slug": "architecture-standards",
       "reason": "Uogólnione reguły z audytu (dyscyplina asercji, konwencje lokatorów, CI jako część definicji ukończenia) zostały przeniesione do `docs/guides/E2E-ACCEPTANCE-TESTING.md` tamtego repo."
     },

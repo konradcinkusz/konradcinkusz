@@ -495,7 +495,7 @@
           "url": "https://x.com/dev_insight"
         }
       ],
-      "scope": "Mapa obejmuje **35 repozytoriów przeczytanych od początku do końca** — README, dokumentację, kod, workflowy i historię gita. Konto ma ich więcej: co najmniej jedenaście kolejnych jest publicznych, nie zarchiwizowanych i **nie ma ich tutaj**, w tym `DeepDiveInto_CSharp_Dictionaries_presentation` (3 gwiazdki) i `llm-book-mini-project`, do którego odwołuje się jedna z książek. Repozytorium trafia na mapę wtedy, gdy ktoś je faktycznie przeczytał — nie wtedy, gdy istnieje."
+      "scope": "Mapa obejmuje **34 repozytoria przeczytane od początku do końca** — README, dokumentację, kod, workflowy i historię gita. Jedno kolejne, przeczytane w ten sam sposób, jest tymczasowo wycofane z mapy do czasu naprawienia luki bezpieczeństwa, którą znalazł audyt. Konto ma ich więcej: co najmniej jedenaście kolejnych jest publicznych, nie zarchiwizowanych i **nie ma ich tutaj**, w tym `DeepDiveInto_CSharp_Dictionaries_presentation` (3 gwiazdki) i `llm-book-mini-project`, do którego odwołuje się jedna z książek. Repozytorium trafia na mapę wtedy, gdy ktoś je faktycznie przeczytał — nie wtedy, gdy istnieje."
     },
     "clusters": [
       {
@@ -1849,212 +1849,6 @@
         }
       },
       {
-        "slug": "aurelius-promptus",
-        "name": "AureliusPromptus",
-        "cluster": "E-lab",
-        "visibility": "private",
-        "state": "active",
-        "tier": "P3",
-        "oneLiner": "Wielodostępny SaaS do zarządzania promptami LLM: pięć wdrażanych usług .NET 9, cztery frontendy Next.js, dziesięć aplikacji na Fly.io.",
-        "summary": "Przechowywanie, wersjonowanie, recenzowanie i publikowanie promptów LLM, plus warstwa agentowa, która wyciąga master prompt z zapisanej rozmowy. Backend to pięć usług ASP.NET Core na `net9.0`, które `AppHost.cs` rejestruje w .NET Aspire i które `flyio.yml` faktycznie wdraża (authservice, prompttemplatesservice, agenticservice, marketplaceservice, extensionservice); cztery z nich mają własną bazę (`authdb`, `prompttemplatesdb`, `agenticdb`, `marketplacedb`), ExtensionService nie ma żadnej; frontend to cztery aplikacje Next.js 14 i ręcznie napisane rozszerzenie Manifest V3, które wstrzykuje prompty na ośmiu hostach czatów AI. Warstwa AI jest cieńsza, niż sugeruje nazwa: `FlowEngine.cs` to 229 linii interpretera kroków JSON, a własna ocena repozytorium z sierpnia 2026 stwierdza wprost, że „agent” oznacza tu prompt systemowy plus deployment modelu. Najciekawsza decyzja inżynierska leży w `DatabaseProviderExtensions.cs`: 188 linii, które przełączają SQL Server, PostgreSQL i InMemory jednym przełącznikiem i tłumaczą host `.flycast` na `.internal`. Dzięki nim migracja z Azure Container Apps na Fly.io odbyła się bez forkowania choćby jednej usługi. Realnym aktywem tego repozytorium jest więc wdrożenie, nie AI.",
-        "stack": [
-          ".NET 9",
-          ".NET Aspire",
-          "EF Core",
-          "OpenIddict + ASP.NET Identity",
-          "Next.js 14 / React 18 / TypeScript",
-          "Chrome Manifest V3",
-          "Bicep + Azure Container Apps",
-          "Fly.io"
-        ],
-        "primaryLanguage": "C#",
-        "license": "Brak pliku LICENSE w korzeniu; MIT leży wyłącznie w `AureliusPromptus.Web.Portal/LICENSE` (Copyright (c) 2024 Konrad Cinkusz), a sekcja licencji w README to placeholder.",
-        "tests": "204 atrybuty `[Fact]`/`[Theory]` w pięciu projektach xUnit (AgenticService 69, AuthService 48, PromptTemplatesService 36, MarketplaceService 31, AgentTemplatesService 20); `[Theory]` daje więcej przypadków niż atrybutów, więc faktyczna liczba jest wyższa i nie została zweryfikowana. Frontend ma trzy pliki testowe Jest w Portalu, a cała warstwa E2E została oddana do osobnego repozytorium i nie biega tutaj w niczym.",
-        "ci": "Dziewięć workflowów, 3 709 linii YAML: `pr-validation.yml` buduje warunkowo według wykrytych zmian (lint + Jest + build dla Portalu, sam lint + build dla trzech pozostałych frontendów, restore + build + test dla pięciu usług .NET). `flyio.yml` ma 86 KB, provisionuje Azure przez Bicep, buduje tylko zmienione usługi, pcha obrazy do `registry.fly.io` i wdraża je w jawnie ustalonej kolejności zależności; testy E2E nie są podpięte do żadnego workflowu.",
-        "metrics": [
-          {
-            "label": "Usługi backendu (.NET 9)",
-            "value": "5 rejestrowanych w `AppHost.cs` i wdrażanych przez `flyctl deploy` w `flyio.yml` (authservice, prompttemplatesservice, agenticservice, marketplaceservice, extensionservice) + AgentTemplatesService zakomentowany w `AppHost.cs:200`"
-          },
-          {
-            "label": "Aplikacje Fly.io",
-            "value": "10"
-          },
-          {
-            "label": "Moduły Bicep",
-            "value": "24, osobna tożsamość zarządzana per usługa"
-          },
-          {
-            "label": "Testy xUnit",
-            "value": "204 atrybuty w 5 projektach"
-          },
-          {
-            "label": "Migracje EF Core",
-            "value": "39"
-          },
-          {
-            "label": "YAML w workflows",
-            "value": "3 709 linii w 9 plikach"
-          },
-          {
-            "label": "Rozszerzenie MV3",
-            "value": "3 874 linie JS, bez bundlera"
-          },
-          {
-            "label": "Dokumenty w docs/",
-            "value": "74"
-          }
-        ],
-        "links": {
-          "repo": "https://github.com/konradcinkusz/aurelius-promptus",
-          "live": [],
-          "docs": [
-            {
-              "label": "Ocena repo wobec dziesięciu nisz AI-infra, z wnioskiem negatywnym",
-              "path": "docs/EMERGING_NICHES_EVALUATION.md"
-            },
-            {
-              "label": "Gotowość produkcyjna, ze statusami OTWARTE/NAPRAWIONE",
-              "path": "docs/PRODUCTION_READINESS.md"
-            },
-            {
-              "label": "Realny stan automatyzacji testów",
-              "path": "docs/test-automation-analysis.md"
-            },
-            {
-              "label": "Cennik licencji private cloud",
-              "path": "docs/business/PRICING.md"
-            },
-            {
-              "label": "Analiza infrastruktury Fly.io",
-              "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
-            },
-            {
-              "label": "Przegląd architektury z diagramem",
-              "path": "docs/architecture/ARCHITECTURE_REVIEW.md"
-            }
-          ]
-        },
-        "deployment": {
-          "fly": true,
-          "docker": true,
-          "ghcr": false,
-          "pages": false,
-          "packages": false
-        },
-        "components": [
-          {
-            "name": "Infrastruktura Bicep i skrypty Fly.io",
-            "path": "infra",
-            "description": "24 moduły Bicep, w których każda usługa dostaje własną tożsamość zarządzaną i własne przypisania ról do SQL, zamiast jednego wspólnego konta. Obok katalog `flyio/` ze skryptami PowerShell do setupu, skalowania, DNS i niszczenia środowisk.",
-            "reusable": true
-          },
-          {
-            "name": "Pipeline wdrożeniowy",
-            "path": ".github/workflows",
-            "description": "`flyio.yml` wykrywa zmienione usługi, buduje tylko je i wdraża w jawnej kolejności zależności, uruchamiając efemeryczną maszynę do provisioningu agentów jako wersjonowany artefakt deploymentu. `private-cloud-push.yml` celowo kończy się na pchnięciu obrazów do ACR klienta i zostawia deployment jego zespołowi.",
-            "reusable": true
-          },
-          {
-            "name": "AureliusPromptus.ServiceDefaults",
-            "path": "AureliusPromptus.ServiceDefaults",
-            "description": "1 365 linii rozszerzeń nad `IHostApplicationBuilder`. Poza szablonem {{term:servicedefaults}} ({{term:otel}}, health, discovery, resilience) dodaje uwierzytelnianie JWT, politykę CORS, Swagger z JWT, filtr walidacji i `DatabaseProviderExtensions` wybierający SQL Server, PostgreSQL albo InMemory z jednego przełącznika. Same sygnatury rozszerzeń są czysto infrastrukturalne, ale publiczna powierzchnia biblioteki niesie typ domenowy: `public sealed record KonradPromptSeed(string Name, string Icon, string Content, string Tags)` oraz `public static class KonradPromptSeeds` z `public static readonly IReadOnlyList<KonradPromptSeed> Published` i `Internal` (607 linii treści promptów jednego autora). Do tego `Services/QuotaConsumptionService.cs` siedzi w namespace `PromptTemplatesService.Services` i wystawia `Task<bool> CheckAndConsumeAsync(string? authorizationHeader, string quotaType)`, które woła `POST /api/auth/quota/consume` w AuthService. Przeniesienie tego na inny produkt wymaga więc najpierw wycięcia domeny, a nie samego dodania referencji — dlatego `reusable: false`.",
-            "reusable": false
-          },
-          {
-            "name": "FlowEngine",
-            "path": "AureliusPromptus.AgenticService/Services/Flow",
-            "description": "229 linii interpretera przepływów zdefiniowanych w JSON: kroki `agent-call`, `transform`, `conditional` i `validation`, ze skokami `skipTo` z kroków warunkowych. Cztery definicje flow i cztery definicje agentów leżą jako dane, nie kod, ale konstruktor bierze wprost `WizardDbContext` i konkretną klasę Azure OpenAI, więc silnik jest przybity do jednego schematu i jednego dostawcy.",
-            "reusable": false
-          },
-          {
-            "name": "Prompt Wallet (rozszerzenie MV3)",
-            "path": "src/AureliusPromptus.BrowserExtension",
-            "description": "3 874 linie JavaScriptu bez bundlera, content scripts na ośmiu hostach czatów AI plus osobny na github.com, z własnym przepływem OAuth w `oauth-content.js`. Samo `popup.js` ma 2 863 linie i mówi bezpośrednio do API produktu.",
-            "reusable": false
-          },
-          {
-            "name": "AuthService",
-            "path": "AureliusPromptus.AuthService",
-            "description": "ASP.NET Identity z OpenIddict jako serwerem {{term:oidc}}, OAuth Google i GitHub, organizacje z zaproszeniami, kwoty z odpowiedzią 429, rozliczenia PayPro jako Merchant of Record oraz eksport i usunięcie danych pod RODO. Tożsamość jest tu sklejona z rozliczeniami jednego modelu cenowego.",
-            "reusable": false
-          },
-          {
-            "name": "AppHost (kompozycja Aspire)",
-            "path": "AureliusPromptus.AppHost/AppHost.cs",
-            "description": "474-liniowy korzeń kompozycji, który wstrzykuje sekret JWT jako parametr Aspire i rejestruje OAuth, Azure OpenAI, AI Foundry i SendGrid warunkowo, tylko gdy są skonfigurowane. AgentTemplatesService jest tu zakomentowany w linii 200 i mimo to nadal budowany oraz testowany w CI.",
-            "reusable": false
-          },
-          {
-            "name": "Web.Portal",
-            "path": "AureliusPromptus.Web.Portal",
-            "description": "Główna aplikacja w Next.js 14 App Router. Trasy API po stronie serwera działają jako proxy i trzymają JWT w ciasteczkach `HttpOnly` (`app/api/auth/set-cookie/route.ts`). Marketplace robi to samo — ma własny `set-cookie` oraz `/api/auth/session`, oba wołane z `credentials: 'same-origin'`; w `localStorage` obie aplikacje trzymają wyłącznie `currentWorkspaceId`.",
-            "reusable": false
-          }
-        ],
-        "overlaps": [
-          {
-            "slug": "aurelius-promptus-acceptance-tests",
-            "reason": "Cała warstwa E2E została świadomie wyprowadzona tam. Tutaj został wskaźnik w dokumentacji i martwy `playwright.config.ts` w korzeniu jako artefakt po przeprowadzce."
-          },
-          {
-            "slug": "authservice",
-            "reason": "Osobne repo nosi tę samą nazwę co `AureliusPromptus.AuthService` i realizuje ten sam zakres. Tamten wpis nazywa to migracją, która się nie odbyła, i ma rację: to jest kopia, nie zależność."
-          },
-          {
-            "slug": "architecture-standards",
-            "reason": "`docs/test-automation-analysis.md` odsyła tam po uogólnione reguły testów akceptacyjnych wyprodukowane przez tutejszy audyt. Wnioski wyjechały, długi zostały."
-          },
-          {
-            "slug": "copilot-scope",
-            "reason": "Przegląd architektury wskazuje bliźniaczy dokument w tamtym repozytorium jako towarzyszący — ta sama metoda samooceny zastosowana do innego systemu."
-          },
-          {
-            "slug": "landing-page",
-            "reason": "Web.OnePager pełni dokładnie tę samą funkcję strony jednostronicowej, tyle że wewnątrz tego monorepo."
-          }
-        ],
-        "product": "Kupujący jest zdefiniowany dwa razy i drugi raz poważniej. Ścieżka pierwsza to samoobsługowy SaaS z planami Free/Premium/Enterprise rozliczany przez PayPro jako Merchant of Record; jest kod, są modele zamówień, jest strona cennika, i jest to wariant o najniższej marży i najtrudniejszej akwizycji. Ścieżka druga to licencja private cloud dla korporacji: `docs/business/PRICING.md` podaje 29 900 PLN za Starter i 59 900 PLN za Professional plus wdrożenia 8 900–24 900 PLN, a `private-cloud-push.yml` jest już technicznie gotową realizacją tego modelu. Trzeba jednak odnotować, że własna ocena repozytorium z 17 sierpnia 2026 kończy się wnioskiem, że żadna z dziesięciu badanych nisz AI-infra nie jest warta wejścia z tym kodem, więc wartość sprzedażowa leży w warstwie platformowej i w gotowym produkcie CRUD, nie w warstwie AI.",
-        "highlights": [
-          "`DatabaseProviderExtensions.cs` to 188 linii, które przełączają SQL Server, PostgreSQL i InMemory jednym przełącznikiem, wraz z polityką ponowień i tłumaczeniem hosta `.flycast` na `.internal`. To jest konkretny powód, dla którego migracja z Azure na Fly.io nie wymagała forkowania ani jednej usługi.",
-          "24 moduły Bicep dają **każdej usłudze własną tożsamość zarządzaną i własne przypisania ról do SQL**, zamiast jednego konta współdzielonego przez sześć usług. To rzadko dowożona część, bo jest nudna i pracochłonna.",
-          "`flyio.yml` ma 86 KB: wykrywa zmienione usługi, wdraża w jawnie ustalonej kolejności zależności i uruchamia efemeryczną maszynę, żeby zaprovisionować agentów jako wersjonowany artefakt deploymentu.",
-          "Rozszerzenie Manifest V3 napisane ręcznie, bez bundlera: 3 874 linie działające na ośmiu hostach czatów AI plus github.com, z własnym przepływem OAuth przez content script.",
-          "`docs/EMERGING_NICHES_EVALUATION.md` kończy się wnioskiem, że **żadna z dziesięciu badanych nisz nie jest warta wejścia z tego repozytorium**, i sam wskazuje działający błąd izolacji najemców z numerami linii. Potwierdziłem go niezależnie w kodzie."
-        ],
-        "gaps": [
-          "**README jest nieaktualny w stopniu wprowadzającym w błąd.** Mówi o .NET 8, choć trzynaście na czternaście plików `.csproj` to `net9.0`; wymienia AgentInstancesService i `Web.NextJs`, których nie ma na dysku; opisuje Convex jako backend frontendu. Nie wspomina o Fly.io, Marketplace, OnePager, AdminDashboard ani o rozszerzeniu przeglądarkowym.",
-          "Brak pliku LICENSE w korzeniu, a sekcja licencji w README to dosłownie `[Add your license information here]`. Jedyny plik {{term:mit}} leży w podkatalogu frontendu i da się go przeczytać jako obejmujący całość.",
-          "Testy E2E nie są podpięte do żadnego workflowu w żadnym z dwóch repozytoriów, a własny audyt szacuje, że około 45% z nich nie dochodzi do realnej asercji. Zielony przebieg nic by nie znaczył, a `playwright.config.ts` w korzeniu wskazuje na katalog, którego nie ma.",
-          "Żaden adres nie został potwierdzony jako odpowiadający. Jest dziesięć plików `fly.toml`, równoległa ścieżka Azure Container Apps i wariant private cloud, ale nazwy aplikacji rozjeżdżają się między plikami toml (`aureliuspromptus-*`) a workflowem niszczącym (`aurelius-*`), więc `destroy` może nie trafić w to, co istnieje.",
-          "Martwy kod utrzymywany w CI: AgentTemplatesService zakomentowany w `AppHost.cs:200`, ale nadal budowany i testowany, oraz 37 KB workflowu środowisk per PR z zakomentowanym wyzwalaczem. Osobno leży `AureliusPromptus.ApiService/` — projekt bez wpisu w `AureliusPromptus.sln`, bez rejestracji w `AppHost.cs` i bez pliku `fly.toml`; występuje wyłącznie jako filtr ścieżki w `pr-validation.yml`, więc nic go nie buduje ani nie wdraża. Przy 74 dokumentach i jednym autorze {{term:drift}} jest już widoczny — dwa dokumenty same oznaczają się jako zastąpione."
-        ],
-        "next": [
-          "Dodać `AuthorizationOptions.FallbackPolicy` z `RequireAuthenticatedUser` w PromptTemplatesService, AgentTemplatesService i MarketplaceService, i uzgodnić nazwę claimu `org_id` szukanego w `ApiControllerBase` z faktycznie emitowanym `organization`. To jedno posiedzenie i zamyka najpoważniejszą pozycję na tej liście.",
-          "Napisać README od zera przeciwko rzeczywistemu drzewu. Obecny szkodzi bardziej niż jego brak, bo jest pierwszą rzeczą, którą zobaczy klient private cloud.",
-          "Dodać LICENSE w korzeniu albo napisać wprost, że repozytorium jest zastrzeżone. Przy sprzedaży licencji za 29 900–59 900 PLN rocznie to nie jest detal redakcyjny.",
-          "Usunąć martwy `playwright.config.ts` i skrypty `test:e2e`, które prowadzą donikąd, albo przepisać je pod realne katalogi.",
-          "Wyciąć ServiceDefaults do osobnego, wersjonowanego pakietu bez `KonradPromptSeeds.cs`. To jedyne aktywo w tym repozytorium, które ma sens poza tym produktem."
-        ],
-        "risks": [
-          "**Potwierdzony brak autoryzacji.** `PromptTemplatesController` nie ma `[Authorize]` na klasie ani na `GetAll`/`GetPaged`, a grep za `FallbackPolicy` nie zwraca w całym rozwiązaniu niczego. `GetAll` przyjmuje `workspaceId` prosto z query stringa, więc treść szablonów jest czytelna przez granicę workspace'u bez uwierzytelnienia. {{term:blast|Zasięg}} obejmuje wszystkich najemców naraz.",
-          "**Ten wpis powtarzał nieaktualny wiersz dokumentacji.** `docs/PRODUCTION_READINESS.md` pozycja 1.1 (status OTWARTE, priorytet KRYTYCZNY) nadal twierdzi, że Marketplace trzyma access i refresh token w `localStorage`. Kod tego nie robi: `AureliusPromptus.Web.Marketplace/contexts/auth-context.tsx` trzyma tokeny w pamięci i w ciasteczkach `HttpOnly` ustawianych przez `/api/auth/set-cookie` (`httpOnly: true` w trzech miejscach route'u), mówi to we własnym komentarzu, a przy starcie migruje starsze kopie z `localStorage` do ciasteczek i je usuwa. Jedyne `localStorage.setItem` w tej aplikacji to `currentWorkspaceId`, baner cookie i klucz rate-limitu formularza kontaktowego. Realnym ryzykiem jest rozjazd dokumentacji z kodem: pozycja 1.1 trafia na listę blokerów wdrożenia i kieruje uwagę na naprawiony problem.",
-          "Potwierdzanie adresu e-mail jest wyłączone przy rejestracji (`EmailConfirmed = true` na sztywno, `RequireConfirmedEmail = false`). Przy produkcie płatnym to prosta droga do nadużyć konta darmowego i do problemów z RODO.",
-          "Brak licencji w korzeniu przy jednoczesnej sprzedaży licencji private cloud to realna luka prawna. Do tego kolizja nazw: osobne repo `authservice` nazywa się tak samo jak usługa wewnątrz tego monorepo, co w mapie portfolio myli."
-        ],
-        "headline": "Najlepsze tu jest wdrożenie, nie AI — a `PromptTemplatesController` nie ma `[Authorize]`",
-        "headlineTone": "bad",
-        "github": {
-          "stars": 1,
-          "openIssues": 27,
-          "openPrs": 2,
-          "dependabotPrs": 0,
-          "lastCommit": "2026-08-17",
-          "commits": 58,
-          "files": 926
-        }
-      },
-      {
         "slug": "aurelius-promptus-acceptance-tests",
         "name": "AureliusPromptus.AcceptanceTests",
         "cluster": "E-lab",
@@ -2191,10 +1985,6 @@
           }
         ],
         "overlaps": [
-          {
-            "slug": "aurelius-promptus",
-            "reason": "To jest system pod testem. Bez uruchomionego Portalu z tamtego repozytorium ta suita nie ma żadnej wartości wykonawczej, a automatyzacja CI zależy od wyłączonego tam workflowu środowisk PR."
-          },
           {
             "slug": "architecture-standards",
             "reason": "Uogólnione reguły z audytu (dyscyplina asercji, konwencje lokatorów, CI jako część definicji ukończenia) zostały przeniesione do `docs/guides/E2E-ACCEPTANCE-TESTING.md` tamtego repo."
@@ -2371,10 +2161,6 @@
           {
             "slug": "architecture-standards",
             "reason": "Cytowany tam czterdzieści razy; wzorzec jego ekstrakcji jest opisany jako propozycja standardu z jawną notką, że ma jeden punkt danych — ten."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "Tamten system nadal wozi **skopiowaną** kopię tego serwisu jako własny projekt. To jest migracja, która się nie odbyła, i najprostszy sposób, żeby jeden punkt danych stał się dwoma."
           },
           {
             "slug": "primates",
@@ -3754,10 +3540,6 @@
           {
             "slug": "maf-book",
             "reason": "Ten sam przedmiot, Microsoft Agent Framework w .NET, od strony działającego kodu zamiast tekstu książki: `AsAIAgent` i `AIFunctionFactory` są tu użyte, a tam opisane."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "Komentarz w `ChessTools.cs` odwołuje się wprost do wzorca granicy narzędziowej przed akcją zapisu, użytego w tamtym przepływie provisioningu."
           }
         ],
         "product": "Brak kupującego i README sam zamyka tę drogę, mówiąc, że to nie jest benchmark siły gry, jedna partia niczego nie dowodzi, a koszt jest szacunkiem wobec cennika, nie fakturą. To projekt kredytujący: pokazuje, że autor składa system agentowy w .NET z twardą granicą deterministyczną, telemetrią i rozliczaniem kosztów. Jeśli cokolwiek stąd ma wartość rynkową, to `HumanMoveGate` jako wzorzec human-in-the-loop, który o szachach nie wie nic, oraz `GameCostTracker` z konfiguracyjnym cennikiem — ale ten drugi dopiero po wycięciu z jego sygnatur enuma `Side`.",
@@ -3950,10 +3732,6 @@
           {
             "slug": "authservice",
             "reason": "Tożsamość nie jest tu budowana — authservice v0.3.1 jest konsumowany jako wydany obraz, a każde API waliduje tokeny wobec jego JWKS. To jest wzorzec do powtórzenia."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "Wersjonowane definicje ról tutaj i szablony promptów tam rozwiązują ten sam problem: co dokładnie kazano agentowi robić w tym konkretnym przebiegu."
           },
           {
             "slug": "chess-mas",
@@ -4756,10 +4534,6 @@
           {
             "slug": "authservice",
             "reason": "cv-maker nie ma własnej tożsamości: loguje się przeciw tej usłudze, waliduje jej JWKS i deployuje jej obraz z {{term:ghcr}} jako `cvmaker-authservice-dev`."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "Cała warstwa agentowa — `agents/<slug>/definition.json`, `flows/*.json`, FlowEngine, Foundry z fallbackiem na mock, `IArtifactStorageService`, układ `flyio/` — jest wprost wzorowana na tamtejszym AgenticService."
           },
           {
             "slug": "black-hole-sim",
@@ -5581,8 +5355,8 @@
         "visibility": "private",
         "state": "active",
         "tier": "P0",
-        "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści pięć repozytoriów, plus strona, która go renderuje.",
-        "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści pięć repozytoriów naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
+        "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści cztery repozytoria, plus strona, która go renderuje.",
+        "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści cztery repozytoria naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
         "stack": [
           "HTML5",
           "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -5600,11 +5374,11 @@
         "metrics": [
           {
             "label": "Repozytoria na mapie",
-            "value": "35, w 6 klastrach"
+            "value": "34, w 6 klastrach"
           },
           {
             "label": "Poziomy uwagi",
-            "value": "5 (P0–P4), pokrywają 35 slugów bez powtórzeń"
+            "value": "5 (P0–P4), pokrywają 34 slugi bez powtórzeń"
           },
           {
             "label": "Model operacyjny",
@@ -5612,7 +5386,7 @@
           },
           {
             "label": "Kernele i duplikacje",
-            "value": "7 kerneli, 6 odrzuconych, 11 duplikacji"
+            "value": "6 kerneli, 6 odrzuconych, 9 duplikacji"
           },
           {
             "label": "Słownik",
@@ -5749,16 +5523,16 @@
             "reason": "README i `meta.json` linkują do kanału jako głównej osi dystrybucji, więc oba opisują ten sam kanał dotarcia."
           }
         ],
-        "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu czterech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 35 repozytoriów, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
+        "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu trzech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 34 repozytoria, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
         "highlights": [
           "Walidator ma **zamknięty** zestaw kluczy repozytorium i sprawdza integralność krzyżowo: nieznany slug w `overlaps`, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. {{term:kernel|Kernel}} z jednym konsumentem jest ostrzeżeniem, nie błędem — to jest osąd, nie naruszenie schematu.",
-          "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 35 slugów bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
+          "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 34 slugi bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
           "Strona nie ma kroku budowania i zero zależności w czasie działania. Jedyna zależność deweloperska to przeglądarka do testu renderowania — który złapał błąd kolejności bootu zostawiający pustą stronę, trzy przepełnienia layoutu i regułę `[hidden]` przegrywającą z `display: flex`.",
-          "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu czterech."
+          "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu trzech."
         ],
         "gaps": [
           "**To repozytorium jest prywatne, więc README profilu nie renderuje się nigdzie.** GitHub pokazuje `README.md` z repozytorium o nazwie równej nazwie użytkownika tylko wtedy, gdy jest ono publiczne. Tu jest prywatne, potwierdzone dwoma niezależnymi źródłami, więc `github.com/konradcinkusz` nie pokazuje ani tabeli projektów, ani niczego innego z tego pliku. Upublicznienie repozytorium naprawia profil i **jednocześnie publikuje cały manifest**, razem z dossier siedemnastu repozytoriów prywatnych — to jedna decyzja, nie dwie, i patrz `risks` poniżej.",
-          "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
+          "Manifest jest **migawką z jednego dnia** dla trzydziestu trzech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
           "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
           "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
           "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
@@ -6656,10 +6430,6 @@
             "reason": "Całe repo jest mierzone checklistą P1-P15 stamtąd, a `docs/architecture/07-STANDARDS-FEEDBACK.md` zwraca poprawki do samego standardu. Sprzężenie idzie w obie strony."
           },
           {
-            "slug": "aurelius-promptus",
-            "reason": "ADR-002 i ADR-003 cytują tamten system jako udokumentowany przypadek rozrostu wspólnego jądra; sufit 800 linii jest bezpośrednią odpowiedzią na tamtą porażkę."
-          },
-          {
             "slug": "AgentHelm",
             "reason": "AgentService to kolejny agent nad Claude z narzędziami i bramką potwierdzenia, czyli ta sama klasa problemu co narzędzia do prowadzenia agentów."
           }
@@ -7251,10 +7021,6 @@
           {
             "slug": "agent-eval-bench",
             "reason": "README wskazuje je jako źródło wzorca wąskiej, jawnie wyliczonej powierzchni narzędziowej agenta zamiast otwartego dostępu do bazy."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "Roadmapa planuje przejęcie stamtąd wzorca QuestPDF do generowania folderów i Bicepowego IaC, a jego zablokowaną integrację płatności cytuje jako lekcję."
           }
         ],
         "product": "Kupujący jest zdefiniowany ostrzej niż w większości portfolio: instytucja, czyli zoo, park dziki albo akwarium, kupująca licencję na produkt do obsługi zwiedzającego, sprzedawana bezpośrednio przez założyciela jako autónomo w Hiszpanii. Nazwane są dwa konkretne cele pilotażu, Río Safari Elche i Bioparc Valencia, ale żaden kontakt nie jest potwierdzony, ceny nie ma, a faza 0 jest jawnie darmową instalacją pod case study. Realny status handlowy to więc hipoteza z gotowym demo, nie pipeline. Sam BUSINESS-CASE.md przyznaje, że rynek rzędu 26 zoo w Polsce nie jest biznesem bez ekspansji międzynarodowej, i to jest najuczciwsze zdanie w całym repozytorium.",
@@ -7310,8 +7076,7 @@
           "cognitive-multi-agent-simulation",
           "auto-veritas",
           "cv-maker",
-          "black-hole-sim",
-          "aurelius-promptus"
+          "black-hole-sim"
         ],
         "effort": "done",
         "licence": "MIT",
@@ -7348,11 +7113,10 @@
         "name": "{{term:servicedefaults|ServiceDefaults}} — wspólne jądro hosta",
         "sourceSlug": "cognitive-multi-agent-simulation",
         "sourcePath": "src/CogniSim.ServiceDefaults/",
-        "description": "Uwierzytelnianie wobec JWKS, wybór dostawcy bazy, limitowanie z jednolitym kształtem odpowiedzi 429, migracja w tle po starcie serwera. Jedenaście projektów w portfolio robi to samo; **cztery napisały to niezależnie od zera**.",
+        "description": "Uwierzytelnianie wobec JWKS, wybór dostawcy bazy, limitowanie z jednolitym kształtem odpowiedzi 429, migracja w tle po starcie serwera. Dziesięć projektów w portfolio robi to samo; **cztery napisały to niezależnie od zera**.",
         "consumers": [
           "primates",
           "auto-veritas",
-          "aurelius-promptus",
           "hydro-scope",
           "copilot-scope",
           "agent-eval-bench",
@@ -7427,25 +7191,6 @@
           "Ten sam kształt danych powstał niezależnie jako {{term:audit|ślad audytowy}} bramki uprawnień"
         ],
         "blocker": "Rób dopiero, gdy K1 ma **dwóch faktycznych** konsumentów w mainie. To jest reguła {{term:wip|limitu}}, nie preferencja."
-      },
-      {
-        "id": "K6",
-        "name": "Wersjonowane definicje agenta",
-        "sourceSlug": "cognitive-multi-agent-simulation",
-        "sourcePath": "src/CogniSim.Ensemble/, agents/",
-        "description": "Rejestr definicji ról z wersją, temperaturą i pochodzeniem, plus {{term:fingerprint}} dokładnego zestawu, który wyprodukował dany przebieg. Bez tego nie da się powiedzieć, czy różnica wyników to zmiana promptu, czy losowość.",
-        "consumers": [
-          "aurelius-promptus",
-          "agent-eval-bench"
-        ],
-        "effort": "days",
-        "licence": "MIT",
-        "readiness": [
-          "Definicja agenta jako dane, walidowana wobec własnego schematu",
-          "Odcisk zestawu jest już wyliczany i przypinany do przebiegu",
-          "Po drugiej stronie stoi cały serwis szablonów promptów, który rozwiązuje tę samą rzecz od innej strony"
-        ],
-        "blocker": "Dwie strony tej duplikacji mają różne modele: jedna wersjonuje **rolę**, druga **szablon**. Scalenie wymaga najpierw wspólnego modelu, a to jest decyzja projektowa, nie refaktor."
       }
     ],
     "kernelsRejected": [
@@ -7528,19 +7273,6 @@
         "severity": "high"
       },
       {
-        "problem": "Serwis tożsamości raz konsumowany jako obraz, raz wożony jako skopiowany kod.",
-        "sideA": {
-          "slug": "authservice",
-          "what": "Wydany obraz, przypinany po tagu, zero zależności źródłowej"
-        },
-        "sideB": {
-          "slug": "aurelius-promptus",
-          "what": "Własny projekt `AureliusPromptus.AuthService` w solucji — kopia sprzed ekstrakcji"
-        },
-        "resolution": "To jest migracja, która się nie odbyła. Wykonanie jej zamienia jeden punkt danych wzorca ekstrakcji w dwa — czyli z anegdoty robi standard.",
-        "severity": "high"
-      },
-      {
         "problem": "{{term:audit|Ślad audytowy}} i {{term:runstore|magazyn przebiegów}} to ta sama struktura danych.",
         "sideA": {
           "slug": "AgentHelm",
@@ -7551,19 +7283,6 @@
           "what": "Zapis przebiegu jako funkcja badawcza — co, ile, z jakim wynikiem"
         },
         "resolution": "Ten sam kształt powstał dwa razy z dwóch różnych powodów. Kernel K5 scala oba, ale dopiero po tym, jak K1 ma dwóch odbiorców — bo scalanie magazynu jest tygodniami, a scalanie kasety godzinami.",
-        "severity": "medium"
-      },
-      {
-        "problem": "{{term:ensemble|Wersjonowana definicja roli}} i wersjonowany szablon promptu.",
-        "sideA": {
-          "slug": "cognitive-multi-agent-simulation",
-          "what": "Sześć ról w JSON z wersją, temperaturą i odciskiem zestawu"
-        },
-        "sideB": {
-          "slug": "aurelius-promptus",
-          "what": "Cały serwis szablonów promptów z marketplace i wersjonowaniem"
-        },
-        "resolution": "Jedno pytanie, dwie odpowiedzi: **co dokładnie kazano agentowi robić w tym konkretnym przebiegu**. Kernel K6, ale wymaga najpierw wspólnego modelu — to jest decyzja projektowa, nie refaktor.",
         "severity": "medium"
       },
       {
@@ -7790,7 +7509,7 @@
         },
         {
           "title": "Repo bez zadeklarowanego poziomu obsługi nie istnieje",
-          "body": "Każde z trzydziestu pięciu repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
+          "body": "Każde z trzydziestu czterech repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
         },
         {
           "title": "Poziom wyznacza promień rażenia, nie sympatia",
@@ -7876,7 +7595,6 @@
             "auto-veritas",
             "cv-maker",
             "primates",
-            "aurelius-promptus",
             "aurelius-promptus-acceptance-tests",
             "zoo-companion",
             "bayesian-inference",
@@ -8043,7 +7761,7 @@
         },
         {
           "name": "Sprawdzenie widoczności i istnienia repozytoriów",
-          "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy trzydziestu pięciu pozycjach.",
+          "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy trzydziestu czterech pozycjach.",
           "where": "konradcinkusz/scripts/check-repos.mjs"
         },
         {
@@ -8073,7 +7791,7 @@
         },
         {
           "name": "Wtyczki agentowe jako sposób dystrybucji reguł",
-          "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu pięciu plików.",
+          "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu czterech plików.",
           "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
         },
         {
@@ -8205,7 +7923,7 @@
         "tag": "komponent",
         "body": [
           "Projekt, który {{term:aspire}} generuje w każdym nowym rozwiązaniu: telemetria, health checks, resilience, service discovery. W szablonie ma około stu linii i jest kopiowany, nie referencowany.",
-          "W tym portfolio istnieje **jedenaście** takich projektów. W czterech z nich urosły równolegle te same pliki: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — i każda kopia jest już inna. To nie jest kod skopiowany raz; to jest cztery niezależnie utrzymywane implementacje jednej rzeczy.",
+          "W tym portfolio istnieje **dziesięć** takich projektów. W czterech z nich urosły równolegle te same pliki: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — i każda kopia jest już inna. To nie jest kod skopiowany raz; to jest cztery niezależnie utrzymywane implementacje jednej rzeczy.",
           "Dlatego jest to największy nierozpoznany kernel w portfolio i jednocześnie najtrudniejszy: nie ma jednej wersji, którą można wyjąć — trzeba wybrać referencyjną i cofnąć rozjazd w pozostałych."
         ],
         "where": "jedenaście projektów `*.ServiceDefaults`; kernel K2",
@@ -8213,7 +7931,6 @@
           "cognitive-multi-agent-simulation",
           "primates",
           "auto-veritas",
-          "aurelius-promptus",
           "hydro-scope",
           "copilot-scope"
         ]
@@ -8251,13 +7968,11 @@
         "term": "Ensemble / definicje ról",
         "tag": "komponent",
         "body": [
-          "Rejestr wersjonowanych definicji ról agentów wraz z odciskiem ({{term:fingerprint}}) dokładnego zestawu, który wyprodukował dany przebieg. Bez tego nie da się powiedzieć, czy różnica między dwoma przebiegami wynika ze zmiany promptu, ze zmiany modelu, czy z losowości.",
-          "To ten sam problem, który po stronie szablonów promptów rozwiązuje aurelius-promptus — i dlatego oba są kandydatami do scalenia w jeden kernel."
+          "Rejestr wersjonowanych definicji ról agentów wraz z odciskiem ({{term:fingerprint}}) dokładnego zestawu, który wyprodukował dany przebieg. Bez tego nie da się powiedzieć, czy różnica między dwoma przebiegami wynika ze zmiany promptu, ze zmiany modelu, czy z losowości."
         ],
-        "where": "cognitive-multi-agent-simulation / Ensemble, aurelius-promptus",
+        "where": "cognitive-multi-agent-simulation / Ensemble",
         "slugs": [
-          "cognitive-multi-agent-simulation",
-          "aurelius-promptus"
+          "cognitive-multi-agent-simulation"
         ]
       },
       {
@@ -8488,14 +8203,13 @@
           "Warstwa orkiestracji lokalnego uruchamiania wielu serwisów naraz, z dashboardem telemetrii. Generuje w każdym rozwiązaniu projekt {{term:servicedefaults}}, i to właśnie ta wygoda jest źródłem największej duplikacji w tym portfolio.",
           "Świadome ograniczenie: Aspire opisuje development, a produkcję opisują osobne pliki wdrożeniowe. Trzymanie tych dwóch rzeczy osobno kosztuje trochę powtórzenia i oszczędza rozjazd między środowiskami."
         ],
-        "where": "osiem systemów w portfolio",
+        "where": "siedem systemów w portfolio",
         "slugs": [
           "cognitive-multi-agent-simulation",
           "primates",
           "copilot-scope",
           "hydro-scope",
           "auto-veritas",
-          "aurelius-promptus",
           "chess-mas",
           "black-hole-sim"
         ]
@@ -8651,7 +8365,7 @@
         "tag": "operacje",
         "body": [
           "Twardy limit liczby rzeczy zaczętych i nieskończonych. Nie wytyczna — limit: przekroczenie jest sygnałem, żeby coś **zamknąć**, a nie żeby pracować dłużej.",
-          "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu pięciu rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
+          "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu czterech rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
         ],
         "where": "zakładka „operacje”, sekcja „limity”"
       },
@@ -8725,7 +8439,7 @@
           "url": "https://x.com/dev_insight"
         }
       ],
-      "scope": "The map covers **35 repositories read from beginning to end** — README, documentation, code, workflows and git history. The account holds more than that: at least eleven others are public, not archived and **are not here**, among them `DeepDiveInto_CSharp_Dictionaries_presentation` (3 stars) and `llm-book-mini-project`, which one of the books refers to. A repository reaches the map when someone has actually read it — not when it exists."
+      "scope": "The map covers **34 repositories read from beginning to end** — README, documentation, code, workflows and git history. One more, read the same way, is temporarily withdrawn from the map until a security gap the audit found in it is fixed. The account holds more than that: at least eleven others are public, not archived and **are not here**, among them `DeepDiveInto_CSharp_Dictionaries_presentation` (3 stars) and `llm-book-mini-project`, which one of the books refers to. A repository reaches the map when someone has actually read it — not when it exists."
     },
     "clusters": [
       {
@@ -10079,212 +9793,6 @@
         }
       },
       {
-        "slug": "aurelius-promptus",
-        "name": "AureliusPromptus",
-        "cluster": "E-lab",
-        "visibility": "private",
-        "state": "active",
-        "tier": "P3",
-        "oneLiner": "Multi-tenant SaaS for managing LLM prompts: five deployed .NET 9 services, four Next.js front ends, ten Fly.io apps.",
-        "summary": "Storing, versioning, reviewing and publishing LLM prompts, plus an agent layer that extracts a master prompt from a saved conversation. The backend is five ASP.NET Core services on `net9.0`, which `AppHost.cs` registers with .NET Aspire and which `flyio.yml` actually deploys (authservice, prompttemplatesservice, agenticservice, marketplaceservice, extensionservice); four of them have their own database (`authdb`, `prompttemplatesdb`, `agenticdb`, `marketplacedb`), ExtensionService has none; the front end is four Next.js 14 applications and a hand-written Manifest V3 extension that injects prompts on eight AI chat hosts. The AI layer is thinner than the name suggests: `FlowEngine.cs` is 229 lines of a JSON step interpreter, and the repository's own assessment from August 2026 states outright that 'agent' here means a system prompt plus a model deployment. The most interesting engineering decision sits in `DatabaseProviderExtensions.cs`: 188 lines that switch between SQL Server, PostgreSQL and InMemory with a single switch and translate a `.flycast` host to `.internal`. Thanks to them the migration from Azure Container Apps to Fly.io happened without forking a single service. The real asset of this repository is therefore the deployment, not the AI.",
-        "stack": [
-          ".NET 9",
-          ".NET Aspire",
-          "EF Core",
-          "OpenIddict + ASP.NET Identity",
-          "Next.js 14 / React 18 / TypeScript",
-          "Chrome Manifest V3",
-          "Bicep + Azure Container Apps",
-          "Fly.io"
-        ],
-        "primaryLanguage": "C#",
-        "license": "No LICENSE file at the root; MIT sits only in `AureliusPromptus.Web.Portal/LICENSE` (Copyright (c) 2024 Konrad Cinkusz), and the README's licence section is a placeholder.",
-        "tests": "204 `[Fact]`/`[Theory]` attributes across five xUnit projects (AgenticService 69, AuthService 48, PromptTemplatesService 36, MarketplaceService 31, AgentTemplatesService 20); `[Theory]` produces more cases than attributes, so the actual count is higher and has not been verified. The front end has three Jest test files in the Portal, and the whole E2E layer was handed over to a separate repository and does not run here in anything.",
-        "ci": "Nine workflows, 3,709 lines of YAML: `pr-validation.yml` builds conditionally according to the changes it detects (lint + Jest + build for the Portal, lint + build only for the three other front ends, restore + build + test for the five .NET services). `flyio.yml` is 86 KB, provisions Azure through Bicep, builds only the changed services, pushes images to `registry.fly.io` and deploys them in an explicitly fixed dependency order; the E2E tests are not wired into any workflow.",
-        "metrics": [
-          {
-            "label": "Backend services (.NET 9)",
-            "value": "5 registered in `AppHost.cs` and deployed by `flyctl deploy` in `flyio.yml` (authservice, prompttemplatesservice, agenticservice, marketplaceservice, extensionservice) + AgentTemplatesService commented out in `AppHost.cs:200`"
-          },
-          {
-            "label": "Fly.io applications",
-            "value": "10"
-          },
-          {
-            "label": "Bicep modules",
-            "value": "24, a separate managed identity per service"
-          },
-          {
-            "label": "xUnit tests",
-            "value": "204 attributes across 5 projects"
-          },
-          {
-            "label": "EF Core migrations",
-            "value": "39"
-          },
-          {
-            "label": "YAML in workflows",
-            "value": "3,709 lines across 9 files"
-          },
-          {
-            "label": "MV3 extension",
-            "value": "3,874 lines of JS, no bundler"
-          },
-          {
-            "label": "Documents in docs/",
-            "value": "74"
-          }
-        ],
-        "links": {
-          "repo": "https://github.com/konradcinkusz/aurelius-promptus",
-          "live": [],
-          "docs": [
-            {
-              "label": "Assessment of the repo against ten AI-infra niches, with a negative conclusion",
-              "path": "docs/EMERGING_NICHES_EVALUATION.md"
-            },
-            {
-              "label": "Production readiness, with OPEN/FIXED statuses",
-              "path": "docs/PRODUCTION_READINESS.md"
-            },
-            {
-              "label": "The real state of test automation",
-              "path": "docs/test-automation-analysis.md"
-            },
-            {
-              "label": "Private cloud licence pricing",
-              "path": "docs/business/PRICING.md"
-            },
-            {
-              "label": "Fly.io infrastructure analysis",
-              "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
-            },
-            {
-              "label": "Architecture review with a diagram",
-              "path": "docs/architecture/ARCHITECTURE_REVIEW.md"
-            }
-          ]
-        },
-        "deployment": {
-          "fly": true,
-          "docker": true,
-          "ghcr": false,
-          "pages": false,
-          "packages": false
-        },
-        "components": [
-          {
-            "name": "Infrastruktura Bicep i skrypty Fly.io",
-            "path": "infra",
-            "description": "24 Bicep modules, in which every service gets its own managed identity and its own role assignments to SQL, rather than one shared account. Next to it a `flyio/` directory with PowerShell scripts for setup, scaling, DNS and destroying environments.",
-            "reusable": true
-          },
-          {
-            "name": "The deployment pipeline",
-            "path": ".github/workflows",
-            "description": "`flyio.yml` detects changed services, builds only those and deploys them in an explicit dependency order, starting an ephemeral machine to provision agents as a versioned deployment artefact. `private-cloud-push.yml` deliberately stops at pushing images to the client's ACR and leaves the deployment to their team.",
-            "reusable": true
-          },
-          {
-            "name": "AureliusPromptus.ServiceDefaults",
-            "path": "AureliusPromptus.ServiceDefaults",
-            "description": "1,365 lines of extensions over `IHostApplicationBuilder`. Beyond the {{term:servicedefaults}} template ({{term:otel}}, health, discovery, resilience) it adds JWT authentication, a CORS policy, Swagger with JWT, a validation filter and `DatabaseProviderExtensions`, which picks SQL Server, PostgreSQL or InMemory from a single switch. The extension signatures themselves are purely infrastructural, but the library's public surface carries a domain type: `public sealed record KonradPromptSeed(string Name, string Icon, string Content, string Tags)` and `public static class KonradPromptSeeds` with `public static readonly IReadOnlyList<KonradPromptSeed> Published` and `Internal` (607 lines of one author's prompt content). On top of that `Services/QuotaConsumptionService.cs` sits in the `PromptTemplatesService.Services` namespace and exposes `Task<bool> CheckAndConsumeAsync(string? authorizationHeader, string quotaType)`, which calls `POST /api/auth/quota/consume` in AuthService. Moving this to another product therefore requires cutting the domain out first, not merely adding a reference — hence `reusable: false`.",
-            "reusable": false
-          },
-          {
-            "name": "FlowEngine",
-            "path": "AureliusPromptus.AgenticService/Services/Flow",
-            "description": "229 lines of an interpreter for flows defined in JSON: `agent-call`, `transform`, `conditional` and `validation` steps, with `skipTo` jumps out of conditional steps. Four flow definitions and four agent definitions sit as data, not code, but the constructor takes `WizardDbContext` and a concrete Azure OpenAI class directly, so the engine is nailed to one schema and one provider.",
-            "reusable": false
-          },
-          {
-            "name": "Prompt Wallet (rozszerzenie MV3)",
-            "path": "src/AureliusPromptus.BrowserExtension",
-            "description": "3,874 lines of JavaScript with no bundler, content scripts on eight AI chat hosts plus a separate one on github.com, with its own OAuth flow in `oauth-content.js`. `popup.js` alone is 2,863 lines and talks directly to the product's API.",
-            "reusable": false
-          },
-          {
-            "name": "AuthService",
-            "path": "AureliusPromptus.AuthService",
-            "description": "ASP.NET Identity with OpenIddict as the {{term:oidc}} server, Google and GitHub OAuth, organisations with invitations, quotas with a 429 response, PayPro billing as Merchant of Record, and GDPR data export and deletion. Identity here is glued to the billing of one pricing model.",
-            "reusable": false
-          },
-          {
-            "name": "AppHost (kompozycja Aspire)",
-            "path": "AureliusPromptus.AppHost/AppHost.cs",
-            "description": "A 474-line composition root that injects the JWT secret as an Aspire parameter and registers OAuth, Azure OpenAI, AI Foundry and SendGrid conditionally, only when they are configured. AgentTemplatesService is commented out here at line 200 and is nevertheless still built and tested in CI.",
-            "reusable": false
-          },
-          {
-            "name": "Web.Portal",
-            "path": "AureliusPromptus.Web.Portal",
-            "description": "The main Next.js 14 App Router application. The server-side API routes act as a proxy and keep the JWT in `HttpOnly` cookies (`app/api/auth/set-cookie/route.ts`). The Marketplace does the same — it has its own `set-cookie` and `/api/auth/session`, both called with `credentials: 'same-origin'`; in `localStorage` both applications keep nothing but `currentWorkspaceId`.",
-            "reusable": false
-          }
-        ],
-        "overlaps": [
-          {
-            "slug": "aurelius-promptus-acceptance-tests",
-            "reason": "The whole E2E layer was deliberately moved out there. What is left here is a pointer in the documentation and a dead `playwright.config.ts` at the root as an artefact of the move."
-          },
-          {
-            "slug": "authservice",
-            "reason": "The separate repo carries the same name as `AureliusPromptus.AuthService` and covers the same scope. That entry calls it a migration that never happened, and it is right: this is a copy, not a dependency."
-          },
-          {
-            "slug": "architecture-standards",
-            "reason": "`docs/test-automation-analysis.md` points there for the generalised acceptance-test rules produced by the audit here. The conclusions left, the debts stayed."
-          },
-          {
-            "slug": "copilot-scope",
-            "reason": "The architecture review names a twin document in that repository as a companion — the same self-assessment method applied to another system."
-          },
-          {
-            "slug": "landing-page",
-            "reason": "Web.OnePager serves exactly the same one-page-site function, only inside this monorepo."
-          }
-        ],
-        "product": "The buyer is defined twice, and the second time more seriously. The first path is self-service SaaS with Free/Premium/Enterprise plans billed through PayPro as Merchant of Record; the code is there, the order models are there, the pricing page is there, and it is the variant with the lowest margin and the hardest acquisition. The second path is a private cloud licence for corporates: `docs/business/PRICING.md` quotes 29,900 PLN for Starter and 59,900 PLN for Professional plus deployments at 8,900–24,900 PLN, and `private-cloud-push.yml` is already a technically finished implementation of that model. It has to be noted, though, that the repository's own assessment of 17 August 2026 ends with the conclusion that none of the ten AI-infra niches examined is worth entering with this code, so the sales value lies in the platform layer and in the finished CRUD product, not in the AI layer.",
-        "highlights": [
-          "`DatabaseProviderExtensions.cs` is 188 lines that switch between SQL Server, PostgreSQL and InMemory with a single switch, together with a retry policy and translation of the `.flycast` host to `.internal`. That is the concrete reason the migration from Azure to Fly.io did not require forking a single service.",
-          "24 Bicep modules give **every service its own managed identity and its own role assignments to SQL**, rather than one account shared by six services. It is a part that is rarely delivered, because it is dull and laborious.",
-          "`flyio.yml` is 86 KB: it detects changed services, deploys in an explicitly fixed dependency order and starts an ephemeral machine to provision agents as a versioned deployment artefact.",
-          "A Manifest V3 extension written by hand, with no bundler: 3,874 lines running on eight AI chat hosts plus github.com, with its own OAuth flow through a content script.",
-          "`docs/EMERGING_NICHES_EVALUATION.md` ends with the conclusion that **none of the ten niches examined is worth entering with this repository**, and itself points out a live tenant isolation bug with line numbers. I confirmed it independently in the code."
-        ],
-        "gaps": [
-          "**The README is out of date to the point of being misleading.** It talks about .NET 8, although thirteen of the fourteen `.csproj` files are `net9.0`; it lists AgentInstancesService and `Web.NextJs`, which are not on disk; it describes Convex as the front end's backend. It does not mention Fly.io, the Marketplace, the OnePager, the AdminDashboard or the browser extension.",
-          "No LICENSE file at the root, and the licence section in the README is literally `[Add your license information here]`. The only {{term:mit}} file sits in a front-end subdirectory and can be read as covering the whole thing.",
-          "The E2E tests are not wired into any workflow in either of the two repositories, and the author's own audit estimates that around 45% of them never reach a real assertion. A green run would mean nothing, and `playwright.config.ts` at the root points at a directory that does not exist.",
-          "No address has been confirmed as answering. There are ten `fly.toml` files, a parallel Azure Container Apps path and a private cloud variant, but the application names diverge between the toml files (`aureliuspromptus-*`) and the destroying workflow (`aurelius-*`), so `destroy` may not hit what exists.",
-          "Dead code kept alive in CI: AgentTemplatesService commented out in `AppHost.cs:200` but still built and tested, and 37 KB of a per-PR environments workflow with a commented-out trigger. Separately there is `AureliusPromptus.ApiService/` — a project with no entry in `AureliusPromptus.sln`, no registration in `AppHost.cs` and no `fly.toml`; it appears only as a path filter in `pr-validation.yml`, so nothing builds or deploys it. At 74 documents and one author the {{term:drift}} is already visible — two documents mark themselves as superseded."
-        ],
-        "next": [
-          "Add `AuthorizationOptions.FallbackPolicy` with `RequireAuthenticatedUser` in PromptTemplatesService, AgentTemplatesService and MarketplaceService, and reconcile the `org_id` claim name looked up in `ApiControllerBase` with the `organization` actually emitted. That is one sitting and it closes the most serious item on this list.",
-          "Write the README from scratch against the actual tree. The current one does more harm than no README at all, because it is the first thing a private cloud client will see.",
-          "Add a LICENSE at the root, or state outright that the repository is proprietary. When you are selling licences at 29,900–59,900 PLN a year that is not an editorial detail.",
-          "Delete the dead `playwright.config.ts` and the `test:e2e` scripts that lead nowhere, or rewrite them against real directories.",
-          "Cut ServiceDefaults out into a separate, versioned package without `KonradPromptSeeds.cs`. It is the only asset in this repository that makes sense outside this product."
-        ],
-        "risks": [
-          "**Confirmed missing authorisation.** `PromptTemplatesController` has no `[Authorize]` on the class or on `GetAll`/`GetPaged`, and a grep for `FallbackPolicy` returns nothing across the whole solution. `GetAll` takes `workspaceId` straight from the query string, so template content is readable across the workspace boundary without authentication. The {{term:blast|blast radius}} covers every tenant at once.",
-          "**This entry was repeating an out-of-date line of documentation.** `docs/PRODUCTION_READINESS.md` item 1.1 (status OPEN, priority CRITICAL) still claims that the Marketplace keeps the access and refresh token in `localStorage`. The code does not do that: `AureliusPromptus.Web.Marketplace/contexts/auth-context.tsx` keeps the tokens in memory and in `HttpOnly` cookies set by `/api/auth/set-cookie` (`httpOnly: true` in three places in the route), says so in its own comment, and on start-up migrates older copies out of `localStorage` into cookies and removes them. The only `localStorage.setItem` in this application is `currentWorkspaceId`, the cookie banner and the contact form's rate-limit key. The real risk is documentation diverging from the code: item 1.1 lands on the deployment blocker list and directs attention at a problem that has been fixed.",
-          "Email confirmation is switched off at registration (`EmailConfirmed = true` hard-coded, `RequireConfirmedEmail = false`). On a paid product that is a straight route to free-account abuse and to GDPR problems.",
-          "No licence at the root while private cloud licences are being sold is a real legal hole. On top of that a name collision: the separate `authservice` repo is named the same as the service inside this monorepo, which confuses the portfolio map."
-        ],
-        "headline": "The deployment is the best part, not the AI — `PromptTemplatesController` has no `[Authorize]`",
-        "headlineTone": "bad",
-        "github": {
-          "stars": 1,
-          "openIssues": 27,
-          "openPrs": 2,
-          "dependabotPrs": 0,
-          "lastCommit": "2026-08-17",
-          "commits": 58,
-          "files": 926
-        }
-      },
-      {
         "slug": "aurelius-promptus-acceptance-tests",
         "name": "AureliusPromptus.AcceptanceTests",
         "cluster": "E-lab",
@@ -10421,10 +9929,6 @@
           }
         ],
         "overlaps": [
-          {
-            "slug": "aurelius-promptus",
-            "reason": "This is the system under test. Without a running Portal from that repository this suite has no executable value at all, and CI automation depends on the PR-environment workflow that is disabled over there."
-          },
           {
             "slug": "architecture-standards",
             "reason": "The generalised rules from the audit (assertion discipline, locator conventions, CI as part of the definition of done) were moved into `docs/guides/E2E-ACCEPTANCE-TESTING.md` in that repo."
@@ -10601,10 +10105,6 @@
           {
             "slug": "architecture-standards",
             "reason": "Cited there forty times; its extraction pattern is described as a proposed standard with an explicit note that it has one data point — this one."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "That system still carries a **copy-pasted** copy of this service as a project of its own. This is the migration that never happened, and the simplest way to turn one data point into two."
           },
           {
             "slug": "primates",
@@ -11984,10 +11484,6 @@
           {
             "slug": "maf-book",
             "reason": "The same subject, Microsoft Agent Framework in .NET, from the side of working code rather than book text: `AsAIAgent` and `AIFunctionFactory` are used here and described there."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "A comment in `ChessTools.cs` refers directly to the tool-boundary-before-a-write-action pattern used in that provisioning flow."
           }
         ],
         "product": "No buyer, and the README closes that route itself, saying that this is not a benchmark of playing strength, that one game proves nothing, and that the cost is an estimate against a price list, not an invoice. This is a credibility project: it shows that the author assembles an agent system in .NET with a hard deterministic boundary, telemetry and cost accounting. If anything here has market value it is `HumanMoveGate` as a human-in-the-loop pattern that knows nothing about chess, and `GameCostTracker` with its configurable price list — but the second only once the `Side` enum has been cut out of its signatures.",
@@ -12180,10 +11676,6 @@
           {
             "slug": "authservice",
             "reason": "Identity is not built here — authservice v0.3.1 is consumed as a released image, and every API validates tokens against its JWKS. This is the pattern to repeat."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "Versioned role definitions here and prompt templates there solve the same problem: what exactly the agent was told to do in this particular run."
           },
           {
             "slug": "chess-mas",
@@ -12986,10 +12478,6 @@
           {
             "slug": "authservice",
             "reason": "cv-maker has no identity of its own: it logs in against this service, validates its JWKS and deploys its image from {{term:ghcr}} as `cvmaker-authservice-dev`."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "The whole agent layer — `agents/<slug>/definition.json`, `flows/*.json`, FlowEngine, Foundry with a fallback to mock, `IArtifactStorageService`, the `flyio/` layout — is modelled directly on the AgenticService there."
           },
           {
             "slug": "black-hole-sim",
@@ -13811,8 +13299,8 @@
         "visibility": "private",
         "state": "active",
         "tier": "P0",
-        "oneLiner": "GitHub profile and hub repository: one manifest describing thirty-five repositories, plus a site that renders it.",
-        "summary": "The repository does two things at once and both are committed today. The first is the profile README — the first thing anyone arriving at the rest of the estate sees. The second is the portfolio map: a site in plain HTML, CSS and JS with no build step and no runtime dependencies, which renders five tabs from a single manifest — portfolio, consolidation, operating model, a sortable index and a glossary of forty-three terms. The data sits split across `data/`, one file per repository, and **a second time** under `data/en/` — Polish is the source, English a translation with an enforced shape. `scripts/build-manifest.mjs` glues both trees into the one `site/data/portfolio.json`, and `--check` mode detects {{term:drift|drift}} of the committed copy against the sources. The most interesting decision is in the validator: the schema of repository keys is **closed**, and referential integrity is checked across files, so an unknown slug, a {{term:kernel|kernel}} with one consumer, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. This is the only place in the portfolio from which thirty-five repositories are visible at once — and that is why it sits at tier P0 despite not containing a single line of business logic.",
+        "oneLiner": "GitHub profile and hub repository: one manifest describing thirty-four repositories, plus a site that renders it.",
+        "summary": "The repository does two things at once and both are committed today. The first is the profile README — the first thing anyone arriving at the rest of the estate sees. The second is the portfolio map: a site in plain HTML, CSS and JS with no build step and no runtime dependencies, which renders five tabs from a single manifest — portfolio, consolidation, operating model, a sortable index and a glossary of forty-three terms. The data sits split across `data/`, one file per repository, and **a second time** under `data/en/` — Polish is the source, English a translation with an enforced shape. `scripts/build-manifest.mjs` glues both trees into the one `site/data/portfolio.json`, and `--check` mode detects {{term:drift|drift}} of the committed copy against the sources. The most interesting decision is in the validator: the schema of repository keys is **closed**, and referential integrity is checked across files, so an unknown slug, a {{term:kernel|kernel}} with one consumer, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. This is the only place in the portfolio from which thirty-four repositories are visible at once — and that is why it sits at tier P0 despite not containing a single line of business logic.",
         "stack": [
           "HTML5",
           "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -13830,11 +13318,11 @@
         "metrics": [
           {
             "label": "Repositories on the map",
-            "value": "35, across 6 clusters"
+            "value": "34, across 6 clusters"
           },
           {
             "label": "Attention tiers",
-            "value": "5 (P0-P4), covering 35 slugs with no repeats"
+            "value": "5 (P0-P4), covering 34 slugs with no repeats"
           },
           {
             "label": "Operating model",
@@ -13842,7 +13330,7 @@
           },
           {
             "label": "Kernels and duplications",
-            "value": "7 kernels, 6 rejected, 11 duplications"
+            "value": "6 kernels, 6 rejected, 9 duplications"
           },
           {
             "label": "Glossary",
@@ -13979,16 +13467,16 @@
             "reason": "The README and `meta.json` link to the channel as the main axis of distribution, so both describe the same channel of reach."
           }
         ],
-        "product": "No buyer, and none should be looked for here. This is channel and credibility: the GitHub profile is the first thing a recruiter or a prospective user of the other thirty-four repositories sees. The map is a decision tool for one person, the owner, and in that role it has real indirect value, because it is the only place from which 35 repositories, their duplications and the {{term:wip|WIP}} limits are visible at once. The site itself is not a product and there is no sense in positioning it as one.",
+        "product": "No buyer, and none should be looked for here. This is channel and credibility: the GitHub profile is the first thing a recruiter or a prospective user of the other thirty-three repositories sees. The map is a decision tool for one person, the owner, and in that role it has real indirect value, because it is the only place from which 34 repositories, their duplications and the {{term:wip|WIP}} limits are visible at once. The site itself is not a product and there is no sense in positioning it as one.",
         "highlights": [
           "The validator has a **closed** set of repository keys and checks integrity across files: an unknown slug in `overlaps`, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. A {{term:kernel|kernel}} with one consumer is a warning, not an error — that is a judgement, not a schema violation.",
-          "`data/ops.json` is a complete operating model, not a declaration of intent: 9 principles, 5 attention tiers covering **exactly 35 slugs with no repeats**, 7 rituals with a timebox and an artefact on the way out, 12 health checks with a signal, a threshold and an action, 7 WIP limits, 12 automations and 6 plan horizons with a completion test.",
+          "`data/ops.json` is a complete operating model, not a declaration of intent: 9 principles, 5 attention tiers covering **exactly 34 slugs with no repeats**, 7 rituals with a timebox and an artefact on the way out, 12 health checks with a signal, a threshold and an action, 7 WIP limits, 12 automations and 6 plan horizons with a completion test.",
           "The site has no build step and zero dependencies at run time. The only development dependency is a browser for the rendering test — which caught a boot-ordering bug that left the page blank, three layout overflows and a `[hidden]` rule losing to `display: flex`.",
-          "The manifest is a **generated and committed file**, and that rules one thing out: it cannot carry its own commit count. An attempt to fill that in from git at build time ended in a chase — every commit invalidated the file it had itself written a moment earlier, and `--check` failed on the next run. Those numbers are gathered by the nightly collector, for this repository on the same terms as for the other thirty-four."
+          "The manifest is a **generated and committed file**, and that rules one thing out: it cannot carry its own commit count. An attempt to fill that in from git at build time ended in a chase — every commit invalidated the file it had itself written a moment earlier, and `--check` failed on the next run. Those numbers are gathered by the nightly collector, for this repository on the same terms as for the other thirty-three."
         ],
         "gaps": [
           "**This repository is private, so the profile README renders nowhere.** GitHub only shows the `README.md` of a repository named after the account when that repository is public. This one is private, confirmed against two independent sources, so `github.com/konradcinkusz` shows neither the project table nor anything else from that file. Making the repository public fixes the profile and **publishes the whole manifest at the same time**, dossiers for seventeen private repositories included — that is one decision, not two, and see `risks` below.",
-          "The manifest is a **snapshot from a single day** for the thirty-four other repositories. The nightly collector meant to take that away is written and tested against a fake API, but has **never run live** — it needs an account-wide token that does not exist yet. Until then the numbers on the cards come from a one-off read.",
+          "The manifest is a **snapshot from a single day** for the thirty-three other repositories. The nightly collector meant to take that away is written and tested against a fake API, but has **never run live** — it needs an account-wide token that does not exist yet. Until then the numbers on the cards come from a one-off read.",
           "The project table in the README is still written by hand, even though the same manifest could generate it. This is exactly the problem the {{term:drift|drift validator}} has already solved for the manifest itself.",
           "The site has not been deployed even once — the Fly configuration and the workflow are written and never run.",
           "Entries about private repositories point at documents the reader will not open. The renderer greys such links out and gives the reason, but there is no way to fix it without opening the repositories."
@@ -14886,10 +14374,6 @@
             "reason": "The whole repository is measured against the P1-P15 checklist from there, and `docs/architecture/07-STANDARDS-FEEDBACK.md` returns corrections to the standard itself. The coupling runs both ways."
           },
           {
-            "slug": "aurelius-promptus",
-            "reason": "ADR-002 and ADR-003 cite that system as a documented case of a shared kernel growing out of hand; the 800-line ceiling is a direct answer to that failure."
-          },
-          {
             "slug": "AgentHelm",
             "reason": "AgentService is another agent over Claude with tools and a confirmation gate, so the same class of problem as tooling for running agents."
           }
@@ -15481,10 +14965,6 @@
           {
             "slug": "agent-eval-bench",
             "reason": "The README names it as the source of the pattern of a narrow, explicitly enumerated agent tool surface rather than open access to the database."
-          },
-          {
-            "slug": "aurelius-promptus",
-            "reason": "The roadmap plans to take the QuestPDF pattern for generating leaflets and the Bicep IaC from there, and cites its blocked payments integration as a lesson."
           }
         ],
         "product": "The buyer is defined more sharply than in most of the portfolio: an institution - a zoo, a wildlife park or an aquarium - buying a licence for a visitor-facing product, sold directly by the founder as an autónomo in Spain. Two specific pilot targets are named, Río Safari Elche and Bioparc Valencia, but no contact is confirmed, there is no price, and phase 0 is openly a free installation in exchange for a case study. The real commercial status is therefore a hypothesis with a working demo, not a pipeline. BUSINESS-CASE.md itself admits that a market of some 26 zoos in Poland is not a business without international expansion, and that is the most honest sentence in the whole repository.",
@@ -15540,8 +15020,7 @@
           "cognitive-multi-agent-simulation",
           "auto-veritas",
           "cv-maker",
-          "black-hole-sim",
-          "aurelius-promptus"
+          "black-hole-sim"
         ],
         "effort": "done",
         "licence": "MIT",
@@ -15578,11 +15057,10 @@
         "name": "{{term:servicedefaults|ServiceDefaults}} — the shared host core",
         "sourceSlug": "cognitive-multi-agent-simulation",
         "sourcePath": "src/CogniSim.ServiceDefaults/",
-        "description": "Authentication against JWKS, database provider selection, rate limiting with a uniform 429 response shape, background migration after the server starts. Eleven projects in the portfolio do the same thing; **four wrote it independently from scratch**.",
+        "description": "Authentication against JWKS, database provider selection, rate limiting with a uniform 429 response shape, background migration after the server starts. Ten projects in the portfolio do the same thing; **four wrote it independently from scratch**.",
         "consumers": [
           "primates",
           "auto-veritas",
-          "aurelius-promptus",
           "hydro-scope",
           "copilot-scope",
           "agent-eval-bench",
@@ -15657,25 +15135,6 @@
           "The same data shape arose independently as the permission gate's {{term:audit|audit trail}}"
         ],
         "blocker": "Do this only once K1 has **two actual** consumers on main. That is the {{term:wip|work-in-progress limit}} rule, not a preference."
-      },
-      {
-        "id": "K6",
-        "name": "Versioned agent definitions",
-        "sourceSlug": "cognitive-multi-agent-simulation",
-        "sourcePath": "src/CogniSim.Ensemble/, agents/",
-        "description": "A registry of role definitions with version, temperature and provenance, plus a {{term:fingerprint}} of the exact set that produced a given run. Without it you cannot say whether a difference in results is a prompt change or randomness.",
-        "consumers": [
-          "aurelius-promptus",
-          "agent-eval-bench"
-        ],
-        "effort": "days",
-        "licence": "MIT",
-        "readiness": [
-          "The agent definition is data, validated against its own schema",
-          "The fingerprint of the set is already computed and pinned to the run",
-          "On the other side stands a whole prompt template service, which solves the same thing from the other end"
-        ],
-        "blocker": "The two sides of this duplication have different models: one versions the **role**, the other the **template**. Merging them needs a shared model first, and that is a design decision, not a refactor."
       }
     ],
     "kernelsRejected": [
@@ -15758,19 +15217,6 @@
         "severity": "high"
       },
       {
-        "problem": "The identity service consumed once as an image and once carried around as copied code.",
-        "sideA": {
-          "slug": "authservice",
-          "what": "A published image, pinned by tag, no source dependency"
-        },
-        "sideB": {
-          "slug": "aurelius-promptus",
-          "what": "Its own `AureliusPromptus.AuthService` project in the solution — a copy from before the extraction"
-        },
-        "resolution": "This is a migration that never happened. Doing it turns one data point for the extraction pattern into two — which turns an anecdote into a standard.",
-        "severity": "high"
-      },
-      {
         "problem": "The {{term:audit|audit trail}} and the {{term:runstore|run store}} are the same data structure.",
         "sideA": {
           "slug": "AgentHelm",
@@ -15781,19 +15227,6 @@
           "what": "The run record as a research function — what, how much, with what result"
         },
         "resolution": "The same shape arose twice for two different reasons. Kernel K5 merges both, but only after K1 has two consumers — because merging the store is weeks of work and merging the cassette is hours.",
-        "severity": "medium"
-      },
-      {
-        "problem": "The {{term:ensemble|versioned role definition}} and the versioned prompt template.",
-        "sideA": {
-          "slug": "cognitive-multi-agent-simulation",
-          "what": "Six roles in JSON with version, temperature and the fingerprint of the set"
-        },
-        "sideB": {
-          "slug": "aurelius-promptus",
-          "what": "A whole prompt template service with a marketplace and versioning"
-        },
-        "resolution": "One question, two answers: **what exactly the agent was told to do in this particular run**. Kernel K6, but it needs a shared model first — that is a design decision, not a refactor.",
         "severity": "medium"
       },
       {
@@ -16020,7 +15453,7 @@
         },
         {
           "title": "A repository with no declared level of service does not exist",
-          "body": "Each of the thirty-five repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
+          "body": "Each of the thirty-four repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
         },
         {
           "title": "The tier follows blast radius, not affection",
@@ -16106,7 +15539,6 @@
             "auto-veritas",
             "cv-maker",
             "primates",
-            "aurelius-promptus",
             "aurelius-promptus-acceptance-tests",
             "zoo-companion",
             "bayesian-inference",
@@ -16273,7 +15705,7 @@
         },
         {
           "name": "A check on repository visibility and existence",
-          "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across thirty-five entries.",
+          "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across thirty-four entries.",
           "where": "konradcinkusz/scripts/check-repos.mjs"
         },
         {
@@ -16303,7 +15735,7 @@
         },
         {
           "name": "Agent plugins as the way to distribute rules",
-          "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching thirty-five files.",
+          "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching thirty-four files.",
           "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
         },
         {
@@ -16435,7 +15867,7 @@
         "tag": "component",
         "body": [
           "The project {{term:aspire}} generates in every new solution: telemetry, health checks, resilience, service discovery. In the template it is about a hundred lines, and it is copied rather than referenced.",
-          "There are **eleven** such projects in this portfolio. In four of them the same files have grown in parallel: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — and every copy is different by now. This is not code copied once; it is four independently maintained implementations of one thing.",
+          "There are **ten** such projects in this portfolio. In four of them the same files have grown in parallel: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — and every copy is different by now. This is not code copied once; it is four independently maintained implementations of one thing.",
           "That makes it the largest unrecognised kernel in the portfolio and at the same time the hardest: there is no single version to lift out — you have to pick a reference one and unwind the divergence in the rest."
         ],
         "where": "eleven `*.ServiceDefaults` projects; kernel K2",
@@ -16443,7 +15875,6 @@
           "cognitive-multi-agent-simulation",
           "primates",
           "auto-veritas",
-          "aurelius-promptus",
           "hydro-scope",
           "copilot-scope"
         ]
@@ -16481,13 +15912,11 @@
         "term": "Ensemble / role definitions",
         "tag": "component",
         "body": [
-          "A registry of versioned agent role definitions together with the fingerprint ({{term:fingerprint}}) of the exact set that produced a given run. Without it you cannot say whether the difference between two runs comes from a prompt change, a model change or randomness.",
-          "It is the same problem that aurelius-promptus solves on the prompt-template side — which is why both are candidates for merging into one kernel."
+          "A registry of versioned agent role definitions together with the fingerprint ({{term:fingerprint}}) of the exact set that produced a given run. Without it you cannot say whether the difference between two runs comes from a prompt change, a model change or randomness."
         ],
-        "where": "cognitive-multi-agent-simulation / Ensemble, aurelius-promptus",
+        "where": "cognitive-multi-agent-simulation / Ensemble",
         "slugs": [
-          "cognitive-multi-agent-simulation",
-          "aurelius-promptus"
+          "cognitive-multi-agent-simulation"
         ]
       },
       {
@@ -16718,14 +16147,13 @@
           "The orchestration layer for running several services locally at once, with a telemetry dashboard. It generates a {{term:servicedefaults}} project in every solution, and that convenience is precisely the source of the largest duplication in this portfolio.",
           "A deliberate limit: Aspire describes development, and production is described by separate deployment files. Keeping the two apart costs a little repetition and saves divergence between environments."
         ],
-        "where": "eight systems in the portfolio",
+        "where": "seven systems in the portfolio",
         "slugs": [
           "cognitive-multi-agent-simulation",
           "primates",
           "copilot-scope",
           "hydro-scope",
           "auto-veritas",
-          "aurelius-promptus",
           "chess-mas",
           "black-hole-sim"
         ]
@@ -16881,7 +16309,7 @@
         "tag": "operations",
         "body": [
           "A hard cap on the number of things started and unfinished. Not a guideline — a limit: a breach is a signal to **close** something, not to work longer.",
-          "One person's portfolio does not die from a shortage of ideas. It dies from thirty-five things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
+          "One person's portfolio does not die from a shortage of ideas. It dies from thirty-four things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
         ],
         "where": "the 'operations' tab, the 'limits' section"
       },

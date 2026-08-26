@@ -157,10 +157,6 @@
       "reason": "Całe repo jest mierzone checklistą P1-P15 stamtąd, a `docs/architecture/07-STANDARDS-FEEDBACK.md` zwraca poprawki do samego standardu. Sprzężenie idzie w obie strony."
     },
     {
-      "slug": "aurelius-promptus",
-      "reason": "ADR-002 i ADR-003 cytują tamten system jako udokumentowany przypadek rozrostu wspólnego jądra; sufit 800 linii jest bezpośrednią odpowiedzią na tamtą porażkę."
-    },
-    {
       "slug": "AgentHelm",
       "reason": "AgentService to kolejny agent nad Claude z narzędziami i bramką potwierdzenia, czyli ta sama klasa problemu co narzędzia do prowadzenia agentów."
     }

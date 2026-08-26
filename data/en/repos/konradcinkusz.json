@@ -5,8 +5,8 @@
   "visibility": "private",
   "state": "active",
   "tier": "P0",
-  "oneLiner": "GitHub profile and hub repository: one manifest describing thirty-five repositories, plus a site that renders it.",
-  "summary": "The repository does two things at once and both are committed today. The first is the profile README — the first thing anyone arriving at the rest of the estate sees. The second is the portfolio map: a site in plain HTML, CSS and JS with no build step and no runtime dependencies, which renders five tabs from a single manifest — portfolio, consolidation, operating model, a sortable index and a glossary of forty-three terms. The data sits split across `data/`, one file per repository, and **a second time** under `data/en/` — Polish is the source, English a translation with an enforced shape. `scripts/build-manifest.mjs` glues both trees into the one `site/data/portfolio.json`, and `--check` mode detects {{term:drift|drift}} of the committed copy against the sources. The most interesting decision is in the validator: the schema of repository keys is **closed**, and referential integrity is checked across files, so an unknown slug, a {{term:kernel|kernel}} with one consumer, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. This is the only place in the portfolio from which thirty-five repositories are visible at once — and that is why it sits at tier P0 despite not containing a single line of business logic.",
+  "oneLiner": "GitHub profile and hub repository: one manifest describing thirty-four repositories, plus a site that renders it.",
+  "summary": "The repository does two things at once and both are committed today. The first is the profile README — the first thing anyone arriving at the rest of the estate sees. The second is the portfolio map: a site in plain HTML, CSS and JS with no build step and no runtime dependencies, which renders five tabs from a single manifest — portfolio, consolidation, operating model, a sortable index and a glossary of forty-three terms. The data sits split across `data/`, one file per repository, and **a second time** under `data/en/` — Polish is the source, English a translation with an enforced shape. `scripts/build-manifest.mjs` glues both trees into the one `site/data/portfolio.json`, and `--check` mode detects {{term:drift|drift}} of the committed copy against the sources. The most interesting decision is in the validator: the schema of repository keys is **closed**, and referential integrity is checked across files, so an unknown slug, a {{term:kernel|kernel}} with one consumer, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. This is the only place in the portfolio from which thirty-four repositories are visible at once — and that is why it sits at tier P0 despite not containing a single line of business logic.",
   "stack": [
     "HTML5",
     "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -24,11 +24,11 @@
   "metrics": [
     {
       "label": "Repositories on the map",
-      "value": "35, across 6 clusters"
+      "value": "34, across 6 clusters"
     },
     {
       "label": "Attention tiers",
-      "value": "5 (P0-P4), covering 35 slugs with no repeats"
+      "value": "5 (P0-P4), covering 34 slugs with no repeats"
     },
     {
       "label": "Operating model",
@@ -36,7 +36,7 @@
     },
     {
       "label": "Kernels and duplications",
-      "value": "7 kernels, 6 rejected, 11 duplications"
+      "value": "6 kernels, 6 rejected, 9 duplications"
     },
     {
       "label": "Glossary",
@@ -173,16 +173,16 @@
       "reason": "The README and `meta.json` link to the channel as the main axis of distribution, so both describe the same channel of reach."
     }
   ],
-  "product": "No buyer, and none should be looked for here. This is channel and credibility: the GitHub profile is the first thing a recruiter or a prospective user of the other thirty-four repositories sees. The map is a decision tool for one person, the owner, and in that role it has real indirect value, because it is the only place from which 35 repositories, their duplications and the {{term:wip|WIP}} limits are visible at once. The site itself is not a product and there is no sense in positioning it as one.",
+  "product": "No buyer, and none should be looked for here. This is channel and credibility: the GitHub profile is the first thing a recruiter or a prospective user of the other thirty-three repositories sees. The map is a decision tool for one person, the owner, and in that role it has real indirect value, because it is the only place from which 34 repositories, their duplications and the {{term:wip|WIP}} limits are visible at once. The site itself is not a product and there is no sense in positioning it as one.",
   "highlights": [
     "The validator has a **closed** set of repository keys and checks integrity across files: an unknown slug in `overlaps`, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. A {{term:kernel|kernel}} with one consumer is a warning, not an error — that is a judgement, not a schema violation.",
-    "`data/ops.json` is a complete operating model, not a declaration of intent: 9 principles, 5 attention tiers covering **exactly 35 slugs with no repeats**, 7 rituals with a timebox and an artefact on the way out, 12 health checks with a signal, a threshold and an action, 7 WIP limits, 12 automations and 6 plan horizons with a completion test.",
+    "`data/ops.json` is a complete operating model, not a declaration of intent: 9 principles, 5 attention tiers covering **exactly 34 slugs with no repeats**, 7 rituals with a timebox and an artefact on the way out, 12 health checks with a signal, a threshold and an action, 7 WIP limits, 12 automations and 6 plan horizons with a completion test.",
     "The site has no build step and zero dependencies at run time. The only development dependency is a browser for the rendering test — which caught a boot-ordering bug that left the page blank, three layout overflows and a `[hidden]` rule losing to `display: flex`.",
-    "The manifest is a **generated and committed file**, and that rules one thing out: it cannot carry its own commit count. An attempt to fill that in from git at build time ended in a chase — every commit invalidated the file it had itself written a moment earlier, and `--check` failed on the next run. Those numbers are gathered by the nightly collector, for this repository on the same terms as for the other thirty-four."
+    "The manifest is a **generated and committed file**, and that rules one thing out: it cannot carry its own commit count. An attempt to fill that in from git at build time ended in a chase — every commit invalidated the file it had itself written a moment earlier, and `--check` failed on the next run. Those numbers are gathered by the nightly collector, for this repository on the same terms as for the other thirty-three."
   ],
   "gaps": [
     "**This repository is private, so the profile README renders nowhere.** GitHub only shows the `README.md` of a repository named after the account when that repository is public. This one is private, confirmed against two independent sources, so `github.com/konradcinkusz` shows neither the project table nor anything else from that file. Making the repository public fixes the profile and **publishes the whole manifest at the same time**, dossiers for seventeen private repositories included — that is one decision, not two, and see `risks` below.",
-    "The manifest is a **snapshot from a single day** for the thirty-four other repositories. The nightly collector meant to take that away is written and tested against a fake API, but has **never run live** — it needs an account-wide token that does not exist yet. Until then the numbers on the cards come from a one-off read.",
+    "The manifest is a **snapshot from a single day** for the thirty-three other repositories. The nightly collector meant to take that away is written and tested against a fake API, but has **never run live** — it needs an account-wide token that does not exist yet. Until then the numbers on the cards come from a one-off read.",
     "The project table in the README is still written by hand, even though the same manifest could generate it. This is exactly the problem the {{term:drift|drift validator}} has already solved for the manifest itself.",
     "The site has not been deployed even once — the Fly configuration and the workflow are written and never run.",
     "Entries about private repositories point at documents the reader will not open. The renderer greys such links out and gives the reason, but there is no way to fix it without opening the repositories."

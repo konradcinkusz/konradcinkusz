@@ -6,7 +6,7 @@
     },
     {
       "title": "Repo bez zadeklarowanego poziomu obsługi nie istnieje",
-      "body": "Każde z trzydziestu pięciu repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
+      "body": "Każde z trzydziestu czterech repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
     },
     {
       "title": "Poziom wyznacza promień rażenia, nie sympatia",
@@ -92,7 +92,6 @@
         "auto-veritas",
         "cv-maker",
         "primates",
-        "aurelius-promptus",
         "aurelius-promptus-acceptance-tests",
         "zoo-companion",
         "bayesian-inference",
@@ -259,7 +258,7 @@
     },
     {
       "name": "Sprawdzenie widoczności i istnienia repozytoriów",
-      "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy trzydziestu pięciu pozycjach.",
+      "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy trzydziestu czterech pozycjach.",
       "where": "konradcinkusz/scripts/check-repos.mjs"
     },
     {
@@ -289,7 +288,7 @@
     },
     {
       "name": "Wtyczki agentowe jako sposób dystrybucji reguł",
-      "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu pięciu plików.",
+      "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu czterech plików.",
       "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
     },
     {

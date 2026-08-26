@@ -157,10 +157,6 @@
       "reason": "The whole repository is measured against the P1-P15 checklist from there, and `docs/architecture/07-STANDARDS-FEEDBACK.md` returns corrections to the standard itself. The coupling runs both ways."
     },
     {
-      "slug": "aurelius-promptus",
-      "reason": "ADR-002 and ADR-003 cite that system as a documented case of a shared kernel growing out of hand; the 800-line ceiling is a direct answer to that failure."
-    },
-    {
       "slug": "AgentHelm",
       "reason": "AgentService is another agent over Claude with tools and a confirmation gate, so the same class of problem as tooling for running agents."
     }
