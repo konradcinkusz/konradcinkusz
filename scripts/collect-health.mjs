@@ -13,12 +13,18 @@
 // the breaches, because "one issue listing everything" and "one issue per repo"
 // are different amounts of attention and that is a policy choice, not a fact.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { sourceRepos } from "./lib/manifest.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const manifest = JSON.parse(readFileSync(join(root, "site", "data", "portfolio.json"), "utf8"));
+// Everything this reads — slug, tier, visibility, state, deployment, licence —
+// is identical in every language bundle, so the source bundle is the whole
+// estate. It is loaded through the shared accessor so that a future shape change
+// stops the collector with a message rather than letting it visit zero
+// repositories and write a health file that looks like a clean estate.
+const repos = sourceRepos(root);
 const dry = process.argv.includes("--dry");
 
 const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN;
@@ -65,26 +71,36 @@ async function gh(path, { allow404 = false } = {}) {
 
 const rows = [];
 const breaches = [];
-const note = (slug, tier, check, detail) => breaches.push({ slug, tier, check, detail });
+// A breach carries a machine key and its parameters, never a formatted sentence.
+//
+// It used to carry Polish prose. That prose was collected once and copied into
+// BOTH language bundles, so the validator's untranslated-string check saw an
+// identical Polish string in the English bundle and rejected the manifest — which
+// meant the nightly job failed on exactly the nights it had something to report,
+// and passed on every quiet one. Reproduced before this was changed.
+//
+// So the collector emits data and the renderer does the words, in whichever
+// language the reader picked. Same reasoning as effort and severity.
+const note = (slug, tier, check, params = {}) => breaches.push({ slug, tier, check, params });
 
 try {
-for (const entry of manifest.repos) {
+for (const entry of repos) {
   const { slug, tier, visibility } = entry;
   process.stderr.write(`  ${slug}\n`);
 
   const repo = await gh(`/repos/${OWNER}/${slug}`, { allow404: true });
   if (!repo) {
-    note(slug, tier, "istnienie", "GitHub zwraca 404 — repozytorium zniknęło albo zmieniło nazwę");
+    note(slug, tier, "missing");
     rows.push({ slug, tier, gone: true });
     continue;
   }
 
   const actual = repo.private ? "private" : "public";
   if (actual !== visibility) {
-    note(slug, tier, "widoczność", `manifest mówi ${visibility}, GitHub mówi ${actual}`);
+    note(slug, tier, "visibility", { claimed: visibility, actual });
   }
   if (repo.archived && entry.state !== "dormant") {
-    note(slug, tier, "archiwum", `zarchiwizowane na GitHubie, a stan w manifeście to "${entry.state}"`);
+    note(slug, tier, "archived", { state: entry.state });
   }
 
   // Open pull requests, split by author. 100 is the page size and also far past
@@ -132,28 +148,28 @@ for (const entry of manifest.repos) {
   // --- thresholds ---------------------------------------------------------
   const t = (k) => THRESHOLDS[k][tier];
   if (redSince !== null && t("ciRedDays") !== null && redSince >= t("ciRedDays")) {
-    note(slug, tier, "czerwone CI", `${failing.length} workflow(ów) czerwonych od ${redSince} dni (próg dla ${tier}: ${t("ciRedDays")})`);
+    note(slug, tier, "ci-red", { n: failing.length, days: redSince, tier, threshold: t("ciRedDays") });
   }
   if (bots.length >= t("dependabotPrs")) {
-    note(slug, tier, "dług bota", `${bots.length} otwartych PR-ów od bota (próg dla ${tier}: ${t("dependabotPrs")})`);
+    note(slug, tier, "bot-debt", { n: bots.length, tier, threshold: t("dependabotPrs") });
   }
   if (t("oldestPrDays") !== null && oldest >= t("oldestPrDays")) {
-    note(slug, tier, "stary PR", `najstarszy otwarty PR ma ${oldest} dni (próg dla ${tier}: ${t("oldestPrDays")})`);
+    note(slug, tier, "old-pr", { days: oldest, tier, threshold: t("oldestPrDays") });
   }
   if (actual === "public" && prs.length >= 5 && bots.length / prs.length >= THRESHOLDS.botShare) {
-    note(slug, tier, "bot zagłusza", `${Math.round(100 * bots.length / prs.length)}% otwartych PR-ów to bot — pierwszy PR od człowieka utonie`);
+    note(slug, tier, "bot-drowning", { pct: Math.round(100 * bots.length / prs.length) });
   }
   if (unreleased !== null && unreleased >= THRESHOLDS.unreleasedCommits) {
-    note(slug, tier, "brak wydania", `${unreleased} commitów od tagu ${tags[0].name}`);
+    note(slug, tier, "unreleased", { n: unreleased, tag: tags[0].name });
   }
   if (!tags.length && (entry.deployment?.ghcr || entry.deployment?.packages)) {
-    note(slug, tier, "brak tagu", "repozytorium deklaruje publikację obrazu albo pakietu, a nie ma ani jednego tagu");
+    note(slug, tier, "no-tag");
   }
   if (t("staleDays") !== null && stale >= t("staleDays")) {
-    note(slug, tier, "bez ruchu", `${stale} dni od ostatniego pusha (próg dla ${tier}: ${t("staleDays")})`);
+    note(slug, tier, "stale", { days: stale, tier, threshold: t("staleDays") });
   }
   if (actual === "public" && !entry.license.startsWith("MIT") && !entry.license.startsWith("Apache") && !entry.license.startsWith("CC")) {
-    note(slug, tier, "licencja", `publiczne repozytorium z licencją "${entry.license}"`);
+    note(slug, tier, "licence", { licence: entry.license });
   }
 }
 
@@ -175,8 +191,8 @@ const totals = {
 
 const out = { collectedAt: new Date().toISOString().slice(0, 10), totals, breaches, rows };
 
-console.log(`\n${totals.repositories} repozytoriów · ${totals.openPrs} otwartych PR-ów (${totals.botPrs} bot, ${totals.humanPrs} człowiek) · ${totals.ciFailing} z czerwonym CI · ${breaches.length} przekroczeń`);
-for (const b of breaches) console.log(`  ${b.tier}  ${b.slug.padEnd(38)} ${b.check}: ${b.detail}`);
+console.log(`\n${totals.repositories} repositories · ${totals.openPrs} open PRs (${totals.botPrs} bot, ${totals.humanPrs} human) · ${totals.ciFailing} with red CI · ${breaches.length} breach(es)`);
+for (const b of breaches) console.log(`  ${b.tier}  ${b.slug.padEnd(38)} ${b.check}${Object.keys(b.params).length ? " " + JSON.stringify(b.params) : ""}`);
 
 if (!dry) {
   writeFileSync(join(root, "data", "health.json"), JSON.stringify(out, null, 2) + "\n");

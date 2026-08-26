@@ -1,0 +1,199 @@
+{
+  "slug": "cognitive-multi-agent-simulation",
+  "name": "CogniSim",
+  "cluster": "A-runtime",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P1",
+  "oneLiner": "A dress rehearsal for PI Planning: six LLM agents act out the {{term:safe|SAFe}} ceremony and return four artefacts instead of a transcript.",
+  "summary": "The input is an increment that is still to be planned — features, teams, business context. The output is the four things that decide whether the real event goes well: PI objectives per team with business value, a cross-team dependency map, a ROAM risk register and a list of open questions. **The transcript is the evidence, the artefacts are the product.** The commercial headline — a dependency your input never declared — is computed deterministically from the data rather than reported by the model. The whole thing runs without an API key: the {{term:playhead|cassette}} replays recorded runs in replay-only mode, and a request with no recording ends in a 503 that says why, never in a plausible-looking empty plan. Six orchestration topologies are wired in and each passes end-to-end in the tests; an unknown topology throws rather than quietly using another one — because a fallback would attribute one topology's results to another.",
+  "stack": [
+    ".NET 10",
+    "Microsoft Agent Framework 1.17.0",
+    "Blazor (Server + SSR, BFF)",
+    ".NET Aspire 13.4.6",
+    "EF Core 10 + Npgsql",
+    "OpenTelemetry",
+    "Docker, Fly.io, Azure Bicep"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "120 test methods (110 Fact + 10 Theory) across 6 projects, including 6 architecture tests enforcing the kernel's purity",
+  "ci": "Six workflows. `ci.yml` has five jobs: build+test, kernel test **in isolation** (proof that it stands on its own), a mechanical line limit on ServiceDefaults, a secret scan and a dependency audit. `deploy.yml` is {{term:tagdeploy|tag-driven}} with change detection. Since 25 August, CI and CodeQL are switched to manual runs only.",
+  "metrics": [
+    {
+      "label": "Test methods",
+      "value": "120 (110 Fact + 10 Theory)"
+    },
+    {
+      "label": "Test projects",
+      "value": "6"
+    },
+    {
+      "label": "Orchestration topologies",
+      "value": "6, each passing end-to-end"
+    },
+    {
+      "label": "Agent role definitions",
+      "value": "6 JSON files, versioned"
+    },
+    {
+      "label": "C#/Razor code",
+      "value": "9,433 lines"
+    },
+    {
+      "label": "Documentation",
+      "value": "4,038 lines of markdown"
+    },
+    {
+      "label": "Fly apps defined",
+      "value": "6, none ever deployed"
+    },
+    {
+      "label": "Live model calls",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/cognitive-multi-agent-simulation",
+    "live": [],
+    "docs": [
+      {
+        "label": "The full description in one reading",
+        "path": "docs/OVERVIEW.md"
+      },
+      {
+        "label": "Portfolio map and kernel extraction order",
+        "path": "docs/PORTFOLIO.md"
+      },
+      {
+        "label": "Design of the experiment that was never run",
+        "path": "docs/architecture/04-EXPERIMENT-DESIGN.md"
+      },
+      {
+        "label": "Engine choice and the arguments against",
+        "path": "docs/architecture/02-ENGINE-DECISION.md"
+      },
+      {
+        "label": "Replay kernel — thesis and API",
+        "path": "kernel/replay/README.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": true,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Playhead — kernel replay",
+      "path": "kernel/replay/",
+      "description": "Two hundred and fifty lines over the {{term:ichatclient}} seam. The SHA-256 key covers the conversation, **the agent's instructions**, the model identifier and the temperature — without the instructions one agent would replay another's answer, and that was a real bug. Neutrality is enforced by a dedicated architecture test and a dedicated CI job that builds the kernel in isolation.",
+      "reusable": true
+    },
+    {
+      "name": "CogniSim.ServiceDefaults",
+      "path": "src/CogniSim.ServiceDefaults/",
+      "description": "Telemetry, health checks, JWT validation against JWKS, rate limiting with a uniform 429 shape, a database provider switch. Purity enforced by a test and a mechanical line limit — because the same rule written as prose has already failed twice in this estate.",
+      "reusable": true
+    },
+    {
+      "name": "Testy architektoniczne",
+      "path": "tests/CogniSim.Architecture.Tests/",
+      "description": "Six tests enforcing two boundaries: ServiceDefaults may not know the domain, and the replay kernel may know neither this system nor the agent framework. The pattern is portable; the assertions refer to assembly names.",
+      "reusable": true
+    },
+    {
+      "name": "CogniSim.Observatory",
+      "path": "src/CogniSim.Observatory/",
+      "description": "A {{term:runstore|run store}} with idempotent ingest by run identifier, a separate results table and scoring off the request path. The {{term:comparison|comparison type}} deliberately has no field for a best run.",
+      "reusable": false
+    },
+    {
+      "name": "CogniSim.Simulation",
+      "path": "src/CogniSim.Simulation/",
+      "description": "The only project that knows the agent framework. The graph factory is a pure function: ensemble in, graph out, six topologies, an unknown one throws.",
+      "reusable": false
+    },
+    {
+      "name": "CogniSim.Ensemble + agents/",
+      "path": "src/CogniSim.Ensemble/, agents/",
+      "description": "{{term:ensemble|Agent as code}}: six role definitions in JSON, each with a version, ceremony scope, temperature and provenance. The ensemble fingerprint travels with every run.",
+      "reusable": false
+    },
+    {
+      "name": "CogniSim.Web (BFF)",
+      "path": "src/CogniSim.Web/",
+      "description": "The largest project (5,301 lines). The browser talks to it and nothing else, the token pair sits in a single encrypted HttpOnly cookie, and every backend call goes out server-side.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "agent-eval-bench",
+      "reason": "The direction of consolidation is already written down: the {{term:playhead|cassette}} is to go **to** the bench, because an evaluation harness without deterministic replay cannot tell a regression from non-determinism."
+    },
+    {
+      "slug": "AgentHelm",
+      "reason": "The same substrate — the run as the unit of record. The {{term:audit|audit trail}} there and the {{term:runstore|run store}} here are two implementations of one thing."
+    },
+    {
+      "slug": "cognitive-multi-agent-simulation-analysis",
+      "reason": "A sibling repository holding the research work and six studies auditing this code read-only."
+    },
+    {
+      "slug": "authservice",
+      "reason": "Identity is not built here — authservice v0.3.1 is consumed as a released image, and every API validates tokens against its JWKS. This is the pattern to repeat."
+    },
+    {
+      "slug": "aurelius-promptus",
+      "reason": "Versioned role definitions here and prompt templates there solve the same problem: what exactly the agent was told to do in this particular run."
+    },
+    {
+      "slug": "chess-mas",
+      "reason": "A different domain, the same class of problem; named outright as a candidate consumer of the replay kernel and the cheapest test of its portability."
+    }
+  ],
+  "product": "The buyer is named specifically: an {{term:rte|RTE}} or whoever owns PI Planning and wants to walk into a two-day event with a hundred people already knowing three undeclared dependencies and six unanswered questions. The offer is narrow and checkable. What is missing before it can be sold, and the repository lists it itself: input paths (buyers have Jira and spreadsheets, not hand-written JSON), tenancy on runs, and — most of all — **not one live model call**, so nobody has seen what a real artefact looks like.",
+  "highlights": [
+    "The {{term:playhead|record/replay cassette}} closes a gap that, by the project's own review, none of the six frameworks it examined closes: a checkpoint replays the orchestration, but not the model's answers.",
+    "Architectural boundaries are enforced **mechanically, not by review**: two purity tests plus a line limit in CI, with the reasoning in a test comment that the same rule written as prose has already failed twice in this estate.",
+    "The {{term:comparison|comparison type}} has no field into which a best run could be written — the discipline of 'medians and spreads, never averages' is enforced by the shape of the type, not by convention.",
+    "The system runs on zero credentials: with no key it serves recorded runs, and an unrecorded request ends in a 503 that says outright why.",
+    "A register of defects caught during the build is kept in the open, including a public correction of an earlier claim that runs pin every input — they did not pin prompts until the ensemble fingerprint was added."
+  ],
+  "gaps": [
+    "**No live model call has ever been made.** The path to the provider compiles and is wired up, but has never sent a task. The quality of the artefacts is entirely unknown — and that is the one thing blocking everything else.",
+    "No deployment has ever been made. Six Fly config files, four Dockerfiles, a Bicep track and a tag-driven pipeline are written and never run; the addresses in the documentation are a promise.",
+    "The experiment comparing the six topologies has not been run, and the results tables are **deliberately empty**. Two decisions only the author can make block it, along with the most serious threat to validity: prompts written for one topology may favour it.",
+    "Since 25 August CI and CodeQL are manual only, and the badge in the README shows a workflow that runs on neither push nor PR."
+  ],
+  "next": [
+    "**Record one real cassette.** One key, one run of the ceremony, ten minutes. This is the single highest-value action in the whole portfolio — the roadmap itself predicts that the first cassette will be disappointing and that this work is precisely the product.",
+    "Do one deployment to dev, so the addresses in the documentation stop being a promise.",
+    "Restore the automatic triggers in CI and turn on code scanning in the repository settings.",
+    "Extract Playhead into its own package **only once** the evaluation harness actually takes it. That discipline is already written down in the repository — it is worth keeping to.",
+    "Fix the copyright header in LICENSE and add a `global.json` pinning the SDK version."
+  ],
+  "risks": [
+    "The name CogniSim is already used by another of the author's repositories, and the kernel's name is a working one, unchecked against the package registry. Both to be settled **before** publication, not after.",
+    "LICENSE carries somebody else's copyright line — the same fault as in two other repositories, so a copying pattern rather than a slip.",
+    "The provider key is a raw platform secret, explicitly marked as a departure from the managed-identity standard; the track that fixes it has never been run.",
+    "The default model is written into two places as a fallback and has an expiry date — a comment in the code refers to an announced wave of retirements.",
+    "Four thousand lines of documentation against nine thousand lines of code. The risk that the documentation starts describing a state the code no longer has is real — for now it is held in check by citing source files next to every number."
+  ],
+  "headline": "One cassette recording unblocks everything else — the cheapest action in the portfolio",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 5,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-25",
+    "commits": 49,
+    "files": 194
+  }
+}

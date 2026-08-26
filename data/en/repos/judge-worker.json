@@ -1,0 +1,199 @@
+{
+  "slug": "judge-worker",
+  "name": "judge-worker",
+  "cluster": "A-runtime",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "A TypeScript worker that pulls agent traces off a BullMQ queue and scores them with an LLM judge — a judge checked by mutants, not assumed.",
+  "summary": "The producer pushes one job per trace through `addBulk`, the worker consumes them from Redis, **revalidates the trace with a Zod schema at the consumption boundary** — the queue is treated here as a trust boundary, not as its own memory — and scores it against a pinned rubric. The default judge is `MockJudgeProvider`: a deterministic heuristic reasoning only over the structure of the trace (tool call order, presence of events, results), never over content, which makes it injection-proof by definition and lets the whole demo run without an API key. The `--live` flag switches to the Anthropic Messages API with the response shape enforced by `zodOutputFormat`. The most interesting decision is not in the queue layer but in `cohenKappa`: when every pair of scores falls into one category, the function returns `null`, not `1.0`, because two raters who always say the same thing have proved nothing. That case actually occurred for the `tone` rubric and the repository reports it as a number that weakens its own claim. It was built as evidence for one quoted line of a job advert and says so plainly in the first section of the README.",
+  "stack": [
+    "TypeScript 5.7",
+    "Node.js 22",
+    "BullMQ 5 + Redis 7",
+    "Zod 4",
+    "@anthropic-ai/sdk 0.117",
+    "prom-client 15 + pino 9",
+    "Vitest 2",
+    "Jekyll 4.3 + just-the-docs"
+  ],
+  "primaryLanguage": "TypeScript",
+  "license": "MIT",
+  "tests": "103 `it()`/`test()` calls in 32 `describe` blocks, spread over 15 files in `test/` — counted with grep, because `node_modules` does not exist in the container and the suite has not been run. `FINDINGS.md` still says 7 files and 30 tests, which are the figures from an earlier commit.",
+  "ci": "Four workflows: `ci.yml` runs lint, format:check, typecheck, build and `test:coverage` on Node 22 with a `redis:7-alpine` service; gitleaks runs over the **full history**, on PR/push and every Monday; `docs.yml` builds Jekyll and pushes to GitHub Pages when markdown changes. CodeQL is declared but skips itself for as long as the repository is private.",
+  "metrics": [
+    {
+      "label": "Commits",
+      "value": "21"
+    },
+    {
+      "label": "Files in git",
+      "value": "115 (including 6 symbolic links)"
+    },
+    {
+      "label": "Test cases",
+      "value": "103 across 15 files"
+    },
+    {
+      "label": "TypeScript lines (src + test)",
+      "value": "4,138"
+    },
+    {
+      "label": "Trace fixtures / human labels",
+      "value": "15 / 30"
+    },
+    {
+      "label": "Judge mutants",
+      "value": "5 written, 5 caught"
+    },
+    {
+      "label": "Load test against the mock",
+      "value": "1,000 traces in 499 ms, 2,004/s"
+    },
+    {
+      "label": "Backpressure evidence",
+      "value": "25 batches / 500 traces rejected"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/judge-worker",
+    "live": [],
+    "docs": [
+      {
+        "label": "Judge contract specification",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "Calibration protocol",
+        "path": "docs/CALIBRATION.md"
+      },
+      {
+        "label": "Architecture decisions (ADR-1, ADR-2)",
+        "path": "docs/architecture/DECISIONS.md"
+      },
+      {
+        "label": "Results of real runs",
+        "path": "FINDINGS.md"
+      },
+      {
+        "label": "Mutation testing of the judge",
+        "path": "MUTATIONS.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Producer with a queue-depth limit",
+      "path": "src/queue/producer.ts",
+      "description": "`enqueueBatch()` refuses to insert a batch that would exceed `QUEUE_DEPTH_LIMIT`, throwing `QueueDepthExceededError` rather than growing quietly. It accepts an explicit limit override and its own `Queue` instance, because `loadEnv()` is memoised before the CLI has parsed its flags — a trap that previously falsified the backpressure test in silence.",
+      "reusable": true
+    },
+    {
+      "name": "CircuitBreakerJudgeProvider",
+      "path": "src/judge/circuitBreakerJudgeProvider.ts",
+      "description": "A decorator over any `JudgeProvider` with a closed → open → half-open state machine, so that a run of failing jobs does not burn the SDK's retry budget against an unreachable endpoint. The only thing tying it to the domain is a two-method interface, which generalises trivially.",
+      "reusable": true
+    },
+    {
+      "name": "Kalibracja — kappa Cohena",
+      "path": "src/calibration/cohenKappa.ts",
+      "description": "Unweighted {{term:kappa|kappa}} over a pair of score sequences, returning `null` on zero variance instead of apparent perfect agreement. A pure statistical function with not one domain dependency — it suits any LLM judge calibration.",
+      "reusable": true
+    },
+    {
+      "name": "Kolejka dead-letter z CLI do requeue",
+      "path": "src/reliability/deadLetter.ts",
+      "description": "A separate `<name>-dead-letter` queue carrying a truncated failure reason; `pnpm run dlq -- requeue` restores an entry through the normal `enqueueBatch()` path, so it gets the same depth limit and the same job options. The entry disappears only after a successful requeue, not before.",
+      "reusable": true
+    },
+    {
+      "name": "Log-redaction policy",
+      "path": "src/observability/redact.ts",
+      "description": "`safeResultFields()` is an allow-list of `JudgeResult` fields used everywhere a result is logged, so a new field does not become loggable through object spread at the call site. `truncateForLog()` trims the error text from an external dependency before it reaches the dead-letter queue.",
+      "reusable": true
+    },
+    {
+      "name": "Consuming worker with a cost ceiling",
+      "path": "src/queue/worker.ts",
+      "description": "Revalidates the payload with Zod, scores it, counts the cost through `RunCostTracker` and **pauses itself** once `MAX_RUN_COST_USD` is breached. A job that has exhausted its attempts lands in the dead-letter queue rather than vanishing.",
+      "reusable": false
+    },
+    {
+      "name": "MockJudgeProvider",
+      "path": "src/judge/mockJudgeProvider.ts",
+      "description": "A heuristic judge reading only the structure of the trace, never the semantics. {{term:determinizm|Determinism}} is not a testing convenience here but a security property: a judge that does not read the content cannot be talked round by an instruction inside it.",
+      "reusable": false
+    },
+    {
+      "name": "Judge mutants and the harness",
+      "path": "src/mutations/mutantJudgeProviders.ts",
+      "description": "Five subclasses each breaking exactly one property of the output: inverted verdict, missing justification, compliance with an injected instruction, ungrounded optimism, no check for an absent confirmation. Each test has two stages — a sanity check against the real judge, then an assertion against the mutant.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "agent-eval-bench",
+      "reason": "The README and FINDINGS say plainly that the scoring contract, the {{term:kappa|kappa}} calibration protocol and the {{term:mutation|mutation testing}} discipline were carried over from there — as a pattern, not as code, because that one is in .NET."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "The same judge calibration arithmetic, only there it runs over production telemetry and without a single human label. Here there are 30 labels and the number came out."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Built against the constraints in `AI-EVALS.md` and `00-REFERENCE-ARCHITECTURE.md`, with two deliberate departures written down as ADR-1 and ADR-2."
+    },
+    {
+      "slug": "agent-eval-bench-factorial",
+      "reason": "The same family of problem — measuring the quality of an LLM judge — although judge-worker does not refer to it directly."
+    }
+  ],
+  "product": "**No buyer**, and that is not a flaw of this repository but its definition. It was built for one quoted line of a Senior Backend Engineer (Data Infrastructure) advert at Langfuse, in the language and the queue technology that team actually uses, and it says so in the first section of the README. As {{term:evidence|evidence}} it works very well: a complete reliability layer, real numbers from real runs and honestly marked limits of measurement. As a product it has no audience — nobody will buy a worker that scores traces in the shape of one repository's fixtures, and the market for that is already held by the company the application was addressed to.",
+  "highlights": [
+    "Five hand-written judge mutants, all caught, each breaking a different property — and a separate `mutation pass diversity` test checks that diversity **mechanically**, instead of relying on the author's inspection.",
+    "`cohenKappa` returns `null` rather than `1.0` when there is no variance in the scores. That case actually happened for the `tone` rubric and the repository reports it in `FINDINGS.md` as a number that weakens its own headline.",
+    "Backpressure proved by load, not by declaration: 600 traces, a depth limit of 100, a scoring delay of 150 ms — 100 scored, 500 rejected. `FINDINGS.md` also describes two bugs that had previously falsified this test in silence: a shared Redis connection and the memoisation of `loadEnv()`.",
+    "`pricing.test.ts` breaks CI when `PRICING_LAST_VERIFIED` is older than six months. An out-of-date price table becomes a loud failure instead of a quietly false cost figure.",
+    "The reliability layer is complete and every part of it has its own test: the depth limit, retry with backoff, dead-letter with requeue, the circuit breaker, the cost ceiling that pauses the worker, and a graceful shutdown timeout that reports which jobs it interrupted."
+  ],
+  "gaps": [
+    "**`FINDINGS.md` reports 7 test files and 30 tests, while the repository has 15 and 103.** The figures are from an earlier commit and were not refreshed after the CLI, circuit breaker, cost, metrics and redaction tests were added. It is the only place where the repo states a number that has drifted from the code — and it happens to be the file whose entire value rests on its numbers being true.",
+    "Calibration has been run **against the mock only**, and the human labels and the mock's heuristics were written by the same person in the same sitting. The repo says so plainly, but a kappa of 1.0 still does not measure the quality of the judge, only the author's agreement with himself.",
+    "The `--live` path has no {{term:mutation|mutation}} coverage at all and has never been run against the real API — it is tested with an injected `fetch`, so end to end remains unchecked.",
+    "No real {{term:otel|OTel}} telemetry: there are pino logs and Prometheus metrics, and the log field vocabulary is borrowed from the GenAI OTel conventions, which can be misread. `SPEC.md` corrects this itself.",
+    "Deploying the documentation needs a one-off manual switch of Settings → Pages → Source to GitHub Actions, which the workflow cannot do for itself. The README links to that site as the full documentation; whether it responds has not been verified.",
+    "The documentation site is not confirmed as published: the repository is private, and the header of the Pages workflow says itself that the deployment job will return a permissions error until somebody manually changes the source in the settings — which the workflow cannot do on its own behalf."
+  ],
+  "risks": [
+    "LICENSE assigns copyright to `dev_insight`, which clashes with another portfolio entry (slug `dev-insight`) and looks like an artefact of copying between repositories.",
+    "The repository is built for one company's advert and names it. Once the recruitment closes, the README will start reading like an out-of-date application, and the value of the channel will drop to zero without a single commit.",
+    "The price table in `src/observability/pricing.ts` is hard-coded and was verified on 2026-08-17. The staleness test gives it six months, after which CI goes red for a reason unconnected to the code.",
+    "No secret is in the repository, but `--live` reads `ANTHROPIC_API_KEY` from the environment, and the only brake on spending — `MAX_RUN_COST_USD` — is off by default."
+  ],
+  "next": [
+    "Refresh the numbers in `FINDINGS.md` against the current commit. A file whose claim is 'real numbers from real runs' cannot report stale ones.",
+    "Fix the copyright line in LICENSE to the right owner — today it carries the name of another repository.",
+    "Run `pnpm run calibrate -- --live` with a real key over the 15 fixtures (a dozen seconds, pennies) and record that {{term:kappa|kappa}} next to the mock one. It is the cheapest thing that turns the repository's weakest claim into a measurement.",
+    "Add a mutation counterpart to `SilentInjectionComplianceJudge` for `LiveJudgeProvider` — check whether the real judge resists the attack in `adv-003`.",
+    "Settle the repository's visibility (issue #19). While it is private, CodeQL skips itself and the whole 'code scanning in CI' layer is a declaration, not a control."
+  ],
+  "headline": "A judge checked by five mutants; the live path has never touched the real API",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 21,
+    "openPrs": 13,
+    "dependabotPrs": 13,
+    "lastCommit": "2026-08-17",
+    "commits": 21,
+    "files": 115
+  }
+}

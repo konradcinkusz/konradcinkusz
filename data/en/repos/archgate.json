@@ -1,0 +1,177 @@
+{
+  "slug": "archgate",
+  "name": "ArchGate",
+  "cluster": "B-static",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P1",
+  "oneLiner": "Architecture gate for .NET: {{term:roslyn}} analyzers that fail the build when code breaks the declared architecture — counted from the PR diff.",
+  "summary": "Seven {{term:roslyn}} analyzers on `netstandard2.0` enforce part of the architectural constitution: the shared kernel boundary, persistence portability, controller/DbContext layering, orphan entities, inheritance instead of an interface, vendor SDK types leaking outside the adapter, a missing `AddServiceDefaults`. The gate counts **only the lines changed in a pull request** — without that, every new rule lights up thousands of warnings in existing code and the team switches the tool off in the first week; the problem is documented and reproduced on a two-commit repro. {{term:provenance|Provenance}} is read from real git — `git diff -U0` plus `git blame` plus commit trailers — never from code style, and it serves only to raise the severity threshold; it appears in the PR comment neither as a badge nor as a score. The whole thing ships as two `dotnet` tools — `ArchGate.Cli` and `ArchGate.CiComment`, the only two projects with `PackAsTool` — plus a third package, `ArchGate.Analyzers`, which is not a tool: it is a Roslyn analyzer package with `IncludeBuildOutput=false` whose DLL goes to `analyzers/dotnet/cs`. On top of that, a container image and a composite action.",
+  "stack": [
+    ".NET 8",
+    "netstandard2.0",
+    "Roslyn 4.8.0 (analizatory) / 4.11.0 (silnik)",
+    "xUnit",
+    "Docker",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "150 [Fact] attributes across 21 files (`grep -rho '[Fact]' tests --include='*.cs' | wc -l`; zero `[Theory]`, zero `[InlineData]`); the ROADMAP says 146/146 and is two commits stale — the last change to `ROADMAP-archgate.md` is `716c32a`, and `git rev-list --count 716c32a..HEAD` gives 2 (one working commit and one merge). The tests were not run in this pass — no SDK in the environment.",
+  "ci": "`archgate-pr-check.yml` runs the gate on the repository's own PRs; `release.yml` on a `v*` tag declares five jobs — `build`, `publish-nuget`, `publish-container`, `release-notes`, `moving-tag` — including verification of the packed analyzer in a temporary consumer project (a step inside `build`). No tag exists, so the release has never run for real.",
+  "metrics": [
+    {
+      "label": "Roslyn analyzers",
+      "value": "7 registered"
+    },
+    {
+      "label": "Diagnostic identifiers",
+      "value": "11"
+    },
+    {
+      "label": "Constitution coverage",
+      "value": "6 of 15 principles (4 never will be)"
+    },
+    {
+      "label": "Mutation variants",
+      "value": "10, zero survivors"
+    },
+    {
+      "label": "C# code",
+      "value": "3,638 lines of src + 4,113 lines of tests"
+    },
+    {
+      "label": "Documentation",
+      "value": "11 files, 2,383 lines"
+    },
+    {
+      "label": "Declared NuGet packages",
+      "value": "3, none published"
+    },
+    {
+      "label": "Tags in the repository",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/archgate",
+    "live": [],
+    "docs": [
+      {
+        "label": "Product vision and specification",
+        "path": "ARCHGATE-VISION.md"
+      },
+      {
+        "label": "Frozen contracts (SPEC)",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "Name collision and invalidated claims",
+        "path": "docs/COMPETITIVE-2026-08-18.md"
+      },
+      {
+        "label": "Mutation run over the rules",
+        "path": "docs/MUTATIONS.md"
+      },
+      {
+        "label": "The gate counted from the diff",
+        "path": "docs/DIFF-GATE.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": true,
+    "pages": false,
+    "packages": true
+  },
+  "components": [
+    {
+      "name": "ArchGate.Engine (Scanner)",
+      "path": "src/ArchGate.Engine/Scanner.cs",
+      "description": "Harness: parses every `.cs` file into a single compilation, runs the rule registry, maps diagnostics onto a violation record and works out the gate verdict. A neutral wrapper — run any set of analyzers over a directory and get deterministic JSON.",
+      "reusable": true
+    },
+    {
+      "name": "Provenance z historii gita",
+      "path": "src/ArchGate.Engine/Provenance",
+      "description": "Line-by-line attribution from `git blame` and commit trailers, classified as Human/Ai/Mixed/Unknown. It tells an empty diff apart from a git failure, so the gate degrades to absolute mode instead of quietly letting things through.",
+      "reusable": true
+    },
+    {
+      "name": "Model konfiguracji konwencji",
+      "path": "src/ArchGate.Rules/ArchGateConventions.cs",
+      "description": "One configuration, two channels: the analyzer reads `.globalconfig`, the CLI reads `archgate.json` and flattens it onto the same keys — because an analyzer cannot open files under `EnforceExtendedAnalyzerRules`.",
+      "reusable": true
+    },
+    {
+      "name": "ArchGate.Rules (7 analysers)",
+      "path": "src/ArchGate.Rules",
+      "description": "The analyzers themselves are a general package for any C# repository, but the individual rules encode principles P1–P15 from the constitution — outside it, some of them have to be reconfigured.",
+      "reusable": false
+    },
+    {
+      "name": "ArchGate.CiComment",
+      "path": "src/ArchGate.CiComment",
+      "description": "Renders the result to Markdown, works out the difference against the previous scan and updates **one** sticky PR comment, found by a hidden marker. Provenance deliberately never gets in there.",
+      "reusable": false
+    },
+    {
+      "name": "Composite GitHub Action",
+      "path": "action.yml",
+      "description": "Deliberately composite rather than container-based — container actions only run on Linux runners. It checks that a base commit is present before turning on diff mode.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "It does not invent its own rule language — it enforces principles P1–P15 from that repository and quotes them in the category of every diagnostic. The loop is closed."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "The {{term:provenance}} signal is designed explicitly as a repudiation of that one: the specification cites per-session averaging as the mistake that must not be repeated."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "The evidence discipline was carried over from there: the {{term:mutation|mutation run}} and the principle that a test suite which has never failed has not been tested."
+    }
+  ],
+  "product": "The buyer is named outright: an engineering lead or a platform team in a .NET organisation that can see the debt from AI-written code growing and has nothing to measure it with. Open-core model, with an empty `enterprise/` directory waiting for team features. The problem sits in front of all of that, though: **the sales channel is blocked by the name**. Until that changes, this is a credibility artefact — a finished, documented, mutation-tested engine — and nothing more.",
+  "highlights": [
+    "The repository knocked down its own marketing claim: the competitive document confirms a published namesake in the same package registry, corrects the numbers from two other people's reviews and **lists every place that went out of date as a result**. That is a rarer skill than writing an analyzer.",
+    "The release pipeline verifies the packed analyzer in a temporary consumer project and fails if the package does not emit a specific diagnostic. That catches the classic failure 'the DLL landed in the wrong folder, the package installs cleanly and does nothing'.",
+    "The analyzers deliberately sit on Roslyn 4.8.0 rather than 4.11.0, because an analyzer built against the newer one emits an error at the consumer. Established by consuming the packed `.nupkg`, not by reading the documentation.",
+    "Ten mutation variants of the rules, with tests that the real rule catches a case and the mutant lets it through — evidence that the tests respond to the mechanism and not to their own fixtures."
+  ],
+  "gaps": [
+    "**Zero published artefacts.** There is no tag of any kind, so the three packages, the image and the action do not exist, and every install command in the README returns a 404. The README admits it, which is honest and does not change the fact.",
+    "Nine of the fifteen principles are not implemented, and four never will be — the tool covers 6/15 of the contract it appeals to.",
+    "The engine sees a single compilation parsed straight from files, with no MSBuildWorkspace and no package references — that makes some of the rules purely syntactic, which limits their accuracy and will require a rewrite once the constraint is lifted.",
+    "The repository is private, even though all of its distribution value depends on being public."
+  ],
+  "next": [
+    "Decide on the new name and carry it through in **one pass**: repository name, three package identifiers, all the diagnostic identifiers, namespaces, `action.yml`, Dockerfile, documentation. The identifiers become an API contract the moment the first consumer types them into `.editorconfig` — after that point, changing them is breaking.",
+    "Fix the copyright line in LICENSE; it carries someone else's name, copied from another repository.",
+    "Cut the first tag under the new name and check whether the five release jobs actually pass — today they are unverified assumptions about secrets and package visibility.",
+    "Open the repository. A private CI gate has no way to win its first user.",
+    "Turn the gate on for the PRs of a consumer repository and fix the open entries — that is the only test that counts for the buyer."
+  ],
+  "risks": [
+    "**A name collision with a published, maintained product in the same NuGet registry.** Publishing under the current name would read as a clone or a typosquat — and that is the one thing blocking the whole distribution path.",
+    "LICENSE assigns the rights to someone else's name, out of step with the rest of the configuration. In an MIT repository that is a legal defect, not a typo.",
+    "Many of the rules are matches on folder name and call shape, with no bound symbol — a risk of false positives, which the vision itself names as the known failure mode of this category of tool."
+  ],
+  "headline": "Name taken by a working product in the same registry — the rename blocks all distribution",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 3,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-19",
+    "commits": 38,
+    "files": 113
+  }
+}

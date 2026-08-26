@@ -1,0 +1,186 @@
+{
+  "slug": "architecture-standards",
+  "name": "architecture-standards",
+  "cluster": "B-static",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P0",
+  "oneLiner": "The estate's architectural constitution: fifteen principles and seventeen guides, also shipped as {{term:plugins|agent plugins}}.",
+  "summary": "One body of text in two forms. Close to forty-six thousand words of prose in `docs/` (45,893 outside code blocks, 48,664 words in total) is documentation to read **and** the source from which five plugins and twenty-one skills are generated in the {{term:plugins|Agent Plugins 1.0.0}} format. The reason it exists is stated outright: an agent working on another repository is meant to **read** the rules, not reconstruct them from whatever code it happens to see — because that is the most expensive failure in the whole estate. The skills are routers: a short 'use when…' description, a failure-mode table and a checklist, with the full standard sitting alongside and loading only once the skill fires. The generator and the validator are deliberately separate: the first proves the tree agrees with the sources, the second — independently — that a client will accept it. This is the only repository in the portfolio that changes how the rest of the portfolio gets built.",
+  "stack": [
+    "Markdown",
+    "Node.js 22 (ESM, zero dependencies)",
+    "Agent Plugins 1.0.0",
+    "GitHub Actions",
+    "GitHub Pages",
+    "LaTeX/Beamer",
+    "Mermaid"
+  ],
+  "primaryLanguage": "Markdown",
+  "license": "MIT",
+  "tests": "No unit tests. The only automatic verification is the manifest validator (234 lines), which reports '5 plugins, 21 skills, 2 manifests', and the {{term:drift|drift validator}} — and that one fails on HEAD.",
+  "ci": "Two workflows. `validate-marketplace.yml` runs the generator in `--check` mode and then the validator; the first step exits 1 on HEAD, so **CI is red**. `deploy-pages.yml` publishes the single-page site.",
+  "metrics": [
+    {
+      "label": "Principles P1–P15",
+      "value": "15"
+    },
+    {
+      "label": "Operational guides",
+      "value": "17"
+    },
+    {
+      "label": "Plugins / skills",
+      "value": "5 / 21"
+    },
+    {
+      "label": "Words in docs/",
+      "value": "48,664 words across 25 `docs/**/*.md` files (split on whitespace), of which 45,893 outside code blocks"
+    },
+    {
+      "label": "Compliance checklist items",
+      "value": "18"
+    },
+    {
+      "label": "Generator + validator",
+      "value": "597 lines of JS, zero dependencies"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/architecture-standards",
+    "live": [
+      {
+        "label": "Site (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/architecture-standards/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "The constitution: 15 principles and the compliance checklist",
+        "path": "docs/architecture/00-REFERENCE-ARCHITECTURE.md"
+      },
+      {
+        "label": "REVIEW/MODERNIZE/RECOVER session playbook",
+        "path": "docs/PLAYBOOK.md"
+      },
+      {
+        "label": "Marketplace: installation and token cost",
+        "path": "MARKETPLACE.md"
+      },
+      {
+        "label": "Entry point for an agent",
+        "path": "AGENTS.md"
+      },
+      {
+        "label": "Shared-service extraction pattern",
+        "path": "docs/proposals/EXTRACT-SHARED-SERVICE-PATTERN.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Konstytucja (P1–P15)",
+      "path": "docs/architecture/00-REFERENCE-ARCHITECTURE.md",
+      "description": "667 lines: a diagram of the whole shape of the system, fifteen principles and an eighteen-point compliance checklist. Every principle carries a quoted example from a **working** system — the document is descriptive, not aspirational.",
+      "reusable": true
+    },
+    {
+      "name": "Seventeen operational guides",
+      "path": "docs/guides/",
+      "description": "A fixed shape: introduction, numbered sections, failure-mode table, checklist, quoted examples at the end. The largest are deployment to Fly.io (522 lines) and Azure AI Foundry agents (508).",
+      "reusable": true
+    },
+    {
+      "name": "Standard dokumentacji badawczej",
+      "path": "docs/research/",
+      "description": "Defines the layout, the shape of a research document and the evidence rules: every number traceable, reproduction as a command, validate the instrument before trusting its readings, negative results written up as well.",
+      "reusable": true
+    },
+    {
+      "name": "Generator pakowania",
+      "path": "scripts/build-marketplace.mjs",
+      "description": "363 lines of plain Node. Parses markdown sections while skipping code blocks, trims an excerpt to a 1400-character budget, rewrites links and emits the whole plugin tree. `--check` mode compares the generated tree against the committed one.",
+      "reusable": true
+    },
+    {
+      "name": "The manifest validator",
+      "path": "scripts/validate-marketplace.mjs",
+      "description": "234 lines, deliberately independent of the generator. The generator proves the tree agrees with the sources; the validator proves a client will accept it. That separation is the most important design decision here.",
+      "reusable": true
+    },
+    {
+      "name": "Wygenerowane drzewo wtyczek",
+      "path": "plugins/",
+      "description": "Five plugins, twenty-one skills. Each has a `plugin.json` at the root **and** in `.claude-plugin/`, because different clients read different paths — a real compatibility problem solved once.",
+      "reusable": false
+    },
+    {
+      "name": "Propozycje niezmergowane",
+      "path": "docs/proposals/",
+      "description": "Three documents openly marked as not-yet-standard, among them the shared-service extraction pattern with an honest note that it has **one data point**.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "authservice",
+      "reason": "Cited forty times; the playbook says to adopt it as the single identity provider, and a separate proposal describes its extraction as a pattern."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Cited thirty-one times as the public worked example; part of the standards was extracted from it."
+    },
+    {
+      "slug": "archgate",
+      "reason": "That repository enforces six of these fifteen principles in code. The policy → rule → CI loop is closed."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "The reference implementation of the evaluation standard defined here, with a line-by-line account of the deviations and fixes flowing back into the standard."
+    }
+  ],
+  "product": "{{term:kernel|Channel and credibility}}, not a transaction. Public, MIT-licensed, and at the same time a real tool that lowers the cost of every agent session over another repository in the estate. The potential commercial consumer is a platform team or a consultant who wants **their own** constitution packaged the same way — at which point what sells is the method (prose plus catalogue plus generator), not the content. The mechanism for distributing it across a whole organisation already exists.",
+  "highlights": [
+    "One body of text, two forms: 45,893 words of prose outside code blocks (48,664 words in total across `docs/**/*.md`) are documentation and the source of five plugins at once — without a single line copied by hand.",
+    "A real client-compatibility problem solved: Copilot reads `plugin.json` at the root, Claude Code reads it in `.claude-plugin/`, and agents want the `.agent.md` extension in one place and plain `.md` in the other. The generator emits both spellings, the validator keeps the manifests from diverging.",
+    "Private repositories are cited under stable placeholders with a legend — the example shows the shape without disclosing the source.",
+    "The skills are routers, not the standard pasted into the prompt: the full text loads only once the skill fires. That is the difference between a hundred tokens and a thousand on every session."
+  ],
+  "gaps": [
+    "**CI is red on HEAD.** One commit changed a source document without regenerating the tree, so the {{term:drift|drift validator}} exits with an error. A repository whose central claim is 'no copy-paste drift' is drifting — and that is the best possible evidence the mechanism works.",
+    "MARKETPLACE.md says three skills where there are four, and twenty where there are twenty-one. The table is written by hand — which is exactly the problem the generator already solved for the plugin tree.",
+    "All the plugins have version 1.0.0 hard-coded from the start, and the marketplace is served from the default branch — a consumer has no way to detect that the contents changed.",
+    "No tests for the generator. The only verification that the markdown parser works is that its output matches the committed tree.",
+    "The token-cost figures are given as measured, but the repository holds neither a script nor a record of the measurement — contradicting its own research-standard rule on reproducibility."
+  ],
+  "next": [
+    "Run the generator and commit the regenerated tree so CI goes green again. It is one command and it is first on the list for the whole portfolio.",
+    "Generate the skills table in MARKETPLACE.md from the catalogue instead of writing it by hand.",
+    "Add a check to the validator that every reference to a principle has a matching heading in the constitution.",
+    "Introduce release tagging for the marketplace — today every merge to the default branch immediately changes what everyone installing gets.",
+    "Record the token-cost measurement method as a command, or remove the figures, in line with your own rule."
+  ],
+  "risks": [
+    "The generated tree has diverged from the source on HEAD — that is not only red CI but a real risk that somebody installs a skill carrying an older version of the standard than the documentation.",
+    "No release versioning, with manifests declaring 1.0.0 from the start.",
+    "The redaction of private repository names covers HEAD; your own guide on open-source release calls for an audit of the **history**, not just the current state."
+  ],
+  "headline": "The drift validator is red — the repository about not drifting is drifting",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 1,
+    "openPrs": 1,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-24",
+    "commits": 54,
+    "files": 106
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "slug": "tiny-transformer",
+  "name": "TinyTransformer",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "dormant",
+  "tier": "P4",
+  "oneLiner": "A transformer encoder block written from scratch in C# on bare `float[,]` arrays, with no numerical library at all.",
+  "summary": "One transformer encoder block built on `net9.0` from the BCL alone: the static `MathOps` class supplies `MatMul`, `Transpose`, `AddBias`, `SoftmaxRows`, `ReLU`, variance and the initialisers, and on top of it stand six network layers, from `Embedding` to `TransformerEncoderBlock`. The data path is complete and internally consistent: the embedding returns a `[T x dModel]` matrix, attention scales the `Q·Kᵀ` product by `1/sqrt(dK)`, and the block closes two residual connections and two normalisations in a post-norm arrangement. The most interesting engineering decision sits in the tests rather than in the production code: attention is verified by **equivariance under a permutation of the tokens**, that is, reversing the order of the input rows must reverse the output rows, and `LayerNorm` by a statistical property (mean 0, variance 1 in every row) instead of by comparison against a hard-coded table of numbers. `Linear` was given a second constructor taking ready-made `W` and `b` so that the tests do not depend on the random number generator, which gives {{term:determinizm}} in the one place where initialisation is random by definition. Only the forward pass is finished, however: there are no gradients, no training and no weight saving, so the model computes on parameters nobody has trained. Work stopped at the seventh commit on 30 September 2025 and the repository has stood still since.",
+  "stack": [
+    ".NET 9 (net9.0)",
+    "C# z nullable i ImplicitUsings",
+    "xUnit 2.4.2",
+    "FluentAssertions 8.6.0",
+    "Microsoft.NET.Test.Sdk 17.7.1",
+    "coverlet.collector 3.2.0",
+    "PlantUML"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "24 `[Fact]` methods across 10 files plus a shared `TestsBase`, zero `[Theory]` and zero `[InlineData]`; 486 lines of tests against 487 lines of Core code. The count comes from counting the attributes in the code, because the review environment had no dotnet SDK and a run could not be confirmed.",
+  "ci": "No CI. The `.github` directory does not exist, there is no `yml` or `yaml` file anywhere in the repository, so those 24 tests are not run on any push.",
+  "metrics": [
+    {
+      "label": "Commits",
+      "value": "7"
+    },
+    {
+      "label": "Files in git",
+      "value": "35"
+    },
+    {
+      "label": "`[Fact]` tests",
+      "value": "24"
+    },
+    {
+      "label": "Lines of Core code",
+      "value": "487"
+    },
+    {
+      "label": "Lines of test code",
+      "value": "486"
+    },
+    {
+      "label": "Network layers",
+      "value": "6"
+    },
+    {
+      "label": "Period of activity",
+      "value": "2025-09-24 to 2025-09-30"
+    },
+    {
+      "label": "NuGet dependencies in Core",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/tiny-transformer",
+    "live": [],
+    "docs": [
+      {
+        "label": "Conceptual diagram of the model (PlantUML)",
+        "path": "docs/diagram_concept.puml"
+      },
+      {
+        "label": "Class diagram of the solution (PlantUML)",
+        "path": "docs/diagram_solution.puml"
+      },
+      {
+        "label": "Rendered solution diagram",
+        "path": "docs/diagram_solution.png"
+      },
+      {
+        "label": "Solution with three projects",
+        "path": "TinyTransformer.sln"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "MathOps",
+      "path": "TinyTransformer.Core/MathOps.cs",
+      "description": "The project's only numerical layer: `MatMul` in an i-k-j loop, `Transpose`, `Add`, `AddBias`, scalar multiplication, `Mean`, `Variance`, `ReverseRow` and overloaded initialisers. `SoftmaxRows` subtracts the row maximum before exponentiating, that is, it applies the standard numerical stabilisation instead of computing straight from the formula.",
+      "reusable": true
+    },
+    {
+      "name": "SelfAttention",
+      "path": "TinyTransformer.Core/Layers/SelfAttention.cs",
+      "description": "Single-head self-attention: four `Linear` projections onto Q, K, V and the output, the product of Q with the transpose of K, scaling by `1/sqrt(dK)`, softmax across rows and the context back to `dModel`. There is no causal masking and no multiple heads, so it suits an encoder and does not suit a decoder.",
+      "reusable": true
+    },
+    {
+      "name": "TransformerEncoderBlock",
+      "path": "TinyTransformer.Core/Layers/TransformerEncoderBlock.cs",
+      "description": "The repository's substantive destination: attention, adding the input, `LayerNorm`, feed-forward, adding again, a second `LayerNorm`. Four layers hidden behind a single `ILayer`, and at the same time the only class in the project without a test file of its own.",
+      "reusable": true
+    },
+    {
+      "name": "Linear",
+      "path": "TinyTransformer.Core/Layers/Linear.cs",
+      "description": "An affine layer `Y = X W + b` with weights initialised at a scale of `sqrt(2/(din+dout))`. The second constructor takes ready-made `W` and `b`, solely so that the assertions do not depend on the generator's seed.",
+      "reusable": true
+    },
+    {
+      "name": "ILayer i IEmbedding",
+      "path": "TinyTransformer.Core/Interfaces",
+      "description": "Two contracts over primitives: `Forward(float[,])` and `Lookup(int[])`. They are what let the block be assembled from interchangeable parts, but inside `ILayer` sits a `TODO: add Tensor class` comment, which is an admission that an interface this narrow will not carry back-propagation.",
+      "reusable": true
+    },
+    {
+      "name": "TestsBase and the test set",
+      "path": "TinyTransformer.Tests",
+      "description": "A shared base with tolerance-based matrix comparison and data generators, and above it 24 tests of MathOps and the layers. The `float[,]` assertions built on FluentAssertions are {{term:hermetyczny|hermetic}} and domain-neutral, so they carry over to any other numerical code in C#.",
+      "reusable": true
+    },
+    {
+      "name": "ConsoleApp",
+      "path": "TinyTransformer.ConsoleApp/Program.cs",
+      "description": "A dozen or so lines of demo: five tokens, `dModel` 16, `dK` 16, hidden layer 32, seed 0. It computes `Forward`, then prints the string `Encoded sequence` and nothing else; the `posEncoding` and `seqLen` variables are dead.",
+      "reusable": false
+    },
+    {
+      "name": "Diagramy PlantUML",
+      "path": "docs",
+      "description": "A conceptual diagram of the language model and a class diagram of the solution. Both describe the intended state, not the code: the solution diagram declares a `TinyTransformer.Autograd` package with `Tensor` and `TensorOps` classes, which are not among the repository's 35 files.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "math-for-ai-engineers",
+      "reason": "The same material: the linear algebra and activation functions behind neural networks, here as working code instead of a lecture."
+    },
+    {
+      "slug": "bayesian-inference",
+      "reason": "The same way of working: the mathematical apparatus implemented from scratch instead of calling a ready-made library."
+    },
+    {
+      "slug": "agents-and-llms",
+      "reason": "A shared LLM domain, but from the opposite end of the stack: the mechanics of the model here, the application layer over ready-made models there."
+    },
+    {
+      "slug": "llm-book",
+      "reason": "A natural source of material for a chapter on what exactly an attention block computes, before the book starts talking about the framework layer."
+    }
+  ],
+  "product": "No buyer, and there is no point looking for one. For anything of working use there are ONNX Runtime and TorchSharp, so this code will never reach production and that was never the intent. The value is in credibility and teaching: it is evidence that the author can take the attention mechanism apart into matrix multiplications and write it without a framework, which counts for something in an interview about LLM work and as material for an article or a book chapter.",
+  "highlights": [
+    "A test of attention's equivariance under a permutation of the tokens: it reverses the order of the input rows and checks that the output reverses the same way. That is the right way to test attention and most tutorials do not do it.",
+    "`SoftmaxRows` subtracts the row maximum before exponentiating. Deliberate numerical stabilisation, not a naive transcription of the formula.",
+    "`LayerNorm` is tested by a statistical property, mean 0 and variance 1 in every row, instead of by comparison against a pasted-in table of numbers.",
+    "486 lines of tests against 487 lines of production code, with 24 `[Fact]` methods and zero NuGet dependencies in the Core project.",
+    "`Linear` has a second constructor taking ready-made `W` and `b`, added solely so that the tests do not depend on the random number generator."
+  ],
+  "gaps": [
+    "**The README is one line**, `# TinyTransformer`, 17 bytes. No description, no way to run it, no reason for the repository to exist.",
+    "No back-propagation, no gradients and no training loop. The model computes on random weights, so the output has no semantic meaning, and `ILayer` in its present shape will not carry it.",
+    "Positional encoding does not exist, although the conceptual diagram shows it, and `Program.cs` carries a dead `posEncoding` variable and a comment about building it. This is one of several divergences between the code and its own diagrams, and not the only one; the rest are collected in the point below.",
+    "`diagram_solution.puml` describes a non-existent `TinyTransformer.Autograd` package with `Tensor` and `TensorOps` classes, the layers `EmbeddingAuto`, `SelfAttentionAuto` and `TransformerEncoderBlockAuto` (in the code they are `Embedding`, `SelfAttention` and `TransformerEncoderBlock`, and only `FeedForwardAuto` carries the `Auto` suffix), plus the tests `FeedForwardTests` and `TransformerBlockTests` (the repository has `FeedForwardAutoTests`, and block tests do not exist at all). Seven class names and a whole package with no counterpart among the 35 files in git. A design intention presented as a description of the state.",
+    "The console demo prints the heading alone and does not print the output matrix, and `TransformerEncoderBlock` is the only layer without a test file. Anyone who clones the repo and runs the project will see nothing."
+  ],
+  "next": [
+    "Write the README: what this is, why it is done without a library, what shape the data has on input and output, and how to run `dotnet test` and `dotnet run`.",
+    "Fix the demo so that it prints the block's output matrix, and remove the dead `posEncoding` and `seqLen`.",
+    "Add a GitHub Actions workflow with `dotnet build` and `dotnet test` on `net9.0`, and while you are there raise the xunit 2.4.2 and Test.Sdk 17.7.1 pins.",
+    "Add tests for `TransformerEncoderBlock`: shape preservation and a mean close to zero across the rows after the second `LayerNorm`.",
+    "Settle the project's status: either positional encoding and autograd, or close it as a finished forward-pass exercise with the diagram reconciled. The present suspension is the worst of the three options."
+  ],
+  "risks": [
+    "The name `tiny-transformer` is exceptionally common in the ML teaching ecosystem and does nothing to distinguish the repository in a search.",
+    "`LICENSE.txt` is an unfilled {{term:mit|MIT}} template with literal `[year]` and `[fullname]`, so formally it names no copyright holder.",
+    "The name `FeedForwardAuto` is a leftover from the autograd plan and misleads, because nothing there is automatically differentiated; likewise the `BasicTestsBase` class in `BasicMathOpsTests.cs` pretends to be a base class while being an ordinary set of eight tests.",
+    "The code has stood still since 30 September 2025 at seven commits, and without CI there is no telling whether the 24 tests still pass. With no README to close the argument, the whole thing reads as an abandoned sketch rather than a finished exercise."
+  ],
+  "headline": "Forward pass closed, no back-propagation, README is one line",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 4,
+    "openIssues": 1,
+    "openPrs": 1,
+    "dependabotPrs": 0,
+    "lastCommit": "2025-09-30",
+    "commits": 7,
+    "files": 35
+  }
+}

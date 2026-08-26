@@ -1,0 +1,202 @@
+{
+  "slug": "hydro-scope",
+  "name": "AquaScope",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "A simulated water network plus a full monitoring platform around it: OTLP, alert correlation and replay-produced numbers pinned in tests as bounds.",
+  "summary": "Nine .NET 10 projects impersonate a water distribution network: two pumping stations, twelve sensors across three zones, a meter ingestor and a fault injector with three on-demand scenarios. All telemetry goes through one {{term:otel|OpenTelemetry}} Collector, which fans it out in parallel to Prometheus with Grafana and to an in-house backend, where a hand-written OTLP decoder turns batches into an asset model. Over that model a pipeline of five analyzers behind a single `IIncidentAnalyzer` interface runs every five seconds: threshold, freshness, trend on EWMA and linear drift, correlation over the topology, and AI triage. The most interesting decision is `CorrelationAnalyzer`: 410 lines that glue alerts into one incident by walking the downstream graph within a 180 s window and at most four hops, and rank the candidate cause from four **explicitly written-down weights** (upstream 0.40, onset 0.30, type 0.20, distance 0.10), so every ranking can be challenged by hand instead of taking a model's word for it. The three headline numbers are not typed into the README but produced by a replay of the scenarios; `FindingsMeasurementTests` prints them, and `FaultScenarioAcceptanceTests` pins them with lower bounds. The repository grew around `docs/SPEC.md`, written before the code, whose revision history has four rows: the initial version and three revisions carrying corrections found during implementation (v1.2 declares three, v1.3 four).",
+  "stack": [
+    ".NET 10 (SDK 10.0.100)",
+    "Aspire.Hosting 13.4.6",
+    "OpenTelemetry .NET 1.17.0",
+    "OTel Collector contrib 0.158.0",
+    "Prometheus 3.13.2 + Grafana 13.0.6",
+    "Postgres 17 + EF Core 10",
+    "xunit 2.9.3",
+    "Docker + Fly.io"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "143 cases in a single project, `tests/AquaScope.Tests` (121 [Fact] plus 4 [Theory] with 22 [InlineData]), 3,591 lines across 16 files; the count agrees with row 16 of `docs/COMPLIANCE.md`, but it is counted from the attributes in the code, not from a green `dotnet test` run.",
+  "ci": "Four workflows: build and test on .NET 10 with a trx artefact and a separate job for the two mechanical guards, CodeQL for csharp and actions with a Monday cron, gitleaks over the **whole history** plus the same scan as a pre-commit hook. The fifth piece is `flyio.yml` (323 lines), triggered by a `v*` tag, which detects changes against the previous tag and deploys in the order postgres, core, simulators.",
+  "metrics": [
+    {
+      "label": "Projects in the solution",
+      "value": "9 src + 1 test"
+    },
+    {
+      "label": "C# code",
+      "value": "9,629 lines in src, 3,591 in tests"
+    },
+    {
+      "label": "Tests",
+      "value": "143"
+    },
+    {
+      "label": "Alert rules",
+      "value": "16 declared, 14 implemented"
+    },
+    {
+      "label": "Analyzers in the pipeline",
+      "value": "5"
+    },
+    {
+      "label": "Shared kernel",
+      "value": "142 of an allowed 800 lines"
+    },
+    {
+      "label": "Noise reduction (scenario 1, measured)",
+      "value": "8 alerts → 1 incident (table in docs/FINDINGS.md §1, from the replay; the test pins only ≥ 6)"
+    },
+    {
+      "label": "Lead of the trend rule over the threshold rule (measured)",
+      "value": "240 s, TR-BEARING-DRIFT +90 s against TH-BEARING-HOT +330 s (docs/FINDINGS.md §2; the test pins only ≥ 4 min)"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/hydro-scope",
+    "live": [],
+    "docs": [
+      {
+        "label": "The monitoring strategy, written before the code (671 lines)",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "The measured numbers, and what was not measured",
+        "path": "docs/FINDINGS.md"
+      },
+      {
+        "label": "Postmortem of the zone C failure",
+        "path": "docs/RCA-001.md"
+      },
+      {
+        "label": "A reckoning against principles P1–P15 and the deviations register",
+        "path": "docs/COMPLIANCE.md"
+      },
+      {
+        "label": "Costing of the Fly.io estate and the case for the pinned machines",
+        "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
+      },
+      {
+        "label": "Four ADRs",
+        "path": "docs/adr/"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Dekoder OTLP",
+      "path": "src/AquaScope.Core/Otlp",
+      "description": "A hand-written protobuf reader (`ProtoReader.cs`, 155 lines) plus an OTLP/JSON path, together about 1,200 lines turning batches from the collector into metrics, spans and logs. It knows only the wire format; it knows nothing of an asset or a zone.",
+      "reusable": true
+    },
+    {
+      "name": "AquaScope.ServiceDefaults",
+      "path": "src/AquaScope.ServiceDefaults/Extensions.cs",
+      "description": "The hosting {{term:servicedefaults|shared kernel}}: OTel, health and alive, service discovery, the standard resilience handler. 142 lines against a ceiling of 800 and **zero references to the Contracts project**, so it copies into another service without dragging the domain along.",
+      "reusable": true
+    },
+    {
+      "name": "Mechanical architecture guards",
+      "path": "scripts",
+      "description": "`check-kernel-size.sh` watches the kernel ceiling, `check-tfm-matches-runtime.sh` compares the major of the runtime image with the major of the TFM in every Dockerfile. Both fail the build rather than warn, and the second came out of a specific container start-up failure in copilot-scope.",
+      "reusable": true
+    },
+    {
+      "name": "The analyser pipeline",
+      "path": "src/AquaScope.Core/Analysis",
+      "description": "Five implementations of one interface, run by `AnalysisLoop` every five seconds. Each returns an `AnalyzerReport` with metrics and a rationale, so missing data is reported as no-data instead of quietly vanishing from the result.",
+      "reusable": true
+    },
+    {
+      "name": "AssetHealthEngine",
+      "path": "src/AquaScope.Core/Scoring/AssetHealthEngine.cs",
+      "description": "A 0–100 score per asset from four dimensions, with the weights renormalised over only the dimensions that have data and confidence reported separately. The construction is carried straight over from the session-quality engine in copilot-scope; what changes is the dimensions plugged in, not the mechanics.",
+      "reusable": true
+    },
+    {
+      "name": "CorrelationAnalyzer",
+      "path": "src/AquaScope.Core/Correlation/CorrelationAnalyzer.cs",
+      "description": "410 lines that assemble alerts into an incident over the `NetworkTopology` graph and rank the cause from four written-down weights. Every component of a candidate's placement in the ranking is recorded, so the result can be challenged without reading the code.",
+      "reusable": false
+    },
+    {
+      "name": "TrendAnalyzer",
+      "path": "src/AquaScope.Core/Analysis/TrendAnalyzer.cs",
+      "description": "428 lines of EWMA and linear drift, meant to fire before the threshold. The alert carries its own arithmetic: the slope and the predicted moment of breach. The thresholds are justified by logged runs, not picked by eye.",
+      "reusable": false
+    },
+    {
+      "name": "AiTriageAnalyzer",
+      "path": "src/AquaScope.Core/Analysis/AiTriageAnalyzer.cs",
+      "description": "Builds the prompt only from facts established {{term:determinizm|deterministically}} and queues an RCA draft behind a human acceptance gate (`/triage/{incidentId}/approve`). Without an API key it reports no-data and nothing else breaks, but nobody drains the queue either.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "copilot-scope",
+      "reason": "The sibling repository, and named as such openly: the README admits that the OTLP ingest, the scoring and the analyzer pipeline are adapted from there, and a comment in `AssetHealthEngine` points at that project's session-quality engine. It is the same shape of system in a different domain."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "The whole of the documentation reckons itself against principles P1–P15 from that repository; `COMPLIANCE.md` and `DEVIATIONS.md` are a formal pass through someone else's checklist with three rows partly satisfied."
+    },
+    {
+      "slug": "authservice",
+      "reason": "Deviation D-001 justifies the absence of authentication on the grounds that the identity work lives in authservice and is not repeated here. That is the right decision, but it leaves the read API and the fault injector open."
+    },
+    {
+      "slug": "dev-insight",
+      "reason": "`LICENSE` carries the copyright `dev_insight` — a template carried over from there and never corrected, exactly as in authservice."
+    }
+  ],
+  "product": "No buyer, and the repository does not even pretend to be looking for one: the README links to one specific advertisement (Monitoring & Observability Specialist at Idrica, Valencia) and maps every point of the posting onto a file, a dashboard or a measured number. The value is therefore evidential — it shows the design of a monitoring strategy, not the wiring-up of Prometheus. Secondarily, material can be lifted out of it for an article on alert-noise reduction, or on why trend rules beat threshold rules on slow failures; both numbers are measured and defensible. But the audience is one person, and it expires with the advertisement.",
+  "gaps": [
+    "**The AI triage calls no model.** `AiTriageDraftStore.Dequeue()` has not a single call site in `src`, so even with `ANTHROPIC_API_KEY` set all that appears is a prompt in a queue. Neither the README nor `DEVIATIONS.md` says so — D-002 describes only the absence of an LLM judge.",
+    "**No `flyio/collector.fly.toml`**, even though `core.fly.toml` and every simulator point `OTEL_EXPORTER_OTLP_ENDPOINT` at `aquascope-collector.internal:4318`, and `INFRASTRUCTURE-ANALYSIS.md` lists that machine as pinned. The word `collector` does not appear once in `flyio.yml`, so the deployed estate has nothing to receive telemetry with.",
+    "Two of the sixteen rules in the catalogue never fire: `TR-NIGHT-FLOW` and `TH-INGEST-LAG`. This is described honestly in FINDINGS 4 and D-003, but it is still a hole in coverage.",
+    "The overhead of the in-house instrumentation has not been measured; FINDINGS 3 itself names this the one number that is owed and unreported.",
+    "Zero dashboard screenshots and no public URL. The demo is local only, and the six Fly.io configurations are, as of today, a description of a deployment rather than a deployment."
+  ],
+  "next": [
+    "Settle the AI triage: either write the hosted service that drains `AiTriageDraftStore` and actually calls the model API, or strike the 'AI incident triage' claim from the README and describe that component as a prompt builder.",
+    "Add `flyio/collector.fly.toml` and a collector deployment step to `flyio.yml`. Without it the deployment path is incomplete against what you describe yourself in the infrastructure analysis.",
+    "Run the stack on a machine with Docker, take three screenshots and, on that same run, measure the overhead of the in-house telemetry so that FINDINGS 3 can be closed.",
+    "Implement `TH-INGEST-LAG` — the `aqua.ingest.latency` instrument already exists, what is missing is the comparison against the 2 s threshold; `AlertCatalogueCoverageTests` will then force both documents to be shortened.",
+    "Fix the copyright line in `LICENSE` and decide on the name: either the repository becomes `aquascope`, or the code becomes `HydroScope`."
+  ],
+  "highlights": [
+    "The headline numbers come from a replay of the scenarios, not from being typed into the README, but **they are enforced only as bounds**: `FindingsMeasurementTests` (one `[Theory]`, four `[InlineData]`) prints them through `ITestOutputHelper` and has exactly one assertion, `Assert.True(raw >= 0)`. The pinning assertions sit in `FaultScenarioAcceptanceTests`: `incident.Members.Count >= 6` and `lead >= TimeSpan.FromMinutes(4)`. The only thing pinned outright is the control: `run.Alerts.History.Count == 0` plus `Assert.Empty(run.Incidents.All)` over fifteen minutes of a healthy network.",
+    "`docs/RCA-001.md` is the postmortem of one specific run, in which every timestamp is pinned by the `Scenario2RcaEvidenceTests` test. It found a suppression rule structurally incapable of firing, and the fix **worsened** the noise-reduction figure from 8:1 to 4:1 — and it is reported that way.",
+    "`docs/SPEC.md` (671 lines) was written before the code, and its revision history has four rows: v1.0 is the initial specification, followed by three revisions carrying corrections forced by the implementation — v1.1 corrects two injection parameters for scenario 1, v1.2 declares 'Three corrections', v1.3 'Four corrections'. A single number of 'cases' cannot be derived from this without an arbitrary choice of whether to count rows, revisions or individual corrections. FINDINGS 1.3 reports a measurement that contradicts the prediction instead of quietly correcting the spec.",
+    "Two mechanical guards in CI instead of a sentence in the documentation: the 800-line ceiling on the shared kernel (142 today) and agreement between the TFM major and the runtime image major, both failing the build.",
+    "Every pinned machine in `flyio/` names, in a comment, the synchronous call that forces it, plus the costed alternative: about 2 USD a month to let Core sleep, against losing all telemetry."
+  ],
+  "risks": [
+    "**A name collision built into the repository:** the directory is `hydro-scope`, while all the code, every container, the Fly apps and the documents say `AquaScope`. The README explains it, but every external link and every search hits a different name.",
+    "Grafana starts with `GF_AUTH_ANONYMOUS_ENABLED=true`, the Admin role and the login form disabled. Deliberate for a demo on a laptop; copied anywhere else it is an open admin.",
+    "`AiTriageOptions.Model` hard-codes `\"claude-sonnet-5\"`. A model identifier in a constant is a pin that will age quietly, the more so since nothing uses it today anyway.",
+    "Fifteen commits and the last one on 2026-08-15: the repository was produced in one sitting and never touched since. The pins (Aspire 13.4.6, EF Core 10.0.11, Grafana 13.0.6, collector 0.158.0) will age faster than anyone looks in here."
+  ],
+  "headline": "Numbers pinned by tests, but AI triage only builds a prompt and the collector has no fly.toml",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 8,
+    "openPrs": 8,
+    "dependabotPrs": 8,
+    "lastCommit": "2026-08-15",
+    "commits": 15,
+    "files": 142
+  }
+}

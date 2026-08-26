@@ -1,0 +1,194 @@
+{
+  "slug": "bayesian-inference",
+  "name": "WSB — Bayesian Network Inference",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "An exact inference engine for Bayesian networks written from scratch, plus a Blazor app that does not use it and computes its own wrong numbers.",
+  "summary": "The repository has two halves that share a name and share no code. The first is `WSB.BayesianNetwork.Logic`: the Enumeration-Ask algorithm from Russell and Norvig written without any probabilistic library, with a console harness that sweeps all 6561 evidence combinations. The second is a full-stack application — Blazor WebAssembly (37 `.razor` components) talking over REST to an ASP.NET Core host (9 controllers), CQRS on MediatR, EF Core 7 with Npgsql, RS256 tokens validated against the {{term:oidc|JWKS}} of a separate `authservice` instance. The web application **does not reference the tested engine**, it duplicates the probability calculation in its own service layer instead. The most interesting decision is not in the code but in `docs/research`: the author could not run .NET in the environment where the study was done, so he wrote a 229-line replica of the engine in Python, validated it against the existing unit tests, and only then used it as an instrument — and with that instrument he showed that the demo network has underspecified CPTs and that the web calculation path does not return posteriors at all. This is a repository whose best product is the evidence of its own errors.",
+  "stack": [
+    ".NET 7 (SDK 7.0.203)",
+    "Blazor WebAssembly 7.0.5",
+    "ASP.NET Core MVC + Swashbuckle 6.5.0",
+    "EF Core 7.0.5 + Npgsql 7.0.4",
+    "PostgreSQL 16",
+    "MediatR 11.1.0 + AutoMapper 12.0.1",
+    "xUnit 2.4.2",
+    "Docker + Fly.io"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Exactly 4 `[Fact]` tests in a single project, all of them against the engine; the expected values (0.461538 for the WetRain network, 0.336689 for the Alarm variant) were derived by hand from the CPTs in the comments, not copied from the algorithm's output. The web calculation path has no test at all, which the README and the gap analysis both state outright. The run was not verified — there was no .NET SDK in the review environment.",
+  "ci": "Four workflows. `build.yml` does a restore, a Release build and `dotnet test` over the whole solution, and then **applies a hand-written EF Core migration against a `postgres:16` service** — the migration was written without local access to a database and this is its only verification. Only two of the other three disable themselves: `deploy.yml` (flyctl) checks `if [ -z \"$FLY_API_TOKEN\" ]` in the script and finishes with `exit 0`, and `reset-demo.yml` (cron every 6 hours) puts `if: ${{ vars.DEMO_APP_URL != '' }}` on its steps with a 'not configured yet' branch; without the secret and without the variable both end in a no-op. `pages.yml` has no such guard — the file contains not one `if:`, nor any reference to `vars.` or `secrets.` — so it fires on every push that touches `html/` and, as its own header says, the `actions/deploy-pages@v4` step **fails** with 'Pages site not found' until the repository owner switches Settings → Pages → Source to 'GitHub Actions'. That is a red run, not a quiet skip.",
+  "metrics": [
+    {
+      "label": "Commits",
+      "value": "27"
+    },
+    {
+      "label": "Files in git",
+      "value": "2264 (including about 2000 bootstrap-icons icons)"
+    },
+    {
+      "label": "Projects in the solution",
+      "value": "9 csproj"
+    },
+    {
+      "label": "xUnit tests",
+      "value": "4 [Fact]"
+    },
+    {
+      "label": "API controllers / .razor components",
+      "value": "9 / 37"
+    },
+    {
+      "label": "CQRS handlers",
+      "value": "28 .cs files"
+    },
+    {
+      "label": "ADRs",
+      "value": "11 (ADR-001..ADR-011)"
+    },
+    {
+      "label": "Queries in the console sweep",
+      "value": "6561 (3^8), of which 648 give a meaningful posterior"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/bayesian-inference",
+    "live": [],
+    "docs": [
+      {
+        "label": "Study 01 — underspecified CPTs in the StockBN network",
+        "path": "docs/research/01-STOCKBN-CPT-UNDERSPECIFICATION.md"
+      },
+      {
+        "label": "Study 02 — the web calculation path",
+        "path": "docs/research/02-WEB-CALCULATION-PATH.md"
+      },
+      {
+        "label": "LaTeX paper tying both studies together",
+        "path": "docs/research/papers/00-COMPREHENSIVE-REVIEW.tex"
+      },
+      {
+        "label": "Analysis of 18 conformance points against the standard",
+        "path": "docs/architecture/02-GAP-ANALYSIS.md"
+      },
+      {
+        "label": "Architecture decisions ADR-001..011",
+        "path": "docs/architecture/05-DECISIONS.md"
+      },
+      {
+        "label": "Open-source readiness audit",
+        "path": "docs/architecture/06-OPEN-SOURCE-READINESS.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "docs/research — the studies, artefacts and the article",
+      "path": "docs/research",
+      "description": "Two formal studies using the validated-replica method: 229 lines of Python reproducing the engine, 56 lines of sweep analysis, 295 lines of a transcript of the web calculator and a 601-line LaTeX paper. Every artefact is committed, so the result can be reproduced without a .NET SDK.",
+      "reusable": true
+    },
+    {
+      "name": "Weryfikacja migracji EF Core w CI",
+      "path": ".github/workflows/build.yml",
+      "description": "A step that brings up `postgres:16` as a service and runs `dotnet ef database update` with a pinned `dotnet-ef` 7.0.5 and a dummy auth metadata address. A domain-neutral pattern for any repository where migrations are written by hand.",
+      "reusable": true
+    },
+    {
+      "name": "WSB.BayesianNetwork.Logic",
+      "path": "WSB.BayesianNetwork.Logic",
+      "description": "`BaseInference` with normalisation and a domain, a working `Enumeration` and an `Elimination` that is a stub throwing `NotImplementedException`. The CPT sits in a fixed `double[10,10,10,10]` array, so cells that were never written return 0.0 silently — that is the source of the defect described in study 01.",
+      "reusable": false
+    },
+    {
+      "name": "WSB.Console",
+      "path": "WSB.Console",
+      "description": "The demo harness and benchmark: it builds the StockBN, Alarm and WetRain networks, times a full sweep of 3^8 evidence combinations with a `Stopwatch` and dumps the result to `output_<timestamp>.txt`. This is what produced the 4374 / 1539 / 648 split.",
+      "reusable": false
+    },
+    {
+      "name": "WSB.Service — warstwa CQRS",
+      "path": "Infrastructure/WSB.Service",
+      "description": "28 command and query files on MediatR, and inside them both parallel calculation paths: the live `EnumerationCalculator` and the `CalculateCommand` that no controller can reach. Neither of them calls the engine in `WSB.BayesianNetwork.Logic`.",
+      "reusable": false
+    },
+    {
+      "name": "Server (WSB.Server)",
+      "path": "Server",
+      "description": "A host with a versioned API, `/health` and `/alive`, a `MigrationHostedService` applying migrations in the background and a `WriteAccessAuthorizationFilter`. Without `Auth:MetadataAddress` set the process does not start at all — it throws `InvalidOperationException` while building the container.",
+      "reusable": false
+    },
+    {
+      "name": "Client (WSB.Client)",
+      "path": "Client",
+      "description": "An editor for networks and probability tables, a query box and a live Mermaid diagram of the network being built. The sign-in page talks directly to `authservice`, with refresh token rotation and 2FA; `DataServiceBase`, however, has no retry policy and no timeout.",
+      "reusable": false
+    },
+    {
+      "name": "docs/architecture — ADR-y i audyty",
+      "path": "docs/architecture",
+      "description": "Six documents, including 11 ADRs that also record decisions **not** to do something (ADR-004 deferring variable elimination, ADR-005 deliberately leaving the duplicated logic in place) and an open-source readiness {{term:audit|audit}} with an inventory of what had been sitting in the scrubbed git history.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "authservice",
+      "reason": "The application has no signing key of its own: it validates RS256 against the JWKS of that service's instance (ADR-010/ADR-011), and the deployment runbook stands both applications side by side on Fly.io. With HS256 on that side the JWKS is empty and every token is thrown out while both services look healthy."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "The whole of `docs/architecture` and `docs/research` is written directly against that repository's conformance checklist and research standard. This is a real use of that repository, not a declaration."
+    }
+  ],
+  "product": "No buyer, and the README admits it in the *What this project is not* section — the project does not compete with pgmpy or with any PGM library. It started as a coursework assignment, then grew into a reference full-stack application and into a test case for the author's own documentation standard. The value is credibility and teaching: it shows an exact inference algorithm written by hand, and an author who publishes a formal study of the errors in his own code instead of quietly fixing them.",
+  "gaps": [
+    "**The web calculation path does not work.** Study 02 showed that the parser falls over on the hints the server generates, the result never reaches the UI, there is no normalisation, and the numbers returned (1.7 and 4.0) are not probabilities. This is the application's main function and its most important unpatched defect.",
+    "The StockBN demo network has underspecified two-parent CPTs: of the 6561 sweep queries 4374 are degenerate, 1539 return NaN through a division by zero in `Normalization`, and 648 give a meaningful posterior. `P(b)` comes out as 0 despite a prior of 0.99.",
+    "The two halves of the repository are not joined up — the application duplicates the logic instead of referencing the tested engine, and `Elimination.cs` is an empty stub. ADR-004 and ADR-005 record this as a deliberate deferral, which does not change the state of the tree.",
+    "A latent bug in the `BaseInference` constructor: given a non-empty variable list `_vars` is left `null` and inference throws `NullReferenceException`. It works only because `Enumeration` always passes `null`. On top of that the comments about evidence encoding are systematically inverted against the code (they say 0 = true, the code uses 1 = true).",
+    "No screenshots, no {{term:otel|OTLP}} telemetry, no retry and timeout policies on HttpClient, no secret scanner in CI. None of the three declared addresses was confirmed to be live."
+  ],
+  "next": [
+    "Write characterisation tests for `EnumerationCalculator`, then replace both web calculation paths with a call into `WSB.BayesianNetwork.Logic`. That closes point 16 of the gap analysis and study 02 at the same time.",
+    "Fill in the two-parent CPTs in StockBN (eight `SetProbabilities` calls, following the Alarm network) and guard `BaseInference.Normalization` against division by zero. Without this 23.5 per cent of queries still return NaN.",
+    "Close out `06-OPEN-SOURCE-READINESS.md`: delete or repoint the `v1.0.0` and `v1.0.1` tags, which still point at history from before `git filter-repo`. The audit itself calls this the only blocker to going public.",
+    "Settle the name collision: `fly.toml` says `wsb-bayesian-inference`, the `LABEL` in the Dockerfile and the Pages link in the README say `BayesianInference`, and the repo slug is `bayesian-inference`. Turn Pages on and check what address the one-pager actually lands at.",
+    "Plan the move off .NET 7 onto an LTS version together with EF Core and the base images — today the whole stack sits on an unsupported release."
+  ],
+  "highlights": [
+    "Enumeration-Ask written from scratch, without any probabilistic library, and the expected values in the tests (0.461538 and 0.336689) are **derived by hand from the CPTs in the comments**, not copied from the algorithm's output. That is the difference between a correctness test and pinning current behaviour.",
+    "A method for studying code you cannot run: a replica in Python, validated first against the existing unit tests and only then used as an instrument. 580 lines of artefacts, all committed — and this is the one thing in this repository that could be carried anywhere else.",
+    "Two formal research studies find serious errors in the author's own code, with numbers: `P(b)` = 0 against a prior of 0.99, and the 4374 / 1539 / 648 split across 6561 sweep queries.",
+    "CI does not only build and test, it applies a hand-written EF Core migration against a real `postgres:16` container. The migration was written without local access to a database and this step is its only verification.",
+    "The README has its own *What this project is not* section and states outright that the two halves of the repository are not joined up and that the web calculation path is unverified."
+  ],
+  "risks": [
+    "The `v1.0.0` and `v1.0.1` tags still point at history from before the rewrite (`git filter-repo`, 2026-08-15), so once the repository is public they lead to deleted PDFs carrying a student number. The author's own audit calls this the only blocker.",
+    "The public demo is designed with no sign-in for either reading or writing, protected only by a data reset every 6 hours (ADR-008). With a live deployment that means write access to the database is open to anyone.",
+    "The whole stack sits on .NET 7 — a release out of support — including the `sdk:7.0` and `aspnet:7.0` images, so security holes will not be patched. `appsettings.Development.json` carries a committed `postgres/postgres`, and there is no secret scanner in CI.",
+    "Dead code stays in the tree: `CalculateCommand` cannot be reached from a controller and, according to study 02, returns infinity, and `Elimination.cs` throws `NotImplementedException`."
+  ],
+  "headline": "Two halves that never meet — and the author proved it himself in two studies",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-15",
+    "commits": 27,
+    "files": 2264
+  }
+}

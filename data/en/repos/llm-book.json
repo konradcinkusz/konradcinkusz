@@ -1,0 +1,212 @@
+{
+  "slug": "llm-book",
+  "name": "LangChain, LangGraph and Async Python",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P2",
+  "oneLiner": "Sources of a book on LangChain 1.x, LangGraph and async Python for an engineer arriving from .NET: 17 chapters, 6 appendices.",
+  "summary": "The repository is 8,698 lines of LaTeX across chapters, appendices and front matter (17 chapters, 6 appendices), plus a preamble and a pipeline that builds the PDF. There is one thesis and it is defended consistently: after the 1.0 release of 17 October 2025, `langchain` became a thin layer over the `langgraph` runtime, so most material on the web describes an architecture that no longer exists. The most interesting engineering decision is not about the content but about **discipline**: the whole editorial debt is countable and counted by CI. The `make debt` target tallies stub chapters, missing screenshots, `verifybox` blocks and diagrams, and the `build.yml` workflow publishes the same counters to the GitHub Step Summary on every build. A `verifybox` block marks a listing that was not run against the pinned versions, and across 8,450 lines of chapters and appendices there are **zero** of them. The only occurrence in the repository is a specimen in the box legend at `frontmatter/introduction.tex:157`, which the Makefile deliberately excludes from the counter and documents with a comment. The author enforced his own rule instead of declaring it. Diagrams are text: 45 Mermaid sources are committed, the rendered PDFs are gitignored, and when a render is missing the macro prints the diagram source, so a build without `mermaid-cli` still shows the reader the structure.",
+  "stack": [
+    "LaTeX (latexmk, pdflatex, klasa book)",
+    "tcolorbox / listings / imakeidx / microtype",
+    "Mermaid CLI v11",
+    "Python 3.13 (skrypty pomiarowe)",
+    "langchain 1.3.14 / langchain-core 1.5.3 / langgraph 1.2.10",
+    "FastAPI + uvicorn + httpx (tylko benchmark rozdz. 13)",
+    "GitHub Actions",
+    "GitHub Pages"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "dual: MIT for the code, CC BY-NC-SA 4.0 for the prose",
+  "tests": "No automated tests: there is no pytest, no `pyproject.toml` and no dependency file. The LaTeX build plays the role of the test, plus a CI step that fails on an unresolved cross-reference; the four measurement scripts in `code/` (702 lines) are not run in CI.",
+  "ci": "Three workflows. `build.yml` has three jobs: rendering every `.mmd` through mermaid-cli with a failure on error, a `latexmk` compilation with a grep for `Reference.*undefined` in `main.log` and publication of the debt counters to the Step Summary, and an advisory job comparing the nine pins against PyPI. `release.yml` attaches the PDF to a GitHub Release on a `v*` tag, `pages.yml` publishes `docs/`.",
+  "metrics": [
+    {
+      "label": "Chapters / appendices",
+      "value": "17 / 6"
+    },
+    {
+      "label": ".tex lines",
+      "value": "8,698 (chapters + appendices + frontmatter; with main.tex and preamble.tex 9,222)"
+    },
+    {
+      "label": "Index entries",
+      "value": "411"
+    },
+    {
+      "label": "Mermaid sources",
+      "value": "45"
+    },
+    {
+      "label": "Python listings",
+      "value": "82"
+    },
+    {
+      "label": "verifybox blocks",
+      "value": "0 in chapters and appendices (8,450 lines, `grep -rc 'begin{verifybox}' chapters appendices`); 1 specimen in the introduction's legend"
+    },
+    {
+      "label": "Measurement scripts",
+      "value": "4 files, 702 lines"
+    },
+    {
+      "label": "Experiments run",
+      "value": "3.5 of 5"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/llm-book",
+    "live": [
+      {
+        "label": "Book site (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/llm-book/"
+      },
+      {
+        "label": "Ops Copilot mini-project (separate repo)",
+        "url": "https://github.com/konradcinkusz/llm-book-mini-project"
+      },
+      {
+        "label": "Sister volume for .NET",
+        "url": "https://github.com/konradcinkusz/maf-book"
+      }
+    ],
+    "docs": [
+      {
+        "label": "README with the measurement tables",
+        "path": "README.md"
+      },
+      {
+        "label": "Conventions and the state of API verification",
+        "path": "CLAUDE.md"
+      },
+      {
+        "label": "Manifest of diagrams and screenshots",
+        "path": "appendices/appF-manifest.tex"
+      },
+      {
+        "label": "API cheat sheet",
+        "path": "appendices/appB-cheatsheet.tex"
+      },
+      {
+        "label": "Pin check against PyPI",
+        "path": "tools/check_versions.py"
+      },
+      {
+        "label": "Landing page published on Pages",
+        "path": "docs/index.html"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Missing-artefact macros",
+      "path": "preamble.tex",
+      "description": "`\\mermaidfig`, `\\needscreenshot` and `\\chapterstub` turn a missing artefact into a visible placeholder and at the same time add an entry to the `.dgm` / `.shots` manifest. When the rendered PDF is absent, `\\mermaidfig` prints the Mermaid source outright, so an incomplete build still carries the content.",
+      "reusable": true
+    },
+    {
+      "name": "Editorial-debt counters",
+      "path": "Makefile",
+      "description": "The `debt`, `shots` and `stubs` targets grep the sources and return four numbers, which CI copies into GITHUB_STEP_SUMMARY. The debt is therefore visible on every push instead of living in the author's head; it moves to any text repository once you swap the names of the macros being grepped.",
+      "reusable": true
+    },
+    {
+      "name": "The Mermaid diagram pipeline",
+      "path": "Makefile",
+      "description": "The rule `figures/diagrams/%.pdf: figures/mermaid/%.mmd` renders each of the 45 sources through `npx @mermaid-js/mermaid-cli@11` with `--pdfFit`, auto-detects the browser and generates `figures/mermaid/.puppeteer.json` itself. The input is any source directory, and a shared `figures/mermaid/config.json` keeps the palette out of the individual diagrams.",
+      "reusable": true
+    },
+    {
+      "name": "MeteredFakeModel",
+      "path": "code/ch11/structural_cost.py",
+      "description": "A subclass of `FakeMessagesListChatModel` that counts model calls and context size before answering from a script. It measures the structural cost of any LangGraph graph with no provider and no second of waiting; here it handles five {{term:topologie|topologies}} hand-built from `StateGraph` and `Command`.",
+      "reusable": true
+    },
+    {
+      "name": "The preamble and eight environments",
+      "path": "preamble.tex",
+      "description": "447 lines: 17x24 cm geometry, a custom `listings` language named `pythonx` and eight tcolorbox frames (note, warning, versionbox, verifybox, exercisebox, projectbox, dotnetbox, chapterstub). A defensive `\\IfFileExists` for babel, newtx and inconsolata degrades the build instead of wrecking it, and a comment flatly forbids mapping U+00A0, because that kills `listings`.",
+      "reusable": true
+    },
+    {
+      "name": "Dependency-free landing page",
+      "path": "docs/index.html",
+      "description": "7,602 bytes of a single HTML file with its own CSS variables and `prefers-color-scheme` support, without a single external resource. It duplicates the status and the measurement tables from the README, so it drifts away from it by hand.",
+      "reusable": true
+    },
+    {
+      "name": "Pin check against PyPI",
+      "path": "tools/check_versions.py",
+      "description": "Pulls nine `\\newcommand` macros out of `preamble.tex`, queries `pypi.org/pypi/<dist>/json` and prints a Markdown table with a `behind` marker. The distribution dictionary is hard-coded and it never fails the build, because the CI job carries `continue-on-error`.",
+      "reusable": false
+    },
+    {
+      "name": "Benchmark serwisu agentowego",
+      "path": "code/ch13/bench_service.py",
+      "description": "182 lines: uvicorn in a separate process, driven over real HTTP through httpx, the provider mocked at 100 ms, 400 requests per cell, three scenarios (clean, blocking, `to_thread`). The docstring records two earlier methodological errors, and that is why the script now calibrates against a no-op endpoint and flags cells close to the client's ceiling.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "maf-book",
+      "reason": "The sister volume, linked directly from the README and the landing page: the same preamble, the same debt counters and the same rule of 'measurement rather than assertion', only for the .NET stack. Both also share the same hole: the most expensive experiment in the book has not been run."
+    },
+    {
+      "slug": "agents-and-llms",
+      "reason": "The same subject area, LLM agents. The contents of that repository were not checked in this run, so the overlap is declarative."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Experiment 5 measures the structural cost of multi-agent topologies with a fake model; that benchmark scores the quality of the same arrangements on tasks. The half of the experiment that has not been run is exactly what that repo can already count."
+    }
+  ],
+  "product": "No buyer in the transactional sense, and the licence settles it: the prose is under CC BY-NC-SA 4.0, so commercial redistribution of the text is ruled out, and there is no sales path anywhere in the repository. The real value is {{term:evidence|evidence}} for recruitment and consulting in the LLM agent space, resting on verified API surface and original measurements rather than rewritten documentation. A training course or a print edition could be the earning channel, but nothing in the repository prepares for either: there is no print version, no mailing list and no offer page.",
+  "highlights": [
+    "**Zero `verifybox` blocks across 8,450 lines of chapters and appendices.** The environment exists in the preamble and is counted by CI (`grep -rc 'begin{verifybox}' chapters appendices`), and yet not one of the 82 listings carries the mark — every one was put through the pinned versions. The only `\\begin{verifybox}` in the repository is a specimen in the box legend at `frontmatter/introduction.tex:157`, that is, text explaining to the reader what the box means, not a listing that was never run; the Makefile excludes it from the counter and says why. The convention was enforced, not announced.",
+    "The consistency run caught **the book's own error**: the default `recursion_limit` in `langgraph` is 10007, not 25. The old value survived the entire draft inside a `console` block that nobody ever ran, and was corrected in the chapter and in the appendix (commit 9435b1f).",
+    "The four measurement scripts (702 lines) are {{term:hermetyczny|hermetic}}: none of them needs a model provider. Experiment 1 hits a hand-written HTTP server on localhost instead of `asyncio.sleep`, because sleeping only proves that the scheduler can schedule.",
+    "Experiment 5 was split into a structural part and a quality part, and only the second needs a budget. The number of model calls is a property of the {{term:topologie|topology}}, so a counter on a fake gives the same answer as a real provider: a supervisor makes five calls against a single agent's two, and three of them are routing, not work.",
+    "45 Mermaid sources committed as text with the PDFs gitignored, so a diagram change reviews as an ordinary diff."
+  ],
+  "gaps": [
+    "**The `\\pyfile` and `\\pyregion` macros are defined, the scripts carry `--8<--` markers, but there is not a single call in `chapters/` or `appendices/`.** All 82 listings are retyped by hand, so the book and the code can drift apart silently in exactly the way the project's own conventions forbid.",
+    "Three measurements that need a paid provider have not been run: answer quality across multi-agent topologies (ch. 11, the book's headline experiment), tool-selection accuracy against tool count (ch. 6) and cache hit rate (ch. 12). The tables in Appendix B stand empty and are meant to stay empty.",
+    "The claimed 244 pages and 'zero overfull vboxes' come only from the README and CLAUDE.md; the repository holds neither `main.log` nor the PDF, so without a build there is no way to confirm it.",
+    "The scripts in `code/` have no linter, no test and no dependency file, and they do not run in CI, even though all of them execute in seconds without a provider. Nobody will notice when they stop running.",
+    "The Ops Copilot mini-project is a separate repository, which 17 `projectbox` frames treat as a contract, and which according to the notes has only stage 00 implemented. The README describes both repositories as one whole.",
+    "The book refers to the companion project `llm-book-mini-project` — a public repository in which seventeen chapters have stages defined and one is implemented. That repository is not on this map, so its state has not been verified here at first hand."
+  ],
+  "risks": [
+    "The nine pins in `preamble.tex` age fast: `langchain-core` alone had 49 stable releases between January and July 2026, and the job comparing them against PyPI carries `continue-on-error`, so {{term:drift|drift}} will never stop the build.",
+    "The dual licence is misleading in the README: the {{term:mit|MIT}} badge stands next to the CC BY-NC-SA badge, and only `LICENSE-CONTENT` says that the prose cannot be used commercially.",
+    "`release.yml` fires only on `v*` tags, and `git push --tags` returns 403 through the sandbox proxy. In practice no release will exist without tagging from a local clone.",
+    "The measurement scripts declare neither dependencies nor versions, so reproducing the same numbers a year from now will be guesswork about which release of `langchain-core` was installed at the time."
+  ],
+  "next": [
+    "Wire the listings in through `\\pyregion` wherever the `--8<--` regions already exist. That closes the only route to the book and the code drifting apart silently, and the macro is ready.",
+    "Add a light Python job to `build.yml`: ruff plus a run of `bench_concurrency.py`, `structural_cost.py` and `context_cost.py`. None needs a provider and all of them run in seconds.",
+    "Build the PDF and put the verified page count and the current overfull hbox counter into the README instead of numbers from memory; while you are there, fix the two stale lines in CLAUDE.md (the number of experiments run and the number of diagrams).",
+    "Add a dependency file with exact versions to `code/`, so the measurements can be repeated after the next LangChain release.",
+    "State plainly in the README that Ops Copilot is a contract today rather than a working system, or implement the next stages. The reader has no way to settle it."
+  ],
+  "headline": "Full draft with zero verification debt, but 82 listings still retyped by hand",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-25",
+    "commits": 21,
+    "files": 91
+  }
+}

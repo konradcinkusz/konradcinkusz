@@ -1,0 +1,486 @@
+{
+  "kernels": [
+    {
+      "id": "K0",
+      "name": "authservice — identity as an image",
+      "sourceSlug": "authservice",
+      "sourcePath": "src/AuthService",
+      "description": "A login service lifted out of a private monorepo and published as a versioned {{term:ghcr}} image. The consumer pins a tag in configuration and has **no** source dependency at all.",
+      "consumers": [
+        "primates",
+        "cognitive-multi-agent-simulation",
+        "auto-veritas",
+        "cv-maker",
+        "black-hole-sim",
+        "aurelius-promptus"
+      ],
+      "effort": "done",
+      "licence": "MIT",
+      "readiness": [
+        "One codebase, N independent instances, no shared root of trust",
+        "The job that publishes the image needs none of the secrets required for deployment",
+        "The pattern is written up as a proposed standard, with an explicit note that it rests on one data point"
+      ],
+      "blocker": "There is no tag at all. Six repositories pin a version of an image whose existence cannot be confirmed — so the pattern is documented and the artefact is not."
+    },
+    {
+      "id": "K1",
+      "name": "{{term:playhead|Record/replay cassette}}",
+      "sourceSlug": "cognitive-multi-agent-simulation",
+      "sourcePath": "kernel/replay/",
+      "description": "Recording and replaying model calls at the {{term:ichatclient}} seam. 250 lines, one package dependency, {{term:hermetyczny|hermeticity}} enforced by an architecture test and a separate CI job that builds the kernel in isolation.",
+      "consumers": [
+        "agent-eval-bench",
+        "chess-mas",
+        "AgentHelm",
+        "judge-worker"
+      ],
+      "effort": "hours",
+      "licence": "MIT",
+      "readiness": [
+        "Already physically extracted into `kernel/replay/` with its own project file and its own tests",
+        "No domain vocabulary; neutrality is tested, not declared",
+        "The first consumer is named and justified: an evaluation harness without replay cannot tell a regression from randomness"
+      ],
+      "blocker": "The name is provisional and has not been checked against the package registry. Check it **before** publishing — changing the identifier after the first install is a breaking change."
+    },
+    {
+      "id": "K2",
+      "name": "{{term:servicedefaults|ServiceDefaults}} — the shared host core",
+      "sourceSlug": "cognitive-multi-agent-simulation",
+      "sourcePath": "src/CogniSim.ServiceDefaults/",
+      "description": "Authentication against JWKS, database provider selection, rate limiting with a uniform 429 response shape, background migration after the server starts. Eleven projects in the portfolio do the same thing; **four wrote it independently from scratch**.",
+      "consumers": [
+        "primates",
+        "auto-veritas",
+        "aurelius-promptus",
+        "hydro-scope",
+        "copilot-scope",
+        "agent-eval-bench",
+        "black-hole-sim",
+        "zoo-companion",
+        "cards-game",
+        "chess-mas"
+      ],
+      "effort": "weeks",
+      "licence": "MIT",
+      "readiness": [
+        "The CogniSim version has its cleanliness enforced by an architecture test and a mechanical line limit in CI",
+        "The authservice version has the best worked-out background migration, with a readiness signal",
+        "The primates version has the richest web layer"
+      ],
+      "blocker": "**There is no single version you can lift out.** Four implementations have 188, 177, 169 and 101 lines of database provider selection alone, and every one of them is different. First decide which is the reference and write that decision down — then extract."
+    },
+    {
+      "id": "K3",
+      "name": "Judge calibration ({{term:kappa|Cohen's kappa}})",
+      "sourceSlug": "copilot-scope",
+      "sourcePath": "src/CopilotScope.JudgeAgent/Calibration/Agreement.cs",
+      "description": "Agreement between an LLM judge and human labels: unweighted, linearly weighted and quadratically weighted kappa, with a bootstrap and a confidence interval, plus a **ceiling taken from the mutual agreement of a human panel**, computed before the judge is scored.",
+      "consumers": [
+        "agent-eval-bench",
+        "judge-worker"
+      ],
+      "effort": "days",
+      "licence": "MIT",
+      "readiness": [
+        "The arithmetic itself is neutral: it computes agreement over ordinal labels and nothing else",
+        "The only dependency to remove is an import of the collector's domain namespace for a percentile helper — **two calls**",
+        "The CopilotScope version is the richest: 340 lines with three weighting variants and a separate 'ceiling too low' verdict",
+        "The other two consumers already have their own, thinner implementations — consolidation here removes code rather than adding it"
+      ],
+      "blocker": "None of the three implementations has been run against real human labels. Extracting a library will not fix the fact that nobody has labelled a sample yet."
+    },
+    {
+      "id": "K4",
+      "name": "An OTLP decoder without the SDK",
+      "sourceSlug": "hydro-scope",
+      "sourcePath": "src/AquaScope.Core/Otlp/",
+      "description": "A hand-written protobuf reader plus decoders for traces, metrics and logs, with the field numbers verified against the official `.proto` files. It receives {{term:otel|OTLP}} without pulling in the whole SDK.",
+      "consumers": [
+        "copilot-scope",
+        "hydro-scope"
+      ],
+      "effort": "days",
+      "licence": "MIT",
+      "readiness": [
+        "It reads the generic OTLP format and knows nothing of sessions or sensors — the neutrality here is structural",
+        "Two versions exist: 718 lines in copilot-scope and 1063 lines in hydro-scope; the newer one is a superset",
+        "Both have their own decoder tests, so the extraction starts with coverage"
+      ],
+      "blocker": "Two consumers is the minimum, not comfort. If one of these repositories is archived after the extraction, the library drops to one user and goes back inside."
+    },
+    {
+      "id": "K5",
+      "name": "{{term:runstore|Run store}} and comparison",
+      "sourceSlug": "cognitive-multi-agent-simulation",
+      "sourcePath": "src/CogniSim.Observatory/",
+      "description": "It stores a **run**, not a single span, with idempotent ingest and scoring off the request path. The {{term:comparison|comparison layer}} reports medians and spreads and has no field for a best run.",
+      "consumers": [
+        "agent-eval-bench",
+        "AgentHelm"
+      ],
+      "effort": "weeks",
+      "licence": "MIT",
+      "readiness": [
+        "The distribution arithmetic itself is a hundred per cent generic",
+        "The run record needs parameterising — today it carries the ceremony's domain fields",
+        "The same data shape arose independently as the permission gate's {{term:audit|audit trail}}"
+      ],
+      "blocker": "Do this only once K1 has **two actual** consumers on main. That is the {{term:wip|work-in-progress limit}} rule, not a preference."
+    },
+    {
+      "id": "K6",
+      "name": "Versioned agent definitions",
+      "sourceSlug": "cognitive-multi-agent-simulation",
+      "sourcePath": "src/CogniSim.Ensemble/, agents/",
+      "description": "A registry of role definitions with version, temperature and provenance, plus a {{term:fingerprint}} of the exact set that produced a given run. Without it you cannot say whether a difference in results is a prompt change or randomness.",
+      "consumers": [
+        "aurelius-promptus",
+        "agent-eval-bench"
+      ],
+      "effort": "days",
+      "licence": "MIT",
+      "readiness": [
+        "The agent definition is data, validated against its own schema",
+        "The fingerprint of the set is already computed and pinned to the run",
+        "On the other side stands a whole prompt template service, which solves the same thing from the other end"
+      ],
+      "blocker": "The two sides of this duplication have different models: one versions the **role**, the other the **template**. Merging them needs a shared model first, and that is a design decision, not a refactor."
+    }
+  ],
+  "kernelsRejected": [
+    {
+      "name": "ArtefactExtractor — pulling artefacts out of a transcript",
+      "reason": "It knows what a PI objective, a cross-team dependency and a ROAM risk are. That is not a dependency you can parameterise — it is **the entire value** of the component. Extracting it would leave an empty shell."
+    },
+    {
+      "name": "QualityEngine — the session quality score",
+      "reason": "Six weights are an opinion about what a good session with an assistant means. An opinion is not a library; published as a library, it immediately becomes somebody else's metric that you have to answer for."
+    },
+    {
+      "name": "Roslyn analysers",
+      "reason": "They encode the specific P1–P15 principles of this constitution. Outside it, half the rules need reconfiguring and the other half make no sense. What is reusable is the harness that runs them, not the analysers."
+    },
+    {
+      "name": "ConfirmationTokenStore — the write gate",
+      "reason": "The pattern is neutral and tempting, but today it has **one** consumer. A library with one user is a project moved into a different directory, paid for with a separate CI run and a separate release."
+    },
+    {
+      "name": "Blazor BFF with a token pair in the cookie",
+      "reason": "The layer is good and repeatable, but its surface is one application's routes. What repeats is a pattern to describe in a guide, not code to package."
+    },
+    {
+      "name": "Architecture tests",
+      "reason": "The mechanism is portable, but every assertion refers to one repository's assembly names. Distribute it as a template in a guide, not as a package."
+    }
+  ],
+  "duplications": [
+    {
+      "problem": "**{{term:kappa|Cohen's kappa}} implemented three times, in two languages.**",
+      "sideA": {
+        "slug": "copilot-scope",
+        "what": "`Calibration/Agreement.cs`, 340 lines, three weighting variants and a bootstrap"
+      },
+      "sideB": {
+        "slug": "judge-worker",
+        "what": "`src/calibration/cohenKappa.ts`, 50 lines, the basic version"
+      },
+      "resolution": "A third copy sits in the evaluation harness (228 lines). Together, 618 lines computing the same statistic. **One library, two consumers who delete code the moment they take it** — this is kernel K3 and the cleanest consolidation in the whole portfolio.",
+      "severity": "high"
+    },
+    {
+      "problem": "**The OTLP decoder written twice, in files with identical names.**",
+      "sideA": {
+        "slug": "copilot-scope",
+        "what": "`Collector/Otlp/` — 718 lines in three files"
+      },
+      "sideB": {
+        "slug": "hydro-scope",
+        "what": "`Core/Otlp/` — 1063 lines in files with **the same names**"
+      },
+      "resolution": "These two repositories share nine identically named `.cs` files. The newer version is a superset of the older one, so the direction is settled: lift it out of hydro-scope and wire it into copilot-scope. This is kernel K4.",
+      "severity": "high"
+    },
+    {
+      "problem": "**{{term:servicedefaults|ServiceDefaults}} in eleven projects, four written independently.**",
+      "sideA": {
+        "slug": "cognitive-multi-agent-simulation",
+        "what": "169 lines of database provider selection, 166 lines of authentication"
+      },
+      "sideB": {
+        "slug": "primates",
+        "what": "145 lines of authentication and a separate migration layer, all of it done differently"
+      },
+      "resolution": "Aspire generates this project in every new solution and nobody references it — it gets copied. The convenience of the template is the source of the largest duplication in the portfolio. This is kernel K2, and also the hardest one, because you have to **pick the reference version first**.",
+      "severity": "high"
+    },
+    {
+      "problem": "**Eight repositories have a licence file carrying somebody else's copyright line.**",
+      "sideA": {
+        "slug": "authservice",
+        "what": "MIT with a name copied from another project"
+      },
+      "sideB": {
+        "slug": "cognitive-multi-agent-simulation",
+        "what": "the same thing, the same line"
+      },
+      "resolution": "It affects eight repositories. One of them is public today — but six of the rest are candidates for opening, so the defect will surface at exactly the moment it does the most harm. This is not eight typos, it is one template copied eight times: **one session, eight commits**, and it is the cheapest fix with a real legal effect in the whole map.",
+      "severity": "high"
+    },
+    {
+      "problem": "The identity service consumed once as an image and once carried around as copied code.",
+      "sideA": {
+        "slug": "authservice",
+        "what": "A published image, pinned by tag, no source dependency"
+      },
+      "sideB": {
+        "slug": "aurelius-promptus",
+        "what": "Its own `AureliusPromptus.AuthService` project in the solution — a copy from before the extraction"
+      },
+      "resolution": "This is a migration that never happened. Doing it turns one data point for the extraction pattern into two — which turns an anecdote into a standard.",
+      "severity": "high"
+    },
+    {
+      "problem": "The {{term:audit|audit trail}} and the {{term:runstore|run store}} are the same data structure.",
+      "sideA": {
+        "slug": "AgentHelm",
+        "what": "The run record as a compliance function — who, when, with what permission"
+      },
+      "sideB": {
+        "slug": "cognitive-multi-agent-simulation",
+        "what": "The run record as a research function — what, how much, with what result"
+      },
+      "resolution": "The same shape arose twice for two different reasons. Kernel K5 merges both, but only after K1 has two consumers — because merging the store is weeks of work and merging the cassette is hours.",
+      "severity": "medium"
+    },
+    {
+      "problem": "The {{term:ensemble|versioned role definition}} and the versioned prompt template.",
+      "sideA": {
+        "slug": "cognitive-multi-agent-simulation",
+        "what": "Six roles in JSON with version, temperature and the fingerprint of the set"
+      },
+      "sideB": {
+        "slug": "aurelius-promptus",
+        "what": "A whole prompt template service with a marketplace and versioning"
+      },
+      "resolution": "One question, two answers: **what exactly the agent was told to do in this particular run**. Kernel K6, but it needs a shared model first — that is a design decision, not a refactor.",
+      "severity": "medium"
+    },
+    {
+      "problem": "Fly.io deployment scaffolding written again from scratch in six repositories.",
+      "sideA": {
+        "slug": "primates",
+        "what": "`flyio/` with nine configuration files, an infrastructure analysis and a document about secrets"
+      },
+      "sideB": {
+        "slug": "hydro-scope",
+        "what": "The same thing, six files, the same directory layout and the same two documents"
+      },
+      "resolution": "Six infrastructure analyses and eight documents about secrets describe the same pattern. The configuration code has to stay per-repo, but **the documents should be one guide** — and that guide already exists in the constitution. Replace the six copies with a link.",
+      "severity": "medium"
+    },
+    {
+      "problem": "Sixteen `ci.yml` files and **no two of them are identical**.",
+      "sideA": {
+        "slug": "auto-veritas",
+        "what": "Build, test, format, secret scan"
+      },
+      "sideB": {
+        "slug": "cards-game",
+        "what": "The same thing, in a different order, with different action versions"
+      },
+      "resolution": "The classic pattern: copy, then drift. One `workflow_call` in a hub repository and three lines in each consumer replace sixteen files that are ageing independently.",
+      "severity": "medium"
+    },
+    {
+      "problem": "The LaTeX book build chain assembled five times.",
+      "sideA": {
+        "slug": "maf-book",
+        "what": "`main.tex` + a 291-line preamble + a Makefile + three workflows"
+      },
+      "sideB": {
+        "slug": "llm-book",
+        "what": "The same structure, with the preamble grown to 447 lines"
+      },
+      "resolution": "On top of that, three lighter variants in the decks and the articles. The preamble and the Makefile are one template repository plus `git subtree` — and the traps (the non-breaking space mapping, a missing language in `babel`) are already written up in both and **should not be discovered a third time**.",
+      "severity": "low"
+    },
+    {
+      "problem": "{{term:mutation|Mutation testing}} configured three times, differently each time.",
+      "sideA": {
+        "slug": "archgate",
+        "what": "Ten analyser variants with a test that the mutant gets through"
+      },
+      "sideB": {
+        "slug": "agent-eval-bench",
+        "what": "Four broken agent variants, each with an assigned scenario"
+      },
+      "resolution": "The third version is in judge-worker. Here the duplication is **apparent and healthy**: this is a method, not code, and every domain needs its own mutants. At most, the description of the method belongs in a guide.",
+      "severity": "low"
+    }
+  ],
+  "boundaries": [
+    {
+      "title": "runtime ⟂ source code",
+      "reason": "{{term:roslyn}} analysis works on source code, the replay harness on agent runs. A different moment in the cycle, a different artefact, **a different buyer**. Gluing them together gives a product you cannot describe in one sentence — and a product without one sentence has no buyer."
+    },
+    {
+      "title": "production telemetry ⟂ test scenario",
+      "reason": "Session observability and the evaluation harness use the same words — judge, rubric, score — and measure something entirely different. There the unit is **a session that happened**, here **a scenario that was designed**. What they share is the {{term:kappa|calibration}} arithmetic, and that is all: any further shared code would be a coincidence."
+    },
+    {
+      "title": "content ⟂ product",
+      "reason": "The book is a {{term:kernel|channel}}, not a product, and trying to turn it into a product damages it in both directions: it stops being citable and never starts earning. The book sells the library, the library sells the service — in that order and with no shortcuts."
+    },
+    {
+      "title": "evidence system ⟂ kernel",
+      "reason": "An evidence system **consumes** a kernel and never defines it. The moment the shape of the library starts following the needs of one proving ground, the library stops being a kernel and the proving ground gains a dependency it did not want."
+    },
+    {
+      "title": "tool ⟂ attestation",
+      "reason": "A tool that produces evidence and a service that attests to evidence are two different businesses. {{term:atestacja|Attestation}} means taking on liability, and liability needs a legal entity and insurance. You sell the tool, the client's auditor attests — the same functionality, no transferred risk."
+    }
+  ],
+  "distribution": {
+    "openPaid": {
+      "rule": "**Open** — what you run locally and what produces a file.<br>**Paid** — what remembers, compares, integrates with your systems and survives an audit.<br>This is the {{term:opencore|open core line}}, drawn inside one repository rather than between repositories.",
+      "openRole": "Role: channel, credibility, citability. No revenue — and that is how it is meant to be.",
+      "paidRole": "Role: revenue. A platform fee plus charging per run. Not {{term:perseat|per seat}}, not {{term:outcome|per outcome}}.",
+      "open": [
+        "K1 · {{term:playhead|record/replay cassette}} — on {{term:nuget}}, a README with one claim",
+        "K3 · judge calibration — pure arithmetic, no domain",
+        "K4 · an OTLP decoder without the SDK",
+        "K0 · authservice — an image in {{term:ghcr}}, the pattern already proven",
+        "architecture-standards — the constitution and the {{term:plugins|plugins}}",
+        "agent-eval-bench — the scenarios and the schema, not a service",
+        "CogniSim — the reference engine, without the memory layer",
+        "The books and decks — {{term:mit|CC-BY}}, in full"
+      ],
+      "paid": [
+        {
+          "name": "Rehearsal",
+          "buyer": "{{term:rte|RTE}} · the transformation office",
+          "what": "Import from Jira and Azure DevOps, artefacts, a report. You pay for the input and for the memory, not for the engine.",
+          "sourceSlugs": [
+            "cognitive-multi-agent-simulation"
+          ]
+        },
+        {
+          "name": "Evidence Pack",
+          "buyer": "Risk · compliance · internal audit",
+          "what": "Retention, the link between a run and the version of the roles and the model, an {{term:evidence|audit export}}. It answers 'prove it', not 'debug it'.",
+          "sourceSlugs": [
+            "agent-eval-bench",
+            "cognitive-multi-agent-simulation",
+            "AgentHelm"
+          ]
+        },
+        {
+          "name": "A gate for the team",
+          "buyer": "Platform team · engineering lead",
+          "what": "Breach history, trends, per-repository policy, a management report. The analysers stay open.",
+          "sourceSlugs": [
+            "archgate",
+            "architecture-standards"
+          ]
+        },
+        {
+          "name": "Workshops and rollout",
+          "buyer": "{{term:spc|SPC/SPCT consultants}}",
+          "what": "The scenario, the facilitation, a licence for the material. The shortest path to a first invoice and the only one that does not need a product.",
+          "sourceSlugs": [
+            "cognitive-multi-agent-simulation",
+            "architecture-standards"
+          ]
+        }
+      ]
+    },
+    "pricingNotes": [
+      "**Do not sell {{term:atestacja|compliance attestation}} without a legal entity and insurance.** A tool that produces evidence and a service that attests to evidence are two different businesses, and the move from the first to the second is irreversible and is not something you do by accident in the copy on a sales page.",
+      "**Marketing headline yes, invoice by runs.** The metric 'the independence nobody has counted' is persuasive precisely because the client does not count it today — and for exactly that reason you cannot {{term:outcome|invoice}} against it.",
+      "**Do not close the engine.** The risk of a one-person project with no customers being cloned is close to zero; the risk of a .NET enterprise bouncing off an AGPL-style licence is a certainty. This is not an ideological choice, it is a reading of the adoption precedent."
+    ],
+    "rows": [
+      {
+        "step": "01",
+        "artefact": "K1 and K3 as packages",
+        "artefactSlugs": [
+          "cognitive-multi-agent-simulation",
+          "copilot-scope"
+        ],
+        "channel": "{{term:nuget}} · GitHub · the Agent Framework book",
+        "buyer": ".NET developers building agents",
+        "product": "— a channel, not a product",
+        "isProduct": false,
+        "status": "Three package identifiers declared, none published"
+      },
+      {
+        "step": "02",
+        "artefact": "agent-eval-bench + preprint",
+        "artefactSlugs": [
+          "agent-eval-bench",
+          "cognitive-multi-agent-simulation-analysis"
+        ],
+        "channel": "arXiv · an ICSE/ASE workshop · a post",
+        "buyer": "Risk and compliance",
+        "product": "Evidence Pack",
+        "isProduct": true,
+        "status": "The contract and the scenarios are ready; no measurement has been run"
+      },
+      {
+        "step": "03",
+        "artefact": "CogniSim as the reference engine",
+        "artefactSlugs": [
+          "cognitive-multi-agent-simulation"
+        ],
+        "channel": "{{term:spc|SPC/SPCT consultants}} · Atlassian Marketplace",
+        "buyer": "{{term:rte|RTE}} and the transformation office",
+        "product": "Rehearsal (hosted)",
+        "isProduct": true,
+        "status": "No live model calls at all — nobody has seen the artefact"
+      },
+      {
+        "step": "04",
+        "artefact": "architecture-standards + the gate (after the rename)",
+        "artefactSlugs": [
+          "architecture-standards",
+          "archgate"
+        ],
+        "channel": "A plugin marketplace · GitHub Action · Azure Marketplace",
+        "buyer": "The platform team and the PMO",
+        "product": "A gate for the team",
+        "isProduct": true,
+        "status": "Blocked by a name collision; the plugins work today"
+      },
+      {
+        "step": "05",
+        "artefact": "copilot-scope + hydro-scope",
+        "artefactSlugs": [
+          "copilot-scope",
+          "hydro-scope"
+        ],
+        "channel": "{{term:otel|OpenTelemetry conventions}} · a talk · an article",
+        "buyer": "Platform teams",
+        "product": "— a channel, not a product",
+        "isProduct": false,
+        "status": "The work was done privately; the proposal was never submitted"
+      },
+      {
+        "step": "06",
+        "artefact": "Books, decks, the knowledge base",
+        "artefactSlugs": [
+          "maf-book",
+          "llm-book",
+          "csharp-flashcards",
+          "agents-and-llms"
+        ],
+        "channel": "GitHub Pages · YouTube · a PDF release",
+        "buyer": ".NET developers",
+        "product": "— a channel, not a product",
+        "isProduct": false,
+        "status": "The only asset that compounds without further work"
+      }
+    ]
+  }
+}
