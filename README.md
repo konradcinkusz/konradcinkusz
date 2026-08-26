@@ -21,9 +21,21 @@ I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** — a channe
 
 ## 🗺️ Portfolio map
 
-This repository is the hub. It holds a single manifest describing thirty-five repositories —
-what each is, what it is for, what is finished, what is not — plus the consolidation analysis
-and the operating model that keeps them from rotting.
+> **This repository is private, so the profile README does not render.** GitHub only
+> shows the `README.md` of a repository named after the account when that repository is
+> public. Right now `github.com/konradcinkusz` shows none of what follows.
+>
+> Making it public would fix the profile **and publish the whole manifest in the same
+> move** — including dossiers for eighteen private repositories that name file paths,
+> class names and confirmed security holes in a live paid product. One decision, not
+> two. If you want the profile without the disclosure, the map needs a public build
+> that ships only the public entries and fails if any surviving string names a private
+> one.
+
+This repository is the hub. It holds a single manifest describing thirty-five
+repositories — seventeen public, eighteen private — what each is, what it is for, what is
+finished, what is not, plus the consolidation analysis and the operating model that keeps
+them from rotting.
 
 **Thirty-five, not all of them.** The account holds considerably more; the map covers the
 set that was surveyed end to end, and says so on its own front page rather than implying it

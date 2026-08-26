@@ -2,7 +2,7 @@
   "slug": "konradcinkusz",
   "name": "konradcinkusz (profil GitHub + mapa portfolio)",
   "cluster": "F-meta",
-  "visibility": "public",
+  "visibility": "private",
   "state": "active",
   "tier": "P0",
   "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści pięć repozytoriów, plus strona, która go renderuje.",
@@ -181,6 +181,7 @@
     "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu czterech."
   ],
   "gaps": [
+    "**To repozytorium jest prywatne, więc README profilu nie renderuje się nigdzie.** GitHub pokazuje `README.md` z repozytorium o nazwie równej nazwie użytkownika tylko wtedy, gdy jest ono publiczne. Tu jest prywatne, potwierdzone dwoma niezależnymi źródłami, więc `github.com/konradcinkusz` nie pokazuje ani tabeli projektów, ani niczego innego z tego pliku. Upublicznienie repozytorium naprawia profil i **jednocześnie publikuje cały manifest**, razem z dossier siedemnastu repozytoriów prywatnych — to jedna decyzja, nie dwie, i patrz `risks` poniżej.",
     "Manifest jest **migawką z jednego dnia** dla trzydziestu czterech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
     "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
     "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
@@ -193,7 +194,7 @@
     "Przenieś tu wielokrotnie używalny workflow CI dla .NET; szesnaście kopii `ci.yml` w estate to jeden `workflow_call` i trzy linijki u konsumenta."
   ],
   "risks": [
-    "Manifest jest serwowany publicznie i wymienia repozytoria prywatne z nazwy i opisu. To jest świadome ujawnienie, nie przypadek, a zamknięty schemat kluczy jest mechanizmem, który pilnuje, żeby nie doszło do niego nic więcej."
+    "**Manifest opisuje repozytoria prywatne na tyle dokładnie, że jego upublicznienie jest decyzją, a nie formalnością.** Dziś repozytorium jest prywatne, a strona nie jest wdrożona, więc nic nie wyciekło. Ale wpisy prywatne wymieniają ścieżki plików, nazwy klas i **potwierdzone luki bezpieczeństwa** w działającym, płatnym produkcie. Publikacja — czy przez upublicznienie repozytorium, czy przez wdrożenie strony pod adresem, który ktoś znajdzie — udostępnia to wszystko. Zamknięty schemat kluczy pilnuje, żeby zakres nie rósł sam; nie zmniejsza tego, co już jest w środku."
   ],
   "headline": "Jedyne miejsce, z którego widać całe portfolio naraz — i jedyne, które pilnuje, żeby nie kłamało",
   "headlineTone": "good",
