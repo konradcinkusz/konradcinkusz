@@ -13,12 +13,18 @@
 // the breaches, because "one issue listing everything" and "one issue per repo"
 // are different amounts of attention and that is a policy choice, not a fact.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { sourceRepos } from "./lib/manifest.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const manifest = JSON.parse(readFileSync(join(root, "site", "data", "portfolio.json"), "utf8"));
+// Everything this reads — slug, tier, visibility, state, deployment, licence —
+// is identical in every language bundle, so the source bundle is the whole
+// estate. It is loaded through the shared accessor so that a future shape change
+// stops the collector with a message rather than letting it visit zero
+// repositories and write a health file that looks like a clean estate.
+const repos = sourceRepos(root);
 const dry = process.argv.includes("--dry");
 
 const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN;
@@ -68,7 +74,7 @@ const breaches = [];
 const note = (slug, tier, check, detail) => breaches.push({ slug, tier, check, detail });
 
 try {
-for (const entry of manifest.repos) {
+for (const entry of repos) {
   const { slug, tier, visibility } = entry;
   process.stderr.write(`  ${slug}\n`);
 
