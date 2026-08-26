@@ -5,10 +5,11 @@
   "description": "Portfolio manifest, the static site that renders it, and the checks that keep it honest.",
   "scripts": {
     "build": "node scripts/build-manifest.mjs",
-    "check": "node scripts/build-manifest.mjs --check && node scripts/validate-portfolio.mjs && node scripts/smoke-site.mjs",
+    "check": "node scripts/build-manifest.mjs --check && node scripts/validate-portfolio.mjs && node scripts/smoke-site.mjs && node scripts/theme-audit.mjs",
     "check:repos": "node scripts/check-repos.mjs",
     "check:render": "node scripts/render-check.mjs",
-    "serve": "cd site && python3 -m http.server 8000"
+    "serve": "cd site && python3 -m http.server 8000",
+    "build:standalone": "node scripts/build-standalone.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.0"

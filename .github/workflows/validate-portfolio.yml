@@ -39,8 +39,25 @@ jobs:
       - name: The site is valid HTML that parses
         run: node scripts/smoke-site.mjs
 
+      # A colour defined only inside a theme block never applies to a viewer whose
+      # OS is on "system", which is the default. That is a whole-page failure and
+      # it is invisible on the machine that authored it.
+      - name: Every colour follows the theme
+        run: node scripts/theme-audit.mjs
+
       - name: It actually renders
         run: |
           npm install --no-save playwright@1.56.1
           npx playwright install --with-deps chromium
           node scripts/render-check.mjs
+
+      # The single-file build has its own failure mode: a replacement string that
+      # eats "$$". The builder parses the inlined script and fails on that.
+      - name: The single-file build is valid
+        run: node scripts/build-standalone.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-standalone
+          path: dist/portfolio.html
+          retention-days: 30

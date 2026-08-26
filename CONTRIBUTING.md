@@ -16,9 +16,11 @@ data/                     source of truth, hand-edited
   glossary.json           every term the prose links to
 scripts/
   build-manifest.mjs      data/ -> site/data/portfolio.json   (--check for drift)
+  build-standalone.mjs    everything -> dist/portfolio.html, one self-contained file
   validate-portfolio.mjs  schema + referential integrity
   check-repos.mjs         every slug still exists with the claimed visibility
   smoke-site.mjs          structural check of site/index.html
+  render-check.mjs        drives the built site in Chromium, 3 viewports, both themes
 site/                     the served artefact; never hand-edit site/data/
 deploy/nginx.conf         listens on 8080, serves /healthz outside the SPA fallback
 flyio/portfolio.fly.toml  one app, scale to zero, no secrets
@@ -30,7 +32,19 @@ flyio/portfolio.fly.toml  one app, scale to zero, no secrets
 node scripts/build-manifest.mjs      # regenerate
 node scripts/validate-portfolio.mjs  # schema + cross-references
 node scripts/smoke-site.mjs          # tabs, panels, local assets
+node scripts/render-check.mjs         # real browser, both themes, 3 viewports
 cd site && python3 -m http.server 8000
+```
+
+`render-check.mjs` is the one that earns its keep: a static check cannot see a page
+that parses perfectly and renders nothing. It has already caught a boot-order bug that
+left the page blank, three layout overflows, and a `[hidden]` rule that lost to a class
+setting `display`.
+
+For a copy you can open off a disk, attach to a message, or print:
+
+```sh
+node scripts/build-standalone.mjs      # dist/portfolio.html, ~600 kB, no server needed
 ```
 
 `site/data/portfolio.json` is **generated and committed**. It is committed because the site
