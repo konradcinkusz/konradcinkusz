@@ -5116,10 +5116,10 @@
       "name": "konradcinkusz (profil GitHub + mapa portfolio)",
       "cluster": "F-meta",
       "visibility": "public",
-      "state": "draft",
+      "state": "active",
       "tier": "P0",
-      "oneLiner": "Profilowy README GitHuba plus statyczna mapa 35 repozytoriów. Kod mapy wciąż leży poza gitem.",
-      "summary": "Repozytorium robi dwie rzeczy naraz. Pierwsza, zacommitowana i działająca, to profilowy README: tabela dziewięciu projektów open source i dwa zewnętrzne widgety statystyk. Druga, obecna wyłącznie w katalogu roboczym, to strona w czystym HTML/CSS/JS bez `package.json`, która z jednego manifestu renderuje pięć zakładek: portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik 43 terminów. Dane leżą rozdzielone w `data/`, `scripts/build-manifest.mjs` skleja je w `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug w `overlaps`, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie `{{term:...}}` w prozie zatrzymują CI. Dziś nic z tego nie przechodzi, bo brakuje `data/consolidation.json` i wygenerowanego manifestu, więc `build-manifest.mjs` kończy się ENOENT, a strona otwarta w przeglądarce pokazałaby komunikat o nieudanym wczytaniu danych.",
+      "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści pięć repozytoriów, plus strona, która go renderuje.",
+      "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium; `scripts/build-manifest.mjs` skleja je w `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści pięć repozytoriów naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
       "stack": [
         "HTML5",
         "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -5131,25 +5131,25 @@
         "GitHub Actions"
       ],
       "primaryLanguage": "JavaScript",
-      "license": "brak pliku LICENSE",
-      "tests": "Brak testów jednostkowych i brak frameworka. Są trzy skrypty walidacyjne: `validate-portfolio.mjs` (149 linii), `check-repos.mjs` (41), `smoke-site.mjs` (36). Uruchomione lokalnie na Node 22.22.2: smoke przechodzi i raportuje 5 zakładek i 5 paneli, pozostałe dwa kończą się ENOENT na brakujących plikach danych.",
-      "ci": "`validate-portfolio.yml` na push do main, PR i ręcznie uruchamia trzy skrypty walidacyjne na Node 22; przy obecnym stanie drzewa pierwszy krok by się wywalił. `flyio.yml` odpala się na tagu `v*` albo ręcznie z wymaganym polem `reason`, tworzy aplikację, jeśli nie istnieje, i po deployu pobiera serwowany manifest, żądając co najmniej 30 repozytoriów. Żaden z tych workflowów nie jest jeszcze zacommitowany.",
+      "license": "MIT",
+      "tests": "Brak testów jednostkowych; zamiast nich cztery skrypty kontrolne uruchamiane w CI: walidator manifestu (schemat zamknięty plus integralność referencyjna), kontroler istnienia i widoczności repozytoriów przez API GitHuba, smoke test struktury strony i test renderowania w Chromium na trzech viewportach i w obu motywach.",
+      "ci": "`validate-portfolio.yml` na push, PR i ręcznie: dryf manifestu, walidacja, istnienie repozytoriów, smoke i pełne renderowanie w przeglądarce. `flyio.yml` na tagu `v*`: tworzy aplikację jeśli nie istnieje, wdraża, a **po** wdrożeniu pobiera serwowany manifest i żąda co najmniej trzydziestu repozytoriów — bo health check dowodzi, że nginx wstał, nie że dane dojechały.",
       "metrics": [
         {
           "label": "Repozytoria na mapie",
-          "value": "35, rozdzielone na 6 klastrów"
-        },
-        {
-          "label": "Pliki śledzone przez git",
-          "value": "1 (README.md) z 19 na dysku"
-        },
-        {
-          "label": "Model operacyjny",
-          "value": "9 zasad, 12 kontroli zdrowia, 7 limitów WIP, 12 automatów"
+          "value": "35, w 6 klastrach"
         },
         {
           "label": "Poziomy uwagi",
-          "value": "5 (P0–P4), pokrywają 35 slugów bez duplikatów"
+          "value": "5 (P0–P4), pokrywają 35 slugów bez powtórzeń"
+        },
+        {
+          "label": "Model operacyjny",
+          "value": "9 zasad · 12 kontroli zdrowia · 7 limitów WIP · 12 automatów"
+        },
+        {
+          "label": "Kernele i duplikacje",
+          "value": "7 kerneli, 6 odrzuconych, 11 duplikacji"
         },
         {
           "label": "Terminy słownika",
@@ -5157,15 +5157,15 @@
         },
         {
           "label": "Kod strony",
-          "value": "645 linii JS + 568 linii CSS + 322 linie HTML"
+          "value": "645 linii JS + 579 linii CSS + 324 linie HTML"
         },
         {
-          "label": "Zależności npm",
-          "value": "0 (brak package.json)"
+          "label": "Zależności runtime",
+          "value": "0"
         },
         {
-          "label": "Commity",
-          "value": "9, ostatni 2026-07-27"
+          "label": "Wygenerowany manifest",
+          "value": "527 kB, commitowany i sprawdzany na dryf"
         }
       ],
       "links": {
@@ -5291,27 +5291,22 @@
         "`flyio/SECRETS.md` deklaruje zero sekretów runtime i nazywa to właściwością do utrzymania; jedynym poświadczeniem jest `FLY_API_TOKEN` ograniczony do jednej aplikacji."
       ],
       "gaps": [
-        "**Osiemnaście z dziewiętnastu plików jest poza kontrolą wersji.** `git ls-files` zwraca wyłącznie `README.md`; cały kod strony, dane, skrypty, Dockerfile i workflowy siedzą w katalogu roboczym.",
-        "Brakuje `data/consolidation.json` i wygenerowanego `site/data/portfolio.json`, więc `build-manifest.mjs` i `validate-portfolio.mjs` kończą się ENOENT, a strona nie ma czego wyrenderować.",
-        "`smoke-site.mjs` przechodzi mylnie: skanuje wywołania `fetch` tylko w `index.html`, a `fetch(\"data/portfolio.json\")` jest w `app.js`. Brakujący manifest nie jest przez ten test wykrywany, więc zielone CI nic tu nie znaczy.",
-        "README wymienia `DeepDiveInto_CSharp_Dictionaries_presentation`, którego nie ma wśród 35 slugów w `ops.json`, i używa nazw `CopilotScope` oraz `TinyTransformer` tam, gdzie manifest ma `copilot-scope` i `tiny-transformer`. Dwie listy projektów już się rozjechały.",
-        "Brak pliku LICENSE na publicznym repozytorium, mimo że `ops.json` ma kontrolę zdrowia oznaczoną jako natychmiastowa dokładnie dla tego przypadku."
+        "Manifest jest **migawką z jednego dnia**. Liczby PR-ów, gwiazdek i ostatnich commitów są wpisane ręcznie; nocny kolektor zdrowia opisany w modelu operacyjnym jest zaplanowany i nie istnieje.",
+        "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To jest dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
+        "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione, a więc na razie są obietnicą.",
+        "Wpisy o repozytoriach prywatnych nie linkują do dokumentów wewnętrznych, bo czytelnik dostałby 404. Walidator to ostrzega, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
       ],
       "next": [
-        "Zacommitować całe drzewo robocze. To jest pierwsza rzecz przed czymkolwiek innym: dziś jeden przegląd kontenera kasuje kilkanaście godzin pracy.",
-        "Dopisać `data/consolidation.json` z kernelami, duplikacjami, granicami i dystrybucją, potem uruchomić `build-manifest.mjs` i doprowadzić walidację do zera błędów.",
-        "Rozszerzyć `smoke-site.mjs` o skanowanie wywołań `fetch` w `site/assets/*.js`, żeby brakujący manifest faktycznie zatrzymywał CI zamiast przechodzić na zielono.",
-        "Dodać LICENSE, bo własna kontrola zdrowia klasyfikuje jego brak jako sprawę natychmiastową na repozytorium publicznym.",
-        "Zbudować `scripts/build-readme.mjs` i generować tabelę projektów w README z manifestu, żeby usunąć rozjazd nazw u źródła."
+        "Wypuść pierwszy tag i sprawdź, czy wdrożenie faktycznie przechodzi — łącznie z krokiem weryfikującym serwowany manifest.",
+        "Zbuduj `scripts/build-readme.mjs` i generuj tabelę projektów w README z manifestu, żeby usunąć rozjazd u źródła.",
+        "Dodaj nocny kolektor zdrowia zapisujący `data/health.json` i otwierający **jedno** zgłoszenie z przekroczonymi progami.",
+        "Przenieś tu wielokrotnie używalny workflow CI dla .NET; szesnaście kopii `ci.yml` w estate to jeden `workflow_call` i trzy linijki u konsumenta."
       ],
       "risks": [
-        "Kilkanaście plików poza gitem w kontenerze sesyjnym to ryzyko utraty całej pracy, nie usterka kosmetyczna.",
-        "Manifest z założenia wymienia repozytoria prywatne z nazwy. `SECRETS.md` nazywa to świadomym ujawnieniem, ale jedyną mechaniczną ochroną przed dopisaniem wrażliwego pola jest zamknięty schemat kluczy.",
-        "`check-repos.mjs` bez tokenu wychodzi z kodem 0, więc w forku albo w PR bez uprawnień kontrola przechodzi, nie sprawdziwszy niczego.",
-        "Deploy jest wyzwalany tagiem `v*`, a notatki z innych repozytoriów tego portfolio odnotowują, że `git push --tags` zwraca HTTP 403 przez proxy sandboksa. Tag trzeba pchnąć z lokalnego klona."
+        "Manifest jest serwowany publicznie i wymienia repozytoria prywatne z nazwy i opisu. To jest świadome ujawnienie, nie przypadek, a zamknięty schemat kluczy jest mechanizmem, który pilnuje, żeby nie doszło do niego nic więcej."
       ],
-      "headline": "Cała mapa portfolio istnieje tylko w katalogu roboczym — jeden plik jest w gicie",
-      "headlineTone": "bad",
+      "headline": "Jedyne miejsce, z którego widać całe portfolio naraz — i jedyne, które pilnuje, żeby nie kłamało",
+      "headlineTone": "good",
       "github": {
         "stars": 0,
         "openIssues": 0,
