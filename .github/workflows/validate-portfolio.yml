@@ -41,6 +41,12 @@ jobs:
       - name: The manifest is not stale
         run: node scripts/build-manifest.mjs --check
 
+      # The same assertion the container job runs against nginx and the deploy runs
+      # against the live URL, applied here to the committed file. Cheap, and it
+      # means a half-built manifest fails before anything is built or deployed.
+      - name: The committed manifest is complete
+        run: node scripts/assert-served-manifest.mjs ./site/data/portfolio.json
+
       - name: The site is valid HTML that parses
         run: node scripts/smoke-site.mjs
 

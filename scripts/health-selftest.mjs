@@ -20,7 +20,11 @@ const FIXTURES = {
   "architecture-standards": { private: false, red: 2, bots: 0, humans: 1, oldest: 1, tags: ["v1"], ahead: 3, push: 1 },
   // P0 publishing an image with no tag at all -> breach
   "authservice":            { private: false, red: null, bots: 6, humans: 1, oldest: 9, tags: [], ahead: null, push: 11 },
-  // public, 9 of 9 PRs from the bot -> bot-drowns breach + bot-debt breach
+  // public, 9 of 9 PRs from the bot -> bot-drowning ONLY. Not bot-debt: this repo
+  // is P3, whose dependabotPrs threshold is 10, and 9 >= 10 is false. The comment
+  // used to promise both, and nothing asserted the second one, so the fixture and
+  // the comment disagreed for as long as the file existed. bot-debt is covered by
+  // authservice at P0, where the threshold is 5.
   "black-hole-sim":         { private: false, red: null, bots: 9, humans: 0, oldest: 8, tags: ["v2"], ahead: 4, push: 11 },
   // clean P1
   "agent-eval-bench":       { private: false, red: null, bots: 0, humans: 1, oldest: 1, tags: ["v3"], ahead: 2, push: 1 },
@@ -83,6 +87,9 @@ must(/authservice\s+bot-debt\b/, "6 bot PRs on P0 should breach (threshold 5)");
 must(/black-hole-sim\s+bot-drowning\b/, "9 of 9 PRs from a bot on a public repo should breach");
 must(/archgate\s+visibility\b/, "manifest says private, stub says public — should breach");
 mustNot(/agent-eval-bench\s+\S/, "the clean P1 repository should produce no breach");
+// The tier threshold really is what stops this one, so assert its absence too —
+// otherwise a threshold table edit could start firing it and nothing would notice.
+mustNot(/black-hole-sim\s+bot-debt/, "9 bot PRs on a P3 repo is under the threshold of 10 and must NOT breach");
 
 // The parameters have to arrive too. A key with an empty params object renders
 // as a template full of literal {placeholders} on the page.
