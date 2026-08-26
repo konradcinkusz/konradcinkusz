@@ -2,12 +2,18 @@
 // Cheap structural smoke test for site/index.html. It is not a browser, so it
 // checks the things a broken hand-edit actually breaks: unbalanced tags in the
 // shell, missing tab panels, and a data fetch pointing at a path that is not shipped.
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const html = readFileSync(join(root, "site", "index.html"), "utf8");
+// The data fetch lives in app.js, not in the HTML. Scanning only the HTML made
+// this check pass while the manifest was missing entirely, which is the exact
+// failure it exists to catch.
+const scripts = readdirSync(join(root, "site", "assets"))
+  .filter((f) => f.endsWith(".js"))
+  .map((f) => ({ file: `assets/${f}`, src: readFileSync(join(root, "site", "assets", f), "utf8") }));
 const errors = [];
 
 const openTabs = [...html.matchAll(/data-tab="([a-z-]+)"/g)].map((m) => m[1]);
@@ -17,9 +23,11 @@ for (const t of new Set(openTabs)) {
 }
 if (new Set(openTabs).size < 2) errors.push("fewer than two tabs found — the app is meant to have at least Portfolio and Operacje");
 
-for (const m of html.matchAll(/fetch\(\s*["']([^"']+)["']/g)) {
-  const p = m[1].replace(/^\.?\//, "");
-  if (!existsSync(join(root, "site", p))) errors.push(`fetch("${m[1]}") but site/${p} does not exist`);
+for (const { file, src } of [{ file: "index.html", src: html }, ...scripts]) {
+  for (const m of src.matchAll(/fetch\(\s*["']([^"']+)["']/g)) {
+    const p = m[1].replace(/^\.?\//, "");
+    if (!existsSync(join(root, "site", p))) errors.push(`${file}: fetch("${m[1]}") but site/${p} does not exist`);
+  }
 }
 
 for (const m of html.matchAll(/(?:src|href)="(?!https?:|#|data:|mailto:)([^"]+)"/g)) {
@@ -33,4 +41,4 @@ if (opens !== closes) errors.push(`structural tags unbalanced: ${opens} opened, 
 
 for (const e of errors) console.error(`  ERROR ${e}`);
 if (errors.length) { console.error(`\n${errors.length} problem(s) in site/index.html.`); process.exit(1); }
-console.log(`site/index.html OK — ${new Set(openTabs).size} tabs, ${panels.length} panels.`);
+console.log(`site/index.html OK — ${new Set(openTabs).size} tabs, ${panels.length} panels, ${scripts.length} script(s) scanned for data fetches.`);
