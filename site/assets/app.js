@@ -26,7 +26,9 @@
           return `<a class="term" href="#t-${id}" data-term="${id}">${esc(g ? g.term : id)}</a>`;
         })
       .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
-      .replace(/`([^`]+)`/g, "<code>$1</code>");
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      // The one tag allowed through: everything else stays escaped.
+      .replace(/&lt;br\s*\/?&gt;/g, "<br>");
 
   const html = (strings, ...vals) => strings.reduce((a, s, i) => a + s + (vals[i] == null ? "" : vals[i]), "");
   const list = (arr, cls) => (arr || []).map((x) => `<li${cls ? ` class="${cls}"` : ""}>${prose(x)}</li>`).join("");
@@ -363,7 +365,8 @@
         <div class="node">${prose(row.channel)}</div>
         <div class="node">${prose(row.buyer)}</div>
         <div class="node dst ${row.isProduct ? "" : "none"}">${prose(row.product)}</div>
-      </div>`).join("");
+      </div>
+      <p class="flow-status">${prose(row.status)}</p>`).join("");
 
     // Hovering a kernel dims every card it does not feed.
     $$("#kernels .kernel").forEach((k) => {

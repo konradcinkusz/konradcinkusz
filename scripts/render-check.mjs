@@ -64,6 +64,9 @@ for (const [theme, width, height] of [["light", 1440, 1000], ["dark", 1440, 1000
     if (/undefined|\[object Object\]|NaN|\{\{term:/.test(text)) {
       errors.push(`[${label}] panel ${t} contains an unrendered value: ${text.match(/undefined|\[object Object\]|NaN|\{\{term:[a-z-]+\}\}/)[0]}`);
     }
+    const subnavs = await page.locator(".subnav:not([hidden])").count();
+    if (subnavs !== 1) errors.push(`[${label}] ${subnavs} sub-navigation rows visible on tab ${t}, expected exactly 1`);
+
     if (shots) {
       mkdirSync(join(root, ".render"), { recursive: true });
       await page.screenshot({ path: join(root, ".render", `${t}-${theme}-${width}.png`), fullPage: width > 800 });

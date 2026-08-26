@@ -176,6 +176,9 @@ a { color: var(--accent); }
 .tabrow button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
 .tabrow button .n { font-size: 10.5px; color: var(--ink-3); margin-left: 6px; }
 .subnav { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; padding: 6px 0 8px; border-top: 1px solid var(--rule); margin-top: 2px; }
+/* [hidden] is a UA rule and loses to any class that sets display, so every
+   panel-scoped element that can be hidden needs this explicitly. */
+.subnav[hidden] { display: none; }
 .subnav a {
   font-family: var(--mono); font-size: 12px; color: var(--ink-2);
   text-decoration: none; padding: 5px 10px; border-bottom: 2px solid transparent;
@@ -356,6 +359,8 @@ body.linking .card:not(.is-lit) { opacity: 0.3; }
   border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; z-index: 2;
 }
 .step { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); margin-right: 9px; flex: none; }
+.flow-status { font-size: 12.4px; color: var(--ink-3); margin: -4px 0 16px; padding-left: 34px; position: relative; }
+.flow-status::before { content: "stan:"; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; position: absolute; left: 0; top: 2px; }
 
 /* ------------------------------------------------------------------- table */
 /* Nine columns never fit a laptop, let alone a phone. The table scrolls inside
@@ -555,6 +560,8 @@ footer .fine { font-family: var(--sans); font-size: 12.3px; color: var(--ink-3);
   .flow { grid-template-columns: 1fr; gap: 0; margin-bottom: 20px; border: 1px solid var(--rule); }
   .flow .node { border: 0; border-bottom: 1px solid var(--rule); }
   .flow .node:not(:last-child)::after { display: none; }
+  .flow-status { padding-left: 0; margin: 6px 0 20px; }
+  .flow-status::before { position: static; display: block; }
   .check, .check-head { grid-template-columns: 1fr; }
   .check-head { display: none; }
   .check .t::before { content: "próg: "; color: var(--ink-3); }
