@@ -1,0 +1,88 @@
+{
+  "slug": "konradcinkusz",
+  "name": "konradcinkusz (profil GitHub + mapa portfolio)",
+  "cluster": "F-meta",
+  "visibility": "public",
+  "state": "draft",
+  "tier": "P0",
+  "oneLiner": "Profilowy README GitHuba plus statyczna mapa 35 repozytoriów. Kod mapy wciąż leży poza gitem.",
+  "summary": "Repozytorium robi dwie rzeczy naraz. Pierwsza, zacommitowana i działająca, to profilowy README: tabela dziewięciu projektów open source i dwa zewnętrzne widgety statystyk. Druga, obecna wyłącznie w katalogu roboczym, to strona w czystym HTML/CSS/JS bez `package.json`, która z jednego manifestu renderuje pięć zakładek: portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik 43 terminów. Dane leżą rozdzielone w `data/`, `scripts/build-manifest.mjs` skleja je w `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug w `overlaps`, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie `{{term:...}}` w prozie zatrzymują CI. Dziś nic z tego nie przechodzi, bo brakuje `data/consolidation.json` i wygenerowanego manifestu, więc `build-manifest.mjs` kończy się ENOENT, a strona otwarta w przeglądarce pokazałaby komunikat o nieudanym wczytaniu danych.",
+  "stack": ["HTML5", "CSS3 z custom properties (motyw jasny/ciemny)", "Vanilla JavaScript, moduły ES, zero zależności", "Node.js 22", "nginx 1.27-alpine", "Docker", "Fly.io", "GitHub Actions"],
+  "primaryLanguage": "JavaScript",
+  "license": "brak pliku LICENSE",
+  "tests": "Brak testów jednostkowych i brak frameworka. Są trzy skrypty walidacyjne: `validate-portfolio.mjs` (149 linii), `check-repos.mjs` (41), `smoke-site.mjs` (36). Uruchomione lokalnie na Node 22.22.2: smoke przechodzi i raportuje 5 zakładek i 5 paneli, pozostałe dwa kończą się ENOENT na brakujących plikach danych.",
+  "ci": "`validate-portfolio.yml` na push do main, PR i ręcznie uruchamia trzy skrypty walidacyjne na Node 22; przy obecnym stanie drzewa pierwszy krok by się wywalił. `flyio.yml` odpala się na tagu `v*` albo ręcznie z wymaganym polem `reason`, tworzy aplikację, jeśli nie istnieje, i po deployu pobiera serwowany manifest, żądając co najmniej 30 repozytoriów. Żaden z tych workflowów nie jest jeszcze zacommitowany.",
+  "metrics": [
+    { "label": "Repozytoria na mapie", "value": "35, rozdzielone na 6 klastrów" },
+    { "label": "Pliki śledzone przez git", "value": "1 (README.md) z 19 na dysku" },
+    { "label": "Model operacyjny", "value": "9 zasad, 12 kontroli zdrowia, 7 limitów WIP, 12 automatów" },
+    { "label": "Poziomy uwagi", "value": "5 (P0–P4), pokrywają 35 slugów bez duplikatów" },
+    { "label": "Terminy słownika", "value": "43" },
+    { "label": "Kod strony", "value": "645 linii JS + 568 linii CSS + 322 linie HTML" },
+    { "label": "Zależności npm", "value": "0 (brak package.json)" },
+    { "label": "Commity", "value": "9, ostatni 2026-07-27" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/konradcinkusz",
+    "live": [
+      { "label": "Kanał Dev Insight na YouTube", "url": "https://www.youtube.com/@_dev_insight" },
+      { "label": "@dev_insight na X", "url": "https://x.com/dev_insight" }
+    ],
+    "docs": [
+      { "label": "Model operacyjny portfolio", "path": "data/ops.json" },
+      { "label": "Definicje klastrów i ich substratów", "path": "data/clusters.json" },
+      { "label": "Sekrety i zasady manifestu", "path": "flyio/SECRETS.md" },
+      { "label": "Konfiguracja wdrożenia Fly.io", "path": "flyio/portfolio.fly.toml" },
+      { "label": "Walidator manifestu", "path": "scripts/validate-portfolio.mjs" }
+    ]
+  },
+  "deployment": { "fly": true, "docker": true, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    { "name": "Builder manifestu", "path": "scripts/build-manifest.mjs", "description": "57 linii sklejających `data/` i `data/repos/*.json` w jeden artefakt, z wymuszeniem zgodności nazwy pliku ze slugiem. Tryb `--check` porównuje wygenerowany wynik z zacommitowaną kopią i wywala CI przy rozjeździe; komentarz w pliku wskazuje `architecture-standards` jako źródło wzorca.", "reusable": true },
+    { "name": "Kontroler istnienia repozytoriów", "path": "scripts/check-repos.mjs", "description": "Odpytuje `api.github.com` o każde repozytorium z manifestu i porównuje faktyczną widoczność oraz flagę `archived` z deklaracją. Bez tokenu wychodzi z kodem 0, zamiast fałszywie failować w forku.", "reusable": true },
+    { "name": "Smoke test strony", "path": "scripts/smoke-site.mjs", "description": "Strukturalny test HTML bez przeglądarki: paruje zakładki z panelami, sprawdza istnienie każdego lokalnego assetu i bilansuje znaczniki sekcyjne. Nie zna ani jednego pojęcia z domeny portfolio, więc zadziała na dowolnej statycznej stronie z zakładkami.", "reusable": true },
+    { "name": "Obraz i konfiguracja serwera", "path": "Dockerfile, deploy/nginx.conf", "description": "nginx 1.27-alpine serwujący `site/` jako pliki statyczne, z `/healthz` wyjętym spod fallbacku SPA, no-cache na manifeście, siedmiodniowym cache na assetach i nagłówkami bezpieczeństwa. Kontener chodzi jako nieuprzywilejowany użytkownik i ma własny HEALTHCHECK.", "reusable": true },
+    { "name": "Wdrożenie Fly.io sterowane tagiem", "path": "flyio/portfolio.fly.toml, .github/workflows/flyio.yml", "description": "Aplikacja `konrad-portfolio` w regionie waw, shared-cpu-1x 256 MB, `min_machines_running = 0`. Workflow jawnie sprawdza obecność `FLY_API_TOKEN`, tworzy aplikację na żądanie i weryfikuje deploy przez pobranie manifestu, nie przez health check.", "reusable": true },
+    { "name": "Walidator manifestu", "path": "scripts/validate-portfolio.mjs", "description": "Zamknięty zbiór `REPO_KEYS`, unikalność slugów, integralność referencyjna między repozytoriami, klastrami, kernelami i duplikacjami, przypisanie każdego repo do dokładnie jednego {{term:poziom|poziomu}} oraz rozwiązywalność każdego odwołania do słownika. Cała logika jest napisana pod ten jeden schemat.", "reusable": false },
+    { "name": "Renderer manifestu", "path": "site/assets/app.js", "description": "645 linii bez zależności: fetch manifestu, pięć zakładek, filtry po klastrze i widoczności, sortowanie indeksu, boczny panel repozytorium, podświetlanie konsumentów kernela i mikroskładnia `{{term:id|etykieta}}` linkująca prozę do słownika.", "reusable": false },
+    { "name": "Źródła danych", "path": "data/", "description": "`meta.json` z nagłówkiem i linkami, `clusters.json` z sześcioma klastrami opisanymi przez {{term:substrat|substrat}} i barierę, `ops.json` (26 kB) z modelem operacyjnym, `glossary.json` (30 kB) z 43 terminami. To treść o tym konkretnym portfolio, nie schemat do ponownego użycia.", "reusable": false }
+  ],
+  "overlaps": [
+    { "slug": "architecture-standards", "reason": "`build-manifest.mjs` cytuje wzorzec walidatora dryfu wprost z tamtego katalogu wtyczek, a `data/ops.json` wskazuje tamtejszy `FLY-IO-DEPLOYMENT.md` jako źródło schematu wdrożenia." },
+    { "slug": "landing-page", "reason": "Dwie statyczne strony o autorze w tym samym klastrze, konkurujące o tę samą rolę wizytówki." },
+    { "slug": "konrad-cinkusz-cv-maker", "reason": "Ten sam materiał rekrutacyjny w innym formacie, oba w klastrze F." },
+    { "slug": "cv-maker", "reason": "Nakładająca się funkcja: generowanie materiału o autorze z danych strukturalnych." },
+    { "slug": "dev-insight", "reason": "README i `meta.json` linkują do kanału jako głównej osi dystrybucji, więc oba opisują ten sam kanał dotarcia." }
+  ],
+  "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu czterech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 35 repozytoriów, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
+  "highlights": [
+    "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 35 slugów bez powtórzeń**, 7 rytuałów, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
+    "Walidator wymusza zamknięty schemat kluczy i pełną integralność referencyjną. Nieznany slug w `overlaps`, kernel z jednym konsumentem albo nierozwiązywalny termin słownika zatrzymują build, więc martwe odwołanie w prozie jest błędem kompilacji, a nie literówką.",
+    "Workflow deployujący nie kończy się na health checku, tylko pobiera serwowany manifest i żąda co najmniej 30 repozytoriów. Jego własny komentarz tłumaczy dlaczego: health check dowodzi wyłącznie, że nginx wstał.",
+    "645 linii JS i 568 linii CSS bez ani jednej zależności npm. Nie ma `package.json`, więc nie ma też łańcucha dostaw do pilnowania ani {{term:dependabot|dependabota}} do obsługi.",
+    "`flyio/SECRETS.md` deklaruje zero sekretów runtime i nazywa to właściwością do utrzymania; jedynym poświadczeniem jest `FLY_API_TOKEN` ograniczony do jednej aplikacji."
+  ],
+  "gaps": [
+    "**Osiemnaście z dziewiętnastu plików jest poza kontrolą wersji.** `git ls-files` zwraca wyłącznie `README.md`; cały kod strony, dane, skrypty, Dockerfile i workflowy siedzą w katalogu roboczym.",
+    "Brakuje `data/consolidation.json` i wygenerowanego `site/data/portfolio.json`, więc `build-manifest.mjs` i `validate-portfolio.mjs` kończą się ENOENT, a strona nie ma czego wyrenderować.",
+    "`smoke-site.mjs` przechodzi mylnie: skanuje wywołania `fetch` tylko w `index.html`, a `fetch(\"data/portfolio.json\")` jest w `app.js`. Brakujący manifest nie jest przez ten test wykrywany, więc zielone CI nic tu nie znaczy.",
+    "README wymienia `DeepDiveInto_CSharp_Dictionaries_presentation`, którego nie ma wśród 35 slugów w `ops.json`, i używa nazw `CopilotScope` oraz `TinyTransformer` tam, gdzie manifest ma `copilot-scope` i `tiny-transformer`. Dwie listy projektów już się rozjechały.",
+    "Brak pliku LICENSE na publicznym repozytorium, mimo że `ops.json` ma kontrolę zdrowia oznaczoną jako natychmiastowa dokładnie dla tego przypadku."
+  ],
+  "next": [
+    "Zacommitować całe drzewo robocze. To jest pierwsza rzecz przed czymkolwiek innym: dziś jeden przegląd kontenera kasuje kilkanaście godzin pracy.",
+    "Dopisać `data/consolidation.json` z kernelami, duplikacjami, granicami i dystrybucją, potem uruchomić `build-manifest.mjs` i doprowadzić walidację do zera błędów.",
+    "Rozszerzyć `smoke-site.mjs` o skanowanie wywołań `fetch` w `site/assets/*.js`, żeby brakujący manifest faktycznie zatrzymywał CI zamiast przechodzić na zielono.",
+    "Dodać LICENSE, bo własna kontrola zdrowia klasyfikuje jego brak jako sprawę natychmiastową na repozytorium publicznym.",
+    "Zbudować `scripts/build-readme.mjs` i generować tabelę projektów w README z manifestu, żeby usunąć rozjazd nazw u źródła."
+  ],
+  "risks": [
+    "Kilkanaście plików poza gitem w kontenerze sesyjnym to ryzyko utraty całej pracy, nie usterka kosmetyczna.",
+    "Manifest z założenia wymienia repozytoria prywatne z nazwy. `SECRETS.md` nazywa to świadomym ujawnieniem, ale jedyną mechaniczną ochroną przed dopisaniem wrażliwego pola jest zamknięty schemat kluczy.",
+    "`check-repos.mjs` bez tokenu wychodzi z kodem 0, więc w forku albo w PR bez uprawnień kontrola przechodzi, nie sprawdziwszy niczego.",
+    "Deploy jest wyzwalany tagiem `v*`, a notatki z innych repozytoriów tego portfolio odnotowują, że `git push --tags` zwraca HTTP 403 przez proxy sandboksa. Tag trzeba pchnąć z lokalnego klona."
+  ],
+  "headline": "Cała mapa portfolio istnieje tylko w katalogu roboczym — jeden plik jest w gicie",
+  "headlineTone": "bad",
+  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-07-27", "commits": 9, "files": 19 }
+}

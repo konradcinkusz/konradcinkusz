@@ -1,0 +1,85 @@
+{
+  "slug": "cognitive-multi-agent-simulation",
+  "name": "CogniSim",
+  "cluster": "A-runtime",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P1",
+  "oneLiner": "Próba generalna PI Planning: sześciu agentów LLM odgrywa ceremonię {{term:safe|SAFe}} i zwraca cztery artefakty zamiast transkryptu.",
+  "summary": "Wejściem jest inkrement, który dopiero ma być planowany — cechy, zespoły, kontekst biznesowy. Wyjściem są cztery rzeczy, które decydują o tym, czy realne wydarzenie pójdzie dobrze: cele PI per zespół z wartością biznesową, mapa zależności międzyzespołowych, rejestr ryzyk ROAM i lista otwartych pytań. **Transkrypt jest dowodem, artefakty są produktem.** Nagłówek komercyjny — zależność, której Twoje wejście nigdy nie zadeklarowało — jest liczony deterministycznie z danych, a nie raportowany przez model. Całość działa bez klucza API: {{term:playhead|kaseta}} odtwarza nagrane przebiegi w trybie tylko-odtwarzanie, a żądanie bez nagrania kończy się kodem 503 mówiącym dlaczego, nigdy prawdopodobnie wyglądającym pustym planem. Sześć topologii orkiestracji jest wpiętych i każda przechodzi end-to-end w testach; nieznana topologia rzuca wyjątek zamiast po cichu użyć innej — bo fallback przypisałby wyniki jednej topologii drugiej.",
+  "stack": [".NET 10", "Microsoft Agent Framework 1.17.0", "Blazor (Server + SSR, BFF)", ".NET Aspire 13.4.6", "EF Core 10 + Npgsql", "OpenTelemetry", "Docker, Fly.io, Azure Bicep"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "120 metod testowych (110 Fact + 10 Theory) w 6 projektach, w tym 6 testów architektonicznych egzekwujących czystość kernela",
+  "ci": "Sześć workflowów. `ci.yml` ma trzy zadania: build+test, test kernela **w izolacji** (dowód, że stoi sam) i mechaniczny limit ~800 linii na ServiceDefaults. `deploy.yml` jest {{term:tagdeploy|sterowany tagiem}} z wykrywaniem zmian. CI i CodeQL są od 25 sierpnia przełączone wyłącznie na uruchamianie ręczne.",
+  "metrics": [
+    { "label": "Metody testowe", "value": "120 (110 Fact + 10 Theory)" },
+    { "label": "Projekty testowe", "value": "6" },
+    { "label": "Topologie orkiestracji", "value": "6, każda przechodzi end-to-end" },
+    { "label": "Definicje ról agentów", "value": "6 plików JSON, wersjonowanych" },
+    { "label": "Kod C#/Razor", "value": "9 433 linie" },
+    { "label": "Dokumentacja", "value": "4 038 linii markdown" },
+    { "label": "Aplikacje Fly zdefiniowane", "value": "6, żadna nigdy nie wdrożona" },
+    { "label": "Żywe wywołania modelu", "value": "0" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/cognitive-multi-agent-simulation",
+    "live": [],
+    "docs": [
+      { "label": "Pełny opis w jednym czytaniu", "path": "docs/OVERVIEW.md" },
+      { "label": "Mapa portfolio i kolejność ekstrakcji kerneli", "path": "docs/PORTFOLIO.md" },
+      { "label": "Projekt nieuruchomionego eksperymentu", "path": "docs/architecture/04-EXPERIMENT-DESIGN.md" },
+      { "label": "Wybór silnika i argumenty przeciw", "path": "docs/architecture/02-ENGINE-DECISION.md" },
+      { "label": "Kernel replay — teza i API", "path": "kernel/replay/README.md" }
+    ]
+  },
+  "deployment": { "fly": true, "docker": true, "ghcr": true, "pages": false, "packages": false },
+  "components": [
+    { "name": "Playhead — kernel replay", "path": "kernel/replay/", "description": "Dwieście pięćdziesiąt linii nad szwem {{term:ichatclient}}. Klucz SHA-256 obejmuje konwersację, **instrukcje agenta**, identyfikator modelu i temperaturę — bez instrukcji jeden agent odtwarzałby odpowiedź drugiego, i to był realny błąd. Neutralność wymuszona osobnym testem architektonicznym i osobnym zadaniem CI budującym kernel w izolacji.", "reusable": true },
+    { "name": "CogniSim.ServiceDefaults", "path": "src/CogniSim.ServiceDefaults/", "description": "Telemetria, health checks, walidacja JWT wobec JWKS, limitowanie z jednolitym kształtem 429, przełącznik dostawcy bazy. Czystość wymuszona testem i mechanicznym limitem linii — bo ta sama zasada w prozie zawiodła już dwa razy w tym estate.", "reusable": true },
+    { "name": "Testy architektoniczne", "path": "tests/CogniSim.Architecture.Tests/", "description": "Sześć testów egzekwujących dwie granice: ServiceDefaults nie może znać domeny, a kernel replay nie może znać ani tego systemu, ani frameworka agentowego. Wzorzec jest przenośny; asercje odwołują się do nazw assembly.", "reusable": true },
+    { "name": "CogniSim.Observatory", "path": "src/CogniSim.Observatory/", "description": "{{term:runstore|Magazyn przebiegów}} z idempotentnym ingestem po identyfikatorze przebiegu, osobną tabelą wyników i scoringiem poza ścieżką żądania. {{term:comparison|Typ porównania}} celowo nie ma pola na najlepszy przebieg.", "reusable": false },
+    { "name": "CogniSim.Simulation", "path": "src/CogniSim.Simulation/", "description": "Jedyny projekt, który zna framework agentowy. Fabryka grafu jest czystą funkcją: ensemble na wejściu, graf na wyjściu, sześć topologii, nieznana rzuca wyjątek.", "reusable": false },
+    { "name": "CogniSim.Ensemble + agents/", "path": "src/CogniSim.Ensemble/, agents/", "description": "{{term:ensemble|Agent jako kod}}: sześć definicji ról w JSON, każda z wersją, zakresem ceremonii, temperaturą i pochodzeniem. Odcisk zestawu jedzie z każdym przebiegiem.", "reusable": false },
+    { "name": "CogniSim.Web (BFF)", "path": "src/CogniSim.Web/", "description": "Największy projekt (5 301 linii). Przeglądarka rozmawia wyłącznie z nim, para tokenów siedzi w jednym zaszyfrowanym ciasteczku HttpOnly, każde wywołanie backendu leci po stronie serwera.", "reusable": false }
+  ],
+  "overlaps": [
+    { "slug": "agent-eval-bench", "reason": "Kierunek konsolidacji jest już zapisany: {{term:playhead|kaseta}} ma pójść **do** benchu, bo harness ewaluacyjny bez deterministycznego odtwarzania nie odróżni regresji od niedeterminizmu." },
+    { "slug": "AgentHelm", "reason": "Ten sam substrat — przebieg jako jednostka zapisu. {{term:audit|Ślad audytowy}} tam i {{term:runstore|magazyn przebiegów}} tutaj to dwie implementacje jednej rzeczy." },
+    { "slug": "cognitive-multi-agent-simulation-analysis", "reason": "Repozytorium siostrzane z pracą badawczą i sześcioma studiami audytującymi ten kod tylko do odczytu." },
+    { "slug": "authservice", "reason": "Tożsamość nie jest tu budowana — authservice v0.3.1 jest konsumowany jako wydany obraz, a każde API waliduje tokeny wobec jego JWKS. To jest wzorzec do powtórzenia." },
+    { "slug": "aurelius-promptus", "reason": "Wersjonowane definicje ról tutaj i szablony promptów tam rozwiązują ten sam problem: co dokładnie kazano agentowi robić w tym konkretnym przebiegu." },
+    { "slug": "chess-mas", "reason": "Inna domena, ta sama klasa problemu; wskazany wprost jako potencjalny konsument kernela replay i najtańszy test jego przenośności." }
+  ],
+  "product": "Kupujący jest nazwany konkretnie: {{term:rte|RTE}} albo osoba odpowiedzialna za PI Planning, która chce wejść na dwudniowe wydarzenie ze stu osobami, znając już trzy niezadeklarowane zależności i sześć pytań bez odpowiedzi. Oferta jest wąska i sprawdzalna. Czego brakuje do sprzedaży, i repozytorium samo to wylicza: ścieżki wejścia (kupujący mają Jirę i arkusze, nie ręcznie pisany JSON), tenancy na przebiegach, oraz — najważniejsze — **ani jednego żywego wywołania modelu**, więc nikt nie widział, jak wygląda realny artefakt.",
+  "highlights": [
+    "{{term:playhead|Kaseta record/replay}} zamyka lukę, której według własnego przeglądu nie zamyka żaden z sześciu badanych frameworków: checkpoint odtwarza orkiestrację, ale nie odpowiedzi modelu.",
+    "Granice architektoniczne są egzekwowane **mechanicznie, nie recenzją**: dwa testy czystości plus limit linii w CI, z uzasadnieniem w komentarzu testu, że ta sama zasada w prozie zawiodła już dwa razy w tym estate.",
+    "{{term:comparison|Typ porównania}} nie ma pola, do którego dałoby się wpisać najlepszy przebieg — dyscyplina „mediany i rozstępy, nigdy średnie” jest wymuszona kształtem typu, nie konwencją.",
+    "System działa z zerowymi poświadczeniami: bez klucza serwuje nagrane przebiegi, a nienagrane żądanie kończy się kodem 503 mówiącym wprost dlaczego.",
+    "Rejestr defektów złapanych przy budowie jest prowadzony jawnie, łącznie z publiczną korektą własnego wcześniejszego zdania o tym, że przebiegi pinują każde wejście — nie pinowały promptów, dopóki nie dodano odcisku zestawu."
+  ],
+  "gaps": [
+    "**Żadne żywe wywołanie modelu nigdy nie zostało wykonane.** Ścieżka do dostawcy kompiluje się i jest podpięta, ale nigdy nie wysłała zadania. Cała jakość artefaktów jest nieznana — i to jest jedyna rzecz, która blokuje wszystko inne.",
+    "Żaden deployment nigdy nie został wykonany. Sześć plików konfiguracji Fly, cztery Dockerfile, tor Bicep i pipeline sterowany tagiem są napisane i nieuruchomione; adresy w dokumentacji są obietnicą.",
+    "Eksperyment porównujący sześć topologii nie został uruchomiony, a tabele wyników są **celowo puste**. Blokują go dwie decyzje, które może podjąć tylko autor, oraz najpoważniejsze zagrożenie trafności: prompty pisane pod jedną topologię mogą jej sprzyjać.",
+    "CI i CodeQL są od 25 sierpnia wyłącznie ręczne, a badge w README pokazuje workflow, który nie uruchamia się ani na push, ani na PR."
+  ],
+  "next": [
+    "**Nagraj jedną prawdziwą kasetę.** Jeden klucz, jeden przebieg ceremonii, dziesięć minut. To jest pojedyncza akcja o najwyższej wartości w całym portfolio — roadmapa sama przewiduje, że pierwsza kaseta będzie rozczarowująca i że właśnie ta praca jest produktem.",
+    "Wykonaj jeden deployment na dev, żeby adresy w dokumentacji przestały być obietnicą.",
+    "Przywróć automatyczne wyzwalacze w CI i włącz code scanning w ustawieniach repozytorium.",
+    "Wyekstrahuj Playhead do własnego pakietu **dopiero wtedy**, gdy harness ewaluacyjny faktycznie go przyjmie. Ta dyscyplina jest już zapisana w repozytorium — warto jej dotrzymać.",
+    "Popraw nagłówek copyright w LICENSE i dodaj `global.json` przypinający wersję SDK."
+  ],
+  "risks": [
+    "Nazwa CogniSim jest już użyta przez inne repozytorium autora, a nazwa kernela jest robocza i niesprawdzona w rejestrze pakietów. Obie do rozstrzygnięcia **przed** publikacją, nie po.",
+    "LICENSE nosi cudzą linię copyright — ta sama wada co w dwóch innych repozytoriach, czyli wzorzec kopiowania, nie pomyłka.",
+    "Klucz dostawcy jest surowym sekretem platformy, jawnie oznaczonym jako odstępstwo od standardu tożsamości zarządzanej; tor, który to naprawia, nigdy nie został wykonany.",
+    "Domyślny model jest wpisany w dwóch miejscach jako fallback i ma datę ważności — komentarz w kodzie odwołuje się do zapowiedzianej fali wycofań.",
+    "Cztery tysiące linii dokumentacji wobec dziewięciu tysięcy linii kodu. Ryzyko, że dokumentacja zacznie opisywać stan, którego kod już nie ma, jest realne — na razie kontrolowane przez cytowanie plików źródłowych przy każdej liczbie."
+  ],
+  "headline": "Jedno nagranie kasety odblokowuje wszystko inne — to jest najtańsza akcja w portfolio",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 5, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-25", "commits": 49, "files": 194 }
+}

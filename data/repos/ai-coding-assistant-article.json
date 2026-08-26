@@ -1,0 +1,133 @@
+{
+  "slug": "ai-coding-assistant-article",
+  "name": "Building AI Coding Assistants in the Age of Foundation Models",
+  "cluster": "D-content",
+  "visibility": "private",
+  "state": "draft",
+  "tier": "P4",
+  "oneLiner": "Artykuł w LaTeX-u o architekturze asystentów kodowania: trzy warstwy, RAG dla kodu i {{term:mcp|MCP}}, ze ścieżką implementacji w C#.",
+  "summary": "Jednoplikowy artykuł naukowy (klasa `article`, dziesięć plików rozdziałów wciąganych z `main.tex`) o tym, jak zbudowane są komercyjne asystenty kodowania i jak zbudować własny. Tekst rozkłada system na trzy warstwy: uzupełnianie przez LSP z budżetem 100–200 ms, czat z montażem kontekstu oraz warstwę agentową z pętlą narzędzi i samoweryfikacją przez kompilację i testy. Rdzeniem są rozdziały 4 i 5: pipeline indeksowania (chunking świadomy AST przez Tree-sitter, embeddingi kodowe, reranking cross-encoderem) oraz {{term:mcp|Model Context Protocol}} jako {{term:substrat|substrat}} integracyjny z rolami host, client i server. Najciekawsza decyzja merytoryczna jest w podrozdziale 4.4: zamiast poprzestać na wyszukiwaniu wektorowym, autor przenosi wzorzec LspRag na {{term:roslyn|Roslyn}} i OmniSharp, czyli dokłada dokładne przejście po grafie symboli z serwera języka tam, gdzie podobieństwo tekstowe zawodzi. Artykuł stawia jedną falsyfikowalną tezę o dominacji jakości retrievalu nad jakością modelu i w rozdziale 8 podaje projekt eksperymentu, który ją rozstrzyga. Eksperyment nie został przeprowadzony, a wszystkie liczby w tekście pochodzą z 22 cytowanych źródeł, nie z własnych pomiarów. Repozytorium ma jeden commit z 2026-04-26 i 17 plików: to skończony draft tekstu, nie projekt w rozwoju.",
+  "stack": [
+    "LaTeX (article, XeLaTeX przez latexmk)",
+    "listings + tabularx + booktabs + hyperref + microtype",
+    "PlantUML + Graphviz",
+    "GitHub Actions (xu-cheng/latex-action@v4)",
+    "softprops/action-gh-release@v2",
+    "C# / .NET (wyłącznie w listingach, nieskompilowane)"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT No Attribution",
+  "tests": "Brak testów: w repozytorium nie ma kodu wykonywalnego ani projektu testowego. Nie zweryfikowano również, czy dokument się składa, bo w środowisku nie było ani `latexmk`, ani `xelatex`, ani `plantuml`.",
+  "ci": "Jeden workflow `ci.yml` na 53 linie: instaluje plantuml i graphviz, renderuje `figures/*.plantuml` do PNG, składa dokument XeLaTeX-em, zmienia nazwę na `AI_Coding_Assistant.pdf` i publikuje go jako GitHub Release. Odpala się wyłącznie na push tagu `v*` ({{term:tagdeploy|wydanie na tag}}), więc zwykły commit ani pull request nie są w ogóle sprawdzane.",
+  "metrics": [
+    { "label": "Pliki rozdziałów", "value": "10 (.tex)" },
+    { "label": "Słowa w rozdziałach", "value": "6 964" },
+    { "label": "Linie .tex razem z main.tex", "value": "755" },
+    { "label": "Pozycje bibliografii", "value": "22 (1 niecytowana)" },
+    { "label": "Listingi kodu", "value": "5, wszystkie w rozdziale 6" },
+    { "label": "Tabele / rysunki", "value": "1 / 1" },
+    { "label": "Commity / pliki", "value": "1 / 17" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/ai-coding-assistant-article",
+    "live": [],
+    "docs": [
+      { "label": "README z quick startem i strukturą repo", "path": "README.md" },
+      { "label": "Rdzeń merytoryczny: RAG dla kodu i LspRag", "path": "chapters/04-retrieval.tex" },
+      { "label": "MCP jako warstwa integracji", "path": "chapters/05-mcp.tex" },
+      { "label": "Ścieżka implementacji w C# z pięcioma listingami", "path": "chapters/06-csharp-implementation.tex" },
+      { "label": "Teza falsyfikowalna i projekt eksperymentu", "path": "chapters/08-discussion.tex" },
+      { "label": "Pipeline składania i wydania PDF", "path": ".github/workflows/ci.yml" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "main.tex: preambuła i sterownik dokumentu",
+      "path": "main.tex",
+      "description": "Klasa `article` 12pt a4paper, `geometry` 2,5 cm, `hyperref` z kolorowanymi odnośnikami i własny styl `csharpstyle` z listą słów kluczowych rozszerzoną o `record`, `required`, `McpServer` i `Tool`. Cała treść wchodzi dziesięcioma `\\input`, więc preambuła jest niezależna od tekstu.",
+      "reusable": true
+    },
+    {
+      "name": "Pipeline build i release",
+      "path": ".github/workflows/ci.yml",
+      "description": "Sekwencja plantuml, `latex-action`, `gh-release` w dwóch jobach z przekazaniem PDF-a przez artefakt. Nie zna ani jednej nazwy z tego artykułu poza nazwą pliku wyjściowego, więc przenosi się do dowolnego repozytorium z dokumentem LaTeX.",
+      "reusable": true
+    },
+    {
+      "name": "Rozdział 4: retrieval dla kodu",
+      "path": "chapters/04-retrieval.tex",
+      "description": "Czterostopniowy pipeline indeksowania z dwupoziomową hierarchią chunków (klasa jako rodzic, metoda jako dziecko) i przyrostową reindeksacją na file watcherze. Podrozdział 4.4 dokłada do wyszukiwania wektorowego przejście po grafie symboli z LSP i cytuje z LspRag wzrost pokrycia linii o 213% dla Javy i 174% dla Go.",
+      "reusable": false
+    },
+    {
+      "name": "Rozdział 6: ścieżka implementacji w C#",
+      "path": "chapters/06-csharp-implementation.tex",
+      "description": "Pięć listingów na 198 liniach: hostowanie serwera MCP przez `AddMcpServer` i `WithStdioServerTransport`, narzędzia z atrybutami `McpServerToolType` i `McpServerTool`, indeks wektorowy, warstwa czatu na Semantic Kernel oraz `.vscode/mcp.json`. Odwołują się do typów, których nigdzie nie ma (`ICodebaseIndex`, `TreeSitterChunker`, `Reranker`), i nigdy nie były kompilowane.",
+      "reusable": false
+    },
+    {
+      "name": "Rozdziały opisowe 1–3, 5, 7–9",
+      "path": "chapters/",
+      "description": "Taksonomia narzędzi, trójwarstwowa architektura, MCP, wybór modelu, ograniczenia i wnioski. Rozdział 8 jest tu najważniejszy, bo zawiera jedyny w tekście plan badania z trzema warunkami retrievalu przy ustalonym modelu.",
+      "reusable": false
+    },
+    {
+      "name": "Bibliografia",
+      "path": "chapters/10-references.tex",
+      "description": "Środowisko `thebibliography` z 22 pozycjami, w którym prace recenzowane (Lewis 2020, ReAct, SWE-bench, Lost in the Middle, LspRag / arXiv 2510.22210) sąsiadują z wpisami blogowymi i marketingowymi. Klucz `kinde2026` nie jest nigdzie cytowany, a mimo to się wydrukuje.",
+      "reusable": false
+    },
+    {
+      "name": "Figura 1: diagram warstw",
+      "path": "figures/assistant-layers.plantuml",
+      "description": "Diagram komponentów na 78 linii: IDE i CLI, warstwa LSP/MCP, orkiestracja w Semantic Kernel, podsystem retrievalu ze store wektorowym i resolverem symboli oraz API modelu. PNG jest w `.gitignore` i powstaje dopiero w CI, więc zmiana rysunku recenzuje się jako diff tekstu.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "maf-book", "reason": "Ta sama domena .NET plus MCP i ten sam format LaTeX-owy. Artykuł streszcza na kilkunastu stronach to, co maf-book rozwija na 246. Obie prace niosą też ten sam dług: zaprojektowany i nieprzeprowadzony eksperyment." },
+    { "slug": "llm-book", "reason": "Oba teksty opisują warstwę orkiestracji nad modelami fundamentalnymi, retrieval i zarządzanie kontekstem, tylko z dwóch stron: llm-book od Pythona i LangGraph, artykuł od C# i Semantic Kernel." },
+    { "slug": "copilot-scope", "reason": "Ten sam przedmiot z drugiej strony: artykuł opisuje, jak asystent kodowania jest zbudowany, CopilotScope mierzy telemetrię z pięciu takich asystentów. Trójwarstwowy model z rozdziału 3 to gotowy słownik dla tamtego kolektora." },
+    { "slug": "agents-and-llms", "reason": "Pokrycie tematyczne po nazwie: pętla agentowa i wywołania narzędzi z rozdziału 3. Zawartości tamtego repozytorium nie weryfikowano." }
+  ],
+  "product": "Brak kupującego. To materiał kanałowy i dowód kompetencji: pokazuje, że autor rozumie architekturę asystentów kodowania, MCP i RAG od strony .NET, czyli od strony, z której prawie nikt o tym nie pisze. Realna wartość pojawia się dopiero po przeprowadzeniu eksperymentu z rozdziału 8, bo danych o dominacji retrievalu nad jakością modelu, zmierzonych na konkretnym repozytorium, nikt dobrze nie opublikował, a projekt badania jest tu już gotowy. Do tego czasu artykuł jest dobrym przeglądem, którego teza pozostaje deklaracją.",
+  "highlights": [
+    "Teza jest postawiona jawnie i falsyfikowalnie, z gotowym planem: ustalony model, trzy warunki retrievalu (brak, bazowy, wzbogacony), pomiar poprawności i wskaźnika halucynacji na zadaniach z prawdziwego repozytorium. Deklaracja tego typu w tekście przeglądowym jest rzadkością.",
+    "Podrozdział 4.4 przenosi wzorzec LspRag (arXiv 2510.22210) na {{term:roslyn|Roslyn}} i OmniSharp: wyszukiwanie wektorowe daje kandydatów, a wywołania `definition` i `references` z serwera języka dochodzą po grafie symboli tam, gdzie podobieństwo tekstowe nie sięga. Praca źródłowa raportuje przy tym +213% pokrycia linii dla Javy i +174% dla Go.",
+    "Kompletny i spójny draft w jednym commicie: 6 964 słowa w dziesięciu rozdziałach, abstrakt, spis treści, 22 pozycje bibliografii, tabela porównawcza modeli i diagram warstw.",
+    "Diagram jest trzymany wyłącznie jako źródło PlantUML na 78 linii, a PNG jest w `.gitignore` i generowany w CI. Zmiana rysunku recenzuje się jako diff, nie jako podmiana binarki.",
+    "CI zamyka całą pętlę wydawniczą jednym plikiem: render diagramów, XeLaTeX, artefakt, GitHub Release z przemianowanym PDF-em."
+  ],
+  "gaps": [
+    "**Centralna teza nie jest zweryfikowana.** Rozdział 8 podaje projekt eksperymentu i nie raportuje żadnego wyniku; w całym artykule nie ma ani jednego własnego pomiaru. To odróżnia ten tekst od pracy z wkładem własnym.",
+    "W repozytorium nie ma żadnego tagu, a CI odpala się tylko na push tagu `v*`. Badge PDF w README linkuje do `releases/latest/download/AI_Coding_Assistant.pdf`, którego najprawdopodobniej nie ma, a badge CI pokazuje status workflowa, który nigdy nie ruszył.",
+    "Żaden zwykły commit ani PR nie jest sprawdzany. Błąd składni LaTeX-a wyszedłby dopiero przy próbie wydania, czyli w najgorszym możliwym momencie.",
+    "Pozycja `kinde2026` jest w bibliografii i nie jest cytowana w żadnym rozdziale; `thebibliography` wydrukuje ją mimo to. Bibliografia miesza też prace recenzowane z wpisami marketingowymi, a to z nich pochodzą liczby rynkowe z rozdziału 1.",
+    "`main.tex` ładuje `inputenc` z opcją `utf8`, choć CI składa XeLaTeX-em, gdzie ten pakiet jest zbędny. Pliki są czystym ASCII, więc build to przetrwa, ale jest to pozostałość po pdflatexu."
+  ],
+  "risks": [
+    "Rozbieżność tożsamości: `main.tex` i LICENSE podpisują artykuł jako K.C. Voss, a jedyny commit jest podpisany Konrad Cinkusz. W portfolio pod własnym nazwiskiem trzeba to ujednolicić albo wprost wyjaśnić.",
+    "Listingi C# nigdy nie były kompilowane i wołają typy, których nie ma (`ICodebaseIndex`, `TreeSitterChunker`, `Reranker`), a tekst nigdzie nie zaznacza, że to szkice. Czytelnik może wziąć je za działający kod.",
+    "Nazwy w SDK MCP i Semantic Kernel starzeją się szybko, a artykuł sam przyznaje, że SDK jest w wersji preview, i nie pinuje żadnej wersji. Notatki z maf-book wskazują, że użyty w listingu `McpClientFactory.CreateAsync` ustąpił już `McpClient.CreateAsync`.",
+    "Jeden commit i zero aktywności od 2026-04-26. Z zewnątrz wygląda na porzucone, mimo że treść jest skończona."
+  ],
+  "next": [
+    "Rozstrzygnąć autorstwo: albo podpisać artykuł własnym nazwiskiem, albo świadomie utrzymać pseudonim. Dziś dokument i historia gita mówią co innego.",
+    "Dodać do CI job na `push` i `pull_request`, który składa dokument bez publikowania wydania. Obecnie nic nie chroni przed niekompilującym się tekstem.",
+    "Wypchnąć tag `v1.0.0`, żeby oba badge'e w README przestały wskazywać na nieistniejący artefakt.",
+    "Skompilować pięć listingów z rozdziału 6 w małym rozwiązaniu wobec realnych pakietów ModelContextProtocol i Semantic Kernel, poprawić nazwy typów i dopisać w tekście, wobec jakich wersji to sprawdzono.",
+    "Przeprowadzić eksperyment z rozdziału 8 na jednym prawdziwym repozytorium C# i wstawić wyniki. To jedyna zmiana, która zamienia przegląd w pracę z własnym wkładem."
+  ],
+  "headline": "Teza falsyfikowalna bez ani jednego pomiaru, a badge PDF prowadzi do pustego wydania",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-04-26",
+    "commits": 1,
+    "files": 17
+  }
+}

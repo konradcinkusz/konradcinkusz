@@ -1,0 +1,39 @@
+[
+  {
+    "id": "A-runtime",
+    "letter": "A",
+    "name": "Klaster A — runtime i zachowanie agenta",
+    "note": "Wspólny substrat: **przebieg agenta jako jednostka pracy**. Sekwencja wywołań modelu z wynikiem, którą da się zapisać, odtworzyć, ocenić i porównać z innym przebiegiem. Te projekty mogą mieć wspólny {{term:cassette|replay}}, wspólny {{term:runstore|magazyn przebiegów}} i wspólny scoring — i tylko one.",
+    "barrier": "Analiza {{term:roslyn}} działa na kodzie źródłowym, harness replay na przebiegach agenta. Inny moment w cyklu, inny artefakt, inny kupujący. Sklejenie daje produkt, którego nie da się opisać jednym zdaniem — a produkt bez jednego zdania nie ma kupującego."
+  },
+  {
+    "id": "B-static",
+    "letter": "B",
+    "name": "Klaster B — kod źródłowy i polityki",
+    "note": "Wspólny substrat: **plik z kodem albo polityka**. Jednostką jest diff, plik, reguła. Te projekty konsumują się nawzajem — {{term:archgate|bramka}} czyta standard, standard cytuje repozytoria — ale nie mają nic wspólnego z kernelami klastra A."
+  },
+  {
+    "id": "C-infra",
+    "letter": "C",
+    "name": "Klaster C — infrastruktura wielokrotnego użytku",
+    "note": "Wspólny substrat: **usługa, którą konsumuje inny system tego portfolio**. Jest tu dokładnie jedna pozycja, i to jest ustalenie, nie niedopatrzenie: {{term:ghcr|jedna zakończona ekstrakcja}} na trzydzieści pięć repozytoriów. Wzorzec zadziałał raz i jest udokumentowany — cała konsolidacja z zakładki obok to jego powtórzenia."
+  },
+  {
+    "id": "D-content",
+    "letter": "D",
+    "name": "Klaster D — treść i dystrybucja",
+    "note": "Wspólny substrat: **dokument dla czytelnika**. Książki, artykuły, talie, bazy wiedzy. Zero przychodu bezpośredniego i tak ma być — to jest kanał dotarcia dla wszystkiego z klastrów A i B oraz jedyne aktywo, które kumuluje się bez dalszej pracy."
+  },
+  {
+    "id": "E-lab",
+    "letter": "E",
+    "name": "Klaster E — systemy dowodowe",
+    "note": "Wspólny substrat: **żaden**. Systemy zbudowane od początku do końca, żeby czegoś dowieść: symulacje, silniki obliczeniowe, gry, oraz próby produktowe, które się zatrzymały. Nie mają dziś kupującego i nie powinny go szukać. Ich rola jest podwójna: najtańszy test przenośności kernela oraz materiał, który sprzedaje **autora**, a nie produkt."
+  },
+  {
+    "id": "F-meta",
+    "letter": "F",
+    "name": "Klaster F — materiał o autorze",
+    "note": "Wspólny substrat: **kariera**. Profil, CV, materiały rekrutacyjne, cudza strona lądowania. Wchodzą na mapę, żeby nie udawać, że ich nie ma — i żeby przypomnieć, że część czasu portfolio idzie na to, a nie na produkt."
+  }
+]

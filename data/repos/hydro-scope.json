@@ -1,0 +1,85 @@
+{
+  "slug": "hydro-scope",
+  "name": "AquaScope",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Symulowana sieć wodociągowa plus pełna platforma monitoringu wokół niej: OTLP, korelacja alertów i liczby wymuszane testem.",
+  "summary": "Dziewięć projektów .NET 10 udaje sieć dystrybucji wody: dwie przepompownie, dwanaście czujników w trzech strefach, ingestor liczników i wstrzykiwacz awarii z trzema scenariuszami na żądanie. Cała telemetria idzie przez jeden {{term:otel|OpenTelemetry}} Collector, który rozgłasza ją równolegle do Prometheusa z Grafaną i do własnego backendu, gdzie ręcznie napisany dekoder OTLP zamienia batche na model aktywów. Nad tym modelem chodzi co pięć sekund pipeline pięciu analizatorów za jednym interfejsem `IIncidentAnalyzer`: progowy, świeżości, trendowy na EWMA i dryfie liniowym, korelacyjny po topologii oraz AI triage. Najciekawsza decyzja to `CorrelationAnalyzer`: 410 linii, które sklejają alerty w jeden incydent chodząc po grafie downstream w oknie 180 s i maksymalnie czterech skokach, a kandydata na przyczynę rankingują z czterech **jawnie zapisanych wag** (upstream 0,40, onset 0,30, typ 0,20, dystans 0,10), więc każdy ranking da się zakwestionować ręcznie zamiast wierzyć modelowi. Trzy nagłówkowe liczby nie są wpisane do README, tylko produkowane przez `FindingsMeasurementTests`. Repozytorium powstało wokół `docs/SPEC.md` napisanego przed kodem, z historią rewizji notującą cztery przypadki, w których implementacja obaliła specyfikację.",
+  "stack": [".NET 10 (SDK 10.0.100)", "Aspire.Hosting 13.4.6", "OpenTelemetry .NET 1.17.0", "OTel Collector contrib 0.158.0", "Prometheus 3.13.2 + Grafana 13.0.6", "Postgres 17 + EF Core 10", "xunit 2.9.3", "Docker + Fly.io"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "143 przypadki w jednym projekcie `tests/AquaScope.Tests` (121 [Fact] plus 4 [Theory] z 22 [InlineData]), 3 591 linii w 16 plikach; liczba zgadza się z wierszem 16 w `docs/COMPLIANCE.md`, ale policzona jest z atrybutów w kodzie, nie z zielonego przebiegu `dotnet test`.",
+  "ci": "Cztery workflowy: build i test na .NET 10 z artefaktem trx oraz osobnym jobem dwóch mechanicznych straży, CodeQL dla csharp i actions z cronem w poniedziałki, gitleaks po **całej historii** plus ten sam skan jako hook pre-commit. Piąty kawałek to `flyio.yml` (323 linie) wyzwalany tagiem `v*`, który wykrywa zmiany względem poprzedniego tagu i wdraża w kolejności postgres, core, symulatory.",
+  "metrics": [
+    { "label": "Projekty w solucji", "value": "9 src + 1 test" },
+    { "label": "Kod C#", "value": "9 629 linii w src, 3 591 w testach" },
+    { "label": "Testy", "value": "143" },
+    { "label": "Reguły alertów", "value": "16 zadeklarowanych, 14 zaimplementowanych" },
+    { "label": "Analizatory w pipeline", "value": "5" },
+    { "label": "Wspólny kernel", "value": "142 z dozwolonych 800 linii" },
+    { "label": "Redukcja szumu (scenariusz 1)", "value": "8 alertów → 1 incydent" },
+    { "label": "Wyprzedzenie reguły trendowej nad progową", "value": "240 s" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/hydro-scope",
+    "live": [],
+    "docs": [
+      { "label": "Strategia monitoringu, napisana przed kodem (671 linii)", "path": "docs/SPEC.md" },
+      { "label": "Zmierzone liczby i to, czego nie zmierzono", "path": "docs/FINDINGS.md" },
+      { "label": "Postmortem awarii strefy C", "path": "docs/RCA-001.md" },
+      { "label": "Rozliczenie z zasadami P1–P15 i rejestr odstępstw", "path": "docs/COMPLIANCE.md" },
+      { "label": "Wycena estate'u Fly.io i uzasadnienie przypiętych maszyn", "path": "flyio/INFRASTRUCTURE-ANALYSIS.md" },
+      { "label": "Cztery ADR-y", "path": "docs/adr/" }
+    ]
+  },
+  "deployment": { "fly": true, "docker": true, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    { "name": "Dekoder OTLP", "path": "src/AquaScope.Core/Otlp", "description": "Ręcznie napisany czytnik protobuf (`ProtoReader.cs`, 155 linii) plus ścieżka OTLP/JSON, razem około 1 200 linii zamieniających batche z kolektora na metryki, spany i logi. Zna wyłącznie format drutowy, nie zna pojęcia aktywa ani strefy.", "reusable": true },
+    { "name": "AquaScope.ServiceDefaults", "path": "src/AquaScope.ServiceDefaults/Extensions.cs", "description": "{{term:servicedefaults|Wspólny kernel}} hostingowy: OTel, health i alive, service discovery, standardowy handler odporności. 142 linie przy suficie 800 i **zero referencji do projektu Contracts**, więc kopiuje się do innego serwisu bez ciągnięcia domeny.", "reusable": true },
+    { "name": "Mechaniczne straże architektury", "path": "scripts", "description": "`check-kernel-size.sh` pilnuje sufitu kernela, `check-tfm-matches-runtime.sh` porównuje major obrazu runtime z majorem TFM w każdym Dockerfile. Oba wywalają build zamiast ostrzegać, a drugi powstał z konkretnej awarii startu kontenera w copilot-scope.", "reusable": true },
+    { "name": "Pipeline analizatorów", "path": "src/AquaScope.Core/Analysis", "description": "Pięć implementacji jednego interfejsu uruchamianych przez `AnalysisLoop` co pięć sekund. Każda zwraca `AnalyzerReport` z metrykami i uzasadnieniem, więc brak danych jest raportowany jako no-data zamiast cicho znikać z wyniku.", "reusable": true },
+    { "name": "AssetHealthEngine", "path": "src/AquaScope.Core/Scoring/AssetHealthEngine.cs", "description": "Wynik 0–100 na aktywo z czterech wymiarów, z renormalizacją wag wyłącznie po wymiarach mających dane i osobno raportowaną pewnością. Konstrukcja przeniesiona wprost z silnika jakości sesji w copilot-scope; wymienia się podpięte wymiary, nie mechanikę.", "reusable": true },
+    { "name": "CorrelationAnalyzer", "path": "src/AquaScope.Core/Correlation/CorrelationAnalyzer.cs", "description": "410 linii, które składają alerty w incydent po grafie `NetworkTopology` i rankingują przyczynę z czterech zapisanych wag. Każdy składnik lądowania w rankingu jest utrwalony, więc wynik da się podważyć bez czytania kodu.", "reusable": false },
+    { "name": "TrendAnalyzer", "path": "src/AquaScope.Core/Analysis/TrendAnalyzer.cs", "description": "428 linii EWMA i dryfu liniowego, które mają odpalić przed progiem. Alert niesie własne wyliczenie: nachylenie i przewidywany moment przekroczenia. Progi są uzasadnione zalogowanymi przebiegami, a nie dobrane na oko.", "reusable": false },
+    { "name": "AiTriageAnalyzer", "path": "src/AquaScope.Core/Analysis/AiTriageAnalyzer.cs", "description": "Buduje prompt wyłącznie z faktów ustalonych {{term:determinizm|deterministycznie}} i kolejkuje szkic RCA za bramką akceptacji człowieka (`/triage/{incidentId}/approve`). Bez klucza API raportuje no-data i nic więcej się nie psuje, ale kolejki i tak nikt nie opróżnia.", "reusable": false }
+  ],
+  "overlaps": [
+    { "slug": "copilot-scope", "reason": "Repozytorium siostrzane i jawnie tak nazwane: README przyznaje, że ingest OTLP, scoring i pipeline analizatorów są zaadaptowane stamtąd, a komentarz w `AssetHealthEngine` wskazuje na tamtejszy silnik jakości sesji. To ten sam kształt systemu w innej domenie." },
+    { "slug": "architecture-standards", "reason": "Cała dokumentacja rozlicza się z zasadami P1–P15 z tamtego repozytorium; `COMPLIANCE.md` i `DEVIATIONS.md` to formalne przejście przez cudzy checklist z trzema wierszami częściowo spełnionymi." },
+    { "slug": "authservice", "reason": "Odstępstwo D-001 uzasadnia brak uwierzytelniania tym, że praca nad tożsamością mieszka w authservice i nie jest tu powtarzana. To poprawna decyzja, ale zostawia read API i wstrzykiwacz awarii otwarte." },
+    { "slug": "dev-insight", "reason": "`LICENSE` ma copyright `dev_insight` — szablon przeniesiony stamtąd i nigdy nie poprawiony, dokładnie tak samo jak w authservice." }
+  ],
+  "product": "Brak kupującego i repozytorium nawet nie udaje, że go szuka: README linkuje do konkretnego ogłoszenia (Monitoring & Observability Specialist w Idrica, Walencja) i mapuje każdy punkt oferty na plik, dashboard albo zmierzoną liczbę. Wartość jest więc dowodowa — pokazuje projektowanie strategii monitoringu, a nie podłączenie Prometheusa. Wtórnie da się z tego wyjąć materiał na artykuł o redukcji szumu alertów albo o tym, dlaczego reguły trendowe biją progowe na powolnych awariach; obie liczby są zmierzone i obronialne. Adresat jest jednak jeden i wygasa razem z ogłoszeniem.",
+  "gaps": [
+    "**AI triage nie woła żadnego modelu.** `AiTriageDraftStore.Dequeue()` nie ma ani jednego wywołania w `src`, więc nawet z ustawionym `ANTHROPIC_API_KEY` powstaje wyłącznie prompt w kolejce. Ani README, ani `DEVIATIONS.md` tego nie mówią — D-002 opisuje tylko brak sędziego LLM.",
+    "**Brak `flyio/collector.fly.toml`**, chociaż `core.fly.toml` i wszystkie symulatory kierują `OTEL_EXPORTER_OTLP_ENDPOINT` na `aquascope-collector.internal:4318`, a `INFRASTRUCTURE-ANALYSIS.md` wymienia tę maszynę jako przypiętą. W `flyio.yml` słowo `collector` nie pada ani razu, więc wdrożony estate nie ma czym przyjąć telemetrii.",
+    "Dwie z szesnastu reguł katalogu nigdy nie odpalają: `TR-NIGHT-FLOW` i `TH-INGEST-LAG`. Jest to uczciwie opisane w FINDINGS 4 i D-003, ale nadal jest dziurą w pokryciu.",
+    "Narzut własnej instrumentacji nie został zmierzony; FINDINGS 3 sam nazywa to jedyną liczbą, która jest winna i nieraportowana.",
+    "Zero zrzutów ekranu dashboardów i zero publicznego URL-a. Demo jest wyłącznie lokalne, a sześć konfiguracji Fly.io to na dziś opis wdrożenia, nie wdrożenie."
+  ],
+  "next": [
+    "Rozstrzygnij AI triage: albo dopisz hosted service opróżniający `AiTriageDraftStore` i faktycznie wołający API modelu, albo skreśl z README deklarację „AI incident triage” i opisz ten komponent jako budowniczego promptu.",
+    "Dodaj `flyio/collector.fly.toml` i krok wdrożenia kolektora w `flyio.yml`. Bez tego ścieżka wdrożeniowa jest niekompletna względem tego, co sam opisujesz w analizie infrastruktury.",
+    "Uruchom stack na maszynie z Dockerem, zrób trzy zrzuty ekranu i przy tym samym przebiegu zmierz narzut własnej telemetrii, żeby zamknąć FINDINGS 3.",
+    "Zaimplementuj `TH-INGEST-LAG` — instrument `aqua.ingest.latency` już istnieje, brakuje porównania z progiem 2 s; `AlertCatalogueCoverageTests` wymusi wtedy skrócenie obu dokumentów.",
+    "Popraw linię copyright w `LICENSE` i zdecyduj o nazwie: albo repozytorium na `aquascope`, albo kod na `HydroScope`."
+  ],
+  "highlights": [
+    "Trzy nagłówkowe liczby są **produkowane przez test**, nie wpisane ręcznie: `FindingsMeasurementTests` wymusza 8 alertów złożonych w 1 incydent, 240 s wyprzedzenia reguły trendowej nad progową i 0 alertów na piętnastu minutach zdrowej sieci.",
+    "`docs/RCA-001.md` to postmortem konkretnego przebiegu, w którym każdy timestamp jest przypięty testem `Scenario2RcaEvidenceTests`. Znalazł regułę supresji strukturalnie niezdolną do odpalenia, a naprawa **pogorszyła** wskaźnik redukcji szumu z 8:1 na 4:1 i tak jest zaraportowana.",
+    "`docs/SPEC.md` (671 linii) powstał przed kodem i ma historię rewizji notującą cztery przypadki, w których implementacja obaliła specyfikację; FINDINGS 1.3 raportuje pomiar sprzeczny z przewidywaniem zamiast po cichu poprawić spec.",
+    "Dwie mechaniczne straże w CI zamiast zdania w dokumentacji: sufit 800 linii wspólnego kernela (dziś 142) i zgodność majora TFM z majorem obrazu runtime, wywalające build.",
+    "Każda przypięta maszyna w `flyio/` ma w komentarzu nazwane synchroniczne wywołanie, które ją wymusza, plus wyliczony koszt alternatywy: około 2 USD miesięcznie za uśpienie Core wobec utraty całej telemetrii."
+  ],
+  "risks": [
+    "**Kolizja nazw wbudowana w repozytorium:** katalog to `hydro-scope`, a cały kod, wszystkie kontenery, aplikacje Fly i dokumenty mówią `AquaScope`. README to wyjaśnia, ale każdy zewnętrzny link i każde wyszukiwanie trafia w inną nazwę.",
+    "Grafana startuje z `GF_AUTH_ANONYMOUS_ENABLED=true`, rolą Admin i wyłączonym formularzem logowania. Świadome dla dema na laptopie, skopiowane gdziekolwiek indziej jest otwartym adminem.",
+    "`AiTriageOptions.Model` ma na sztywno `\"claude-sonnet-5\"`. Identyfikator modelu w stałej to pin, który zestarzeje się po cichu, tym bardziej że dziś i tak nic go nie używa.",
+    "Piętnaście commitów i ostatni z 2026-08-15: repozytorium powstało jednym ciągiem i nie było potem dotykane. Piny (Aspire 13.4.6, EF Core 10.0.11, Grafana 13.0.6, kolektor 0.158.0) zestarzeją się szybciej, niż ktokolwiek tu zajrzy."
+  ],
+  "headline": "Liczby wymuszane testami, ale AI triage tylko buduje prompt, a kolektor nie ma fly.toml",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 8, "openPrs": 8, "dependabotPrs": 8, "lastCommit": "2026-08-15", "commits": 15, "files": 142 }
+}

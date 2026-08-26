@@ -1,0 +1,76 @@
+{
+  "slug": "math-for-ai-engineers",
+  "name": "math-for-ai-engineers",
+  "cluster": "D-content",
+  "visibility": "private",
+  "state": "stub",
+  "tier": "P4",
+  "oneLiner": "Zarezerwowana nazwa repozytorium: jeden commit, jeden plik README o rozmiarze 49 bajtów, zero treści.",
+  "summary": "Całe repozytorium to `README.md` z dwiema liniami: nagłówkiem `# math-for-ai-engineers` i zdaniem `From zero to AI Engineer`. Nie ma kodu, notatników, plików LaTeX, licencji ani katalogu `.github`. Historia liczy jeden commit (`b4320e0`, 2026-08-26 09:33), a wszystkie cztery referencje — dwie lokalne i dwie zdalne — wskazują na to samo drzewo z tym samym jednym plikiem. Deklarowany zamiar to materiał matematyczny dla inżynierów AI, ale nic poza tytułem tego nie potwierdza: brak spisu tematów, brak wyboru formatu, brak jednego akapitu treści. Najciekawsza decyzja inżynierska w tym repozytorium jeszcze nie zapadła i jest to decyzja o formacie, bo od niej zależy, czy powstaną notatniki, książka w LaTeX-u, czy strona MkDocs. W obecnym stanie każda ocena dojrzałości powyżej `stub` byłaby zmyślona.",
+  "stack": ["Markdown", "git"],
+  "primaryLanguage": "Markdown",
+  "license": "brak pliku LICENSE",
+  "tests": "Brak testów i brak czegokolwiek, co dałoby się przetestować: `git ls-files` zwraca jedną pozycję, `README.md`.",
+  "ci": "brak CI — katalog `.github` nie istnieje, więc żaden przebieg nigdy się nie odbył.",
+  "metrics": [
+    { "label": "Pliki śledzone przez git", "value": "1" },
+    { "label": "Commity", "value": "1" },
+    { "label": "Rozmiar README", "value": "49 bajtów" },
+    { "label": "Linie treści w repozytorium", "value": "2" },
+    { "label": "Referencje git wskazujące to samo drzewo", "value": "4 z 4" },
+    { "label": "Workflowy CI", "value": "0" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/math-for-ai-engineers",
+    "live": [],
+    "docs": [
+      { "label": "Jedyny plik w repozytorium", "path": "README.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    { "name": "README.md", "path": "README.md", "description": "Dwie linie: tytuł i deklaracja intencji `From zero to AI Engineer`. Nie rozstrzyga formatu ani zakresu, więc nie da się z niego wyprowadzić żadnego planu pracy.", "reusable": false }
+  ],
+  "overlaps": [
+    { "slug": "brain-train", "reason": "Ten sam cel dydaktyczny wokół pojęć AI. Treść matematyczna ma tam gotowe miejsce i istniejący format, więc osobne repozytorium musi uzasadnić, dlaczego nie trafia tam." },
+    { "slug": "tiny-transformer", "reason": "Implementacja transformera od zera już wymusza wyprowadzenie tej samej matematyki. Rozdział o uwadze napisany osobno będzie dublował kod, który tam działa." },
+    { "slug": "bayesian-inference", "reason": "Wnioskowanie bayesowskie to podzbiór deklarowanego zakresu i istnieje jako osobny projekt. Bez rozstrzygnięcia granicy ten sam materiał powstanie dwa razy." }
+  ],
+  "product": "Brak kupującego, i nie jest to stan przejściowy do naprawienia treścią. Rynek materiałów z matematyki dla ML jest gęsty i w większości darmowy, a nazwisko autora nie jest tu przewagą dystrybucyjną. Gdyby materiał powstał, jego jedyną rolą byłoby budowanie wiarygodności i własna nauka, więc wartość portfolio zależy wyłącznie od tego, czy repozytorium przestanie być puste.",
+  "highlights": [
+    "Całe repozytorium waży **49 bajtów** i mieści się w dwóch liniach. To jedyny wpis w portfolio, dla którego pełny listing treści zajmuje mniej miejsca niż jego własny opis.",
+    "Wszystkie cztery referencje git — `main`, `claude/portfolio-html-app-w6306n` i ich odpowiedniki na `origin` — wskazują dokładnie to samo drzewo. Gałąź robocza nigdy nie dostała ani jednego commita.",
+    "Jedyny commit jest podpisany autorem `dev_insight`, a nie kontem osobowym, co odróżnia go od reszty historii w portfolio i wskazuje na utworzenie przez automat, nie przez człowieka siadającego do pisania."
+  ],
+  "gaps": [
+    "Brakuje wszystkiego poza tytułem: zero stron treści, zero notatników, zero plików źródłowych.",
+    "README nie rozstrzyga formatu docelowego. Notatniki Jupyter, książka w LaTeX-u i strona MkDocs to trzy różne projekty o różnym koszcie, a żaden nie został wybrany.",
+    "Brak spisu tematów, więc nie da się ocenić ani zakresu, ani tego, ile z niego pokrywają już `brain-train` i `bayesian-inference`.",
+    "Brak pliku LICENSE. Bez niego materiał jest domyślnie objęty pełnym prawem autorskim, co jest dokładnym przeciwieństwem intencji materiału dydaktycznego.",
+    "Gałąź `claude/portfolio-html-app-w6306n` nazywa aplikację portfolio, a leży w repozytorium o matematyce i nie zawiera niczego."
+  ],
+  "next": [
+    "Rozstrzygnij, czy to repozytorium ma istnieć. Jeśli treść ma trafić do `brain-train`, zarchiwizuj je dzisiaj zamiast trzymać pusty wpis w portfolio.",
+    "Jeśli ma istnieć: wpisz do README format docelowy i spis 8–12 tematów, zanim powstanie pierwszy plik z treścią.",
+    "Dodaj plik LICENSE ({{term:mit|MIT}} albo CC BY dla samej treści), żeby status prawny był określony od początku.",
+    "Usuń gałąź `claude/portfolio-html-app-w6306n` — jest pusta i jej nazwa myli.",
+    "Napisz jeden kompletny rozdział jako próbę formatu. Dopiero on pokaże, czy wybrany format da się utrzymać przez dwanaście kolejnych."
+  ],
+  "risks": [
+    "Puste publiczne repozytorium w portfolio czyta się jako porzucony zamiar i obniża wiarygodność sąsiednich, ukończonych projektów.",
+    "Brak LICENSE oznacza domyślnie wszystkie prawa zastrzeżone, więc nikt nie może legalnie użyć materiału, który powstanie.",
+    "Zakres pokrywa się z co najmniej trzema innymi repozytoriami. Bez wcześniejszego rozgraniczenia ta sama treść powstanie w kilku miejscach i żadna wersja nie będzie kanoniczna.",
+    "Kolejny otwarty front przy i tak przekroczonym {{term:wip|limicie prac w toku}}: koszt utrzymania jest niezerowy, a zwrot dziś dokładnie zerowy."
+  ],
+  "headline": "49 bajtów README i jeden commit: zarezerwowana nazwa, nie projekt",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-26",
+    "commits": 1,
+    "files": 1
+  }
+}

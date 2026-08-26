@@ -1,0 +1,127 @@
+{
+  "slug": "landing-page",
+  "name": "landing-page (Franke label)",
+  "cluster": "F-meta",
+  "visibility": "private",
+  "state": "dormant",
+  "tier": "P4",
+  "oneLiner": "Statyczna jednostronicowa witryna sprzedażowa dla klientki zewnętrznej, zbudowana na gotowym szablonie i porzucona po pięciu dniach.",
+  "summary": "Jeden plik `index.html` (621 linii) plus trzy arkusze CSS, pięć skryptów i dziewięć obrazów. Strona jest w całości po polsku i sprzedaje usługi jednej osoby: audyt konta TikTok, szkolenia z nagrywania wideo i pakiety od 400 do 3000 PLN, z sekcjami banner, o mnie, liczniki, oferta, cennik, kontakt. Baza wizualna pochodzi z szablonu LayoutFlow, co jest uczciwie odnotowane w pierwszej linii `style-global.css` i w stopce, więc własnego kodu jest tu około 60 linii JavaScriptu w `js/scripts.js`. Najciekawsza decyzja jest w warstwie stylów: 63 wymiary w `style.css` są liczone w jednostkach `vw`, przez co layout skaluje się ciągle, a osobny `style-responsive.css` z trzema breakpointami odpowiada wyłącznie za przełamania. To rozdzielenie skalowania od przełamań jest sensowne i rzadko spotykane w szablonach tej klasy. Reszta repozytorium to biblioteki wgrane lokalnie: jQuery 2.2.0, counterUp, Waypoints, Font Awesome Free 6.1.1 i Linearicons, dzięki czemu strona jest prawie {{term:hermetyczny|hermetyczna}} i zależy z sieci tylko od Google Fonts.",
+  "stack": [
+    "HTML5",
+    "CSS3 (3 ręcznie pisane arkusze, 1083 linie)",
+    "jQuery 2.2.0",
+    "jquery.counterup 1.0",
+    "Waypoints 2.0.3",
+    "Font Awesome Free 6.1.1",
+    "Linearicons Free",
+    "szablon LayoutFlow"
+  ],
+  "primaryLanguage": "HTML",
+  "license": "brak pliku LICENSE",
+  "tests": "Brak testów: w repozytorium nie ma ani jednego pliku testowego, ani konfiguracji jakiegokolwiek test runnera.",
+  "ci": "Brak CI. Katalogu `.github` nie ma w ogóle, więc nie działa tu też {{term:dependabot}}, mimo że wszystkie biblioteki są wgrane lokalnie i nikt ich nie odświeży.",
+  "metrics": [
+    { "label": "Commity", "value": "13" },
+    { "label": "Okno pracy", "value": "2024-06-11 do 2024-06-15" },
+    { "label": "Pliki w repo (git ls-files)", "value": "34" },
+    { "label": "Linie index.html", "value": "621" },
+    { "label": "Linie CSS w 3 arkuszach", "value": "1083" },
+    { "label": "Własny JavaScript", "value": "1440 B (scripts.js) + 679 B (bliss.js)" },
+    { "label": "Wymiary w jednostkach vw", "value": "63 w style.css" },
+    { "label": "Rozmiar repo bez .git", "value": "4,5 MB" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/landing-page",
+    "live": [],
+    "docs": [
+      { "label": "README (stub w UTF-16, 34 bajty)", "path": "README.md" },
+      { "label": "Cała strona w jednym pliku", "path": "index.html" },
+      { "label": "Nagłówek z atrybucją szablonu LayoutFlow", "path": "style-global.css" },
+      { "label": "Własny JavaScript wraz z martwymi wywołaniami", "path": "js/scripts.js" },
+      { "label": "Breakpointy responsywne", "path": "style-responsive.css" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "style-global.css",
+      "path": "style-global.css",
+      "description": "249 linii resetu i klas narzędziowych flex z szablonu LayoutFlow, bez jednej nazwy z tej domeny. Da się przenieść w całości do innej statycznej strony, o ile przeniesie się też atrybucję z pierwszej linii pliku.",
+      "reusable": true
+    },
+    {
+      "name": "js/bliss.js",
+      "path": "js/bliss.js",
+      "description": "Scrollspy plus płynne przewijanie do kotwic w 679 bajtach zminifikowanego kodu. Konfiguruje się globalnymi zmiennymi `menuid`, `gaptop`, `scrollspeed` i `menu_active_class` ustawianymi w HTML, więc nie zna żadnego selektora tego konkretnego szablonu.",
+      "reusable": true
+    },
+    {
+      "name": "Fonty ikonowe wgrane lokalnie",
+      "path": "fonts/",
+      "description": "Font Awesome Free 6.1.1 i Linearicons Free w komplecie formatów, trzymane w repo zamiast ładowane z CDN. To jedyny powód, dla którego strona renderuje się poprawnie bez sieci poza żądaniem do Google Fonts.",
+      "reusable": true
+    },
+    {
+      "name": "index.html",
+      "path": "index.html",
+      "description": "Topbar, przyklejony nagłówek z nawigacją kotwicową, banner, sekcja o autorce, liczniki, cztery karty oferty, tabele pakietów i stopka. Cała treść, łącznie z cennikiem 400–3000 PLN, jest wpisana na sztywno w znaczniki.",
+      "reusable": false
+    },
+    {
+      "name": "js/scripts.js",
+      "path": "js/scripts.js",
+      "description": "Menu mobilne z blokadą scrolla na `body` i klasa `.fixed` na nagłówku po 100 px przewinięcia. Poniżej nich leżą wywołania `owlCarousel` i `datepicker` do bibliotek, których w repo już nie ma; ponieważ są na końcu callbacku, psują tylko konsolę i siebie nawzajem.",
+      "reusable": false
+    },
+    {
+      "name": "style.css + style-responsive.css",
+      "path": "style.css, style-responsive.css",
+      "description": "451 linii stylów konkretnych sekcji i 383 linie z trzema breakpointami. Rozdział jest czysty: skalowanie ciągłe siedzi w `vw` w pierwszym pliku, przełamania układu wyłącznie w drugim.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "konradcinkusz", "reason": "Ten sam typ artefaktu: statyczna strona-wizytówka serwowana jako pliki. Jeśli oba mają zostać w portfolio, powinny dzielić przynajmniej arkusz narzędziowy zamiast trzymać dwie kopie tego samego resetu." },
+    { "slug": "cv-maker", "reason": "Identyczny produkt końcowy, jednostronicowa prezentacja osoby w HTML, tylko tam generowana z danych, a tutaj pisana ręcznie. Porównanie obu pokazuje, ile z tej strony dałoby się wyrazić jako szablon plus dane." }
+  ],
+  "product": "Brak kupującego. To skończona robota freelancerska dla konkretnej klientki, marki Franke label, a nie produkt ani biblioteka. Wartość portfolio jest tu najniższa w całym zestawie, bo warstwa wizualna pochodzi z zewnętrznego szablonu, a autorskiego kodu jest około 60 linii JavaScriptu. Jedyne, czego dowodzi, to że projekt dla klienta zewnętrznego został dowieziony w całości w pięć dni.",
+  "highlights": [
+    "Kompletna strona sprzedażowa z ofertą, licznikami i dwiema tabelami pakietów dowieziona w **13 commitach między 11 a 15 czerwca 2024**, z czytelną historią: `remove contact form`, `add pricing`, `deleted reviews slider`.",
+    "Zero procesu budowania. Nie ma `package.json`, bundlera ani kroku kompilacji, więc strona działa po skopiowaniu katalogu na dowolny serwer statyczny i będzie działać dokładnie tak samo za pięć lat.",
+    "**63 wymiary liczone w `vw`** w `style.css`, a wszystkie przełamania układu wyniesione do osobnego `style-responsive.css` z trzema breakpointami. Skalowanie ciągłe jest tu oddzielone od skoków, co w szablonach tej klasy jest wyjątkiem.",
+    "Scrollspy z podświetlaniem aktywnej pozycji menu i płynnym przewijaniem mieści się w **679 bajtach** `js/bliss.js` i konfiguruje się wyłącznie zmiennymi globalnymi z HTML.",
+    "Pochodzenie szablonu jest zadeklarowane w dwóch miejscach: w pierwszej linii `style-global.css` i w stopce strony. Nikt nie udaje, że warstwa wizualna jest autorska."
+  ],
+  "gaps": [
+    "**README to 34-bajtowy stub zapisany w UTF-16 z BOM**, o treści `# landing-page`. Nie mówi, czym jest projekt, dla kogo powstał, skąd pochodzi szablon ani jak go uruchomić.",
+    "`index.html` linkuje w linii 19 arkusz `bxslider/jquery.bxslider.css`, a katalogu `bxslider` w repo nie ma. Każde załadowanie strony kończy się widocznym w konsoli 404.",
+    "Pozycja menu **Cennik prowadzi do `#testimonials`** (linia 74), bo sekcja cennika w linii 245 odziedziczyła identyfikator po usuniętym sliderze opinii. Nawigacja działa przypadkiem, nie z projektu.",
+    "Adres `franke.label@gmail.com` stoi w dwóch miejscach w tagu `<a>` bez atrybutu `href`, a `<span class=\"year\"></span>` w stopce nie jest przez nic wypełniany, więc renderuje się `Copyright ©  | Template By`. To dwa najbardziej widoczne elementy strony kontaktowej.",
+    "Martwe wywołania `owlCarousel` i `datepicker` w `js/scripts.js` to {{term:drift}} po dwóch usuniętych funkcjach: znaczniki zniknęły, skrypt został."
+  ],
+  "risks": [
+    "Repozytorium publikuje dane osobowe i biznesowe osoby trzeciej: imię, zdjęcia, adres e-mail, konta TikTok i Instagram oraz pełny cennik. Zgody na to nie da się potwierdzić z repozytorium, a cennik z czerwca 2024 może być już nieaktualny.",
+    "Brak pliku LICENSE przy jednoczesnym wgraniu bibliotek na czterech różnych licencjach, w tym `jquery.counterup` na GPL v2, oraz szablonu komercyjnego. Status prawny redystrybucji tego repo jest nierozstrzygnięty i nie naprawi go dopisanie {{term:mit|MIT}}.",
+    "jQuery 2.2.0 jest z 2016 roku i nie dostaje już poprawek; Waypoints 2.0.3 i counterUp 1.0 są starsze. Wgranie ich lokalnie oznacza, że nikt tego nie zauważy.",
+    "Nazwa `landing-page` nie niesie żadnej informacji. W liście repozytoriów jest szumem, a nie pozycją."
+  ],
+  "next": [
+    "Rozstrzygnij, czy to repo w ogóle należy do portfolio. Jeśli tak, opisz je wprost jako pracę na szablonie dla klienta zewnętrznego; jeśli nie, zarchiwizuj i przestań je liczyć.",
+    "Przepisz README jako UTF-8: czym jest strona, dla kogo powstała, skąd szablon i że wystarczy dowolny serwer statyczny. Obecny plik nie niesie ani jednego bitu informacji.",
+    "Usuń link do `bxslider` z linii 19 oraz wywołania `owlCarousel` i `datepicker` ze `scripts.js`, i przenieś identyfikator sekcji cennika z `#testimonials` na `#pricing` wraz z linkiem w menu.",
+    "Dodaj `href=\"mailto:...\"` przy obu wystąpieniach adresu i wpisz rok w stopce na sztywno. To trzy linie, które naprawiają jedyną ścieżkę konwersji na tej stronie.",
+    "Dopisz NOTICE wyliczający licencje wgranych bibliotek i szablonu LayoutFlow, albo potwierdź u klientki, czy strona ma dalej publicznie stać z tym cennikiem."
+  ],
+  "headline": "Dowód roboty freelancerskiej, nie inżynierii: 60 linii własnego JS na cudzym szablonie",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2024-06-15",
+    "commits": 13,
+    "files": 34
+  }
+}

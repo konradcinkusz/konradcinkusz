@@ -1,0 +1,126 @@
+{
+  "slug": "zoo-companion",
+  "name": "Zoo Companion",
+  "cluster": "E-lab",
+  "visibility": "private",
+  "state": "prototype",
+  "tier": "P3",
+  "oneLiner": "Jednonajemcowa aplikacja B2B dla zoo: panel dla personelu, publiczne strony wybiegów pod kodem QR i czat Claude z dwoma narzędziami.",
+  "summary": "Panel administracyjny dla personelu jednego zoo (wybiegi, zwierzęta, gatunki, notatki opiekunów, godziny karmienia, zdjęcia), publiczne strony `/exhibit/{slug}` osiągalne z tabliczki przy wybiegu przez kod QR i czat oparty na Claude, ograniczony do danych tego zoo. Stack to .NET 10, {{term:aspire|Aspire}} 13.4.6 jako korzeń kompozycji, Blazor Server, EF Core na Postgresie i pakiet Anthropic 12.40.0. Uwierzytelnianie personelu jest w całości wyniesione do własnej instancji siostrzanego `authservice`, więc repozytorium nie zawiera ani magazynu użytkowników, ani klucza podpisującego; logowanie idzie przez zwykły endpoint `POST /admin/login` poza obwodem Blazora, bo obwód SignalR nie może zapisać ciasteczka. Najciekawsza decyzja jest w warstwie agenta: powierzchnia narzędziowa to **dwa narzędzia tylko-do-odczytu**, `list_exhibits` i `get_exhibit_details`, przez co nie istnieje bramka potwierdzeń ani stan wstrzymanej tury, a `ZooDataQueries` jest jedynym czytnikiem danych wspólnym dla czatu i strony publicznej, więc oba nie mogą rozjechać się co do faktów. Całość powstała w jednym przejściu implementacyjnym: pięć commitów, ostatni 18 sierpnia 2026.",
+  "stack": [".NET 10", ".NET Aspire 13.4.6", "Blazor Server", "EF Core 10 + PostgreSQL 16", "Anthropic SDK 12.40.0", "QRCoder 1.8.0", "OpenTelemetry 1.17.0", "Docker Compose"],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Brak. W repozytorium nie ma żadnego projektu ani pliku testowego, a `ci.yml` niesie jawny komentarz `No test project yet - Phase 0 has no automated tests` przy 1 044 liniach kodu C#.",
+  "ci": "Jeden workflow `.github/workflows/ci.yml`: checkout, setup-dotnet 10.0.x, `dotnet restore` i `dotnet build ZooCompanion.slnx -warnaserror`. Bez kroku testowego, bez budowania obrazu, bez wdrożenia.",
+  "metrics": [
+    { "label": "Commity", "value": "5" },
+    { "label": "Pliki w git", "value": "113 (w tym wendorowany Bootstrap w wwwroot/lib)" },
+    { "label": "Kod C# bez migracji", "value": "1 044 linie" },
+    { "label": "Migracje EF Core", "value": "883 linie, jedna migracja InitialCreate" },
+    { "label": "Komponenty Razor", "value": "17 plików .razor" },
+    { "label": "Encje domenowe", "value": "6" },
+    { "label": "Narzędzia agenta", "value": "2, oba tylko-do-odczytu" },
+    { "label": "Projekty w solucji", "value": "3 (AppHost, ServiceDefaults, Web)" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/zoo-companion",
+    "live": [],
+    "docs": [
+      { "label": "Uruchomienie lokalne", "path": "SETUP.md" },
+      { "label": "Architektura i uzasadnienie wyborów", "path": "docs/architecture/ARCHITECTURE.md" },
+      { "label": "Roadmapa fazowa z kryteriami wyjścia", "path": "docs/ROADMAP.md" },
+      { "label": "Uzasadnienie biznesowe i geneza", "path": "docs/business/BUSINESS-CASE.md" },
+      { "label": "Instrukcje dla Copilota", "path": ".github/copilot-instructions.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": true, "ghcr": false, "pages": false, "packages": false },
+  "components": [
+    {
+      "name": "Warstwa konsumenta authservice",
+      "path": "src/ZooCompanion.Web/Authentication",
+      "description": "`AuthEndpoints` mapuje logowanie i wylogowanie poza obwodem Blazora, `AuthserviceLoginClient` woła `POST /api/v1/auth/login` zewnętrznej instancji, a `JwtClaimsPrincipalFactory` zamienia zwrócony token na ClaimsPrincipal ciasteczka. Równolegle skonfigurowany JwtBearer waliduje tokeny przez JWKS, więc jedna aplikacja obsługuje ciasteczko dla UI i bearer dla API.",
+      "reusable": true
+    },
+    {
+      "name": "ZooCompanion.ServiceDefaults",
+      "path": "src/ZooCompanion.ServiceDefaults/Extensions.cs",
+      "description": "Wspólny {{term:servicedefaults|kernel infrastrukturalny}}: {{term:otel|OpenTelemetry}} dla logów, metryk i trace'ów, health checks, service discovery i standardowy handler odpornościowy HttpClient. Komentarz w kodzie powołuje się na zasadę P2 z `architecture-standards` jako powód, dla którego nie ma tu ani jednej encji domenowej.",
+      "reusable": true
+    },
+    {
+      "name": "QrCodeService",
+      "path": "src/ZooCompanion.Web/Services/QrCodeService.cs",
+      "description": "Szesnaście linii opakowania QRCoder: wejściem jest string i liczba pikseli na moduł, wyjściem PNG z korekcją błędów poziomu Q. Strona `/admin/exhibits/{id}/qr` renderuje wynik jako data URI, żeby personel mógł wydrukować tabliczkę bez pobierania pliku.",
+      "reusable": true
+    },
+    {
+      "name": "LocalMediaStorage",
+      "path": "src/ZooCompanion.Web/Services/LocalMediaStorage.cs",
+      "description": "Zapis przesłanych zdjęć na dysk pod `wwwroot/uploads` z nazwą z Guid, plus `GetPublicUrl` i `Delete`. Jedyne założenie to istnienie WebRootPath; brak zależności od blob storage jest świadomym ograniczeniem na czas pilotażu jednoinstancyjnego.",
+      "reusable": true
+    },
+    {
+      "name": "ZooChatAgent + ZooChatTools",
+      "path": "src/ZooCompanion.Web/Services",
+      "description": "Pętla tool-calling na SDK Anthropic: najwyżej 6 iteracji, 1 024 tokeny wyjścia, konwersja bloków TextBlock i ToolUseBlock, błąd zwracany jako dwujęzyczny komunikat zamiast wyjątku. Prompt systemowy zamyka agenta w zwierzętach i wybiegach tego zoo, wymusza odpowiedź w języku pytania i zabrania zmyślania imion, gatunków oraz godzin karmienia.",
+      "reusable": false
+    },
+    {
+      "name": "ZooDataQueries",
+      "path": "src/ZooCompanion.Web/Services/ZooDataQueries.cs",
+      "description": "Jedyne miejsce czytające dane wybiegów, współdzielone przez strony publiczne i implementacje narzędzi agenta. Zwraca rekordy projekcyjne `ExhibitSummary`, `ExhibitDetail` i `AnimalDetail`, więc rozjazd faktów między czatem a stroną wymagałby dopisania drugiego czytnika.",
+      "reusable": false
+    },
+    {
+      "name": "ZooCompanion.AppHost",
+      "path": "src/ZooCompanion.AppHost/Program.cs",
+      "description": "Korzeń kompozycji {{term:aspire|Aspire}}: dwie bazy Postgres (własna i osobna dla authservice), kontener authservice z bind-mountem klucza RS256 oraz projekt Web z wstrzykniętym adresem dostawcy tożsamości. Ścieżka do klucza czytana jest wprost z konfiguracji, bo montowanie musi być zdefiniowane synchronicznie.",
+      "reusable": false
+    },
+    {
+      "name": "Model danych i MigrationBackgroundService",
+      "path": "src/ZooCompanion.Web/Data",
+      "description": "Sześć encji, unikalny indeks na `Exhibit.Slug` i jawnie zadeklarowane zachowania kaskad zamiast domyślnych. `MigrationBackgroundService` uruchamia `MigrateAsync` dopiero po starcie Kestrela, żeby health probe nie zinterpretował długiej migracji jako nieudanego wdrożenia.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "authservice", "reason": "Realna zależność runtime: zoo-companion uruchamia własną instancję obrazu `ghcr.io/konradcinkusz/authservice` i nie ma żadnego lokalnego magazynu użytkowników. Kolejny punkt danych dla wzorca „jedna baza kodu, N instancji”." },
+    { "slug": "primates", "reason": "Pomysł został wydzielony z tej samej analizy „Primates: od A do ZOO”, a BUSINESS-CASE.md dokumentuje, że primates nigdy nie zbudował funkcji instytucjonalnych dla zoo poza kategorią-placeholderem." },
+    { "slug": "architecture-standards", "reason": "Kod i `.github/copilot-instructions.md` powołują się wprost na zasady P1–P15 tamtego repo: AppHost jako korzeń kompozycji, migracje zamiast EnsureCreated, sekrety wyłącznie ze środowiska." },
+    { "slug": "copilot-scope", "reason": "Ten sam kształt Blazor Server plus Aspire plus Postgres, wskazany w README jako wzorzec już zwalidowany tam i w AgentHelm." },
+    { "slug": "agent-eval-bench", "reason": "README wskazuje je jako źródło wzorca wąskiej, jawnie wyliczonej powierzchni narzędziowej agenta zamiast otwartego dostępu do bazy." },
+    { "slug": "aurelius-promptus", "reason": "Roadmapa planuje przejęcie stamtąd wzorca QuestPDF do generowania folderów i Bicepowego IaC, a jego zablokowaną integrację płatności cytuje jako lekcję." }
+  ],
+  "product": "Kupujący jest zdefiniowany ostrzej niż w większości portfolio: instytucja, czyli zoo, park dziki albo akwarium, kupująca licencję na produkt do obsługi zwiedzającego, sprzedawana bezpośrednio przez założyciela jako autónomo w Hiszpanii. Nazwane są dwa konkretne cele pilotażu, Río Safari Elche i Bioparc Valencia, ale żaden kontakt nie jest potwierdzony, ceny nie ma, a faza 0 jest jawnie darmową instalacją pod case study. Realny status handlowy to więc hipoteza z gotowym demo, nie pipeline. Sam BUSINESS-CASE.md przyznaje, że rynek rzędu 26 zoo w Polsce nie jest biznesem bez ekspansji międzynarodowej, i to jest najuczciwsze zdanie w całym repozytorium.",
+  "highlights": [
+    "Pełna ścieżka od analizy biznesowej do działającego kodu w **pięć commitów**: BUSINESS-CASE.md, ARCHITECTURE.md i ROADMAP.md poprzedzają implementację i są z nią zgodne.",
+    "Uzasadnienie istnienia produktu jest oparte na audycie cudzego kodu, nie na deklaracji: BUSINESS-CASE.md podaje dowody (bazar Zoos id 104, jedna kategoria `DisplayToThePublic`, jeden typ transakcji `Visit`, tabela cen abonamentu) na to, że funkcje dla zoo nigdy nie powstały ani w FSE, ani w primates.",
+    "Repozytorium nie zawiera żadnego magazynu użytkowników, hasła ani klucza podpisującego: RS256 w `authservice` sprawia, że aplikacja potrzebuje wyłącznie URL-a dostawcy tożsamości.",
+    "Powierzchnia narzędziowa agenta to celowo dwa narzędzia tylko-do-odczytu, więc bramka potwierdzeń i stan wstrzymanej tury po prostu nie istnieją. Komentarz w kodzie porównuje to wprost z dużo cięższym `AgentService` z primates.",
+    "CI buduje z `-warnaserror`, a migracje startują dopiero po nasłuchu Kestrela, żeby health probe nie zinterpretował długiej migracji jako nieudanego deployu."
+  ],
+  "gaps": [
+    "**Zero testów automatycznych** przy 1 044 liniach C#. Nie ma testu ani na `ZooChatTools.ExecuteAsync`, ani na projekcje `ZooDataQueries`, choć oba mają oczywiste przypadki brzegowe (brakujący argument, nieznane narzędzie, nieistniejący slug).",
+    "**Brak wdrożenia i brak publicznego URL-a.** ARCHITECTURE.md wskazuje Fly.io jako cel, ale w repo nie ma żadnego `fly.toml` ani katalogu `infra`; obraz z Dockerfile nie jest nigdzie publikowany, a {{term:ghcr}} występuje tylko jako źródło obcego obrazu authservice.",
+    "Roadmapa odhacza strony publiczne jako „ES primary / EN fallback”, a `Home.razor` i `ExhibitDetail.razor` renderują wyłącznie pola `*En`. Pola hiszpańskie są zbierane w adminie i **nigdy nie pokazywane zwiedzającemu**; dwujęzyczność działa tylko w czacie, przez prompt.",
+    "Brak jakiejkolwiek kontroli ról: ARCHITECTURE.md sam przyznaje, że każde konto istniejące w podpiętej instancji authservice może zalogować się jako personel zoo.",
+    "Publiczny endpoint czatu woła Claude bez rate limitu, bez limitu długości historii i bez limitu sesji. To jedno wystawienie na świat od nieograniczonego rachunku."
+  ],
+  "risks": [
+    "`LICENSE` podaje copyright `dev_insight`, a nie autora ani nazwy projektu. To skopiowany plik z siostrzanego repo i ten sam błąd występuje w co najmniej dwóch innych.",
+    "Obraz authservice jest przypięty na tagu `latest` zarówno w `docker-compose.yml`, jak i w AppHost. Zmiana kontraktu `POST /api/v1/auth/login` albo kształtu odpowiedzi wyłącza logowanie bez żadnego ostrzeżenia w tym repozytorium.",
+    "`JwtClaimsPrincipalFactory` czyta claimy przez `ReadJwtToken`, czyli **bez weryfikacji podpisu**. Komentarz uzasadnia to zaufaniem do połączenia serwer-serwer, co jest prawdą dokładnie tak długo, jak długo `Authority` nie wskaże niezaufanego hosta.",
+    "Model w `appsettings.json` to alias `claude-sonnet-5` bez przypiętej wersji, a hasło startowe `ChangeMe123!` leży wprost w `docker-compose.yml` i w `AppHost/Program.cs`. Oba są akceptowalne na laptopie i oba pojechałyby dalej bez zmiany."
+  ],
+  "next": [
+    "Dodaj `tests/ZooCompanion.Tests` i krok `dotnet test` w `ci.yml`; komentarz w workflow sam o to prosi. Pierwsze cztery testy to `ZooChatTools.ExecuteAsync` na braku argumentu, nieznanym narzędziu i nieistniejącym slugu oraz `GetExhibitDetailBySlugAsync`.",
+    "Rozstrzygnij dwujęzyczność: albo renderuj pola `*Es` na stronach publicznych, albo odznacz checkbox w roadmapie. Dziś roadmapa mówi nieprawdę o własnym kodzie.",
+    "Dopisz rate limiting i limit długości historii na endpoint czatu, zanim cokolwiek zostanie wystawione publicznie.",
+    "Napisz `fly.toml` dla web i `flyio/authservice.fly.toml` według wzorca z ARCHITECTURE.md, i przy okazji przypnij konkretny tag obrazu authservice zamiast `latest`.",
+    "Umów pierwszą rozmowę z Elche albo Valencia. To jedyne zadanie blokujące fazę 0, którego nie da się zamknąć kodem."
+  ],
+  "headline": "Faza 0 kompletna w pięć commitów: zero testów, zero wdrożenia, zero klienta",
+  "headlineTone": "warn",
+  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-18", "commits": 5, "files": 113 }
+}

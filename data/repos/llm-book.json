@@ -1,0 +1,145 @@
+{
+  "slug": "llm-book",
+  "name": "LangChain, LangGraph and Async Python",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P2",
+  "oneLiner": "Źródła książki o LangChain 1.x, LangGraph i async Pythonie dla inżyniera przychodzącego z .NET: 17 rozdziałów, 6 dodatków.",
+  "summary": "Repozytorium to 8 698 linii LaTeX-a: 17 rozdziałów, 6 dodatków, front matter i pipeline budujący PDF. Teza jest jedna i konsekwentnie broniona: po wydaniu 1.0 z 17 października 2025 `langchain` stał się cienką warstwą nad runtime'em `langgraph`, więc większość materiałów w sieci opisuje architekturę, której już nie ma. Najciekawsza decyzja inżynierska nie dotyczy treści, tylko **dyscypliny**: cały dług redakcyjny jest policzalny i liczony przez CI. Cel `make debt` zlicza rozdziały-stuby, brakujące zrzuty ekranu, bloki `verifybox` i diagramy, a workflow `build.yml` publikuje te same liczniki do GitHub Step Summary przy każdym buildzie. Blok `verifybox` oznacza listing, którego nie uruchomiono przeciwko przypiętym wersjom, i w całym repozytorium jest ich **zero**, co znaczy, że autor sam wyegzekwował własną regułę zamiast ją zadeklarować. Diagramy są tekstem: 45 źródeł Mermaid jest commitowanych, wyrenderowane PDF-y gitignorowane, a przy braku renderu makro drukuje źródło diagramu, więc build bez `mermaid-cli` nadal pokazuje czytelnikowi strukturę.",
+  "stack": [
+    "LaTeX (latexmk, pdflatex, klasa book)",
+    "tcolorbox / listings / imakeidx / microtype",
+    "Mermaid CLI v11",
+    "Python 3.13 (skrypty pomiarowe)",
+    "langchain 1.3.14 / langchain-core 1.5.3 / langgraph 1.2.10",
+    "FastAPI + uvicorn + httpx (tylko benchmark rozdz. 13)",
+    "GitHub Actions",
+    "GitHub Pages"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "podwójna: kod MIT, proza CC BY-NC-SA 4.0",
+  "tests": "Brak testów automatycznych: nie ma pytest, `pyproject.toml` ani pliku zależności. Rolę testu pełni build LaTeX plus krok CI failujący przy nierozwiązanej referencji krzyżowej; cztery skrypty pomiarowe w `code/` (702 linie) nie są w CI uruchamiane.",
+  "ci": "Trzy workflow. `build.yml` ma trzy joby: render każdego `.mmd` przez mermaid-cli z failem przy błędzie, kompilacja `latexmk` z grepem `Reference.*undefined` w `main.log` i publikacją liczników długu do Step Summary, oraz doradczy job porównujący dziewięć pinów z PyPI. `release.yml` dopina PDF do GitHub Release na tagu `v*`, `pages.yml` publikuje `docs/`.",
+  "metrics": [
+    { "label": "Rozdziały / dodatki", "value": "17 / 6" },
+    { "label": "Linie .tex", "value": "8 698" },
+    { "label": "Wpisy indeksu", "value": "411" },
+    { "label": "Źródła Mermaid", "value": "45" },
+    { "label": "Listingi Pythona", "value": "82" },
+    { "label": "Bloki verifybox", "value": "0" },
+    { "label": "Skrypty pomiarowe", "value": "4 pliki, 702 linie" },
+    { "label": "Uruchomione eksperymenty", "value": "3,5 z 5" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/llm-book",
+    "live": [
+      { "label": "Strona książki (GitHub Pages)", "url": "https://konradcinkusz.github.io/llm-book/" },
+      { "label": "Mini-projekt Ops Copilot (osobne repo)", "url": "https://github.com/konradcinkusz/llm-book-mini-project" },
+      { "label": "Tom siostrzany dla .NET", "url": "https://github.com/konradcinkusz/maf-book" }
+    ],
+    "docs": [
+      { "label": "README z tabelami pomiarów", "path": "README.md" },
+      { "label": "Konwencje i stan weryfikacji API", "path": "CLAUDE.md" },
+      { "label": "Manifest diagramów i zrzutów", "path": "appendices/appF-manifest.tex" },
+      { "label": "Ściągawka API", "path": "appendices/appB-cheatsheet.tex" },
+      { "label": "Kontrola pinów wobec PyPI", "path": "tools/check_versions.py" },
+      { "label": "Landing page publikowany na Pages", "path": "docs/index.html" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": false, "ghcr": false, "pages": true, "packages": false },
+  "components": [
+    {
+      "name": "Makra brakującego artefaktu",
+      "path": "preamble.tex",
+      "description": "`\\mermaidfig`, `\\needscreenshot` i `\\chapterstub` zamieniają brak artefaktu w widoczny placeholder i jednocześnie dopisują pozycję do manifestu `.dgm` / `.shots`. Przy braku wyrenderowanego PDF-a `\\mermaidfig` drukuje wprost źródło Mermaid, więc niekompletny build nadal niesie treść.",
+      "reusable": true
+    },
+    {
+      "name": "Liczniki długu redakcyjnego",
+      "path": "Makefile",
+      "description": "Cele `debt`, `shots` i `stubs` grepują źródła i zwracają cztery liczby, które CI przepisuje do GITHUB_STEP_SUMMARY. Dług jest przez to widoczny przy każdym pushu zamiast żyć w głowie autora; przenosi się na dowolne repozytorium tekstowe po podmianie nazw grepowanych makr.",
+      "reusable": true
+    },
+    {
+      "name": "Pipeline diagramów Mermaid",
+      "path": "Makefile + figures/mermaid/",
+      "description": "Reguła renderuje każdy `.mmd` przez `npx @mermaid-js/mermaid-cli@11` z `--pdfFit`, autowykrywa przeglądarkę i sama generuje `.puppeteer.json`. Wejściem jest dowolny katalog źródeł, a wspólny `config.json` trzyma paletę poza pojedynczymi diagramami.",
+      "reusable": true
+    },
+    {
+      "name": "MeteredFakeModel",
+      "path": "code/ch11/structural_cost.py",
+      "description": "Podklasa `FakeMessagesListChatModel`, która przed odpowiedzią ze skryptu liczy wywołania modelu i rozmiar kontekstu. Mierzy koszt strukturalny dowolnego grafu LangGraph bez dostawcy i bez sekundy oczekiwania; tu obsługuje pięć {{term:topologie|topologii}} zbudowanych ręcznie ze `StateGraph` i `Command`.",
+      "reusable": true
+    },
+    {
+      "name": "Preambuła i osiem środowisk",
+      "path": "preamble.tex",
+      "description": "447 linii: geometria 17x24 cm, własny język `listings` o nazwie `pythonx` i osiem ramek tcolorbox (note, warning, versionbox, verifybox, exercisebox, projectbox, dotnetbox, chapterstub). Obronne `\\IfFileExists` dla babel, newtx i inconsolata degraduje build zamiast go wywracać, a komentarz wprost zakazuje mapowania U+00A0, bo to zabija `listings`.",
+      "reusable": true
+    },
+    {
+      "name": "Landing page bez zależności",
+      "path": "docs/index.html",
+      "description": "7 602 bajty jednego pliku HTML z własnymi zmiennymi CSS i obsługą `prefers-color-scheme`, bez jednego zewnętrznego zasobu. Powiela status i tabele pomiarów z README, więc rozjeżdża się z nim ręcznie.",
+      "reusable": true
+    },
+    {
+      "name": "Kontrola pinów wobec PyPI",
+      "path": "tools/check_versions.py",
+      "description": "Wyciąga dziewięć makr `\\newcommand` z `preamble.tex`, odpytuje `pypi.org/pypi/<dist>/json` i drukuje tabelę Markdown ze znacznikiem `behind`. Słownik dystrybucji jest zaszyty na sztywno i nigdy nie failuje builda, bo job w CI ma `continue-on-error`.",
+      "reusable": false
+    },
+    {
+      "name": "Benchmark serwisu agentowego",
+      "path": "code/ch13/bench_service.py",
+      "description": "182 linie: uvicorn w osobnym procesie, sterowanie po realnym HTTP przez httpx, dostawca zamokowany na 100 ms, 400 żądań na komórkę, trzy scenariusze (clean, blocking, `to_thread`). Docstring spisuje dwa wcześniejsze błędy metodologiczne i dlatego skrypt kalibruje się teraz wobec endpointu no-op i flaguje komórki bliskie sufitowi klienta.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "maf-book", "reason": "Tom siostrzany, linkowany wprost z README i landing page: ta sama preambuła, te same liczniki długu i ta sama zasada „pomiar zamiast twierdzenia”, tylko dla stosu .NET. Oba mają też tę samą dziurę: najdroższy eksperyment w książce jest nieuruchomiony." },
+    { "slug": "agents-and-llms", "reason": "Ten sam obszar tematyczny, agenci LLM. Zawartość tamtego repozytorium nie była w tym przebiegu sprawdzana, więc nakładanie się jest deklaratywne." },
+    { "slug": "agent-eval-bench", "reason": "Eksperyment 5 mierzy koszt strukturalny topologii wieloagentowych fake'owym modelem; tamten benchmark ocenia jakość tych samych układów na zadaniach. Nieuruchomiona połowa eksperymentu to dokładnie to, co tamto repo już potrafi policzyć." }
+  ],
+  "product": "Brak kupującego w sensie transakcyjnym i licencja to przesądza: proza jest na CC BY-NC-SA 4.0, więc komercyjna redystrybucja tekstu jest wykluczona, a w repozytorium nie ma żadnej ścieżki sprzedaży. Realna wartość to {{term:evidence|materiał dowodowy}} pod rekrutację i konsulting w obszarze agentów LLM, oparty na weryfikowanym API i własnych pomiarach zamiast przepisanej dokumentacji. Kanałem zarobkowym mogłoby być szkolenie albo wydanie papierowe, ale nic w repozytorium tego nie przygotowuje: nie ma ani wersji do druku, ani listy mailingowej, ani strony z ofertą.",
+  "highlights": [
+    "**Zero bloków `verifybox` w 8 698 liniach tekstu.** Środowisko istnieje w preambule i jest liczone przez CI, a mimo to nie użyto go ani razu, bo każdy z 82 listingów przepuszczono przez przypięte wersje. Konwencja została wyegzekwowana, nie ogłoszona.",
+    "Przebieg spójnościowy wyłapał **własny błąd książki**: domyślny `recursion_limit` w `langgraph` to 10007, nie 25. Stara wartość przetrwała cały szkic w bloku `console`, którego nikt nigdy nie uruchomił, i została poprawiona w rozdziale oraz w dodatku (commit 9435b1f).",
+    "Cztery skrypty pomiarowe (702 linie) są {{term:hermetyczny|hermetyczne}}: żaden nie potrzebuje dostawcy modelu. Eksperyment 1 uderza w ręcznie napisany serwer HTTP na localhost zamiast w `asyncio.sleep`, bo sen dowodzi tylko tego, że scheduler potrafi planować.",
+    "Eksperyment 5 rozdzielono na część strukturalną i jakościową, i tylko druga wymaga budżetu. Liczba wywołań modelu jest własnością {{term:topologie|topologii}}, więc licznik na fake'u daje tę samą odpowiedź co realny dostawca: nadzorca robi pięć wywołań przy dwóch pojedynczego agenta, a trzy z nich są routingiem, nie pracą.",
+    "45 źródeł Mermaid commitowanych jako tekst przy gitignorowanych PDF-ach, więc zmiana diagramu recenzuje się jako zwykły diff."
+  ],
+  "gaps": [
+    "**Makra `\\pyfile` i `\\pyregion` są zdefiniowane, skrypty mają znaczniki `--8<--`, ale w `chapters/` i `appendices/` nie ma ani jednego wywołania.** Wszystkie 82 listingi są przepisane ręcznie, więc książka i kod mogą się cicho rozjechać dokładnie w sposób, którego zakazują własne konwencje projektu.",
+    "Trzy pomiary wymagające płatnego dostawcy są nieuruchomione: jakość odpowiedzi w topologiach wieloagentowych (rozdz. 11, nagłówkowy eksperyment książki), trafność wyboru narzędzia wobec liczby narzędzi (rozdz. 6) i cache hit rate (rozdz. 12). Tabele w dodatku B stoją puste i mają stać puste.",
+    "Deklarowane 244 strony i „zero overfull vboxes” pochodzą wyłącznie z README i CLAUDE.md; w repozytorium nie ma ani `main.log`, ani PDF-a, więc bez zbudowania nie da się tego potwierdzić.",
+    "Skrypty w `code/` nie mają lintera, testu ani pliku zależności i nie chodzą w CI, mimo że wszystkie wykonują się w sekundy bez dostawcy. Nikt nie zauważy, kiedy przestaną się uruchamiać.",
+    "Mini-projekt Ops Copilot jest osobnym repozytorium, które 17 ramek `projectbox` traktuje jak kontrakt, a według notatek ma zaimplementowany tylko etap 00. README opisuje oba repozytoria jak jedną całość."
+  ],
+  "risks": [
+    "Dziewięć pinów w `preamble.tex` starzeje się szybko: samo `langchain-core` miało 49 stabilnych wydań między styczniem a lipcem 2026, a job porównujący je z PyPI ma `continue-on-error`, więc {{term:drift|dryf}} nigdy nie zatrzyma builda.",
+    "Podwójna licencja jest myląca w README: badge {{term:mit|MIT}} stoi obok badge'a CC BY-NC-SA i dopiero `LICENSE-CONTENT` mówi, że proza nie może być użyta komercyjnie.",
+    "`release.yml` odpala się wyłącznie na tagach `v*`, a `git push --tags` zwraca 403 przez proxy sandboxa. W praktyce żadne wydanie nie powstanie bez tagowania z lokalnego klona.",
+    "Skrypty pomiarowe nie deklarują zależności ani wersji, więc odtworzenie tych samych liczb za rok będzie zgadywaniem, które wydanie `langchain-core` było wtedy zainstalowane."
+  ],
+  "next": [
+    "Podepnij listingi przez `\\pyregion` tam, gdzie regiony `--8<--` już istnieją. To zamyka jedyną drogę do cichego rozjechania się książki i kodu, a makro jest gotowe.",
+    "Dodaj do `build.yml` lekki job Pythona: ruff plus uruchomienie `bench_concurrency.py`, `structural_cost.py` i `context_cost.py`. Żaden nie potrzebuje dostawcy i wszystkie chodzą w sekundy.",
+    "Zbuduj PDF i wpisz do README zweryfikowaną liczbę stron oraz aktualny licznik overfull hbox zamiast liczb z pamięci; przy okazji popraw dwie nieaktualne linie w CLAUDE.md (liczba uruchomionych eksperymentów i liczba diagramów).",
+    "Dopisz do `code/` plik zależności z dokładnymi wersjami, żeby pomiary dały się powtórzyć po następnym wydaniu LangChaina.",
+    "Oznacz w README wprost, że Ops Copilot jest dziś kontraktem, a nie działającym systemem, albo zaimplementuj kolejne etapy. Czytelnik nie ma jak tego rozstrzygnąć."
+  ],
+  "headline": "Pełny szkic z zerowym długiem weryfikacji, ale 82 listingi wciąż przepisane ręcznie",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-25",
+    "commits": 21,
+    "files": 91
+  }
+}

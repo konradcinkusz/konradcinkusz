@@ -1,0 +1,46 @@
+name: Validate portfolio manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "scripts/**"
+      - ".github/workflows/validate-portfolio.yml"
+  pull_request:
+    paths:
+      - "site/**"
+      - "scripts/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Schema and referential integrity
+        run: node scripts/validate-portfolio.mjs
+
+      - name: Every repository in the manifest still exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/check-repos.mjs
+
+      - name: The manifest is not stale
+        run: node scripts/build-manifest.mjs --check
+
+      - name: The site is valid HTML that parses
+        run: node scripts/smoke-site.mjs
+
+      - name: It actually renders
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          node scripts/render-check.mjs

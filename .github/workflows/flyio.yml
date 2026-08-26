@@ -1,0 +1,79 @@
+name: Deploy portfolio to Fly.io
+
+# A deploy is an act, and a tag is the record of it.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why this manual deploy"
+        required: true
+        type: string
+
+concurrency:
+  group: flyio-portfolio
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate site/data/portfolio.json
+        run: node scripts/validate-portfolio.mjs
+
+  deploy:
+    name: Build and deploy
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail early on a missing deploy token
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [ -z "${FLY_API_TOKEN}" ]; then
+            echo "::error::FLY_API_TOKEN is not set. See flyio/SECRETS.md."
+            exit 1
+          fi
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Create the app if it does not exist yet
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if ! flyctl status --app konrad-portfolio >/dev/null 2>&1; then
+            echo "App missing; creating it."
+            flyctl apps create konrad-portfolio --org personal
+          fi
+
+      - name: Deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl deploy --config flyio/portfolio.fly.toml \
+                        --remote-only \
+                        --wait-timeout 300
+
+      # The health check proves nginx is up. It does not prove the manifest shipped.
+      - name: Verify the manifest is served
+        run: |
+          for i in 1 2 3 4 5; do
+            count=$(curl -fsS --max-time 20 https://konrad-portfolio.fly.dev/data/portfolio.json \
+                    | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s);console.log(j.repos.length)})' ) && break
+            echo "attempt $i failed, retrying"; sleep 10
+          done
+          echo "repositories served: ${count:-0}"
+          [ "${count:-0}" -ge 30 ] || { echo "::error::manifest served with ${count:-0} repositories"; exit 1; }

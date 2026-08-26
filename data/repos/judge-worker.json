@@ -1,0 +1,134 @@
+{
+  "slug": "judge-worker",
+  "name": "judge-worker",
+  "cluster": "A-runtime",
+  "visibility": "private",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Worker TypeScript, który zdejmuje ślady agenta z kolejki BullMQ i ocenia je sędzią LLM — z sędzią sprawdzonym mutacjami, nie założonym.",
+  "summary": "Producent wrzuca jedno zadanie na ślad przez `addBulk`, worker konsumuje je z Redisa, **waliduje ślad schematem Zod ponownie na granicy konsumpcji** — kolejka jest tu traktowana jako granica zaufania, nie jako własna pamięć — i ocenia go wobec przypiętej rubryki. Domyślnym sędzią jest `MockJudgeProvider`: deterministyczna heurystyka rozumująca wyłącznie nad strukturą śladu (kolejność wywołań narzędzi, obecność zdarzeń, wyniki), nigdy nad treścią, przez co jest z definicji odporna na wstrzyknięcia i pozwala całemu demo chodzić bez klucza API. Flaga `--live` przełącza na Anthropic Messages API z kształtem odpowiedzi wymuszonym przez `zodOutputFormat`. Najciekawsza decyzja nie jest w warstwie kolejkowej, tylko w `cohenKappa`: gdy wszystkie pary ocen wpadają w jedną kategorię, funkcja zwraca `null`, nie `1.0`, bo dwoje oceniających, którzy zawsze mówią to samo, niczego nie dowiedli. Ten przypadek wystąpił realnie dla rubryki `tone` i repozytorium raportuje go jako liczbę osłabiającą własną tezę. Powstało jako dowód pod jeden cytowany punkt ogłoszenia o pracę i mówi to wprost w pierwszej sekcji README.",
+  "stack": ["TypeScript 5.7", "Node.js 22", "BullMQ 5 + Redis 7", "Zod 4", "@anthropic-ai/sdk 0.117", "prom-client 15 + pino 9", "Vitest 2", "Jekyll 4.3 + just-the-docs"],
+  "primaryLanguage": "TypeScript",
+  "license": "MIT",
+  "tests": "103 wywołania `it()`/`test()` w 32 blokach `describe`, rozłożone na 15 plików w `test/` — policzone grepem, bo `node_modules` nie istnieje w kontenerze i suite nie została uruchomiona. `FINDINGS.md` nadal podaje 7 plików i 30 testów, czyli liczby z wcześniejszego commita.",
+  "ci": "Cztery workflowy: `ci.yml` robi lint, format:check, typecheck, build i `test:coverage` na Node 22 z serwisem `redis:7-alpine`; gitleaks chodzi na **pełnej historii**, na PR/push i co poniedziałek; `docs.yml` buduje Jekylla i wypycha na GitHub Pages przy zmianach w markdownie. CodeQL jest zadeklarowany, ale sam się pomija, dopóki repozytorium jest prywatne.",
+  "metrics": [
+    { "label": "Commity", "value": "21" },
+    { "label": "Pliki w git", "value": "115 (w tym 6 dowiązań symbolicznych)" },
+    { "label": "Przypadki testowe", "value": "103 w 15 plikach" },
+    { "label": "Linie TypeScript (src + test)", "value": "4 138" },
+    { "label": "Fixture'y śladów / etykiety ludzkie", "value": "15 / 30" },
+    { "label": "Mutanty sędziego", "value": "5 napisanych, 5 wykrytych" },
+    { "label": "Load test na mocku", "value": "1 000 śladów w 499 ms, 2 004/s" },
+    { "label": "Dowód backpressure", "value": "25 partii / 500 śladów odrzuconych" }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/judge-worker",
+    "live": [
+      { "label": "Dokumentacja (GitHub Pages)", "url": "https://konradcinkusz.github.io/judge-worker/" }
+    ],
+    "docs": [
+      { "label": "Specyfikacja kontraktu sędziego", "path": "docs/SPEC.md" },
+      { "label": "Protokół kalibracji", "path": "docs/CALIBRATION.md" },
+      { "label": "Decyzje architektoniczne (ADR-1, ADR-2)", "path": "docs/architecture/DECISIONS.md" },
+      { "label": "Wyniki realnych przebiegów", "path": "FINDINGS.md" },
+      { "label": "Testowanie mutacyjne sędziego", "path": "MUTATIONS.md" }
+    ]
+  },
+  "deployment": { "fly": false, "docker": true, "ghcr": false, "pages": true, "packages": false },
+  "components": [
+    {
+      "name": "Producent z limitem głębokości kolejki",
+      "path": "src/queue/producer.ts",
+      "description": "`enqueueBatch()` odmawia wstawienia partii, która przekroczyłaby `QUEUE_DEPTH_LIMIT`, rzucając `QueueDepthExceededError` zamiast po cichu rosnąć. Przyjmuje jawny override limitu i własną instancję `Queue`, bo `loadEnv()` jest memoizowany, zanim CLI zdąży sparsować flagi — ta pułapka wcześniej po cichu psuła test backpressure.",
+      "reusable": true
+    },
+    {
+      "name": "CircuitBreakerJudgeProvider",
+      "path": "src/judge/circuitBreakerJudgeProvider.ts",
+      "description": "Dekorator dowolnego `JudgeProvider` z maszyną stanów closed → open → half-open, żeby seria padających zadań nie przepalała budżetu retry SDK przeciwko niedostępnemu endpointowi. Wiąże go z domeną wyłącznie dwumetodowy interfejs, który uogólnia się trywialnie.",
+      "reusable": true
+    },
+    {
+      "name": "Kalibracja — kappa Cohena",
+      "path": "src/calibration/cohenKappa.ts",
+      "description": "Nieważona {{term:kappa|kappa}} nad parą ciągów ocen, zwracająca `null` przy zerowej wariancji zamiast pozornej doskonałej zgodności. Czysta funkcja statystyczna bez jednej zależności domenowej — nadaje się do każdej kalibracji sędziego LLM.",
+      "reusable": true
+    },
+    {
+      "name": "Kolejka dead-letter z CLI do requeue",
+      "path": "src/reliability/deadLetter.ts",
+      "description": "Osobna kolejka `<nazwa>-dead-letter` z obciętym powodem awarii; `pnpm run dlq -- requeue` przywraca wpis przez normalną ścieżkę `enqueueBatch()`, więc dostaje ten sam limit głębokości i te same opcje zadania. Wpis znika dopiero po udanym requeue, nie przed.",
+      "reusable": true
+    },
+    {
+      "name": "Polityka redakcji logów",
+      "path": "src/observability/redact.ts",
+      "description": "`safeResultFields()` jest białą listą pól `JudgeResult` używaną w każdym miejscu logującym wynik, więc nowe pole nie staje się logowalne przez rozwinięcie obiektu w miejscu wywołania. `truncateForLog()` przycina tekst błędu z zależności zewnętrznej, zanim trafi do dead-letter.",
+      "reusable": true
+    },
+    {
+      "name": "Worker konsumujący z sufitem kosztu",
+      "path": "src/queue/worker.ts",
+      "description": "Rewaliduje ładunek Zodem, ocenia, liczy koszt przez `RunCostTracker` i **pauzuje sam siebie** po przekroczeniu `MAX_RUN_COST_USD`. Zadanie po wyczerpaniu prób ląduje w dead-letter zamiast zniknąć.",
+      "reusable": false
+    },
+    {
+      "name": "MockJudgeProvider",
+      "path": "src/judge/mockJudgeProvider.ts",
+      "description": "Sędzia heurystyczny czytający wyłącznie strukturę śladu, nigdy semantykę. {{term:determinizm|Determinizm}} nie jest tu wygodą testową, tylko własnością bezpieczeństwa: sędzia, który nie czyta treści, nie da się jej instrukcją przekonać.",
+      "reusable": false
+    },
+    {
+      "name": "Mutanty sędziego i harness",
+      "path": "src/mutations/mutantJudgeProviders.ts",
+      "description": "Pięć podklas psujących dokładnie jedną własność wyjścia: odwrócony werdykt, brak uzasadnienia, uległość wobec wstrzykniętej instrukcji, nieugruntowany optymizm, brak sprawdzenia nieobecności potwierdzenia. Każdy test jest dwuetapowy — sanity check na prawdziwym sędzim, potem asercja na mutancie.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    { "slug": "agent-eval-bench", "reason": "README i FINDINGS mówią wprost, że stamtąd przeniesiono kontrakt oceny, protokół kalibracji {{term:kappa|kappą}} i dyscyplinę {{term:mutation|testowania mutacyjnego}} — jako wzorzec, nie kod, bo tamto jest w .NET." },
+    { "slug": "copilot-scope", "reason": "Ta sama arytmetyka kalibracji sędziego, tylko tam nad telemetrią produkcyjną i bez ani jednej etykiety ludzkiej. Tu etykiet jest 30 i liczba wyszła." },
+    { "slug": "architecture-standards", "reason": "Budowane pod ograniczenia z `AI-EVALS.md` i `00-REFERENCE-ARCHITECTURE.md`, a dwa świadome odstępstwa są spisane jako ADR-1 i ADR-2." },
+    { "slug": "agent-eval-bench-factorial", "reason": "Ta sama rodzina problemu — pomiar jakości sędziego LLM — choć judge-worker nie odwołuje się do niego wprost." }
+  ],
+  "product": "**Brak kupującego**, i to nie jest wada tego repozytorium, tylko jego definicja. Zostało zbudowane pod jeden cytowany punkt ogłoszenia Senior Backend Engineer (Data Infrastructure) w Langfuse, w języku i technologii kolejki, których ten zespół faktycznie używa, i mówi to w pierwszej sekcji README. Jako {{term:evidence|dowód}} działa bardzo dobrze: kompletna warstwa niezawodności, realne liczby z realnych przebiegów i uczciwie oznaczone granice pomiaru. Jako produkt nie ma odbiorcy — nikt nie kupi workera oceniającego ślady w kształcie fixture'ów jednego repozytorium, a rynek na to zajmuje już firma, do której to podanie było skierowane.",
+  "highlights": [
+    "Pięć ręcznie napisanych mutantów sędziego, wszystkie wykryte, każdy psujący inną własność — a osobny test `mutation pass diversity` sprawdza tę różnorodność **mechanicznie**, zamiast liczyć na inspekcję autora.",
+    "`cohenKappa` zwraca `null` zamiast `1.0`, gdy nie ma wariancji ocen. Ten przypadek zdarzył się realnie dla rubryki `tone` i repozytorium raportuje go w `FINDINGS.md` jako liczbę, która osłabia jego własny nagłówek.",
+    "Backpressure udowodniony obciążeniem, nie deklaracją: 600 śladów, limit głębokości 100, opóźnienie oceny 150 ms — 100 ocenionych, 500 odrzuconych. `FINDINGS.md` opisuje przy tym dwa błędy, które wcześniej po cichu ten test fałszowały: wspólne połączenie Redis i memoizacja `loadEnv()`.",
+    "`pricing.test.ts` psuje CI, gdy `PRICING_LAST_VERIFIED` jest starsze niż sześć miesięcy. Przeterminowana tabela cen staje się głośnym błędem zamiast po cichu fałszywej liczby kosztu.",
+    "Warstwa niezawodności jest kompletna i każdy jej element ma własny test: limit głębokości, retry z backoffem, dead-letter z requeue, circuit breaker, sufit kosztu pauzujący workera i timeout graceful shutdown, który raportuje, które zadania przerwał."
+  ],
+  "gaps": [
+    "**`FINDINGS.md` podaje 7 plików testowych i 30 testów, a repozytorium ma 15 i 103.** Liczby są z wcześniejszego commita i nie zostały odświeżone po dołożeniu testów CLI, circuit breakera, kosztu, metryk i redakcji. To jedyne miejsce, gdzie repo podaje liczbę rozjechaną z kodem — i akurat w pliku, którego cała wartość polega na tym, że liczby są prawdziwe.",
+    "Kalibracja została uruchomiona **wyłącznie na mocku**, a etykiety ludzkie i heurystyki mocka napisała ta sama osoba w tym samym posiedzeniu. Repo mówi to wprost, ale kappa 1.0 nadal nie mierzy jakości sędziego, tylko zgodność autora z samym sobą.",
+    "Ścieżka `--live` nie ma żadnego pokrycia {{term:mutation|mutacyjnego}} i nigdy nie została uruchomiona przeciwko prawdziwemu API — jest testowana wstrzykniętym `fetch`, więc end-to-end pozostaje niesprawdzone.",
+    "Brak realnej telemetrii {{term:otel|OTel}}: są logi pino i metryki Prometheus, a słownictwo pól logu jest zapożyczone z konwencji GenAI OTel, co da się źle odczytać. `SPEC.md` sam to prostuje.",
+    "Deploy dokumentacji wymaga jednorazowego ręcznego przełączenia Settings → Pages → Source na GitHub Actions, czego workflow nie wykona sam. README linkuje do tej strony jako do dokumentacji pełnej; nie zweryfikowano, czy odpowiada."
+  ],
+  "risks": [
+    "LICENSE przypisuje copyright `dev_insight`, co koliduje z inną pozycją portfolio (slug `dev-insight`) i wygląda na artefakt kopiowania między repozytoriami.",
+    "Repozytorium jest zbudowane pod ogłoszenie jednej firmy i nazywa ją z nazwy. Gdy rekrutacja się zamknie, README zacznie się czytać jak nieaktualne podanie, a wartość kanału spadnie do zera bez jednego commita.",
+    "Tabela cen w `src/observability/pricing.ts` jest zakodowana na sztywno i zweryfikowana 2026-08-17. Test staleness da jej sześć miesięcy, potem CI stanie na czerwono z powodu niezwiązanego z kodem.",
+    "Żaden sekret nie jest w repozytorium, ale `--live` czyta `ANTHROPIC_API_KEY` ze środowiska, a jedyny hamulec wydatku — `MAX_RUN_COST_USD` — jest domyślnie wyłączony."
+  ],
+  "next": [
+    "Odśwież liczby w `FINDINGS.md` na aktualnym commicie. Plik, którego teza brzmi „realne liczby z realnych przebiegów”, nie może podawać nieaktualnych.",
+    "Popraw linię copyright w LICENSE na właściwego właściciela — dziś nosi nazwę innego repozytorium.",
+    "Uruchom `pnpm run calibrate -- --live` z prawdziwym kluczem na 15 fixture'ach (kilkanaście sekund, grosze) i wpisz tę {{term:kappa|kappę}} obok mockowej. To najtańsza rzecz, która zamienia najsłabszą tezę repozytorium w pomiar.",
+    "Dodaj mutacyjny odpowiednik `SilentInjectionComplianceJudge` dla `LiveJudgeProvider` — sprawdź, czy prawdziwy sędzia opiera się atakowi z `adv-003`.",
+    "Rozstrzygnij widoczność repozytorium (issue #19). Dopóki jest prywatne, CodeQL sam się pomija i cała warstwa „skanowanie kodu w CI” jest deklaracją, nie kontrolą."
+  ],
+  "headline": "Sędzia sprawdzony pięcioma mutantami; ścieżka live nigdy nie dotknęła prawdziwego API",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 21,
+    "openPrs": 13,
+    "dependabotPrs": 13,
+    "lastCommit": "2026-08-17",
+    "commits": 21,
+    "files": 115
+  }
+}
