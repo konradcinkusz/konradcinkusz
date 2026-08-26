@@ -7,35 +7,87 @@
   "tier": "P3",
   "oneLiner": "Worker TypeScript, który zdejmuje ślady agenta z kolejki BullMQ i ocenia je sędzią LLM — z sędzią sprawdzonym mutacjami, nie założonym.",
   "summary": "Producent wrzuca jedno zadanie na ślad przez `addBulk`, worker konsumuje je z Redisa, **waliduje ślad schematem Zod ponownie na granicy konsumpcji** — kolejka jest tu traktowana jako granica zaufania, nie jako własna pamięć — i ocenia go wobec przypiętej rubryki. Domyślnym sędzią jest `MockJudgeProvider`: deterministyczna heurystyka rozumująca wyłącznie nad strukturą śladu (kolejność wywołań narzędzi, obecność zdarzeń, wyniki), nigdy nad treścią, przez co jest z definicji odporna na wstrzyknięcia i pozwala całemu demo chodzić bez klucza API. Flaga `--live` przełącza na Anthropic Messages API z kształtem odpowiedzi wymuszonym przez `zodOutputFormat`. Najciekawsza decyzja nie jest w warstwie kolejkowej, tylko w `cohenKappa`: gdy wszystkie pary ocen wpadają w jedną kategorię, funkcja zwraca `null`, nie `1.0`, bo dwoje oceniających, którzy zawsze mówią to samo, niczego nie dowiedli. Ten przypadek wystąpił realnie dla rubryki `tone` i repozytorium raportuje go jako liczbę osłabiającą własną tezę. Powstało jako dowód pod jeden cytowany punkt ogłoszenia o pracę i mówi to wprost w pierwszej sekcji README.",
-  "stack": ["TypeScript 5.7", "Node.js 22", "BullMQ 5 + Redis 7", "Zod 4", "@anthropic-ai/sdk 0.117", "prom-client 15 + pino 9", "Vitest 2", "Jekyll 4.3 + just-the-docs"],
+  "stack": [
+    "TypeScript 5.7",
+    "Node.js 22",
+    "BullMQ 5 + Redis 7",
+    "Zod 4",
+    "@anthropic-ai/sdk 0.117",
+    "prom-client 15 + pino 9",
+    "Vitest 2",
+    "Jekyll 4.3 + just-the-docs"
+  ],
   "primaryLanguage": "TypeScript",
   "license": "MIT",
   "tests": "103 wywołania `it()`/`test()` w 32 blokach `describe`, rozłożone na 15 plików w `test/` — policzone grepem, bo `node_modules` nie istnieje w kontenerze i suite nie została uruchomiona. `FINDINGS.md` nadal podaje 7 plików i 30 testów, czyli liczby z wcześniejszego commita.",
   "ci": "Cztery workflowy: `ci.yml` robi lint, format:check, typecheck, build i `test:coverage` na Node 22 z serwisem `redis:7-alpine`; gitleaks chodzi na **pełnej historii**, na PR/push i co poniedziałek; `docs.yml` buduje Jekylla i wypycha na GitHub Pages przy zmianach w markdownie. CodeQL jest zadeklarowany, ale sam się pomija, dopóki repozytorium jest prywatne.",
   "metrics": [
-    { "label": "Commity", "value": "21" },
-    { "label": "Pliki w git", "value": "115 (w tym 6 dowiązań symbolicznych)" },
-    { "label": "Przypadki testowe", "value": "103 w 15 plikach" },
-    { "label": "Linie TypeScript (src + test)", "value": "4 138" },
-    { "label": "Fixture'y śladów / etykiety ludzkie", "value": "15 / 30" },
-    { "label": "Mutanty sędziego", "value": "5 napisanych, 5 wykrytych" },
-    { "label": "Load test na mocku", "value": "1 000 śladów w 499 ms, 2 004/s" },
-    { "label": "Dowód backpressure", "value": "25 partii / 500 śladów odrzuconych" }
+    {
+      "label": "Commity",
+      "value": "21"
+    },
+    {
+      "label": "Pliki w git",
+      "value": "115 (w tym 6 dowiązań symbolicznych)"
+    },
+    {
+      "label": "Przypadki testowe",
+      "value": "103 w 15 plikach"
+    },
+    {
+      "label": "Linie TypeScript (src + test)",
+      "value": "4 138"
+    },
+    {
+      "label": "Fixture'y śladów / etykiety ludzkie",
+      "value": "15 / 30"
+    },
+    {
+      "label": "Mutanty sędziego",
+      "value": "5 napisanych, 5 wykrytych"
+    },
+    {
+      "label": "Load test na mocku",
+      "value": "1 000 śladów w 499 ms, 2 004/s"
+    },
+    {
+      "label": "Dowód backpressure",
+      "value": "25 partii / 500 śladów odrzuconych"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/judge-worker",
-    "live": [
-      { "label": "Dokumentacja (GitHub Pages)", "url": "https://konradcinkusz.github.io/judge-worker/" }
-    ],
+    "live": [],
     "docs": [
-      { "label": "Specyfikacja kontraktu sędziego", "path": "docs/SPEC.md" },
-      { "label": "Protokół kalibracji", "path": "docs/CALIBRATION.md" },
-      { "label": "Decyzje architektoniczne (ADR-1, ADR-2)", "path": "docs/architecture/DECISIONS.md" },
-      { "label": "Wyniki realnych przebiegów", "path": "FINDINGS.md" },
-      { "label": "Testowanie mutacyjne sędziego", "path": "MUTATIONS.md" }
+      {
+        "label": "Specyfikacja kontraktu sędziego",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "Protokół kalibracji",
+        "path": "docs/CALIBRATION.md"
+      },
+      {
+        "label": "Decyzje architektoniczne (ADR-1, ADR-2)",
+        "path": "docs/architecture/DECISIONS.md"
+      },
+      {
+        "label": "Wyniki realnych przebiegów",
+        "path": "FINDINGS.md"
+      },
+      {
+        "label": "Testowanie mutacyjne sędziego",
+        "path": "MUTATIONS.md"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": true, "ghcr": false, "pages": true, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
   "components": [
     {
       "name": "Producent z limitem głębokości kolejki",
@@ -87,10 +139,22 @@
     }
   ],
   "overlaps": [
-    { "slug": "agent-eval-bench", "reason": "README i FINDINGS mówią wprost, że stamtąd przeniesiono kontrakt oceny, protokół kalibracji {{term:kappa|kappą}} i dyscyplinę {{term:mutation|testowania mutacyjnego}} — jako wzorzec, nie kod, bo tamto jest w .NET." },
-    { "slug": "copilot-scope", "reason": "Ta sama arytmetyka kalibracji sędziego, tylko tam nad telemetrią produkcyjną i bez ani jednej etykiety ludzkiej. Tu etykiet jest 30 i liczba wyszła." },
-    { "slug": "architecture-standards", "reason": "Budowane pod ograniczenia z `AI-EVALS.md` i `00-REFERENCE-ARCHITECTURE.md`, a dwa świadome odstępstwa są spisane jako ADR-1 i ADR-2." },
-    { "slug": "agent-eval-bench-factorial", "reason": "Ta sama rodzina problemu — pomiar jakości sędziego LLM — choć judge-worker nie odwołuje się do niego wprost." }
+    {
+      "slug": "agent-eval-bench",
+      "reason": "README i FINDINGS mówią wprost, że stamtąd przeniesiono kontrakt oceny, protokół kalibracji {{term:kappa|kappą}} i dyscyplinę {{term:mutation|testowania mutacyjnego}} — jako wzorzec, nie kod, bo tamto jest w .NET."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Ta sama arytmetyka kalibracji sędziego, tylko tam nad telemetrią produkcyjną i bez ani jednej etykiety ludzkiej. Tu etykiet jest 30 i liczba wyszła."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Budowane pod ograniczenia z `AI-EVALS.md` i `00-REFERENCE-ARCHITECTURE.md`, a dwa świadome odstępstwa są spisane jako ADR-1 i ADR-2."
+    },
+    {
+      "slug": "agent-eval-bench-factorial",
+      "reason": "Ta sama rodzina problemu — pomiar jakości sędziego LLM — choć judge-worker nie odwołuje się do niego wprost."
+    }
   ],
   "product": "**Brak kupującego**, i to nie jest wada tego repozytorium, tylko jego definicja. Zostało zbudowane pod jeden cytowany punkt ogłoszenia Senior Backend Engineer (Data Infrastructure) w Langfuse, w języku i technologii kolejki, których ten zespół faktycznie używa, i mówi to w pierwszej sekcji README. Jako {{term:evidence|dowód}} działa bardzo dobrze: kompletna warstwa niezawodności, realne liczby z realnych przebiegów i uczciwie oznaczone granice pomiaru. Jako produkt nie ma odbiorcy — nikt nie kupi workera oceniającego ślady w kształcie fixture'ów jednego repozytorium, a rynek na to zajmuje już firma, do której to podanie było skierowane.",
   "highlights": [
@@ -105,7 +169,8 @@
     "Kalibracja została uruchomiona **wyłącznie na mocku**, a etykiety ludzkie i heurystyki mocka napisała ta sama osoba w tym samym posiedzeniu. Repo mówi to wprost, ale kappa 1.0 nadal nie mierzy jakości sędziego, tylko zgodność autora z samym sobą.",
     "Ścieżka `--live` nie ma żadnego pokrycia {{term:mutation|mutacyjnego}} i nigdy nie została uruchomiona przeciwko prawdziwemu API — jest testowana wstrzykniętym `fetch`, więc end-to-end pozostaje niesprawdzone.",
     "Brak realnej telemetrii {{term:otel|OTel}}: są logi pino i metryki Prometheus, a słownictwo pól logu jest zapożyczone z konwencji GenAI OTel, co da się źle odczytać. `SPEC.md` sam to prostuje.",
-    "Deploy dokumentacji wymaga jednorazowego ręcznego przełączenia Settings → Pages → Source na GitHub Actions, czego workflow nie wykona sam. README linkuje do tej strony jako do dokumentacji pełnej; nie zweryfikowano, czy odpowiada."
+    "Deploy dokumentacji wymaga jednorazowego ręcznego przełączenia Settings → Pages → Source na GitHub Actions, czego workflow nie wykona sam. README linkuje do tej strony jako do dokumentacji pełnej; nie zweryfikowano, czy odpowiada.",
+    "Strona dokumentacji nie jest potwierdzona jako opublikowana: repozytorium jest prywatne, a nagłówek workflowu Pages sam mówi, że zadanie wdrożenia będzie zwracać błąd uprawnień, dopóki ktoś ręcznie nie przestawi źródła w ustawieniach — czego workflow nie może zrobić za siebie."
   ],
   "risks": [
     "LICENSE przypisuje copyright `dev_insight`, co koliduje z inną pozycją portfolio (slug `dev-insight`) i wygląda na artefakt kopiowania między repozytoriami.",

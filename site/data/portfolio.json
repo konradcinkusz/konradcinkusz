@@ -543,12 +543,6 @@
           "reusable": true
         },
         {
-          "name": "TerminalService",
-          "path": "src/AgentHelm.Bridge/Workbench/TerminalService.cs",
-          "description": "Sesja powłoki obok czatu, 161 linii. Na Uniksie prawdziwy PTY uzyskany przez `script -qfe -c bash /dev/null` z util-linux, bez interopu i bez pakietu natywnego; bufor 64 kB, subskrybenci przez kanały, wyjście strumieniowane do xterm.js.",
-          "reusable": true
-        },
-        {
           "name": "GitService",
           "path": "src/AgentHelm.Bridge/Workbench/GitService.cs",
           "description": "Backend przeglądarki zmian: parsuje `git status --porcelain` łącznie z tokenem rename, liczy +/- z diffa, accept to `git add`, reject to `git checkout HEAD --` albo usunięcie pliku nieskatalogowanego. Status pliku ustala serwer, nie żądanie z przeglądarki, więc UI nie może wymusić usunięcia śledzonego pliku.",
@@ -559,6 +553,12 @@
           "path": "tools/AgentHelm.EchoAgent",
           "description": "Referencyjny agent mówiący pełnym ACP w 181 liniach: strumieniuje odpowiedź, a na słowo „tool” w promptcie wysyła żądanie uprawnienia. Pozwala przejść cały przepływ z bramką włącznie bez instalowania i logowania się do prawdziwego agenta, i nadaje się jako harness dla dowolnego innego klienta ACP.",
           "reusable": true
+        },
+        {
+          "name": "TerminalService",
+          "path": "src/AgentHelm.Bridge/Workbench/TerminalService.cs",
+          "description": "Sesja powłoki obok czatu, 161 linii. Na Uniksie prawdziwy PTY uzyskany przez `script -qfe -c bash /dev/null` z util-linux, bez interopu i bez pakietu natywnego; bufor 64 kB, subskrybenci przez kanały, wyjście strumieniowane do xterm.js. Nie nadaje się do wydzielenia bez zmiany sygnatury: publiczna metoda subskrypcji zwraca `ChannelReader<SessionEventDto>`, a ten typ jest zadeklarowany w menedżerze sesji tego repozytorium.",
+          "reusable": false
         },
         {
           "name": "AgentHelm.Bridge",
@@ -3349,7 +3349,7 @@
       "primaryLanguage": "C#",
       "license": "MIT",
       "tests": "120 metod testowych (110 Fact + 10 Theory) w 6 projektach, w tym 6 testów architektonicznych egzekwujących czystość kernela",
-      "ci": "Sześć workflowów. `ci.yml` ma trzy zadania: build+test, test kernela **w izolacji** (dowód, że stoi sam) i mechaniczny limit ~800 linii na ServiceDefaults. `deploy.yml` jest {{term:tagdeploy|sterowany tagiem}} z wykrywaniem zmian. CI i CodeQL są od 25 sierpnia przełączone wyłącznie na uruchamianie ręczne.",
+      "ci": "Sześć workflowów. `ci.yml` ma pięć zadań: build+test, test kernela **w izolacji** (dowód, że stoi sam), mechaniczny limit linii na ServiceDefaults, skan sekretów i audyt zależności. `deploy.yml` jest {{term:tagdeploy|sterowany tagiem}} z wykrywaniem zmian. CI i CodeQL są od 25 sierpnia przełączone wyłącznie na uruchamianie ręczne.",
       "metrics": [
         {
           "label": "Metody testowe",
@@ -3753,7 +3753,7 @@
       ],
       "primaryLanguage": "C#",
       "license": "MIT",
-      "tests": "160 metod testowych (155 [Fact] + 5 [Theory]) w 20 plikach. Liczba przechodzących nie została zweryfikowana w tym przebiegu — policzone są atrybuty w kodzie.",
+      "tests": "160 metod testowych (155 [Fact] + 5 [Theory]) w 19 plikach z asercjami, przy 22 plikach w katalogu testów. Liczba przechodzących nie została zweryfikowana w tym przebiegu — policzone są atrybuty w kodzie.",
       "ci": "Pięć workflowów: build i test całej solucji, macierz czterech obrazów na GHCR z testem dymnym **przed** publikacją, kompilacja dwóch artykułów LaTeX dołączanych do wydania, GitHub Pages, gitleaks. Do tego dependabot dla trzech ekosystemów.",
       "metrics": [
         {
@@ -3762,7 +3762,7 @@
         },
         {
           "label": "Kod C#/Razor",
-          "value": "13 204 linie łącznie, 6 205 w src"
+          "value": "13 204 linie łącznie, 7 891 w src"
         },
         {
           "label": "Metody testowe",
@@ -3839,7 +3839,7 @@
         {
           "name": "Kalibracja sędziego (kappa Cohena)",
           "path": "src/CopilotScope.JudgeAgent/Calibration",
-          "description": "670 linii: {{term:kappa|kappa}} nieważona, ważona liniowo i kwadratowo, każda z zasianym bootstrapem 2000 próbek. Mierzy najpierw **sufit zgodności samego panelu ludzi** i ma osobny werdykt „sufit za niski”. Arytmetyka na etykietach porządkowych — nadaje się do każdej kalibracji sędziego LLM.",
+          "description": "670 linii: {{term:kappa|kappa}} nieważona, ważona liniowo i kwadratowo, każda z zasianym bootstrapem 2000 próbek. Mierzy najpierw **sufit zgodności samego panelu ludzi** i ma osobny werdykt „sufit za niski”. Sama arytmetyka jest neutralna, ale plik importuje `CopilotScope.Collector.Domain` i woła `CopilotSession.Percentile` w dwóch miejscach — to jest cała zależność do zdjęcia przed ekstrakcją.",
           "reusable": true
         },
         {
@@ -3902,7 +3902,8 @@
         "Trzy algorytmy sędziowskie działają wyłącznie z chmurą, więc instalacja lokalna — czyli ta reklamowana — nigdy ich nie widzi. To jest jedna trzecia opisu produktu bez pokrycia w scenariuszu, który ktokolwiek uruchomi.",
         "Kolektor jest z założenia jednoinstancyjny; nie skaluje się poziomo bez kolejki partycjonowanej. ADR to zapisuje, README nie eksponuje.",
         "Sekcja niewydanych zmian w CHANGELOG jest wewnętrznie sprzeczna — jeden blok mówi o starej wersji frameworka, drugi opisuje przejście na nową.",
-        "Bicep wystawia sam kolektor, bez bazy, dashboardu i magazynu sekretów; ADR nazywa to eksperymentem, ale plik nadal leży w repozytorium jako pozorny cel wdrożenia."
+        "Bicep wystawia sam kolektor, bez bazy, dashboardu i magazynu sekretów; ADR nazywa to eksperymentem, ale plik nadal leży w repozytorium jako pozorny cel wdrożenia.",
+        "Plik kalibracji, mimo że liczy czystą statystykę, importuje przestrzeń domenową kolektora dla jednego helpera percentyla. Dwa wywołania — ale dopóki tam są, biblioteka nie odłączy się bez wciągnięcia assembly kolektora."
       ],
       "next": [
         "Zbierz realne etykiety dla 50–100 sesji i uruchom raport kalibracyjny. Dopóki {{term:kappa|kappa}} nie ma wartości, każde zdanie o sędzim jest obietnicą, nie pomiarem.",
@@ -4775,12 +4776,7 @@
       ],
       "links": {
         "repo": "https://github.com/konradcinkusz/judge-worker",
-        "live": [
-          {
-            "label": "Dokumentacja (GitHub Pages)",
-            "url": "https://konradcinkusz.github.io/judge-worker/"
-          }
-        ],
+        "live": [],
         "docs": [
           {
             "label": "Specyfikacja kontraktu sędziego",
@@ -4892,7 +4888,8 @@
         "Kalibracja została uruchomiona **wyłącznie na mocku**, a etykiety ludzkie i heurystyki mocka napisała ta sama osoba w tym samym posiedzeniu. Repo mówi to wprost, ale kappa 1.0 nadal nie mierzy jakości sędziego, tylko zgodność autora z samym sobą.",
         "Ścieżka `--live` nie ma żadnego pokrycia {{term:mutation|mutacyjnego}} i nigdy nie została uruchomiona przeciwko prawdziwemu API — jest testowana wstrzykniętym `fetch`, więc end-to-end pozostaje niesprawdzone.",
         "Brak realnej telemetrii {{term:otel|OTel}}: są logi pino i metryki Prometheus, a słownictwo pól logu jest zapożyczone z konwencji GenAI OTel, co da się źle odczytać. `SPEC.md` sam to prostuje.",
-        "Deploy dokumentacji wymaga jednorazowego ręcznego przełączenia Settings → Pages → Source na GitHub Actions, czego workflow nie wykona sam. README linkuje do tej strony jako do dokumentacji pełnej; nie zweryfikowano, czy odpowiada."
+        "Deploy dokumentacji wymaga jednorazowego ręcznego przełączenia Settings → Pages → Source na GitHub Actions, czego workflow nie wykona sam. README linkuje do tej strony jako do dokumentacji pełnej; nie zweryfikowano, czy odpowiada.",
+        "Strona dokumentacji nie jest potwierdzona jako opublikowana: repozytorium jest prywatne, a nagłówek workflowu Pages sam mówi, że zadanie wdrożenia będzie zwracać błąd uprawnień, dopóki ktoś ręcznie nie przestawi źródła w ustawieniach — czego workflow nie może zrobić za siebie."
       ],
       "risks": [
         "LICENSE przypisuje copyright `dev_insight`, co koliduje z inną pozycją portfolio (slug `dev-insight`) i wygląda na artefakt kopiowania między repozytoriami.",
@@ -6915,9 +6912,10 @@
       "effort": "dni",
       "licence": "MIT",
       "readiness": [
-        "To czysta arytmetyka na etykietach porządkowych — zero zależności od domeny",
+        "Sama arytmetyka jest neutralna: liczy zgodność na etykietach porządkowych i nic więcej",
+        "Jedyna zależność do zdjęcia to import przestrzeni domenowej kolektora dla helpera percentyla — **dwa wywołania**",
         "Wersja w CopilotScope jest najbogatsza: 340 linii z trzema wariantami ważenia i osobnym werdyktem „sufit za niski”",
-        "Dwaj pozostali odbiorcy już mają własne, uboższe implementacje — czyli konsolidacja jest usuwaniem kodu, nie dodawaniem"
+        "Dwaj pozostali odbiorcy mają już własne, uboższe implementacje — konsolidacja jest tu usuwaniem kodu, nie dodawaniem"
       ],
       "blocker": "Żadna z trzech implementacji nie została uruchomiona na prawdziwych ludzkich etykietach. Wydzielenie biblioteki nie naprawi tego, że nikt jeszcze nie oznaczył próbki."
     },
