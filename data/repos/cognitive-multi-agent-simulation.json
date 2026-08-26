@@ -149,10 +149,6 @@
       "reason": "Tożsamość nie jest tu budowana — authservice v0.3.1 jest konsumowany jako wydany obraz, a każde API waliduje tokeny wobec jego JWKS. To jest wzorzec do powtórzenia."
     },
     {
-      "slug": "aurelius-promptus",
-      "reason": "Wersjonowane definicje ról tutaj i szablony promptów tam rozwiązują ten sam problem: co dokładnie kazano agentowi robić w tym konkretnym przebiegu."
-    },
-    {
       "slug": "chess-mas",
       "reason": "Inna domena, ta sama klasa problemu; wskazany wprost jako potencjalny konsument kernela replay i najtańszy test jego przenośności."
     }

@@ -11,8 +11,7 @@
         "cognitive-multi-agent-simulation",
         "auto-veritas",
         "cv-maker",
-        "black-hole-sim",
-        "aurelius-promptus"
+        "black-hole-sim"
       ],
       "effort": "done",
       "licence": "MIT",
@@ -49,11 +48,10 @@
       "name": "{{term:servicedefaults|ServiceDefaults}} — the shared host core",
       "sourceSlug": "cognitive-multi-agent-simulation",
       "sourcePath": "src/CogniSim.ServiceDefaults/",
-      "description": "Authentication against JWKS, database provider selection, rate limiting with a uniform 429 response shape, background migration after the server starts. Eleven projects in the portfolio do the same thing; **four wrote it independently from scratch**.",
+      "description": "Authentication against JWKS, database provider selection, rate limiting with a uniform 429 response shape, background migration after the server starts. Ten projects in the portfolio do the same thing; **four wrote it independently from scratch**.",
       "consumers": [
         "primates",
         "auto-veritas",
-        "aurelius-promptus",
         "hydro-scope",
         "copilot-scope",
         "agent-eval-bench",
@@ -128,25 +126,6 @@
         "The same data shape arose independently as the permission gate's {{term:audit|audit trail}}"
       ],
       "blocker": "Do this only once K1 has **two actual** consumers on main. That is the {{term:wip|work-in-progress limit}} rule, not a preference."
-    },
-    {
-      "id": "K6",
-      "name": "Versioned agent definitions",
-      "sourceSlug": "cognitive-multi-agent-simulation",
-      "sourcePath": "src/CogniSim.Ensemble/, agents/",
-      "description": "A registry of role definitions with version, temperature and provenance, plus a {{term:fingerprint}} of the exact set that produced a given run. Without it you cannot say whether a difference in results is a prompt change or randomness.",
-      "consumers": [
-        "aurelius-promptus",
-        "agent-eval-bench"
-      ],
-      "effort": "days",
-      "licence": "MIT",
-      "readiness": [
-        "The agent definition is data, validated against its own schema",
-        "The fingerprint of the set is already computed and pinned to the run",
-        "On the other side stands a whole prompt template service, which solves the same thing from the other end"
-      ],
-      "blocker": "The two sides of this duplication have different models: one versions the **role**, the other the **template**. Merging them needs a shared model first, and that is a design decision, not a refactor."
     }
   ],
   "kernelsRejected": [
@@ -229,19 +208,6 @@
       "severity": "high"
     },
     {
-      "problem": "The identity service consumed once as an image and once carried around as copied code.",
-      "sideA": {
-        "slug": "authservice",
-        "what": "A published image, pinned by tag, no source dependency"
-      },
-      "sideB": {
-        "slug": "aurelius-promptus",
-        "what": "Its own `AureliusPromptus.AuthService` project in the solution — a copy from before the extraction"
-      },
-      "resolution": "This is a migration that never happened. Doing it turns one data point for the extraction pattern into two — which turns an anecdote into a standard.",
-      "severity": "high"
-    },
-    {
       "problem": "The {{term:audit|audit trail}} and the {{term:runstore|run store}} are the same data structure.",
       "sideA": {
         "slug": "AgentHelm",
@@ -252,19 +218,6 @@
         "what": "The run record as a research function — what, how much, with what result"
       },
       "resolution": "The same shape arose twice for two different reasons. Kernel K5 merges both, but only after K1 has two consumers — because merging the store is weeks of work and merging the cassette is hours.",
-      "severity": "medium"
-    },
-    {
-      "problem": "The {{term:ensemble|versioned role definition}} and the versioned prompt template.",
-      "sideA": {
-        "slug": "cognitive-multi-agent-simulation",
-        "what": "Six roles in JSON with version, temperature and the fingerprint of the set"
-      },
-      "sideB": {
-        "slug": "aurelius-promptus",
-        "what": "A whole prompt template service with a marketplace and versioning"
-      },
-      "resolution": "One question, two answers: **what exactly the agent was told to do in this particular run**. Kernel K6, but it needs a shared model first — that is a design decision, not a refactor.",
       "severity": "medium"
     },
     {

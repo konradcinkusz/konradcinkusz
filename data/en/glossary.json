@@ -31,7 +31,9 @@
       "It gives four things at once: a mode that needs no API key, hermetic tests, a free rehearsal of the protocol before any budget is spent, and reproducibility of every recorded run. The key covers `ChatOptions.Instructions` as well — without that one agent would replay the other's response, and that was a real bug found during the build."
     ],
     "where": "cognitive-multi-agent-simulation, `kernel/replay/` — the only component already physically extracted inside the repository",
-    "slugs": ["cognitive-multi-agent-simulation"]
+    "slugs": [
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "servicedefaults",
@@ -39,11 +41,17 @@
     "tag": "component",
     "body": [
       "The project {{term:aspire}} generates in every new solution: telemetry, health checks, resilience, service discovery. In the template it is about a hundred lines, and it is copied rather than referenced.",
-      "There are **eleven** such projects in this portfolio. In four of them the same files have grown in parallel: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — and every copy is different by now. This is not code copied once; it is four independently maintained implementations of one thing.",
+      "There are **ten** such projects in this portfolio. In four of them the same files have grown in parallel: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — and every copy is different by now. This is not code copied once; it is four independently maintained implementations of one thing.",
       "That makes it the largest unrecognised kernel in the portfolio and at the same time the hardest: there is no single version to lift out — you have to pick a reference one and unwind the divergence in the rest."
     ],
     "where": "eleven `*.ServiceDefaults` projects; kernel K2",
-    "slugs": ["cognitive-multi-agent-simulation", "primates", "auto-veritas", "aurelius-promptus", "hydro-scope", "copilot-scope"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "primates",
+      "auto-veritas",
+      "hydro-scope",
+      "copilot-scope"
+    ]
   },
   {
     "id": "runstore",
@@ -55,7 +63,10 @@
       "The same data shape arose independently twice: once as a research feature, once as the permission gate's {{term:audit|audit trail}}. It is one of the three duplications worth merging."
     ],
     "where": "cognitive-multi-agent-simulation / Observatory, AgentHelm / audit trail",
-    "slugs": ["cognitive-multi-agent-simulation", "AgentHelm"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "AgentHelm"
+    ]
   },
   {
     "id": "comparison",
@@ -66,18 +77,21 @@
       "The discipline is enforced by the shape of the type, not by convention: the comparison type has no field into which the best run could be put. That is the right way to enforce a methodological rule — a rule stated in prose will not survive a deadline."
     ],
     "where": "cognitive-multi-agent-simulation / Observatory",
-    "slugs": ["cognitive-multi-agent-simulation"]
+    "slugs": [
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "ensemble",
     "term": "Ensemble / role definitions",
     "tag": "component",
     "body": [
-      "A registry of versioned agent role definitions together with the fingerprint ({{term:fingerprint}}) of the exact set that produced a given run. Without it you cannot say whether the difference between two runs comes from a prompt change, a model change or randomness.",
-      "It is the same problem that aurelius-promptus solves on the prompt-template side — which is why both are candidates for merging into one kernel."
+      "A registry of versioned agent role definitions together with the fingerprint ({{term:fingerprint}}) of the exact set that produced a given run. Without it you cannot say whether the difference between two runs comes from a prompt change, a model change or randomness."
     ],
-    "where": "cognitive-multi-agent-simulation / Ensemble, aurelius-promptus",
-    "slugs": ["cognitive-multi-agent-simulation", "aurelius-promptus"]
+    "where": "cognitive-multi-agent-simulation / Ensemble",
+    "slugs": [
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "fingerprint",
@@ -119,7 +133,10 @@
       "The key cost observation: the number of model calls is **a property of the topology, not of the model**. You can count it with a fake model in a second and the result will be identical to a real provider's. Quality is not."
     ],
     "where": "cognitive-multi-agent-simulation / Simulation",
-    "slugs": ["cognitive-multi-agent-simulation", "chess-mas"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "chess-mas"
+    ]
   },
   {
     "id": "mutation",
@@ -130,7 +147,11 @@
       "It is the only method that measures **the quality of the tests** rather than the quality of the code — and so the only argument that green CI actually means something. In this portfolio it is applied in three places: to the analysers, to the LLM judge and to the CI gate."
     ],
     "where": "archgate, judge-worker, agent-eval-bench",
-    "slugs": ["archgate", "judge-worker", "agent-eval-bench"]
+    "slugs": [
+      "archgate",
+      "judge-worker",
+      "agent-eval-bench"
+    ]
   },
   {
     "id": "roslyn",
@@ -141,7 +162,9 @@
       "That is the difference between an architecture gate and competitors built on `glob` and `grep`: precision in exchange for being single-language, which puts a hard ceiling on the size of the market. That ceiling has to be accepted knowingly, not discovered a year in."
     ],
     "where": "archgate — the gate's analysers",
-    "slugs": ["archgate"]
+    "slugs": [
+      "archgate"
+    ]
   },
   {
     "id": "diffgate",
@@ -152,7 +175,9 @@
       "Without it every new rule lights up thousands of warnings in existing code, the team switches the tool off in the first week, and that is the end of the deployment. Diff scoping is not a performance optimisation — it is a condition of adoption."
     ],
     "where": "archgate",
-    "slugs": ["archgate"]
+    "slugs": [
+      "archgate"
+    ]
   },
   {
     "id": "provenance",
@@ -163,7 +188,10 @@
       "The first attempt in copilot-scope did not pass its own audit: it was a per-session average computed by the editor, not line-by-line attribution. That result is worth more than a successful deployment — it shows that the signal has to be designed from scratch, and that the author can throw out his own work."
     ],
     "where": "archgate (designed from scratch), copilot-scope (the failed first attempt)",
-    "slugs": ["archgate", "copilot-scope"]
+    "slugs": [
+      "archgate",
+      "copilot-scope"
+    ]
   },
   {
     "id": "audit",
@@ -175,7 +203,10 @@
       "The observability category closed around the first. The second was left empty, because that is not those teams' buyer."
     ],
     "where": "AgentHelm; the same data structure as the run store",
-    "slugs": ["AgentHelm", "cognitive-multi-agent-simulation"]
+    "slugs": [
+      "AgentHelm",
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "skille",
@@ -186,7 +217,9 @@
       "The format already exists in this portfolio and is ready: {{term:plugins}}. Every further repository that builds its own skill mechanism instead of using it is a duplication."
     ],
     "where": "architecture-standards; a candidate common format for every agent in the portfolio",
-    "slugs": ["architecture-standards"]
+    "slugs": [
+      "architecture-standards"
+    ]
   },
   {
     "id": "plugins",
@@ -197,7 +230,9 @@
       "The loop is closed: a policy is at once documentation to read and a rule the agent loads before it works. It is the only artefact in the portfolio that changes how the rest of the portfolio gets built."
     ],
     "where": "architecture-standards — five plugins, a catalogue, a drift validator",
-    "slugs": ["architecture-standards"]
+    "slugs": [
+      "architecture-standards"
+    ]
   },
   {
     "id": "drift",
@@ -208,7 +243,10 @@
       "The pattern is cheap and solves exactly one class of problem: files that have to be committed (because something reads them without a build) but are generated. The plugin catalogue, the portfolio manifest, the repository table in the README — all three are the same case."
     ],
     "where": "architecture-standards; this site (`scripts/build-manifest.mjs --check`)",
-    "slugs": ["architecture-standards", "konradcinkusz"]
+    "slugs": [
+      "architecture-standards",
+      "konradcinkusz"
+    ]
   },
   {
     "id": "maf",
@@ -219,7 +257,11 @@
       "In a well-built system it is isolated to a single project — every other service treats a run as data. That makes swapping the engine real rather than theoretical."
     ],
     "where": "cognitive-multi-agent-simulation, chess-mas, maf-book",
-    "slugs": ["cognitive-multi-agent-simulation", "chess-mas", "maf-book"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "chess-mas",
+      "maf-book"
+    ]
   },
   {
     "id": "ichatclient",
@@ -240,7 +282,9 @@
       "It has two uses for this portfolio: the evaluation harness tests an agent through an MCP adapter, and the hosted product imports a real backlog from Jira or Azure DevOps over MCP. The first is technical, the second is commercial."
     ],
     "where": "agent-eval-bench; the integration channel for the hosted product",
-    "slugs": ["agent-eval-bench"]
+    "slugs": [
+      "agent-eval-bench"
+    ]
   },
   {
     "id": "acp",
@@ -251,7 +295,9 @@
       "A market note: the ACP agent registry is already official and built into Zed and JetBrains, so the protocol layer has stopped being a free niche. What is left is not the protocol but **permission policy and evidence** — and that is a different product from a cockpit."
     ],
     "where": "AgentHelm",
-    "slugs": ["AgentHelm"]
+    "slugs": [
+      "AgentHelm"
+    ]
   },
   {
     "id": "otel",
@@ -262,7 +308,10 @@
       "Normalising telemetry from several providers is exactly the same work, done privately. It is a credibility route — a proposal to the conventions, a talk, a post — not a product. The value lies in a name landing in a document that will outlive the project."
     ],
     "where": "copilot-scope, hydro-scope",
-    "slugs": ["copilot-scope", "hydro-scope"]
+    "slugs": [
+      "copilot-scope",
+      "hydro-scope"
+    ]
   },
   {
     "id": "aspire",
@@ -272,8 +321,16 @@
       "The orchestration layer for running several services locally at once, with a telemetry dashboard. It generates a {{term:servicedefaults}} project in every solution, and that convenience is precisely the source of the largest duplication in this portfolio.",
       "A deliberate limit: Aspire describes development, and production is described by separate deployment files. Keeping the two apart costs a little repetition and saves divergence between environments."
     ],
-    "where": "eight systems in the portfolio",
-    "slugs": ["cognitive-multi-agent-simulation", "primates", "copilot-scope", "hydro-scope", "auto-veritas", "aurelius-promptus", "chess-mas", "black-hole-sim"]
+    "where": "seven systems in the portfolio",
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "primates",
+      "copilot-scope",
+      "hydro-scope",
+      "auto-veritas",
+      "chess-mas",
+      "black-hole-sim"
+    ]
   },
   {
     "id": "oidc",
@@ -284,7 +341,9 @@
       "It has one non-obvious operational consequence: a service whose JWKS all the others fetch sits on the request path of every one of them — and not only on the first request, because validators refresh their cache. Such a service **cannot scale to zero**."
     ],
     "where": "authservice (K4) and the six systems that consume it",
-    "slugs": ["authservice"]
+    "slugs": [
+      "authservice"
+    ]
   },
   {
     "id": "ghcr",
@@ -295,7 +354,12 @@
       "It is the only completed extraction in this portfolio and the pattern to repeat: one codebase, N independent instances, no shared runtime and no shared root of trust."
     ],
     "where": "authservice v0.3.1 and five other images",
-    "slugs": ["authservice", "archgate", "copilot-scope", "AgentHelm"]
+    "slugs": [
+      "authservice",
+      "archgate",
+      "copilot-scope",
+      "AgentHelm"
+    ]
   },
   {
     "id": "nuget",
@@ -306,7 +370,9 @@
       "The state of things: three package identifiers are declared across the whole portfolio and **none is published**. It is the cheapest unused channel on the entire map."
     ],
     "where": "archgate declares three packages; the distribution axis, row 01",
-    "slugs": ["archgate"]
+    "slugs": [
+      "archgate"
+    ]
   },
   {
     "id": "tagdeploy",
@@ -317,7 +383,9 @@
       "The rationale is one sentence: a deployment should be an act, and the tag is its record. The rule easiest to forget: a service whose Fly app does not exist must always be selected — that is the only thing that lets you stand up a cold estate with one tag."
     ],
     "where": "architecture-standards / FLY-IO-DEPLOYMENT.md; seven repositories have this workflow",
-    "slugs": ["architecture-standards"]
+    "slugs": [
+      "architecture-standards"
+    ]
   },
   {
     "id": "opencore",
@@ -415,7 +483,7 @@
     "tag": "operations",
     "body": [
       "A hard cap on the number of things started and unfinished. Not a guideline — a limit: a breach is a signal to **close** something, not to work longer.",
-      "One person's portfolio does not die from a shortage of ideas. It dies from thirty-five things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
+      "One person's portfolio does not die from a shortage of ideas. It dies from thirty-four things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
     ],
     "where": "the 'operations' tab, the 'limits' section"
   },
@@ -448,7 +516,9 @@
       "It is exactly the kind of rigour that separates an evaluation harness from a dashboard — and at the same time the thing almost nobody does, because it requires labelling a sample by hand."
     ],
     "where": "judge-worker",
-    "slugs": ["judge-worker"]
+    "slugs": [
+      "judge-worker"
+    ]
   },
   {
     "id": "safe",
@@ -459,6 +529,9 @@
       "Two things matter for this portfolio: the event is expensive and countable (which gives the dress rehearsal its price), and its product is **artefacts, not a transcript** — which sets what the programme should return in the first place."
     ],
     "where": "cognitive-multi-agent-simulation and its research work",
-    "slugs": ["cognitive-multi-agent-simulation", "cognitive-multi-agent-simulation-analysis"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "cognitive-multi-agent-simulation-analysis"
+    ]
   }
 ]

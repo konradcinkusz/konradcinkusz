@@ -148,10 +148,6 @@
       "reason": "cv-maker has no identity of its own: it logs in against this service, validates its JWKS and deploys its image from {{term:ghcr}} as `cvmaker-authservice-dev`."
     },
     {
-      "slug": "aurelius-promptus",
-      "reason": "The whole agent layer — `agents/<slug>/definition.json`, `flows/*.json`, FlowEngine, Foundry with a fallback to mock, `IArtifactStorageService`, the `flyio/` layout — is modelled directly on the AgenticService there."
-    },
-    {
       "slug": "black-hole-sim",
       "reason": "The Channel queue with a BackgroundService, recovery of stuck jobs, the cancellation registry and status polling are ported from there along with the Api/Core/Shared/Web/Tests split."
     },

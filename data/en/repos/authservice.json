@@ -7,46 +7,137 @@
   "tier": "P0",
   "oneLiner": "A standalone authentication microservice for ASP.NET Core — and the only finished extraction in the whole portfolio.",
   "summary": "Accounts, sign-in, address verification, password reset, TOTP with backup codes, JWT issuance with rotated refresh tokens held as hashes. Google and GitHub sign-in, multi-tenant organisations with roles and invitations, an admin API, an append-only audit log, versioned terms consent and GDPR-compliant data export. It began as a **module lifted out of a private monorepo**, and `EXTRACTION.md` lists exactly what was kept and what was thrown out on purpose. The repository deliberately does not host a canonical instance of its own: it publishes an image to {{term:ghcr}}, and every consumer runs its own instance with its own database and its own signing key. **One codebase, N independent instances, no shared root of trust** — and that is precisely the pattern the rest of the consolidation is meant to repeat.",
-  "stack": [".NET 10", "ASP.NET Core Identity", "EF Core 10", "PostgreSQL / SQL Server / SQLite", "xUnit", "Docker", "GHCR"],
+  "stack": [
+    ".NET 10",
+    "ASP.NET Core Identity",
+    "EF Core 10",
+    "PostgreSQL / SQL Server / SQLite",
+    "xUnit",
+    "Docker",
+    "GHCR"
+  ],
   "primaryLanguage": "C#",
   "license": "MIT",
   "tests": "About 67 executed cases in a single project (61 [Fact] + 2 [Theory] with 6 rows), 1,439 lines. The integration tests boot the whole application on in-memory SQLite — the entire HTTP path with no Docker and no network.",
   "ci": "Five workflows: build+test, formatting check, a check that migrations match the model, image build with a smoke test; CodeQL with the security-and-quality suite and a weekly cron; gitleaks over the **full history**; multi-arch image publication on a `v*` tag; GitHub Pages.",
   "metrics": [
-    { "label": "C# code", "value": "7,401 lines of src + 1,439 lines of tests" },
-    { "label": "Controller actions", "value": "56" },
-    { "label": "Projects in the solution", "value": "5" },
-    { "label": "ADRs", "value": "3, with the rejected alternatives written down" },
-    { "label": "Open deviations in the register", "value": "6, dated" },
-    { "label": "Image consumers in the portfolio", "value": "6 systems" }
+    {
+      "label": "C# code",
+      "value": "7,401 lines of src + 1,439 lines of tests"
+    },
+    {
+      "label": "Controller actions",
+      "value": "56"
+    },
+    {
+      "label": "Projects in the solution",
+      "value": "5"
+    },
+    {
+      "label": "ADRs",
+      "value": "3, with the rejected alternatives written down"
+    },
+    {
+      "label": "Open deviations in the register",
+      "value": "6, dated"
+    },
+    {
+      "label": "Image consumers in the portfolio",
+      "value": "6 systems"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/authservice",
     "live": [],
     "docs": [
-      { "label": "Notes from the extraction out of the monorepo", "path": "EXTRACTION.md" },
-      { "label": "Deploying your own instance", "path": "docs/DEPLOYMENT.md" },
-      { "label": "Register of open deviations", "path": "docs/architecture/DEVIATIONS.md" },
-      { "label": "ADR 0002 — token signing", "path": "docs/decisions/0002-token-signing-algorithm.md" },
-      { "label": "curl demo guide", "path": "DEMO.md" },
-      { "label": "Backlog analysis with rejected alternatives", "path": "docs/issue-analysis.md" }
+      {
+        "label": "Notes from the extraction out of the monorepo",
+        "path": "EXTRACTION.md"
+      },
+      {
+        "label": "Deploying your own instance",
+        "path": "docs/DEPLOYMENT.md"
+      },
+      {
+        "label": "Register of open deviations",
+        "path": "docs/architecture/DEVIATIONS.md"
+      },
+      {
+        "label": "ADR 0002 — token signing",
+        "path": "docs/decisions/0002-token-signing-algorithm.md"
+      },
+      {
+        "label": "curl demo guide",
+        "path": "DEMO.md"
+      },
+      {
+        "label": "Backlog analysis with rejected alternatives",
+        "path": "docs/issue-analysis.md"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": true, "ghcr": true, "pages": true, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": true,
+    "pages": true,
+    "packages": false
+  },
   "components": [
-    { "name": "JwtSigningKeys", "path": "src/AuthService/Services/JwtSigningKeys.cs", "description": "Resolves the key material once, at startup, and validates it. The list of **signing keys and the list of validating keys are deliberately different**, which allows a key to be rotated without invalidating tokens already issued. It knows no domain type.", "reusable": true },
-    { "name": "MigrationBackgroundService + DatabaseReadyHealthCheck", "path": "src/AuthService/Extensions/", "description": "Schema initialisation after the HTTP server is already listening, with retries. The completion signal drives the readiness endpoint, which returns 503 until the schema is ready. The 'liveness immediately, readiness after the schema' pattern is neutral — and it has been copied into four other repositories.", "reusable": true },
-    { "name": "AuditService", "path": "src/AuthService/Services/AuditService.cs", "description": "An append-only log. Writes are best-effort from the caller's point of view — a failed audit write does not turn a successful operation into a failed one — apart from the method that attaches a row to the unit of work, so that an action and its trace commit together.", "reusable": true },
-    { "name": "Integration tests on in-memory SQLite", "path": "tests/AuthService.Tests/", "description": "The factory brings up the real application with the database provider swapped. The entire HTTP path tested with no Docker and no network — a pattern to copy into any ASP.NET Core service.", "reusable": true },
-    { "name": "TokenService", "path": "src/AuthService/Services/TokenService.cs", "description": "Refresh tokens held as hashes, tied into a family; presenting an already-rotated token again invalidates the **whole family** and writes an audit event.", "reusable": false },
-    { "name": "ProviderEmailVerifier", "path": "src/AuthService/Controllers/ExternalAuthController.cs", "description": "Closes the account-takeover path through OAuth: it requires the provider itself to have confirmed the address before it is used to link an account. An unknown provider is treated as unverified by default.", "reusable": false }
+    {
+      "name": "JwtSigningKeys",
+      "path": "src/AuthService/Services/JwtSigningKeys.cs",
+      "description": "Resolves the key material once, at startup, and validates it. The list of **signing keys and the list of validating keys are deliberately different**, which allows a key to be rotated without invalidating tokens already issued. It knows no domain type.",
+      "reusable": true
+    },
+    {
+      "name": "MigrationBackgroundService + DatabaseReadyHealthCheck",
+      "path": "src/AuthService/Extensions/",
+      "description": "Schema initialisation after the HTTP server is already listening, with retries. The completion signal drives the readiness endpoint, which returns 503 until the schema is ready. The 'liveness immediately, readiness after the schema' pattern is neutral — and it has been copied into four other repositories.",
+      "reusable": true
+    },
+    {
+      "name": "AuditService",
+      "path": "src/AuthService/Services/AuditService.cs",
+      "description": "An append-only log. Writes are best-effort from the caller's point of view — a failed audit write does not turn a successful operation into a failed one — apart from the method that attaches a row to the unit of work, so that an action and its trace commit together.",
+      "reusable": true
+    },
+    {
+      "name": "Integration tests on in-memory SQLite",
+      "path": "tests/AuthService.Tests/",
+      "description": "The factory brings up the real application with the database provider swapped. The entire HTTP path tested with no Docker and no network — a pattern to copy into any ASP.NET Core service.",
+      "reusable": true
+    },
+    {
+      "name": "TokenService",
+      "path": "src/AuthService/Services/TokenService.cs",
+      "description": "Refresh tokens held as hashes, tied into a family; presenting an already-rotated token again invalidates the **whole family** and writes an audit event.",
+      "reusable": false
+    },
+    {
+      "name": "ProviderEmailVerifier",
+      "path": "src/AuthService/Controllers/ExternalAuthController.cs",
+      "description": "Closes the account-takeover path through OAuth: it requires the provider itself to have confirmed the address before it is used to link an account. An unknown provider is treated as unverified by default.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "architecture-standards", "reason": "Cited there forty times; its extraction pattern is described as a proposed standard with an explicit note that it has one data point — this one." },
-    { "slug": "aurelius-promptus", "reason": "That system still carries a **copy-pasted** copy of this service as a project of its own. This is the migration that never happened, and the simplest way to turn one data point into two." },
-    { "slug": "primates", "reason": "Consumes the image at v0.3.1 with no source dependency at all — evidence that the pattern works." },
-    { "slug": "cognitive-multi-agent-simulation", "reason": "Every API validates tokens against this service's JWKS; the service itself is not built there." },
-    { "slug": "auto-veritas", "reason": "Has its own `auto-veritas-authservice` application based on the same image." }
+    {
+      "slug": "architecture-standards",
+      "reason": "Cited there forty times; its extraction pattern is described as a proposed standard with an explicit note that it has one data point — this one."
+    },
+    {
+      "slug": "primates",
+      "reason": "Consumes the image at v0.3.1 with no source dependency at all — evidence that the pattern works."
+    },
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "Every API validates tokens against this service's JWKS; the service itself is not built there."
+    },
+    {
+      "slug": "auto-veritas",
+      "reason": "Has its own `auto-veritas-authservice` application based on the same image."
+    }
   ],
   "product": "There is no buyer in the paying sense, and the ADR flatly refuses to compete with Keycloak or Ory on feature count. The real audience is a .NET team that needs a sign-in service of its own and wants to **read it in one afternoon** rather than stand up Keycloak. The portfolio value here is the highest of the lot, though: it is the most engineering-complete security artefact in the whole set, with documentation that records the rejected alternatives.",
   "highlights": [
@@ -78,5 +169,13 @@
   ],
   "headline": "The pattern that worked — repeat it for K1, but release a tag first",
   "headlineTone": "good",
-  "github": { "stars": 0, "openIssues": 8, "openPrs": 7, "dependabotPrs": 6, "lastCommit": "2026-08-15", "commits": 53, "files": 109 }
+  "github": {
+    "stars": 0,
+    "openIssues": 8,
+    "openPrs": 7,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-08-15",
+    "commits": 53,
+    "files": 109
+  }
 }

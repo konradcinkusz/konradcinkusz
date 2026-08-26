@@ -7,46 +7,137 @@
   "tier": "P0",
   "oneLiner": "Samodzielny mikroserwis uwierzytelniania dla ASP.NET Core — i jedyna zakończona ekstrakcja w całym portfolio.",
   "summary": "Konta, logowanie, weryfikacja adresu, reset hasła, TOTP z kodami zapasowymi, wydawanie JWT z rotowanymi refresh tokenami trzymanymi jako skróty. Logowanie przez Google i GitHub, organizacje wielodostępne z rolami i zaproszeniami, API administracyjne, dziennik audytu tylko-do-dopisywania, wersjonowana zgoda na regulaminy i eksport danych zgodny z RODO. Powstał jako **wyjęcie modułu z prywatnego monorepo**, a `EXTRACTION.md` wylicza dokładnie, co zachowano i co celowo wyrzucono. Repozytorium świadomie nie hostuje własnej kanonicznej instancji: publikuje obraz do {{term:ghcr}}, a każdy konsument uruchamia własną instancję z własną bazą i własnym kluczem podpisującym. **Jedna baza kodu, N niezależnych instancji, zero wspólnego korzenia zaufania** — i to jest dokładnie ten wzorzec, który reszta konsolidacji ma powtórzyć.",
-  "stack": [".NET 10", "ASP.NET Core Identity", "EF Core 10", "PostgreSQL / SQL Server / SQLite", "xUnit", "Docker", "GHCR"],
+  "stack": [
+    ".NET 10",
+    "ASP.NET Core Identity",
+    "EF Core 10",
+    "PostgreSQL / SQL Server / SQLite",
+    "xUnit",
+    "Docker",
+    "GHCR"
+  ],
   "primaryLanguage": "C#",
   "license": "MIT",
   "tests": "Około 67 wykonywanych przypadków w jednym projekcie (61 [Fact] + 2 [Theory] z 6 wierszami), 1 439 linii. Testy integracyjne bootują całą aplikację na SQLite w pamięci — cała ścieżka HTTP bez Dockera i bez sieci.",
   "ci": "Pięć workflowów: build+test, weryfikacja formatowania, kontrola zgodności migracji z modelem, build obrazu z testem dymnym; CodeQL z zestawem security-and-quality i cotygodniowym cronem; gitleaks na **pełnej historii**; publikacja obrazu multi-arch na tagu `v*`; GitHub Pages.",
   "metrics": [
-    { "label": "Kod C#", "value": "7 401 linii src + 1 439 linii testów" },
-    { "label": "Akcje kontrolerów", "value": "56" },
-    { "label": "Projekty w solucji", "value": "5" },
-    { "label": "ADR-y", "value": "3, z zapisanymi odrzuconymi alternatywami" },
-    { "label": "Otwarte odstępstwa w rejestrze", "value": "6, datowane" },
-    { "label": "Konsumenci obrazu w portfolio", "value": "6 systemów" }
+    {
+      "label": "Kod C#",
+      "value": "7 401 linii src + 1 439 linii testów"
+    },
+    {
+      "label": "Akcje kontrolerów",
+      "value": "56"
+    },
+    {
+      "label": "Projekty w solucji",
+      "value": "5"
+    },
+    {
+      "label": "ADR-y",
+      "value": "3, z zapisanymi odrzuconymi alternatywami"
+    },
+    {
+      "label": "Otwarte odstępstwa w rejestrze",
+      "value": "6, datowane"
+    },
+    {
+      "label": "Konsumenci obrazu w portfolio",
+      "value": "6 systemów"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/authservice",
     "live": [],
     "docs": [
-      { "label": "Notatki z ekstrakcji z monorepo", "path": "EXTRACTION.md" },
-      { "label": "Wdrażanie własnej instancji", "path": "docs/DEPLOYMENT.md" },
-      { "label": "Rejestr otwartych odstępstw", "path": "docs/architecture/DEVIATIONS.md" },
-      { "label": "ADR 0002 — podpisywanie tokenów", "path": "docs/decisions/0002-token-signing-algorithm.md" },
-      { "label": "Przewodnik demo curl", "path": "DEMO.md" },
-      { "label": "Analiza backlogu z odrzuconymi alternatywami", "path": "docs/issue-analysis.md" }
+      {
+        "label": "Notatki z ekstrakcji z monorepo",
+        "path": "EXTRACTION.md"
+      },
+      {
+        "label": "Wdrażanie własnej instancji",
+        "path": "docs/DEPLOYMENT.md"
+      },
+      {
+        "label": "Rejestr otwartych odstępstw",
+        "path": "docs/architecture/DEVIATIONS.md"
+      },
+      {
+        "label": "ADR 0002 — podpisywanie tokenów",
+        "path": "docs/decisions/0002-token-signing-algorithm.md"
+      },
+      {
+        "label": "Przewodnik demo curl",
+        "path": "DEMO.md"
+      },
+      {
+        "label": "Analiza backlogu z odrzuconymi alternatywami",
+        "path": "docs/issue-analysis.md"
+      }
     ]
   },
-  "deployment": { "fly": false, "docker": true, "ghcr": true, "pages": true, "packages": false },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": true,
+    "pages": true,
+    "packages": false
+  },
   "components": [
-    { "name": "JwtSigningKeys", "path": "src/AuthService/Services/JwtSigningKeys.cs", "description": "Rozstrzyga materiał kluczowy raz, przy starcie, i waliduje go. Lista kluczy **podpisujących i walidujących jest celowo różna**, co pozwala rotować klucz bez unieważniania wydanych tokenów. Nie zna żadnego typu domenowego.", "reusable": true },
-    { "name": "MigrationBackgroundService + DatabaseReadyHealthCheck", "path": "src/AuthService/Extensions/", "description": "Inicjalizacja schematu po tym, jak serwer HTTP już nasłuchuje, z ponawianiem. Sygnał ukończenia steruje endpointem gotowości, który zwraca 503, dopóki schemat nie jest gotowy. Wzorzec „liveness od razu, readiness po schemacie” jest neutralny — i jest skopiowany do czterech innych repozytoriów.", "reusable": true },
-    { "name": "AuditService", "path": "src/AuthService/Services/AuditService.cs", "description": "Dziennik tylko-do-dopisywania. Zapisy są best-effort wobec wołającego — błąd zapisu audytu nie zamienia udanej operacji w nieudaną — poza metodą dołączającą wiersz do jednostki pracy, żeby akcja i jej ślad commitowały się razem.", "reusable": true },
-    { "name": "Testy integracyjne na SQLite w pamięci", "path": "tests/AuthService.Tests/", "description": "Fabryka podnosi prawdziwą aplikację z podmienionym providerem bazy. Cała ścieżka HTTP testowana bez Dockera i bez sieci — wzorzec do skopiowania do dowolnej usługi ASP.NET Core.", "reusable": true },
-    { "name": "TokenService", "path": "src/AuthService/Services/TokenService.cs", "description": "Refresh tokeny jako skróty, powiązane w rodzinę; ponowne przedstawienie już zrotowanego tokenu unieważnia **całą rodzinę** i zapisuje zdarzenie audytu.", "reusable": false },
-    { "name": "ProviderEmailVerifier", "path": "src/AuthService/Controllers/ExternalAuthController.cs", "description": "Zamyka ścieżkę przejęcia konta przez OAuth: wymaga, żeby dostawca sam potwierdził adres, zanim zostanie użyty do dowiązania konta. Nieznany dostawca jest domyślnie niezweryfikowany.", "reusable": false }
+    {
+      "name": "JwtSigningKeys",
+      "path": "src/AuthService/Services/JwtSigningKeys.cs",
+      "description": "Rozstrzyga materiał kluczowy raz, przy starcie, i waliduje go. Lista kluczy **podpisujących i walidujących jest celowo różna**, co pozwala rotować klucz bez unieważniania wydanych tokenów. Nie zna żadnego typu domenowego.",
+      "reusable": true
+    },
+    {
+      "name": "MigrationBackgroundService + DatabaseReadyHealthCheck",
+      "path": "src/AuthService/Extensions/",
+      "description": "Inicjalizacja schematu po tym, jak serwer HTTP już nasłuchuje, z ponawianiem. Sygnał ukończenia steruje endpointem gotowości, który zwraca 503, dopóki schemat nie jest gotowy. Wzorzec „liveness od razu, readiness po schemacie” jest neutralny — i jest skopiowany do czterech innych repozytoriów.",
+      "reusable": true
+    },
+    {
+      "name": "AuditService",
+      "path": "src/AuthService/Services/AuditService.cs",
+      "description": "Dziennik tylko-do-dopisywania. Zapisy są best-effort wobec wołającego — błąd zapisu audytu nie zamienia udanej operacji w nieudaną — poza metodą dołączającą wiersz do jednostki pracy, żeby akcja i jej ślad commitowały się razem.",
+      "reusable": true
+    },
+    {
+      "name": "Testy integracyjne na SQLite w pamięci",
+      "path": "tests/AuthService.Tests/",
+      "description": "Fabryka podnosi prawdziwą aplikację z podmienionym providerem bazy. Cała ścieżka HTTP testowana bez Dockera i bez sieci — wzorzec do skopiowania do dowolnej usługi ASP.NET Core.",
+      "reusable": true
+    },
+    {
+      "name": "TokenService",
+      "path": "src/AuthService/Services/TokenService.cs",
+      "description": "Refresh tokeny jako skróty, powiązane w rodzinę; ponowne przedstawienie już zrotowanego tokenu unieważnia **całą rodzinę** i zapisuje zdarzenie audytu.",
+      "reusable": false
+    },
+    {
+      "name": "ProviderEmailVerifier",
+      "path": "src/AuthService/Controllers/ExternalAuthController.cs",
+      "description": "Zamyka ścieżkę przejęcia konta przez OAuth: wymaga, żeby dostawca sam potwierdził adres, zanim zostanie użyty do dowiązania konta. Nieznany dostawca jest domyślnie niezweryfikowany.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "architecture-standards", "reason": "Cytowany tam czterdzieści razy; wzorzec jego ekstrakcji jest opisany jako propozycja standardu z jawną notką, że ma jeden punkt danych — ten." },
-    { "slug": "aurelius-promptus", "reason": "Tamten system nadal wozi **skopiowaną** kopię tego serwisu jako własny projekt. To jest migracja, która się nie odbyła, i najprostszy sposób, żeby jeden punkt danych stał się dwoma." },
-    { "slug": "primates", "reason": "Konsumuje obraz w wersji v0.3.1 bez żadnej zależności źródłowej — dowód, że wzorzec działa." },
-    { "slug": "cognitive-multi-agent-simulation", "reason": "Każde API waliduje tokeny wobec JWKS tej usługi; sama usługa nie jest tam budowana." },
-    { "slug": "auto-veritas", "reason": "Ma własną aplikację `auto-veritas-authservice` opartą na tym samym obrazie." }
+    {
+      "slug": "architecture-standards",
+      "reason": "Cytowany tam czterdzieści razy; wzorzec jego ekstrakcji jest opisany jako propozycja standardu z jawną notką, że ma jeden punkt danych — ten."
+    },
+    {
+      "slug": "primates",
+      "reason": "Konsumuje obraz w wersji v0.3.1 bez żadnej zależności źródłowej — dowód, że wzorzec działa."
+    },
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "Każde API waliduje tokeny wobec JWKS tej usługi; sama usługa nie jest tam budowana."
+    },
+    {
+      "slug": "auto-veritas",
+      "reason": "Ma własną aplikację `auto-veritas-authservice` opartą na tym samym obrazie."
+    }
   ],
   "product": "Kupującego w sensie płatności nie ma i ADR wprost odmawia konkurowania z Keycloakiem czy Ory na liczbę funkcji. Realny odbiorca to zespół .NET, który potrzebuje własnego serwisu logowania i chce go **przeczytać w jedno popołudnie** zamiast stawiać Keycloaka. Wartość portfolio jest tu za to najwyższa ze wszystkich: to najbardziej kompletny inżyniersko artefakt bezpieczeństwa w całym zestawie, z dokumentacją, która spisuje odrzucone alternatywy.",
   "highlights": [
@@ -78,5 +169,13 @@
   ],
   "headline": "Wzorzec, który zadziałał — powtórz go dla K1, ale najpierw wypuść tag",
   "headlineTone": "good",
-  "github": { "stars": 0, "openIssues": 8, "openPrs": 7, "dependabotPrs": 6, "lastCommit": "2026-08-15", "commits": 53, "files": 109 }
+  "github": {
+    "stars": 0,
+    "openIssues": 8,
+    "openPrs": 7,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-08-15",
+    "commits": 53,
+    "files": 109
+  }
 }

@@ -31,7 +31,9 @@
       "Daje cztery rzeczy naraz: tryb bez klucza API, hermetyczne testy, darmową próbę protokołu przed wydaniem budżetu i odtwarzalność każdego zapisanego przebiegu. Klucz obejmuje także `ChatOptions.Instructions` — bez tego jeden agent odtwarzałby odpowiedź drugiego, i to był realny błąd znaleziony w trakcie budowy."
     ],
     "where": "cognitive-multi-agent-simulation, `kernel/replay/` — jedyny komponent już fizycznie wydzielony wewnątrz repozytorium",
-    "slugs": ["cognitive-multi-agent-simulation"]
+    "slugs": [
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "servicedefaults",
@@ -39,11 +41,17 @@
     "tag": "komponent",
     "body": [
       "Projekt, który {{term:aspire}} generuje w każdym nowym rozwiązaniu: telemetria, health checks, resilience, service discovery. W szablonie ma około stu linii i jest kopiowany, nie referencowany.",
-      "W tym portfolio istnieje **jedenaście** takich projektów. W czterech z nich urosły równolegle te same pliki: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — i każda kopia jest już inna. To nie jest kod skopiowany raz; to jest cztery niezależnie utrzymywane implementacje jednej rzeczy.",
+      "W tym portfolio istnieje **dziesięć** takich projektów. W czterech z nich urosły równolegle te same pliki: `AuthenticationExtensions.cs`, `DatabaseProviderExtensions.cs`, `RateLimitingExtensions.cs`, `MigrationBackgroundService.cs` — i każda kopia jest już inna. To nie jest kod skopiowany raz; to jest cztery niezależnie utrzymywane implementacje jednej rzeczy.",
       "Dlatego jest to największy nierozpoznany kernel w portfolio i jednocześnie najtrudniejszy: nie ma jednej wersji, którą można wyjąć — trzeba wybrać referencyjną i cofnąć rozjazd w pozostałych."
     ],
     "where": "jedenaście projektów `*.ServiceDefaults`; kernel K2",
-    "slugs": ["cognitive-multi-agent-simulation", "primates", "auto-veritas", "aurelius-promptus", "hydro-scope", "copilot-scope"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "primates",
+      "auto-veritas",
+      "hydro-scope",
+      "copilot-scope"
+    ]
   },
   {
     "id": "runstore",
@@ -55,7 +63,10 @@
       "Ten sam kształt danych powstał niezależnie dwa razy: raz jako funkcja badawcza, raz jako {{term:audit|ślad audytowy}} bramki uprawnień. To jedna z trzech duplikacji, których scalenie ma sens."
     ],
     "where": "cognitive-multi-agent-simulation / Observatory, AgentHelm / audit trail",
-    "slugs": ["cognitive-multi-agent-simulation", "AgentHelm"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "AgentHelm"
+    ]
   },
   {
     "id": "comparison",
@@ -66,18 +77,21 @@
       "Dyscyplina jest wymuszona kształtem typu, nie konwencją: w typie porównania nie ma pola, w które dałoby się wstawić najlepszy przebieg. To jest właściwy sposób egzekwowania zasady metodologicznej — reguła w prozie nie przetrwa terminu."
     ],
     "where": "cognitive-multi-agent-simulation / Observatory",
-    "slugs": ["cognitive-multi-agent-simulation"]
+    "slugs": [
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "ensemble",
     "term": "Ensemble / definicje ról",
     "tag": "komponent",
     "body": [
-      "Rejestr wersjonowanych definicji ról agentów wraz z odciskiem ({{term:fingerprint}}) dokładnego zestawu, który wyprodukował dany przebieg. Bez tego nie da się powiedzieć, czy różnica między dwoma przebiegami wynika ze zmiany promptu, ze zmiany modelu, czy z losowości.",
-      "To ten sam problem, który po stronie szablonów promptów rozwiązuje aurelius-promptus — i dlatego oba są kandydatami do scalenia w jeden kernel."
+      "Rejestr wersjonowanych definicji ról agentów wraz z odciskiem ({{term:fingerprint}}) dokładnego zestawu, który wyprodukował dany przebieg. Bez tego nie da się powiedzieć, czy różnica między dwoma przebiegami wynika ze zmiany promptu, ze zmiany modelu, czy z losowości."
     ],
-    "where": "cognitive-multi-agent-simulation / Ensemble, aurelius-promptus",
-    "slugs": ["cognitive-multi-agent-simulation", "aurelius-promptus"]
+    "where": "cognitive-multi-agent-simulation / Ensemble",
+    "slugs": [
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "fingerprint",
@@ -119,7 +133,10 @@
       "Kluczowa obserwacja kosztowa: liczba wywołań modelu jest **własnością topologii, nie modelu**. Da się ją policzyć fałszywym modelem w sekundę i wynik będzie identyczny jak u prawdziwego dostawcy. Jakość — nie."
     ],
     "where": "cognitive-multi-agent-simulation / Simulation",
-    "slugs": ["cognitive-multi-agent-simulation", "chess-mas"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "chess-mas"
+    ]
   },
   {
     "id": "mutation",
@@ -130,7 +147,11 @@
       "To jedyna metoda, która mierzy **jakość testów**, a nie jakość kodu — i dlatego jest jedynym argumentem, że zielone CI faktycznie coś znaczy. W tym portfolio zastosowana w trzech miejscach: do analizatorów, do sędziego LLM i do bramki CI."
     ],
     "where": "archgate, judge-worker, agent-eval-bench",
-    "slugs": ["archgate", "judge-worker", "agent-eval-bench"]
+    "slugs": [
+      "archgate",
+      "judge-worker",
+      "agent-eval-bench"
+    ]
   },
   {
     "id": "roslyn",
@@ -141,7 +162,9 @@
       "To jest różnica między bramką architektoniczną a konkurencją opartą na `glob` i `grep`: precyzja w zamian za jednojęzykowość, która nakłada twardy sufit na wielkość rynku. Ten sufit trzeba przyjąć świadomie, a nie odkryć po roku."
     ],
     "where": "archgate — analizatory bramki",
-    "slugs": ["archgate"]
+    "slugs": [
+      "archgate"
+    ]
   },
   {
     "id": "diffgate",
@@ -152,7 +175,9 @@
       "Bez tego każda nowa reguła zapala tysiące ostrzeżeń w istniejącym kodzie, zespół wyłącza narzędzie w pierwszym tygodniu, i to jest koniec wdrożenia. Zakresowanie diffem nie jest optymalizacją wydajności — jest warunkiem adopcji."
     ],
     "where": "archgate",
-    "slugs": ["archgate"]
+    "slugs": [
+      "archgate"
+    ]
   },
   {
     "id": "provenance",
@@ -163,7 +188,10 @@
       "Pierwsze podejście w copilot-scope nie przeszło własnego audytu: było średnią sesyjną liczoną przez edytor, nie atrybucją linia po linii. Ten wynik jest wart więcej niż udane wdrożenie — pokazuje, że sygnał trzeba projektować od zera, i że autor potrafi odrzucić własną pracę."
     ],
     "where": "archgate (projektowane od zera), copilot-scope (nieudane pierwsze podejście)",
-    "slugs": ["archgate", "copilot-scope"]
+    "slugs": [
+      "archgate",
+      "copilot-scope"
+    ]
   },
   {
     "id": "audit",
@@ -175,7 +203,10 @@
       "Kategoria observability zamknęła się wokół pierwszego. Drugie zostało puste, bo to nie jest kupujący tamtych zespołów."
     ],
     "where": "AgentHelm; ta sama struktura danych co magazyn przebiegów",
-    "slugs": ["AgentHelm", "cognitive-multi-agent-simulation"]
+    "slugs": [
+      "AgentHelm",
+      "cognitive-multi-agent-simulation"
+    ]
   },
   {
     "id": "skille",
@@ -186,7 +217,9 @@
       "W tym portfolio format już istnieje i jest gotowy: {{term:plugins}}. Każde kolejne repozytorium, które zbuduje własny mechanizm skilli zamiast go użyć, jest duplikacją."
     ],
     "where": "architecture-standards; kandydat na wspólny format dla wszystkich agentów w portfolio",
-    "slugs": ["architecture-standards"]
+    "slugs": [
+      "architecture-standards"
+    ]
   },
   {
     "id": "plugins",
@@ -197,7 +230,9 @@
       "Pętla jest domknięta: polityka jest jednocześnie dokumentacją do przeczytania i regułą, którą agent wczytuje przed pracą. To jest jedyny artefakt w portfolio, który zmienia sposób, w jaki powstaje reszta portfolio."
     ],
     "where": "architecture-standards — pięć wtyczek, katalog, walidator dryfu",
-    "slugs": ["architecture-standards"]
+    "slugs": [
+      "architecture-standards"
+    ]
   },
   {
     "id": "drift",
@@ -208,7 +243,10 @@
       "Wzorzec jest tani i rozwiązuje dokładnie jedną klasę problemów: pliki, które muszą być zacommitowane (bo coś je czyta bez builda), ale są generowane. Katalog wtyczek, manifest portfolio, tabela repozytoriów w README — wszystkie trzy są tym samym przypadkiem."
     ],
     "where": "architecture-standards; ta strona (`scripts/build-manifest.mjs --check`)",
-    "slugs": ["architecture-standards", "konradcinkusz"]
+    "slugs": [
+      "architecture-standards",
+      "konradcinkusz"
+    ]
   },
   {
     "id": "maf",
@@ -219,7 +257,11 @@
       "W dobrze zbudowanym systemie jest odizolowany do jednego projektu — każdy inny serwis traktuje przebieg jako dane. Dzięki temu wymiana silnika jest realna, a nie teoretyczna."
     ],
     "where": "cognitive-multi-agent-simulation, chess-mas, maf-book",
-    "slugs": ["cognitive-multi-agent-simulation", "chess-mas", "maf-book"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "chess-mas",
+      "maf-book"
+    ]
   },
   {
     "id": "ichatclient",
@@ -240,7 +282,9 @@
       "Dla tego portfolio ma dwa zastosowania: harness ewaluacyjny testuje agenta przez adapter MCP, a produkt hosted importuje przez MCP realny backlog z Jiry albo Azure DevOps. Pierwsze jest techniczne, drugie jest handlowe."
     ],
     "where": "agent-eval-bench; kanał integracji dla produktu hosted",
-    "slugs": ["agent-eval-bench"]
+    "slugs": [
+      "agent-eval-bench"
+    ]
   },
   {
     "id": "acp",
@@ -251,7 +295,9 @@
       "Uwaga rynkowa: rejestr agentów ACP jest już oficjalny i wbudowany w Zed oraz JetBrains, więc warstwa protokołu przestała być wolną niszą. To, co zostaje, to nie protokół, tylko **polityka uprawnień i dowód** — a to jest inny produkt niż cockpit."
     ],
     "where": "AgentHelm",
-    "slugs": ["AgentHelm"]
+    "slugs": [
+      "AgentHelm"
+    ]
   },
   {
     "id": "otel",
@@ -262,7 +308,10 @@
       "Normalizacja telemetrii z kilku dostawców to dokładnie ta sama praca, wykonana prywatnie. To ścieżka reputacyjna — propozycja do konwencji, wystąpienie, wpis — a nie produkt. Wartość leży w tym, że nazwisko trafia do dokumentu, który przeżyje projekt."
     ],
     "where": "copilot-scope, hydro-scope",
-    "slugs": ["copilot-scope", "hydro-scope"]
+    "slugs": [
+      "copilot-scope",
+      "hydro-scope"
+    ]
   },
   {
     "id": "aspire",
@@ -272,8 +321,16 @@
       "Warstwa orkiestracji lokalnego uruchamiania wielu serwisów naraz, z dashboardem telemetrii. Generuje w każdym rozwiązaniu projekt {{term:servicedefaults}}, i to właśnie ta wygoda jest źródłem największej duplikacji w tym portfolio.",
       "Świadome ograniczenie: Aspire opisuje development, a produkcję opisują osobne pliki wdrożeniowe. Trzymanie tych dwóch rzeczy osobno kosztuje trochę powtórzenia i oszczędza rozjazd między środowiskami."
     ],
-    "where": "osiem systemów w portfolio",
-    "slugs": ["cognitive-multi-agent-simulation", "primates", "copilot-scope", "hydro-scope", "auto-veritas", "aurelius-promptus", "chess-mas", "black-hole-sim"]
+    "where": "siedem systemów w portfolio",
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "primates",
+      "copilot-scope",
+      "hydro-scope",
+      "auto-veritas",
+      "chess-mas",
+      "black-hole-sim"
+    ]
   },
   {
     "id": "oidc",
@@ -284,7 +341,9 @@
       "Ma jedną nieoczywistą konsekwencję operacyjną: serwis, którego JWKS pobierają wszystkie pozostałe, jest na ścieżce żądania każdego z nich — i to nie tylko przy pierwszym żądaniu, bo walidatory odświeżają cache. Taki serwis **nie może skalować się do zera**."
     ],
     "where": "authservice (K4) i sześć systemów, które go konsumują",
-    "slugs": ["authservice"]
+    "slugs": [
+      "authservice"
+    ]
   },
   {
     "id": "ghcr",
@@ -295,7 +354,12 @@
       "To jest jedyna zakończona ekstrakcja w tym portfolio i wzorzec do powtórzenia: jedna baza kodu, N niezależnych instancji, żadnego wspólnego runtime'u i żadnego wspólnego korzenia zaufania."
     ],
     "where": "authservice v0.3.1 i pięć innych obrazów",
-    "slugs": ["authservice", "archgate", "copilot-scope", "AgentHelm"]
+    "slugs": [
+      "authservice",
+      "archgate",
+      "copilot-scope",
+      "AgentHelm"
+    ]
   },
   {
     "id": "nuget",
@@ -306,7 +370,9 @@
       "Stan faktyczny: w całym portfolio zadeklarowane są trzy identyfikatory pakietów i **żaden nie jest opublikowany**. To jest najtańszy niewykorzystany kanał w całej mapie."
     ],
     "where": "archgate deklaruje trzy pakiety; oś dystrybucji, wiersz 01",
-    "slugs": ["archgate"]
+    "slugs": [
+      "archgate"
+    ]
   },
   {
     "id": "tagdeploy",
@@ -317,7 +383,9 @@
       "Uzasadnienie jest jednozdaniowe: wdrożenie powinno być aktem, a tag jest jego zapisem. Reguła, o której najłatwiej zapomnieć: serwis, którego aplikacja Fly nie istnieje, musi być zawsze wybrany — to jest jedyne, co pozwala postawić zimny estate jednym tagiem."
     ],
     "where": "architecture-standards / FLY-IO-DEPLOYMENT.md; siedem repozytoriów ma taki workflow",
-    "slugs": ["architecture-standards"]
+    "slugs": [
+      "architecture-standards"
+    ]
   },
   {
     "id": "opencore",
@@ -415,7 +483,7 @@
     "tag": "operacje",
     "body": [
       "Twardy limit liczby rzeczy zaczętych i nieskończonych. Nie wytyczna — limit: przekroczenie jest sygnałem, żeby coś **zamknąć**, a nie żeby pracować dłużej.",
-      "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu pięciu rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
+      "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu czterech rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
     ],
     "where": "zakładka „operacje”, sekcja „limity”"
   },
@@ -448,7 +516,9 @@
       "To jest dokładnie ten rodzaj rzetelności, który odróżnia harness ewaluacyjny od dashboardu — i jednocześnie rzecz, której prawie nikt nie robi, bo wymaga ręcznego oznaczenia próbki."
     ],
     "where": "judge-worker",
-    "slugs": ["judge-worker"]
+    "slugs": [
+      "judge-worker"
+    ]
   },
   {
     "id": "safe",
@@ -459,6 +529,9 @@
       "Dla tego portfolio istotne są dwie rzeczy: wydarzenie jest drogie i policzalne (co daje wycenę próby generalnej), a jego produktem są **artefakty, nie transkrypt** — co ustawia, co program w ogóle powinien zwracać."
     ],
     "where": "cognitive-multi-agent-simulation i jego praca badawcza",
-    "slugs": ["cognitive-multi-agent-simulation", "cognitive-multi-agent-simulation-analysis"]
+    "slugs": [
+      "cognitive-multi-agent-simulation",
+      "cognitive-multi-agent-simulation-analysis"
+    ]
   }
 ]
