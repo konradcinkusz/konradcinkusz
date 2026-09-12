@@ -167,7 +167,7 @@
     "Wykonaj Fazę 2: zmień nazwę projektu na `AureliusPromptus.Web.E2ETests`, przenieś unikalne scenariusze z projektu MSTest i usuń go."
   ],
   "risks": [
-    "Hasła kont seed są zakodowane w repozytorium: `konrad@aurelius.com` / `Konrad123!` w `UserProfileTests/LoginTests.cs:15` oraz `konrad@aurelius.today` / `Konrad123!` w dwóch plikach projektu Portal. Jeśli te konta istnieją w publicznie dostępnym środowisku, to jest wyciek poświadczeń.",
+    "Hasła kont seed są zakodowane na sztywno w repozytorium: jedno konto w `UserProfileTests/LoginTests.cs:15`, drugie w dwóch plikach projektu Portal, oba z tym samym hasłem. Adresy i hasło celowo **nie są tutaj podane** — ten wpis jest publiczny, a repozytorium, którego dotyczy, nie jest. Jeśli te konta istnieją w publicznie dostępnym środowisku, jest to wyciek poświadczeń: hasło trzeba zmienić, a nie tylko usunąć z kodu.",
     "Domeny kont seed nie zgadzają się ze sobą ani z domeną produktu po rebrandzie, więc suita może nie mieć się czym zalogować, zanim w ogóle dojdzie do pierwszej asercji.",
     "Testy tworzą realne dane w środowisku pod testem. Nic nie usuwa organizacji ani promptów, a konta z `LogoutTests` wyciekają, bo po wylogowaniu nie ma już sesji do skasowania.",
     "Brak pliku `LICENSE` przy dwóch wersjach .NET i dwóch frameworkach testowych w jednym solution: nikt inny nie ma prawa tego użyć, a utrzymanie i tak kosztuje dwie ścieżki buildu."
