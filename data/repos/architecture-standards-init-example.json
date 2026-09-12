@@ -1,0 +1,159 @@
+{
+  "slug": "architecture-standards-init-example",
+  "name": "architecture-standards-init-example",
+  "cluster": "B-static",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Co konstytucja architektoniczna produkuje, gdy wycelować ją w puste repozytorium — zgodne z zasadami na pierwszym commicie, nie po sprzątaniu.",
+  "summary": "Przepracowany przebieg inicjalizatora greenfield: jeden korzeń kompozycji Aspire, jedno jądro współdzielone, jedna usługa posiadająca własną bazę, jedna powierzchnia Next.js przed nią, trzy aplikacje Fly.io i osiem workflowów. **Celowo nie zawiera żadnego modelu dziedzinowego** — jest do czytania jako przykład architektury, nie do użycia jako produkt. To jest najważniejszy element uzupełniający `architecture-standards`: konstytucja opisuje, jak system ma wyglądać, a to repozytorium pokazuje ten kształt bez ani jednej linijki dziedziny, która mogłaby odwrócić uwagę. Kilka rzeczy jest tu zrobionych lepiej niż w większości prawdziwych systemów: frontend czyta konfigurację per żądanie z `/api/config`, nigdy z `NEXT_PUBLIC_*`, bo tamto zapieka się przy budowie i kosztuje jeden obraz na środowisko; jądro współdzielone ma 477 linii przy suficie 800 pilnowanym przez test **i** krok CI; skrypt setupu **generuje** jedyny obowiązkowy sekret, bo człowiek poproszony o wymyślenie sekretu wymyśla `changeme`.",
+  "stack": [
+    ".NET 10",
+    ".NET Aspire",
+    "ASP.NET Core Minimal API",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "EF Core",
+    "Playwright",
+    "Fly.io",
+    "Docker",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Dziewięć atrybutów testowych w `tests/…Api.Tests` (README mówi o dziesięciu testach): raport zdrowia bez poświadczeń, przycinanie listy, kształt błędu i trzy strażniki jądra. Do tego cztery testy Playwright przez cały stos, uruchamiane na każdym pull requeście — i to one są tu mocnym punktem, bo bootują dokładnie tę ścieżkę bez Dockera, którą repozytorium reklamuje.",
+  "ci": "Osiem workflowów — najwięcej ze wszystkich repozytoriów dodanych w tym przebiegu: `ci.yml` z pakietem E2E, `codeql.yml`, `secret-scan.yml`, `pages.yml`, `build-overview-pdf.yml` oraz trzy workflowy Fly.io (deploy, skalowanie, teardown z potwierdzeniem wpisywanym z ręki).",
+  "metrics": [
+    {
+      "label": "Linie jądra współdzielonego",
+      "value": "477 przy suficie 800"
+    },
+    {
+      "label": "Workflowy",
+      "value": "8"
+    },
+    {
+      "label": "Testy E2E (Playwright)",
+      "value": "4, na każdym pull requeście"
+    },
+    {
+      "label": "Aplikacje Fly",
+      "value": "3 — api, web, postgres"
+    },
+    {
+      "label": "Model dziedzinowy",
+      "value": "żaden, celowo"
+    },
+    {
+      "label": "Poświadczenia potrzebne do uruchomienia",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/architecture-standards-init-example",
+    "live": [],
+    "docs": [
+      {
+        "label": "Punkt wejścia dla agenta",
+        "path": "AGENTS.md"
+      },
+      {
+        "label": "Inwentarz sekretów",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Analiza infrastruktury i kosztu",
+        "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
+      },
+      {
+        "label": "Skrypt setupu — generuje sekret zamiast prosić o niego",
+        "path": "scripts/"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": true,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Korzeń kompozycji Aspire",
+      "path": "src/ArchitectureStandardsInitExample.AppHost/",
+      "description": "Deklaruje Postgresa, API i frontend przez `WithReference`, `WaitFor` i `WithHttpHealthCheck`. Jawnie **nie** jest topologią produkcyjną — i repozytorium mówi to wprost, co jest najczęściej mylonym punktem w Aspire.",
+      "reusable": true
+    },
+    {
+      "name": "Jądro współdzielone",
+      "path": "src/ArchitectureStandardsInitExample.ServiceDefaults/",
+      "description": "Telemetria, zdrowie, discovery, odporność, JWT, CORS, OpenAPI, dostawca bazy — 477 linii. Test architektoniczny sprawdza, że jądro nie trzyma żadnego typu encji i nie eksportuje niczego, po czym dałoby się dziedziczyć.",
+      "reusable": true
+    },
+    {
+      "name": "Powierzchnia produktu",
+      "path": "web/app/",
+      "description": "Jedyny origin, z jakim rozmawia przeglądarka. Strona serwerowa czyta konfigurację per żądanie z `/api/config`, a do API sięga przez catch-all proxy chodzące po drabinie kandydatów — jedna ścieżka kodu działa na laptopie, pod Aspire i na Fly.",
+      "reusable": true
+    },
+    {
+      "name": "Skrypty setupu",
+      "path": "scripts/",
+      "description": "Sprawdzają wymagania, odtwarzają oba grafy zależności i **generują** jedyny obowiązkowy sekret do `dotnet user-secrets`. `--check` raportuje braki i niczego nie zmienia. Wariant PowerShell robi to samo bez `openssl`, którego na Windowsie nie ma.",
+      "reusable": true
+    },
+    {
+      "name": "Pakiet E2E",
+      "path": "tests/e2e/",
+      "description": "Cztery testy Playwright przez cały stos, bootujące ścieżkę bez Dockera na każdym pull requeście. To nie jest wygoda — to zasada P8 zamieniona w coś sprawdzalnego.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "To jest wyjście tamtego inicjalizatora i jedyny kompletny przykład roboczy konstytucji bez dziedziny, która mogłaby rozpraszać. Zmiana w standardzie, która nie da się tutaj odtworzyć, jest standardem, którego nikt nie wykonał."
+    },
+    {
+      "slug": "parcel-number-generator",
+      "reason": "Ten sam szkielet osiągnięty z drugiej strony: tam modernizacja rozwiązania z 2018 roku, tutaj greenfield. Jądro z sufitem linii, awaryjna baza w pamięci i migracje po starcie Kestrela są identyczne w obu."
+    },
+    {
+      "slug": "authservice",
+      "reason": "Jądro niesie okablowanie JWT, ale wystawca jest zewnętrzny — ten sam podział co wszędzie w portfolio: usługa waliduje tokeny i nie potrafi ich wystawić."
+    }
+  ],
+  "product": "Wiarygodność, nie transakcja, i najwyższy stosunek wartości do rozmiaru w klastrze B. Dla kupującego konsultacyjnie to jest odpowiedź na pytanie „jak wygląda twój pierwszy commit”: nie slajd, tylko repozytorium, które startuje bez poświadczenia i ma osiem bramek od pierwszego dnia. Sprzedaje się tu metoda inicjalizacji, a nie kod.",
+  "highlights": [
+    "Konfiguracja czytana per żądanie z `/api/config` zamiast z `NEXT_PUBLIC_*`. To jest błąd popełniany w większości wdrożeń Next.js i kosztuje jeden obraz na środowisko — tutaj jest rozwiązany w szkielecie, zanim ktokolwiek zdąży go popełnić.",
+    "Skrypt setupu generuje sekret, zamiast prosić człowieka o jego wymyślenie. Uzasadnienie zapisane w repozytorium jest jednozdaniowe i trafne: człowiek poproszony o wymyślenie sekretu produkuje `changeme`.",
+    "Sufit jądra jest pilnowany dwoma niezależnymi mechanizmami — testem architektonicznym i krokiem CI. Podwójne pilnowanie jest tu zamierzone: test chroni w edytorze, krok CI chroni przed testem, który ktoś usunął.",
+    "Liczba zależności na projekt jest wypisana w README. Wzrost w diffie staje się pytaniem, które ktoś może zadać na przeglądzie — to jest tani mechanizm o nieproporcjonalnym efekcie."
+  ],
+  "gaps": [
+    "Pięć otwartych pull requestów Dependabota przy zerowej liczbie otwartych zgłoszeń — wszystkie otwarte pozycje w tym repozytorium to aktualizacje zależności.",
+    "Brak modelu dziedzinowego jest decyzją, ale ma cenę: repozytorium nie może pokazać, jak konstytucja radzi sobie z dziedziną, która się nie mieści w jednej usłudze. Najtrudniejsze pytanie architektoniczne pozostaje tu nietknięte.",
+    "Dziewięć atrybutów testowych po stronie API to niewiele jak na repozytorium reklamujące się bramkami — ciężar dowodu spoczywa na czterech testach E2E."
+  ],
+  "next": [
+    "Zmerguj pięć pull requestów Dependabota. Przy zerowej liczbie zgłoszeń to jedyna otwarta praca w tym repozytorium.",
+    "Dodaj drugą usługę do przykładu albo zapisz jako jawną decyzję, że jedna usługa jest granicą tego, co inicjalizator pokazuje.",
+    "Podłącz ten przykład do walidacji `architecture-standards`: zmiana konstytucji, która nie da się tutaj odtworzyć, powinna wywracać build tamtego repozytorium."
+  ],
+  "risks": [
+    "Przykład jest zgodny z konstytucją na dzień, w którym go wygenerowano. Bez bramki wiążącej go ze standardem rozjedzie się po cichu — i będzie to najgorszy możliwy rodzaj dryfu, bo to repozytorium jest cytowane jako wzorzec."
+  ],
+  "headline": "Osiem workflowów, zero poświadczeń potrzebnych do uruchomienia, zero dziedziny — dokładnie tak, jak zaplanowano",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 5,
+    "dependabotPrs": 5,
+    "lastCommit": "2026-09-07",
+    "commits": 20,
+    "files": 127
+  }
+}

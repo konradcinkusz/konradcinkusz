@@ -2,7 +2,7 @@
   "slug": "math-for-ai-engineers",
   "name": "math-for-ai-engineers",
   "cluster": "D-content",
-  "visibility": "private",
+  "visibility": "public",
   "state": "stub",
   "tier": "P4",
   "oneLiner": "A reserved repository name: one commit, one README file of 49 bytes, no content.",

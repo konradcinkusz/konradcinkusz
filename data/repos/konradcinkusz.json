@@ -2,11 +2,11 @@
   "slug": "konradcinkusz",
   "name": "konradcinkusz (profil GitHub + mapa portfolio)",
   "cluster": "F-meta",
-  "visibility": "private",
+  "visibility": "public",
   "state": "active",
   "tier": "P0",
-  "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści cztery repozytoria, plus strona, która go renderuje.",
-  "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści cztery repozytoria naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
+  "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący czterdzieści trzy repozytoria, plus strona, która go renderuje.",
+  "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać czterdzieści trzy repozytoria naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
   "stack": [
     "HTML5",
     "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -173,31 +173,32 @@
       "reason": "README i `meta.json` linkują do kanału jako głównej osi dystrybucji, więc oba opisują ten sam kanał dotarcia."
     }
   ],
-  "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu trzech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 34 repozytoria, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
+  "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych czterdziestu dwóch repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 34 repozytoria, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
   "highlights": [
     "Walidator ma **zamknięty** zestaw kluczy repozytorium i sprawdza integralność krzyżowo: nieznany slug w `overlaps`, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. {{term:kernel|Kernel}} z jednym konsumentem jest ostrzeżeniem, nie błędem — to jest osąd, nie naruszenie schematu.",
     "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 34 slugi bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
     "Strona nie ma kroku budowania i zero zależności w czasie działania. Jedyna zależność deweloperska to przeglądarka do testu renderowania — który złapał błąd kolejności bootu zostawiający pustą stronę, trzy przepełnienia layoutu i regułę `[hidden]` przegrywającą z `display: flex`.",
-    "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu trzech."
+    "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych czterdziestu dwóch."
   ],
   "gaps": [
-    "**To repozytorium jest prywatne, więc README profilu nie renderuje się nigdzie.** GitHub pokazuje `README.md` z repozytorium o nazwie równej nazwie użytkownika tylko wtedy, gdy jest ono publiczne. Tu jest prywatne, potwierdzone dwoma niezależnymi źródłami, więc `github.com/konradcinkusz` nie pokazuje ani tabeli projektów, ani niczego innego z tego pliku. Upublicznienie repozytorium naprawia profil i **jednocześnie publikuje cały manifest**, razem z dossier siedemnastu repozytoriów prywatnych — to jedna decyzja, nie dwie, i patrz `risks` poniżej.",
-    "Manifest jest **migawką z jednego dnia** dla trzydziestu trzech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
+    "**Repozytorium jest publiczne, więc README profilu renderuje się — i razem z nim opublikowany został cały manifest.** To była jedna decyzja, nie dwie: profil działa, a dossier trzynastu repozytoriów prywatnych jest od tej chwili czytelne dla każdego, kto otworzy `site/data/portfolio.json`. Skutek jest opisany w `risks` poniżej i nie da się go cofnąć samym przestawieniem widoczności z powrotem.",
+    "Manifest jest **migawką z jednego dnia** dla czterdziestu dwóch pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
     "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
     "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
     "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
   ],
   "next": [
+    "Przejrzyj trzynaście wpisów o repozytoriach prywatnych i usuń z nich wszystko, co nie powinno być publiczne — opisy potwierdzonych luk bezpieczeństwa przede wszystkim. To jest pierwsza pozycja na liście całego portfolio, przed czymkolwiek innym.",
     "Wypuść pierwszy tag i sprawdź, czy wdrożenie faktycznie przechodzi — łącznie z krokiem weryfikującym serwowany manifest.",
     "Zbuduj `scripts/build-readme.mjs` i generuj tabelę projektów w README z manifestu, żeby usunąć rozjazd u źródła.",
     "Dodaj nocny kolektor zdrowia zapisujący `data/health.json` i otwierający **jedno** zgłoszenie z przekroczonymi progami.",
     "Przenieś tu wielokrotnie używalny workflow CI dla .NET; szesnaście kopii `ci.yml` w estate to jeden `workflow_call` i trzy linijki u konsumenta."
   ],
   "risks": [
-    "**Manifest opisuje repozytoria prywatne na tyle dokładnie, że jego upublicznienie jest decyzją, a nie formalnością.** Dziś repozytorium jest prywatne, a strona nie jest wdrożona, więc nic nie wyciekło. Ale wpisy prywatne wymieniają ścieżki plików, nazwy klas i **potwierdzone luki bezpieczeństwa** w działającym, płatnym produkcie. Publikacja — czy przez upublicznienie repozytorium, czy przez wdrożenie strony pod adresem, który ktoś znajdzie — udostępnia to wszystko. Zamknięty schemat kluczy pilnuje, żeby zakres nie rósł sam; nie zmniejsza tego, co już jest w środku."
+    "**To ryzyko się zmaterializowało.** Repozytorium jest publiczne, a manifest razem z nim. Wpisy o repozytoriach prywatnych wymieniają ścieżki plików, nazwy klas i **potwierdzone luki bezpieczeństwa** w działającym, płatnym produkcie — i są dziś czytelne dla każdego. Przestawienie widoczności z powrotem tego nie cofa: publiczny commit jest publiczny na zawsze i nie dosięga klonów, forków ani scraperów, które już były. Jedyne działanie, które cokolwiek zmienia, to przejrzenie trzynastu wpisów prywatnych i usunięcie z nich tego, co nie powinno być publiczne."
   ],
-  "headline": "Jedyne miejsce, z którego widać całe portfolio naraz — i jedyne, które pilnuje, żeby nie kłamało",
-  "headlineTone": "good",
+  "headline": "Manifest został opublikowany razem z repozytorium — i niesie dossier trzynastu repozytoriów prywatnych",
+  "headlineTone": "bad",
   "github": {
     "stars": 0,
     "openIssues": 0,

@@ -2,7 +2,7 @@
   "slug": "judge-worker",
   "name": "judge-worker",
   "cluster": "A-runtime",
-  "visibility": "private",
+  "visibility": "public",
   "state": "active",
   "tier": "P3",
   "oneLiner": "A TypeScript worker that pulls agent traces off a BullMQ queue and scores them with an LLM judge — a judge checked by mutants, not assumed.",
@@ -20,7 +20,7 @@
   "primaryLanguage": "TypeScript",
   "license": "MIT",
   "tests": "103 `it()`/`test()` calls in 32 `describe` blocks, spread over 15 files in `test/` — counted with grep, because `node_modules` does not exist in the container and the suite has not been run. `FINDINGS.md` still says 7 files and 30 tests, which are the figures from an earlier commit.",
-  "ci": "Four workflows: `ci.yml` runs lint, format:check, typecheck, build and `test:coverage` on Node 22 with a `redis:7-alpine` service; gitleaks runs over the **full history**, on PR/push and every Monday; `docs.yml` builds Jekyll and pushes to GitHub Pages when markdown changes. CodeQL is declared but skips itself for as long as the repository is private.",
+  "ci": "Four workflows: `ci.yml` runs lint, format:check, typecheck, build and `test:coverage` on Node 22 with a `redis:7-alpine` service; gitleaks runs over the **full history**, on PR/push and every Monday; `docs.yml` builds Jekyll and pushes to GitHub Pages when markdown changes. CodeQL is declared, and the condition that made it skip itself — the repository being private — no longer holds; no first run has been recorded in this entry yet.",
   "metrics": [
     {
       "label": "Commits",
@@ -170,7 +170,7 @@
     "The `--live` path has no {{term:mutation|mutation}} coverage at all and has never been run against the real API — it is tested with an injected `fetch`, so end to end remains unchecked.",
     "No real {{term:otel|OTel}} telemetry: there are pino logs and Prometheus metrics, and the log field vocabulary is borrowed from the GenAI OTel conventions, which can be misread. `SPEC.md` corrects this itself.",
     "Deploying the documentation needs a one-off manual switch of Settings → Pages → Source to GitHub Actions, which the workflow cannot do for itself. The README links to that site as the full documentation; whether it responds has not been verified.",
-    "The documentation site is not confirmed as published: the repository is private, and the header of the Pages workflow says itself that the deployment job will return a permissions error until somebody manually changes the source in the settings — which the workflow cannot do on its own behalf."
+    "The documentation site is still not confirmed as published. The permissions block that followed from the repository being private went away when it was made public, but the header of the Pages workflow says itself that deployment needs a one-off manual switch of the source in the settings — which the workflow cannot do on its own behalf."
   ],
   "risks": [
     "LICENSE assigns copyright to `dev_insight`, which clashes with another portfolio entry (slug `dev-insight`) and looks like an artefact of copying between repositories.",
@@ -183,7 +183,7 @@
     "Fix the copyright line in LICENSE to the right owner — today it carries the name of another repository.",
     "Run `pnpm run calibrate -- --live` with a real key over the 15 fixtures (a dozen seconds, pennies) and record that {{term:kappa|kappa}} next to the mock one. It is the cheapest thing that turns the repository's weakest claim into a measurement.",
     "Add a mutation counterpart to `SilentInjectionComplianceJudge` for `LiveJudgeProvider` — check whether the real judge resists the attack in `adv-003`.",
-    "Settle the repository's visibility (issue #19). While it is private, CodeQL skips itself and the whole 'code scanning in CI' layer is a declaration, not a control."
+    "The repository's visibility is settled — it is public, so CodeQL no longer skips itself. Check the first run and record the result; until then the 'code scanning in CI' layer remains a declaration rather than a control."
   ],
   "headline": "A judge checked by five mutants; the live path has never touched the real API",
   "headlineTone": "warn",

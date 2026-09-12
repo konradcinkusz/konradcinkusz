@@ -1,0 +1,142 @@
+{
+  "slug": "combustion-reports",
+  "name": "combustion-reports",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P4",
+  "oneLiner": "Spalanie samochodu jako krzywa, nie dwie liczby z broszury — z rozdziałem README o tym, jak tej krzywej **nie** czytać.",
+  "summary": "Producent podaje dwie liczby, miejską i pozamiejską; samochód ma krzywą. Aplikacja przyjmuje przejazdy i dopasowuje wielomianowy model zużycia wobec prędkości średniej oraz wobec długości trasy, więc widać, gdzie dany samochód jest naprawdę oszczędny, a nie gdzie twierdzi broszura. Działa w całości w przeglądarce: bez konta, bez serwera, bez telemetrii, stan w `localStorage`. Tym, co wyróżnia to repozytorium spośród wszystkich w portfolio, jest sekcja **„Jak tego nie czytać”** — krzywa dopasowana do czterech punktów jest rysunkiem, nie modelem; dopasowanie jest domyślnie zakotwiczone w zerze, co nie jest fizycznie prawdziwe i jest kompromisem na rzecz stabilności; ekstrapolacja jest celowo krótka, do 1,2× najdalszej próbki; a największym zakłócaczem jest własny styl jazdy kierowcy. R² jest pokazane przy każdym dopasowaniu właśnie po to, żeby dało się nie uwierzyć. To jest rzadkie: produkt, który aktywnie utrudnia nadinterpretację własnego wyniku.",
+  "stack": [
+    "React 18",
+    "Redux Toolkit",
+    "Vite",
+    "Plotly",
+    "Vitest",
+    "Docker",
+    "nginx",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "JavaScript",
+  "license": "MIT",
+  "tests": "Pięć plików testowych na Vitest, skupionych na dopasowaniu wielomianu i warstwie trwałości. Testy magazynu pokrywają przypadki, na których takie aplikacje zwykle się wywracają: niezgodna wersja schematu, uszkodzony wpis, brak dostępu do `localStorage`.",
+  "ci": "Dwa workflowy: `ci.yml` (lint i testy) oraz `pages.yml`, który publikuje aplikację. Obraz Docker z nginxem jest budowany, ale nie jest nigdzie publikowany.",
+  "metrics": [
+    {
+      "label": "Pliki testowe",
+      "value": "5"
+    },
+    {
+      "label": "Wymiary dopasowania",
+      "value": "2 — prędkość średnia, długość trasy"
+    },
+    {
+      "label": "Języki interfejsu",
+      "value": "2 — angielski i polski, wykrywane z przeglądarki"
+    },
+    {
+      "label": "Backend",
+      "value": "żaden — całość w przeglądarce"
+    },
+    {
+      "label": "Granica ekstrapolacji",
+      "value": "1,2× najdalszej próbki"
+    },
+    {
+      "label": "Commity",
+      "value": "42"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/combustion-reports",
+    "live": [],
+    "docs": [
+      {
+        "label": "Historia zmian",
+        "path": "CHANGELOG.md"
+      },
+      {
+        "label": "Zasady współpracy",
+        "path": "CONTRIBUTING.md"
+      },
+      {
+        "label": "Polityka bezpieczeństwa",
+        "path": "SECURITY.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Dopasowanie wielomianu",
+      "path": "src/",
+      "description": "Dopasowanie stopnia drugiego, domyślnie zakotwiczone w początku układu. Kotwica nie jest fizycznie prawdziwa — samochód na biegu jałowym pali — ale bez niej garść próbek daje krzywą wariującą poza zakresem danych. Kompromis jest opisany i wyłączalny parametrem.",
+      "reusable": true
+    },
+    {
+      "name": "Warstwa trwałości",
+      "path": "src/",
+      "description": "Zapisy są debounce'owane, snapshot niesie wersję schematu, a snapshot z niezgodnej wersji jest odrzucany zamiast wczytywany w połowie. Gdy `localStorage` jest niedostępny albo pełny, aplikacja działa dalej w pamięci zamiast rzucać wyjątkiem.",
+      "reusable": true
+    },
+    {
+      "name": "Sekcja „Jak tego nie czytać”",
+      "path": "README.md",
+      "description": "Cztery ostrzeżenia o nadinterpretacji, napisane przez autora przeciwko własnemu produktowi: za mało punktów, kotwica w zerze, krótka ekstrapolacja i własny styl jazdy jako zakłócacz.",
+      "reusable": true
+    },
+    {
+      "name": "Dwujęzyczny interfejs",
+      "path": "src/",
+      "description": "Angielski i polski, przełączane z paska nawigacji i wykrywane z przeglądarki przy pierwszej wizycie — dokładnie ten sam układ co mapa portfolio, tylko rozwiązany niezależnie.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "IberiaFamilyCalculator",
+      "reason": "Ten sam gatunek: kalkulator liczący w całości po stronie przeglądarki, bez konta i bez backendu, z modelem wypisanym tak, żeby dało się go sprawdzić. Warstwa trwałości i wzorzec udostępniania stanu są tu wspólne i nigdy nie zostały wyekstrahowane."
+    },
+    {
+      "slug": "brain-train",
+      "reason": "Aplikacja przeglądarkowa trzymająca cały stan lokalnie u użytkownika, z tym samym zestawem problemów: wersjonowanie schematu, brak eksportu, migracja danych między wydaniami."
+    }
+  ],
+  "product": "Najbliżej produktu z rzeczy zbudowanych dla siebie: rozwiązuje prawdziwy problem, ma odbiorcę poza autorem i nie wymaga żadnej infrastruktury, więc koszt krańcowy użytkownika wynosi zero. Czego brakuje do bycia produktem, to nie funkcje, tylko eksport danych — bez niego użytkownik, który wpisał sto przejazdów, jest uwiązany do jednej przeglądarki na jednym urządzeniu.",
+  "highlights": [
+    "Rozdział o tym, jak **nie** czytać własnego wyniku. W portfolio pełnym repozytoriów uczciwie wypisujących własne luki to jest najczystszy przypadek tej samej cnoty skierowanej do użytkownika, a nie do recenzenta.",
+    "R² pokazane przy każdym dopasowaniu — pokazane, nie schowane. Aplikacja podaje czytelnikowi liczbę pozwalającą jej nie uwierzyć.",
+    "Kotwica dopasowania w zerze jest udokumentowanym kompromisem z uzasadnieniem i furtką wyjścia, a nie ukrytą decyzją implementacyjną. Większość narzędzi tej klasy ma taką decyzję i o niej nie mówi.",
+    "Warstwa trwałości degraduje się poprawnie: tryb prywatny, zablokowane ciasteczka i przekroczony limit nie wywracają aplikacji, tylko przełączają ją na pamięć."
+  ],
+  "gaps": [
+    "**Brak eksportu.** Cały stan siedzi w `localStorage` jednej przeglądarki: wyczyszczone dane witryny kasują wszystko, a przeniesienie się na inne urządzenie jest niemożliwe. To jest ta jedna rzecz, która dzieli tę aplikację od użyteczności dla kogoś obcego.",
+    "Ostatni commit merytoryczny pochodzi z 1 sierpnia 2026; od tamtej pory otwarte są wyłącznie pull requesty Dependabota.",
+    "Obraz Docker jest budowany i nigdzie nie publikowany — konfiguracja, która nic nie robi poza tym, że musi być utrzymywana."
+  ],
+  "next": [
+    "Dodaj eksport i import do JSON. To jedna funkcja i to ona decyduje, czy ktokolwiek poza autorem zbierze w tej aplikacji sto przejazdów.",
+    "Zmerguj dwa pull requesty Dependabota i ustal, czy repozytorium jest utrzymywane, czy zamrożone — dziś odznaka mówi co innego niż historia commitów.",
+    "Publikuj obraz do GHCR albo usuń Dockerfile i `nginx.conf`. Nieużywana ścieżka wdrożeniowa jest kosztem bez korzyści."
+  ],
+  "risks": [
+    "Dane użytkownika żyją wyłącznie w jednej przeglądarce i nie da się ich wyeksportować. Użytkownik, który wprowadzał przejazdy przez rok, straci je przy czyszczeniu danych witryny — i nie dostanie żadnego ostrzeżenia."
+  ],
+  "headline": "Ma rozdział o tym, jak nie czytać własnych wykresów — i nie ma eksportu danych",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 4,
+    "openPrs": 2,
+    "dependabotPrs": 2,
+    "lastCommit": "2026-08-01",
+    "commits": 42,
+    "files": 67
+  }
+}

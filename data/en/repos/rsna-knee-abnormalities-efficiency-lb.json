@@ -1,0 +1,137 @@
+{
+  "slug": "rsna-knee-abnormalities-efficiency-lb",
+  "name": "rsna-knee-abnormalities-efficiency-lb",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "prototype",
+  "tier": "P4",
+  "oneLiner": "A multimodal 2.5D pipeline for a Kaggle knee-MRI challenge — the one repository in the portfolio with no licence file.",
+  "summary": "A deep-learning pipeline for the RSNA Knee Abnormality Detection challenge: detecting twelve findings from knee MRI combined with radiology-report text, over a DINOv2 imaging branch and a multilingual text branch, with an explicit weak-supervision strategy and diagnostics tooling. Four Python files, fifteen hundred lines, three commits — the smallest and rawest entry in this pass, and it joins the map mainly because it is the portfolio's only attempt at medical imaging and its only Kaggle competition entry. It is also the only public repository on the account **with no licence file**, which for a repository touching medical data and described as carrying full documentation is a real omission: with no licence nobody has the right to use the code, and default copyright reserves all rights. The repository carries no CI, no tests and no recorded run results — it has been frozen since 15 August 2026.",
+  "stack": [
+    "Python",
+    "PyTorch",
+    "DINOv2",
+    "Transformers"
+  ],
+  "primaryLanguage": "Python",
+  "license": "No licence file — all rights reserved by default",
+  "tests": "None. There is not a single test, and `diagnostics.py` is a tool for inspecting a run rather than a gate.",
+  "ci": "None. There is no `.github/` directory — nothing is checked automatically.",
+  "metrics": [
+    {
+      "label": "Python files",
+      "value": "4"
+    },
+    {
+      "label": "Lines of code",
+      "value": "about 1,500"
+    },
+    {
+      "label": "Commits",
+      "value": "3"
+    },
+    {
+      "label": "Findings detected",
+      "value": "12"
+    },
+    {
+      "label": "Tests and workflows",
+      "value": "0"
+    },
+    {
+      "label": "Recorded run results",
+      "value": "none in the repository"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/rsna-knee-abnormalities-efficiency-lb",
+    "live": [],
+    "docs": [
+      {
+        "label": "The model: imaging and text branches",
+        "path": "model.py"
+      },
+      {
+        "label": "Dataset and the weak-supervision strategy",
+        "path": "dataset.py"
+      },
+      {
+        "label": "How to fetch the data",
+        "path": "download_data.md"
+      },
+      {
+        "label": "Diagnostics tooling",
+        "path": "diagnostics.py"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The multimodal model",
+      "path": "model.py",
+      "description": "A DINOv2 imaging branch joined to a multilingual text branch over the radiology report. Using the report text alongside the image is the most interesting decision here and is not repeated anywhere else in the portfolio.",
+      "reusable": true
+    },
+    {
+      "name": "Dataset and weak supervision",
+      "path": "dataset.py",
+      "description": "A 2.5D treatment of the MRI volume plus an explicit weak-supervision strategy — the part where most of the decisions that determine the result in a competition like this are actually made.",
+      "reusable": true
+    },
+    {
+      "name": "Diagnostics",
+      "path": "diagnostics.py",
+      "description": "Tooling for inspecting what the model does. With zero tests it is the repository's only verification mechanism — and it requires a human to look at the output.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "bayesian-inference",
+      "reason": "Both are computational engines built to prove something, with no commercial audience. That one, however, is complete and has a surface; this one stopped at four files."
+    },
+    {
+      "slug": "math-for-ai-engineers",
+      "reason": "The same mathematical territory from two sides: teaching material there, an application here. A run against real data would be the best possible material for that repository."
+    }
+  ],
+  "product": "There is no product here and there should not be. This repository's role is purely evidential: it shows that the portfolio touches medical imaging and Kaggle competitions — and that is a claim which today rests on code with not one recorded run. Until there is a result, it is a statement of intent rather than evidence of skill.",
+  "highlights": [
+    "Combining the image with the radiology-report text rather than the image alone. That is the right call for this task and an unusual one among competition entries.",
+    "The weak-supervision strategy is written down explicitly rather than hidden in the data loader — for this kind of task it is the part a reviewer wants to see first."
+  ],
+  "gaps": [
+    "**No licence file.** The only public repository on the account like this. With no licence, default copyright applies and nobody has the right to use the code — including anyone who wanted to reproduce the result.",
+    "Zero CI and zero tests against fifteen hundred lines of training code. No change is protected by anything.",
+    "No recorded run results — no metric, no leaderboard position, no log. The repository description promises full documentation, and the evidence of a result is not in it.",
+    "Three commits and silence since 15 August 2026."
+  ],
+  "next": [
+    "Add a licence file. It takes one minute and it is the only item on this list without which the rest does not matter — with no licence nobody can legally use this code.",
+    "Record the result of even one run: the metric, the configuration and the date. Without it the repository states an intent rather than demonstrating a skill.",
+    "Add minimal CI — a lint and a check that the modules import. At four files that is a dozen lines.",
+    "Either carry it through to a competition entry with a recorded result, or archive the repository. The in-between state costs credibility and returns nothing."
+  ],
+  "risks": [
+    "A public repository with no licence, in the medical-imaging domain, is legally ambiguous for anyone who clones it — and its description invites exactly that.",
+    "Training code with no tests, no CI and no recorded run cannot be distinguished from code that was never run to completion."
+  ],
+  "headline": "The only public repository on the account with no licence file — and with not one recorded run",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-15",
+    "commits": 3,
+    "files": 8
+  }
+}

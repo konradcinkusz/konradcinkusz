@@ -1,0 +1,142 @@
+{
+  "slug": "dotnet-aspire-postgress-article",
+  "name": "dotnet-aspire-postgress-article",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P4",
+  "oneLiner": "A LaTeX technical article on bolting Aspire onto an existing solution — with the master prompt that produced it printed in the README.",
+  "summary": "Nine chapters walking through every step required to add a .NET Aspire AppHost project to an existing .NET 9 solution, against a concrete worked example. The structure has one feature worth singling out: the chapter on `Program.cs` carries **a table of every builder call together with the failure mode produced by omitting it**. That is the inverse of the usual tutorial — instead of showing the correct sequence and leaving the reader wondering what happens if they forget something, the document spells out the consequences. The pitfall table in the secrets chapter does the same job. Separately notable is the **master prompt** printed in the README alongside a placeholder table: the repository ships not only the article but a tool for producing its equivalent for any other solution. It is the only entry in the portfolio that publishes its own method of manufacture this literally.",
+  "stack": [
+    "LaTeX",
+    "XeLaTeX",
+    "latexmk",
+    "PlantUML",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT",
+  "tests": "None, and rightly so — this is a document. What is checkable is whether it compiles, and CI does that.",
+  "ci": "One `ci.yml` workflow: it compiles the PlantUML diagram, builds the article with XeLaTeX via `latexmk`, and on a `v*` tag publishes the PDF as a release artefact. The PDF badge in the README points at the latest release.",
+  "metrics": [
+    {
+      "label": "Chapters",
+      "value": "9"
+    },
+    {
+      "label": "TeX files",
+      "value": "11"
+    },
+    {
+      "label": "Reference tables",
+      "value": "2"
+    },
+    {
+      "label": "Diagrams",
+      "value": "1 — a PlantUML source compiled in CI"
+    },
+    {
+      "label": "Commits",
+      "value": "5"
+    },
+    {
+      "label": "Distribution",
+      "value": "PDF in GitHub Releases, on a tag"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/dotnet-aspire-postgress-article",
+    "live": [],
+    "docs": [
+      {
+        "label": "The article's entry point",
+        "path": "main.tex"
+      },
+      {
+        "label": "Program.cs wiring and the omission failure modes",
+        "path": "chapters/04-program-wiring.tex"
+      },
+      {
+        "label": "Secrets and credentials, with the pitfall table",
+        "path": "chapters/07-secrets-and-credentials.tex"
+      },
+      {
+        "label": "The diagram source",
+        "path": "figures/aspire-wiring.plantuml"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The builder-call and failure-mode table",
+      "path": "chapters/04-program-wiring.tex",
+      "description": "Every builder call together with what breaks if it is omitted. It is the most useful page in the document and the thing missing from the Aspire documentation.",
+      "reusable": true
+    },
+    {
+      "name": "The secrets pitfall table",
+      "path": "chapters/07-secrets-and-credentials.tex",
+      "description": "How Aspire generates passwords, where the User Secrets store lands, where pgAdmin's credentials come from and what goes wrong — the same construction as above, applied to the layer people lose the most time on.",
+      "reusable": true
+    },
+    {
+      "name": "The master prompt",
+      "path": "README.md",
+      "description": "The prompt the article was produced with, plus a placeholder table for substituting any other solution. Publishing the method of manufacture, not just the result.",
+      "reusable": true
+    },
+    {
+      "name": "The release pipeline",
+      "path": ".github/workflows/ci.yml",
+      "description": "The diagram and PDF built from a tag and published as a release. The document has versions and the badge points at the latest — that is as much release discipline as an article needs.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "That repository's Aspire guide and this article describe the same technology for two different audiences: the standard tells a team how things should be, the article tells one engineer how to do it. The version numbers and the shape of the wiring ought to be cited from one place and today are not."
+    },
+    {
+      "slug": "parcel-number-generator",
+      "reason": "The Aspire composition the article describes is exactly the one that repository implements — a working example sits next to the text and is not cited from it."
+    }
+  ],
+  "product": "A pure channel, and the cheapest thing in the portfolio to maintain: five commits, one workflow, no dependencies to update. An article of this kind generates no revenue and is not meant to — it accumulates on its own, as long as the versions it describes stay current. The real asset here is the master prompt, because it ports to any other technology.",
+  "highlights": [
+    "The 'every builder call and the failure mode of omitting it' table is a construction missing from the official Aspire documentation, and it justifies this document's existence on its own.",
+    "The master prompt with its placeholder table makes the article repeatable for any other solution. Publishing the method alongside the result is rare in this portfolio and is done here most literally.",
+    "The diagram is a PlantUML source compiled in CI rather than an image dropped into the repository. The drawing cannot drift from what it describes, because it is produced on every build."
+  ],
+  "gaps": [
+    "The article is pinned to .NET 9 and Aspire 9.0.0, while the rest of the portfolio has moved to .NET 10. A document about configuration ages at exactly the rate of the versions it names.",
+    "The worked example is a `Game` solution that does not exist in this portfolio — a reader cannot line the text up against code, even though `parcel-number-generator` implements exactly that composition.",
+    "The last commit is from 10 August 2026, and no release has gone out since the portfolio moved to .NET 10."
+  ],
+  "next": [
+    "Update the article to .NET 10 and the current Aspire version, or state on the first page which version it addresses. One or the other — a document with no expiry date misleads.",
+    "Swap the worked example for `parcel-number-generator`, which is public and implements the composition described. The reader then gets the text and working code side by side.",
+    "Cite the Aspire guide from `architecture-standards` instead of restating its content, so the version numbers have one source of truth."
+  ],
+  "risks": [
+    "A configuration article pinned to stale versions is worse than no article: a reader follows steps that no longer work and loses trust in everything else under the same name."
+  ],
+  "headline": "It publishes the prompt that produced it — and describes .NET 9 while the rest of the portfolio is on .NET 10",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-10",
+    "commits": 5,
+    "files": 17
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "slug": "llm-book-mini-project",
+  "name": "llm-book-mini-project",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "stub",
+  "tier": "P4",
+  "oneLiner": "The companion project to the LangChain book: fourteen stages, each with a contract, and not one of them implemented.",
+  "summary": "Ops Copilot is meant to be an internal operations assistant: it answers questions about orders and incidents by querying real systems, and it can take exactly one irreversible action — sending an email — only from behind a human approval gate. It is built a stage at a time across the seventeen chapters of `llm-book`, and each stage directory carries a `README.md` stating what that stage must demonstrate and what its tests must prove. **It is a skeleton today: the stage structure and tooling are in place, no stage is implemented**, and the repository says so outright at the top of its README. One rule is worth more than all the rest: **every stage's tests pass without a single real model call.** Not 'mostly', not 'except the integration ones'. A stage that needs a live provider to demonstrate anything has been designed wrong — and the book devotes a chapter to saying so. The second deliverable is the final stage's `DECISIONS.md`, which the repository states plainly matters more than its code.",
+  "stack": [
+    "Python",
+    "LangChain 1.x",
+    "LangGraph",
+    "FastAPI",
+    "uv",
+    "ruff",
+    "mypy strict",
+    "pytest",
+    "Docker"
+  ],
+  "primaryLanguage": "Python",
+  "license": "MIT",
+  "tests": "The tooling is in place — pytest, ruff, mypy in strict mode, a CI gate — and there are exactly zero substantive tests, because there is nothing to test. What each stage directory does carry is a contract stating what its tests will have to prove; a test specification written before the tests.",
+  "ci": "A single `ci.yml` running the toolchain gate. Stage `00-skeleton` exists precisely to prove that gate is real, and it is the only claim in this repository that can be verified today.",
+  "metrics": [
+    {
+      "label": "Stages",
+      "value": "14, from 00-skeleton to final"
+    },
+    {
+      "label": "Stages implemented",
+      "value": "0"
+    },
+    {
+      "label": "Book chapters covered",
+      "value": "17"
+    },
+    {
+      "label": "Real model calls in the tests",
+      "value": "0 — that is the rule, not the outcome"
+    },
+    {
+      "label": "Commits",
+      "value": "14"
+    },
+    {
+      "label": "Files",
+      "value": "44, of which 21 are markdown"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/llm-book-mini-project",
+    "live": [],
+    "docs": [
+      {
+        "label": "The stage contracts",
+        "path": "stages/"
+      },
+      {
+        "label": "Entry point for an agent",
+        "path": "CLAUDE.md"
+      },
+      {
+        "label": "Project documentation",
+        "path": "docs/"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The stage contracts",
+      "path": "stages/",
+      "description": "Fourteen directories, each with a `README.md` stating what the stage adds and what its tests must prove. The contract is written before the implementation — the same pattern as `docs/SPEC.md` in `listing-search-bench`, applied to teaching material.",
+      "reusable": true
+    },
+    {
+      "name": "The toolchain gate",
+      "path": "pyproject.toml",
+      "description": "uv, ruff, mypy in strict mode and pytest, wired into one workflow. The zeroth stage exists to prove the gate is real before anything starts passing through it.",
+      "reusable": true
+    },
+    {
+      "name": "The zero-model-call rule",
+      "path": "README.md",
+      "description": "Stated as a project rule rather than a performance goal: the suite should be fast enough to run on every save, deterministic enough to bisect, and honest enough that a green build means something.",
+      "reusable": true
+    },
+    {
+      "name": "The decision log as the deliverable",
+      "path": "docs/",
+      "description": "The final stage is to produce a `DECISIONS.md`: the choice, the rejected alternative, the reason and the cost. The repository says outright that a reviewer reads that document and nobody reads the code.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "llm-book",
+      "reason": "This is that book's companion project and its only executable artefact. The chapters reference the stages, so an unfinished skeleton is a hole in the book rather than a separate repository of no consequence."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "The same pairing: a book plus a project meant to prove it. Worth deciding once whether every book in the portfolio carries an executable companion, because today the answer differs from book to book."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Stage 11 is to add a twenty-case evaluation set with a regression threshold in CI. That is exactly the method the other repository has already implemented — no reason to write it a second time here."
+    }
+  ],
+  "product": "A channel, and one carrying debt: the book is public and points at a project that is empty. This repository's value will not be its code but its `DECISIONS.md` — the document explaining why a single agent rather than a supervisor, why an idempotency key rather than a distributed transaction, why SSE rather than WebSockets. Documents like that are scarce online, and they are the ones that get cited.",
+  "highlights": [
+    "The 'zero real model calls in the tests' rule, stated without exceptions. Most projects of this kind start with that rule and lose it at the first hard stage; here it is written down as a design condition before anything exists.",
+    "Every stage has a contract written before the implementation, saying what it must demonstrate and what its tests must prove. A skeleton with fourteen contracts is worth considerably more than a skeleton with fourteen empty directories.",
+    "The status is stated honestly in the README's first paragraph. The repository does not pretend to be further along than it is — and for the companion to a public book that is the only right call."
+  ],
+  "gaps": [
+    "**No stage is implemented.** Fourteen contracts and no code, against a book that is already public and already points at them.",
+    "The last commit is from 5 August 2026. The repository stands exactly where the skeleton was put down.",
+    "The `DECISIONS.md` the repository calls its most important deliverable does not exist — and it is the one thing that could be written now, without implementing anything.",
+    "Stage 11 plans an evaluation set with a regression threshold — the method from `agent-eval-bench`, repeated for a third time in this portfolio."
+  ],
+  "next": [
+    "Implement stages 00–02. The three simplest stages turn the repository from a skeleton into something a reader of the book can run, and that is the whole difference.",
+    "Write `DECISIONS.md` now, from the decisions already made while designing the stages. It needs no implementation at all and it is the stated principal deliverable.",
+    "Add a visible note about the companion project's status to the book's README, so a reader does not land in an empty directory without warning.",
+    "Rather than writing the evaluation from scratch in stage 11, import the method from `agent-eval-bench` and describe the differences — better teaching material than a third implementation of the same thing."
+  ],
+  "risks": [
+    "A public book pointing at an empty repository works against the credibility of both. It is the only entry in this pass where delay costs something already published."
+  ],
+  "headline": "Fourteen stage contracts, zero implementation — against a book that is already public",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-05",
+    "commits": 14,
+    "files": 44
+  }
+}

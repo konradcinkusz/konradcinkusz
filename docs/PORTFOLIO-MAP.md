@@ -1,11 +1,11 @@
 # Portfolio map
 
-This repository is the hub. It holds a single manifest describing thirty-four
-repositories — seventeen public, seventeen private — what each is, what it is for, what is
+This repository is the hub. It holds a single manifest describing forty-three
+repositories — thirty public, thirteen private — what each is, what it is for, what is
 finished, what is not, plus the consolidation analysis and the operating model that keeps
 them from rotting.
 
-**Thirty-four, not all of them.** The account holds considerably more; the map covers the
+**Forty-three, not all of them.** The account holds considerably more; the map covers the
 set that was surveyed end to end, and says so on its own front page rather than implying it
 is the whole estate. Repositories join the map when someone has actually read them.
 

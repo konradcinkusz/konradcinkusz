@@ -1,0 +1,137 @@
+{
+  "slug": "rsna-knee-abnormalities-efficiency-lb",
+  "name": "rsna-knee-abnormalities-efficiency-lb",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "prototype",
+  "tier": "P4",
+  "oneLiner": "Multimodalny pipeline 2.5D do wyzwania Kaggle na MRI kolana — jedyne repozytorium w portfolio bez pliku licencji.",
+  "summary": "Pipeline uczenia głębokiego do wyzwania RSNA Knee Abnormality Detection: wykrywanie dwunastu znalezisk z obrazu MRI połączonego z tekstem opisu radiologicznego, na gałęzi obrazowej DINOv2 i wielojęzycznej gałęzi tekstowej, z jawną strategią słabego nadzoru i oprzyrządowaniem diagnostycznym. Cztery pliki Pythona, tysiąc pięćset linii, trzy commity — to jest najmniejsza i najbardziej surowa pozycja w tym przebiegu, i trafia na mapę głównie dlatego, że jest jedynym w portfolio podejściem do obrazowania medycznego i do konkursu Kaggle. Jest też jedynym publicznym repozytorium na koncie **bez pliku licencji**, co przy repozytorium dotykającym danych medycznych i opisanym jako zawierające pełną dokumentację jest realnym brakiem: bez licencji nikt nie ma prawa tego kodu użyć, a domyślne prawo autorskie zastrzega wszystkie prawa. Repozytorium nie niesie żadnego CI, żadnych testów i żadnych zapisanych wyników przebiegu — jest zamrożone od 15 sierpnia 2026.",
+  "stack": [
+    "Python",
+    "PyTorch",
+    "DINOv2",
+    "Transformers"
+  ],
+  "primaryLanguage": "Python",
+  "license": "Brak pliku licencji — domyślnie wszystkie prawa zastrzeżone",
+  "tests": "Brak. Nie ma ani jednego testu, a `diagnostics.py` jest narzędziem do oglądania przebiegu, nie bramką.",
+  "ci": "Brak. Katalog `.github/` nie istnieje — nic nie jest sprawdzane automatycznie.",
+  "metrics": [
+    {
+      "label": "Pliki Pythona",
+      "value": "4"
+    },
+    {
+      "label": "Linie kodu",
+      "value": "około 1 500"
+    },
+    {
+      "label": "Commity",
+      "value": "3"
+    },
+    {
+      "label": "Wykrywane znaleziska",
+      "value": "12"
+    },
+    {
+      "label": "Testy i workflowy",
+      "value": "0"
+    },
+    {
+      "label": "Zapisane wyniki przebiegu",
+      "value": "brak w repozytorium"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/rsna-knee-abnormalities-efficiency-lb",
+    "live": [],
+    "docs": [
+      {
+        "label": "Model: gałąź obrazowa i tekstowa",
+        "path": "model.py"
+      },
+      {
+        "label": "Dataset i strategia słabego nadzoru",
+        "path": "dataset.py"
+      },
+      {
+        "label": "Jak pobrać dane",
+        "path": "download_data.md"
+      },
+      {
+        "label": "Narzędzia diagnostyczne",
+        "path": "diagnostics.py"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Model multimodalny",
+      "path": "model.py",
+      "description": "Gałąź obrazowa na DINOv2 złączona z wielojęzyczną gałęzią tekstową opisu radiologicznego. Wykorzystanie tekstu opisu obok obrazu jest tu najciekawszą decyzją i nigdzie indziej w portfolio się nie powtarza.",
+      "reusable": true
+    },
+    {
+      "name": "Dataset i słaby nadzór",
+      "path": "dataset.py",
+      "description": "Podejście 2.5D do wolumenu MRI plus jawna strategia słabego nadzoru — czyli ta część, w której zapada większość decyzji decydujących o wyniku w tego typu konkursie.",
+      "reusable": true
+    },
+    {
+      "name": "Diagnostyka",
+      "path": "diagnostics.py",
+      "description": "Oprzyrządowanie do oglądania, co robi model. Przy zerze testów jest to jedyny mechanizm weryfikacji w repozytorium — i wymaga człowieka, który na to spojrzy.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "bayesian-inference",
+      "reason": "Obie pozycje to silniki obliczeniowe zbudowane, żeby czegoś dowieść, bez odbiorcy komercyjnego. Tamta jest jednak kompletna i wyposażona w powierzchnię, ta zatrzymała się na czterech plikach."
+    },
+    {
+      "slug": "math-for-ai-engineers",
+      "reason": "Ta sama dziedzina matematyczna z dwóch stron: tam materiał dydaktyczny, tutaj zastosowanie. Przebieg z prawdziwymi danymi byłby najlepszym możliwym materiałem do tamtego repozytorium."
+    }
+  ],
+  "product": "Nie ma tu produktu i nie powinno być. Rola tego repozytorium jest wyłącznie dowodowa: pokazuje, że portfolio dotyka obrazowania medycznego i konkursów Kaggle — i to jest twierdzenie, które dziś opiera się na kodzie bez ani jednego zapisanego przebiegu. Dopóki nie ma wyniku, jest to deklaracja zamiaru, a nie dowód umiejętności.",
+  "highlights": [
+    "Połączenie obrazu z tekstem opisu radiologicznego, a nie sam obraz. To jest właściwa decyzja dla tego zadania i nietypowa wśród zgłoszeń konkursowych.",
+    "Strategia słabego nadzoru jest zapisana jawnie, a nie ukryta w kodzie ładowania danych — przy tym rodzaju zadania to jest ta część, którą recenzent chce zobaczyć najpierw."
+  ],
+  "gaps": [
+    "**Brak pliku licencji.** Jedyne takie publiczne repozytorium na koncie. Bez licencji obowiązuje domyślne prawo autorskie i nikt nie ma prawa tego kodu użyć — łącznie z osobą, która chciałaby powtórzyć wynik.",
+    "Zero CI i zero testów przy tysiącu pięciuset liniach kodu uczącego. Żadna zmiana nie jest niczym zabezpieczona.",
+    "Brak zapisanych wyników przebiegu — ani metryki, ani pozycji na tablicy, ani logu. Opis repozytorium obiecuje pełną dokumentację, a dowodu wyniku w nim nie ma.",
+    "Trzy commity i cisza od 15 sierpnia 2026."
+  ],
+  "next": [
+    "Dodaj plik licencji. To jest jedna minuta i jedyna pozycja na liście, bez której reszta nie ma znaczenia — bez licencji nikt nie może legalnie skorzystać z tego kodu.",
+    "Zapisz wynik choćby jednego przebiegu: metrykę, konfigurację i datę. Bez tego repozytorium deklaruje zamiar, a nie umiejętność.",
+    "Dodaj minimalne CI — lint i sprawdzenie, że moduły się importują. Przy czterech plikach to jest kilkanaście linii.",
+    "Albo doprowadź do zgłoszenia konkursowego z zapisanym wynikiem, albo przenieś repozytorium do archiwum. Stan pośredni kosztuje wiarygodność, nie dając w zamian nic."
+  ],
+  "risks": [
+    "Publiczne repozytorium bez licencji, dotykające dziedziny obrazowania medycznego, jest niejednoznaczne prawnie dla każdego, kto by je sklonował — a jego opis zachęca do tego wprost.",
+    "Kod uczący bez testów, bez CI i bez zapisanego przebiegu nie da się odróżnić od kodu, który nigdy nie został uruchomiony do końca."
+  ],
+  "headline": "Jedyne publiczne repozytorium na koncie bez pliku licencji — i bez ani jednego zapisanego przebiegu",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-15",
+    "commits": 3,
+    "files": 8
+  }
+}

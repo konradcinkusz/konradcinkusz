@@ -6,7 +6,7 @@
     },
     {
       "title": "A repository with no declared level of service does not exist",
-      "body": "Each of the thirty-four repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
+      "body": "Each of the forty-three repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
     },
     {
       "title": "The tier follows blast radius, not affection",
@@ -95,7 +95,12 @@
         "aurelius-promptus-acceptance-tests",
         "zoo-companion",
         "bayesian-inference",
-        "black-hole-sim"
+        "black-hole-sim",
+        "parcel-number-generator",
+        "claude-scope",
+        "listing-search-bench",
+        "architecture-standards-init-example",
+        "SupercompensationApp"
       ]
     },
     {
@@ -114,7 +119,11 @@
         "ai-coding-assistant-article",
         "agent-eval-bench-factorial",
         "math-for-ai-engineers",
-        "landing-page"
+        "landing-page",
+        "combustion-reports",
+        "llm-book-mini-project",
+        "dotnet-aspire-postgress-article",
+        "rsna-knee-abnormalities-efficiency-lb"
       ]
     }
   ],
@@ -258,7 +267,7 @@
     },
     {
       "name": "A check on repository visibility and existence",
-      "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across thirty-four entries.",
+      "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across forty-three entries.",
       "where": "konradcinkusz/scripts/check-repos.mjs"
     },
     {
@@ -288,7 +297,7 @@
     },
     {
       "name": "Agent plugins as the way to distribute rules",
-      "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching thirty-four files.",
+      "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching forty-three files.",
       "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
     },
     {

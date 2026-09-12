@@ -405,7 +405,7 @@
       "Permissive licences — they allow use, modification and commercial embedding. MIT for code, CC-BY for specifications and documents.",
       "The choice rests on adoption precedent, not on ideology: AGPL-style licences effectively block adoption in .NET enterprise organisations, which is exactly the target segment. The risk of a solo project with no customers being cloned is close to zero; the risk of an enterprise bouncing off the licence is a certainty."
     ],
-    "where": "thirty repositories on MIT; five with no licence file"
+    "where": "thirty-seven repositories on an MIT-family licence; six with no licence file"
   },
   {
     "id": "perseat",
@@ -483,7 +483,7 @@
     "tag": "operations",
     "body": [
       "A hard cap on the number of things started and unfinished. Not a guideline — a limit: a breach is a signal to **close** something, not to work longer.",
-      "One person's portfolio does not die from a shortage of ideas. It dies from thirty-four things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
+      "One person's portfolio does not die from a shortage of ideas. It dies from forty-three things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
     ],
     "where": "the 'operations' tab, the 'limits' section"
   },

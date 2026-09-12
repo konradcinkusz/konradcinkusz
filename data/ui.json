@@ -37,7 +37,7 @@
   "checks.lede": "Miara bez progu jest wykresem, a próg bez zapisanej akcji jest wyrzutem sumienia. Każdy wiersz poniżej ma wszystkie trzy części, żeby przekroczenie progu kończyło się czynnością, a nie zmartwieniem.",
   "wip.h": "Limity równoległej pracy",
   "wip.tag": "to, co powstrzymuje 35 połówek",
-  "wip.lede": "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu pięciu rzeczy zaczętych i żadnej skończonej. Poniższe limity są twarde: przekroczenie ich jest sygnałem, żeby coś zamknąć, a nie żeby pracować dłużej.",
+  "wip.lede": "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od czterdziestu trzech rzeczy zaczętych i żadnej skończonej. Poniższe limity są twarde: przekroczenie ich jest sygnałem, żeby coś zamknąć, a nie żeby pracować dłużej.",
   "automation.h": "Automaty",
   "automation.tag": "gdzie mieszka każdy z nich",
   "automation.lede": "Wszystko poniżej istnieje po to, żeby zdjąć decyzję z człowieka albo postawić ją przed nim w momencie, w którym da się ją podjąć w minutę. Przy każdym jest ścieżka w repozytorium — jeśli jej nie ma, to znaczy, że automat jest do zbudowania, i to jest część planu.",

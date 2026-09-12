@@ -1,0 +1,141 @@
+{
+  "slug": "SupercompensationApp",
+  "name": "SupercompensationApp",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P3",
+  "oneLiner": "The supercompensation model carried over from sport to Agile sprints — the one thing in this portfolio that is deployed and simply works.",
+  "summary": "A Blazor WebAssembly application that computes the fatigue → recovery → supercompensation curve for a team across successive sprints, with configurable fatigue depth, supercompensation peak and baseline increment. Three tabs: configuration with spreadsheet-style team editing, an interactive chart with coloured phases, and a day-by-day table with filtering. The mathematical model is written out in the README as formulas with their ranges — unusual, and it lets the arithmetic be checked without reading the code. This repository's value in the portfolio is different from its subject: **it is the only entry added in this pass that is genuinely deployed and reachable at a public address.** Against seven other repositories whose deployment workflows have never once run, this one, with its automatic GitHub Pages deploy, is the proof that the loop from commit to working page is closed at least once in this portfolio.",
+  "stack": [
+    "Blazor WebAssembly",
+    ".NET",
+    "Chart.js",
+    "GitHub Pages",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "68 `[Fact]`/`[Theory]` attributes — the densest test coverage relative to size of anything added in this pass, against 18 C# files. A mathematical model is exactly the kind of code that tests well, and that has been taken advantage of.",
+  "ci": "Four workflows: `ci.yml`, `codeql.yml`, `secret-scan.yml`, and `pages.yml`, which publishes from `master` automatically. That last one is the only deployment workflow in this pass that actually runs.",
+  "metrics": [
+    {
+      "label": "Test attributes",
+      "value": "68"
+    },
+    {
+      "label": "C# files",
+      "value": "18"
+    },
+    {
+      "label": "Tabs",
+      "value": "3 — configuration, chart, data"
+    },
+    {
+      "label": "Model phases",
+      "value": "3 — fatigue, recovery, supercompensation"
+    },
+    {
+      "label": "Deployed environments",
+      "value": "1 — GitHub Pages"
+    },
+    {
+      "label": "Workflows",
+      "value": "4"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/SupercompensationApp",
+    "live": [
+      {
+        "label": "The application (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/SupercompensationApp/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Roadmap: definition of done, phases, protected paths",
+        "path": "ROADMAP.md"
+      },
+      {
+        "label": "House rules for contributors",
+        "path": "CONTRIBUTING.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The supercompensation model",
+      "path": "Services/",
+      "description": "The curve is computed over sprint progress `s` ∈ [0, 1] in three phases, with a baseline that steps up between sprints. The formulas are written out in the README with their ranges, so the arithmetic can be checked without opening the code.",
+      "reusable": true
+    },
+    {
+      "name": "Team configuration",
+      "path": "Pages/",
+      "description": "A spreadsheet-style team table: add and remove members, roles, weights. Together with the sprint parameters, that is the model's entire input.",
+      "reusable": false
+    },
+    {
+      "name": "Chart and export",
+      "path": "wwwroot/",
+      "description": "Chart.js loaded from a CDN, with coloured phase bands and per-sprint summaries — peak, minimum, delivery value — plus CSV export.",
+      "reusable": false
+    },
+    {
+      "name": "The Pages publish",
+      "path": ".github/workflows/pages.yml",
+      "description": "Automatic publication from `master`. In a portfolio where seven other deployment workflows have never started, this one runs — which is why it deserves an entry of its own.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "The same domain — Agile team dynamics — approached from the opposite methodological side. An agent simulation there, a closed-form model here. Running both over the same parameter set would be the cheapest possible test of whether either predicts anything."
+    },
+    {
+      "slug": "black-hole-sim",
+      "reason": "The same shape: a numerical engine in C# with a Blazor surface, built to show a model rather than sell a product. Both fit entirely in the browser."
+    }
+  ],
+  "product": "Channel material rather than a product — and strong in that role precisely because a model carrying a concept from sport over to sprint planning explains itself in one chart. There is no direct sale here and should not be; the value is that it runs at a public address and can be shown in thirty seconds.",
+  "highlights": [
+    "The only repository added in this pass with a live, public deployment. The rest have workflows, configurations and cost analyses — this one has an address that opens.",
+    "Sixty-eight test attributes across eighteen C# files. That is the best test-to-code ratio in the whole pass, and it follows from a mathematical model being directly testable.",
+    "The formulas are in the README, with the range for each phase. A reader can check the model without trusting the implementation — in a portfolio full of systems you must run to see anything, that stands out."
+  ],
+  "gaps": [
+    "The README, the interface and the roadmap are in Polish, for an application deployed at a public address. That narrows the audience to one market for no technical reason.",
+    "Six open Dependabot pull requests, among them a Blazor jump from 8.0 to 10.0 — the kind of update that gets more expensive the longer it waits.",
+    "Chart.js is loaded from a CDN: an application advertised as needing nothing but a browser still requires network access to draw the one thing it is opened for.",
+    "The model is calibrated against nothing. The curve is credible as an illustration of the concept, and there is not one real sprint in the repository against which it has been checked."
+  ],
+  "next": [
+    "Translate the README and the interface into English. The application is deployed and public — it is the cheapest possible change of reach in the whole portfolio.",
+    "Merge the Dependabot queue, starting with the Blazor jump; the longer it waits the larger that single diff becomes.",
+    "Bundle Chart.js instead of loading it from a CDN, so the application works offline as it implies it does.",
+    "Fit the model to one real sprint history and record where it diverges — or say plainly in the README that it is an illustration of a concept and not a predictive tool."
+  ],
+  "risks": [
+    "An uncalibrated model presented as a planning tool could be used to justify decisions about a team's workload. The README should draw that line more sharply than it does."
+  ],
+  "headline": "The only entry in this pass that is genuinely deployed — and its README is in Polish",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 1,
+    "openPrs": 6,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-09-03",
+    "commits": 27,
+    "files": 56
+  }
+}

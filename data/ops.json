@@ -6,7 +6,7 @@
     },
     {
       "title": "Repo bez zadeklarowanego poziomu obsługi nie istnieje",
-      "body": "Każde z trzydziestu czterech repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
+      "body": "Każde z czterdziestu trzech repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
     },
     {
       "title": "Poziom wyznacza promień rażenia, nie sympatia",
@@ -95,7 +95,12 @@
         "aurelius-promptus-acceptance-tests",
         "zoo-companion",
         "bayesian-inference",
-        "black-hole-sim"
+        "black-hole-sim",
+        "parcel-number-generator",
+        "claude-scope",
+        "listing-search-bench",
+        "architecture-standards-init-example",
+        "SupercompensationApp"
       ]
     },
     {
@@ -114,7 +119,11 @@
         "ai-coding-assistant-article",
         "agent-eval-bench-factorial",
         "math-for-ai-engineers",
-        "landing-page"
+        "landing-page",
+        "combustion-reports",
+        "llm-book-mini-project",
+        "dotnet-aspire-postgress-article",
+        "rsna-knee-abnormalities-efficiency-lb"
       ]
     }
   ],
@@ -258,7 +267,7 @@
     },
     {
       "name": "Sprawdzenie widoczności i istnienia repozytoriów",
-      "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy trzydziestu czterech pozycjach.",
+      "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy czterdziestu trzech pozycjach.",
       "where": "konradcinkusz/scripts/check-repos.mjs"
     },
     {
@@ -288,7 +297,7 @@
     },
     {
       "name": "Wtyczki agentowe jako sposób dystrybucji reguł",
-      "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu czterech plików.",
+      "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania czterdziestu trzech plików.",
       "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
     },
     {

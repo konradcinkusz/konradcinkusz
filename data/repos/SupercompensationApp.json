@@ -1,0 +1,141 @@
+{
+  "slug": "SupercompensationApp",
+  "name": "SupercompensationApp",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P3",
+  "oneLiner": "Model superkompensacji przeniesiony ze sportu na sprinty Agile — jedyna rzecz w portfolio, która stoi wdrożona i po prostu działa.",
+  "summary": "Blazor WebAssembly liczący krzywą zmęczenia → regeneracji → superkompensacji dla zespołu przez kolejne sprinty, z konfigurowalną głębokością zmęczenia, szczytem superkompensacji i przyrostem linii bazowej. Trzy zakładki: konfiguracja z edycją zespołu w stylu arkusza, interaktywny wykres z kolorowymi fazami i tabela dzień po dniu z filtrowaniem. Model matematyczny jest wypisany w README jako wzory z zakresami — to rzadkość, bo pozwala sprawdzić rachunek bez czytania kodu. Wartość tego repozytorium w portfolio jest inna niż jego temat: **to jedyna pozycja dodana w tym przebiegu, która jest naprawdę wdrożona i osiągalna pod publicznym adresem.** Przy siedmiu innych repozytoriach, których workflowy wdrożeniowe nigdy nie wystartowały, ten jeden z automatycznym deployem na GitHub Pages jest dowodem, że pętla od commita do działającej strony jest w tym portfolio zamknięta przynajmniej raz.",
+  "stack": [
+    "Blazor WebAssembly",
+    ".NET",
+    "Chart.js",
+    "GitHub Pages",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "68 atrybutów `[Fact]`/`[Theory]` — najgęstsze pokrycie testami w stosunku do rozmiaru ze wszystkich repozytoriów dodanych w tym przebiegu, przy 18 plikach C#. Model matematyczny jest dokładnie tym rodzajem kodu, który testuje się dobrze, i to wykorzystano.",
+  "ci": "Cztery workflowy: `ci.yml`, `codeql.yml`, `secret-scan.yml` i `pages.yml`, który publikuje z gałęzi `master` automatycznie. Ten ostatni jest jedynym workflow wdrożeniowym w tym przebiegu, który faktycznie się wykonuje.",
+  "metrics": [
+    {
+      "label": "Atrybuty testowe",
+      "value": "68"
+    },
+    {
+      "label": "Pliki C#",
+      "value": "18"
+    },
+    {
+      "label": "Zakładki",
+      "value": "3 — konfiguracja, wykres, dane"
+    },
+    {
+      "label": "Fazy modelu",
+      "value": "3 — fatigue, recovery, supercompensation"
+    },
+    {
+      "label": "Wdrożone środowiska",
+      "value": "1 — GitHub Pages"
+    },
+    {
+      "label": "Workflowy",
+      "value": "4"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/SupercompensationApp",
+    "live": [
+      {
+        "label": "Aplikacja (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/SupercompensationApp/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Roadmapa: definicja gotowego, fazy, ścieżki chronione",
+        "path": "ROADMAP.md"
+      },
+      {
+        "label": "Zasady współpracy",
+        "path": "CONTRIBUTING.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Model superkompensacji",
+      "path": "Services/",
+      "description": "Krzywa liczona dla postępu sprintu `s` ∈ [0, 1] w trzech fazach, z linią bazową rosnącą schodkowo między sprintami. Wzory są wypisane w README z zakresami, więc rachunek da się sprawdzić bez otwierania kodu.",
+      "reusable": true
+    },
+    {
+      "name": "Konfiguracja zespołu",
+      "path": "Pages/",
+      "description": "Tabela zespołu w stylu arkusza: dodawanie i usuwanie członków, role, wagi. Razem z parametrami sprintu to jest całe wejście modelu.",
+      "reusable": false
+    },
+    {
+      "name": "Wykres i eksport",
+      "path": "wwwroot/",
+      "description": "Chart.js ładowany z CDN, z kolorowymi pasmami faz i podsumowaniami sprintów — szczyt, minimum, wartość dostarczona — plus eksport do CSV.",
+      "reusable": false
+    },
+    {
+      "name": "Publikacja na Pages",
+      "path": ".github/workflows/pages.yml",
+      "description": "Automatyczna publikacja z `master`. W portfolio, w którym siedem innych workflowów wdrożeniowych nigdy nie wystartowało, ten jeden działa — i dlatego jest wart osobnej pozycji.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "cognitive-multi-agent-simulation",
+      "reason": "Ta sama dziedzina — dynamika zespołu Agile — z przeciwnej strony metodologicznej. Tam symulacja agentowa, tutaj model zamknięty wzorem. Porównanie obu na tym samym zestawie parametrów byłoby najtańszym możliwym testem, czy któryś z nich cokolwiek przewiduje."
+    },
+    {
+      "slug": "black-hole-sim",
+      "reason": "Ten sam kształt: silnik numeryczny w C# z powierzchnią Blazor, zbudowany żeby pokazać model, a nie sprzedać produkt. Oba mieszczą się w całości w przeglądarce."
+    }
+  ],
+  "product": "Materiał dla kanału, nie produkt — i akurat w tej roli jest mocny, bo model przenoszący pojęcie ze sportu na planowanie sprintów tłumaczy się jednym wykresem. Bezpośredniej sprzedaży tu nie ma i nie powinno być; wartością jest to, że działa pod publicznym adresem i można go pokazać w trzydzieści sekund.",
+  "highlights": [
+    "Jedyne repozytorium dodane w tym przebiegu z żywym, publicznym wdrożeniem. Reszta ma workflowy, konfiguracje i analizy kosztów — ta ma adres, który się otwiera.",
+    "Sześćdziesiąt osiem atrybutów testowych na osiemnaście plików C#. To jest najlepszy stosunek testów do kodu w całym tym przebiegu, i wynika z tego, że model matematyczny jest testowalny wprost.",
+    "Wzory są w README, z zakresami dla każdej fazy. Czytelnik może sprawdzić model, nie ufając implementacji — w portfolio pełnym systemów, które trzeba uruchomić, żeby cokolwiek zobaczyć, to jest wyróżnik."
+  ],
+  "gaps": [
+    "README, interfejs i roadmapa są po polsku, przy aplikacji wdrożonej pod publicznym adresem. To zawęża odbiorcę do jednego rynku bez żadnego powodu technicznego.",
+    "Sześć otwartych pull requestów Dependabota, w tym przeskok Blazora z 8.0 na 10.0 — to jest ta aktualizacja, która im dłużej czeka, tym drożej kosztuje.",
+    "Chart.js ładowany z CDN: aplikacja reklamowana jako działająca w przeglądarce bez instalacji wymaga jednak dostępu do sieci, żeby narysować to, po co się ją otwiera.",
+    "Model nie jest z niczym skalibrowany. Krzywa jest wiarygodna jako ilustracja pojęcia i nie ma w repozytorium ani jednego prawdziwego sprintu, wobec którego byłaby sprawdzona."
+  ],
+  "next": [
+    "Przetłumacz README i interfejs na angielski. Aplikacja jest wdrożona i publiczna — to najtańsza możliwa zmiana zasięgu w całym portfolio.",
+    "Zmerguj kolejkę Dependabota, zaczynając od przeskoku Blazora; im dłużej czeka, tym większy staje się ten jeden diff.",
+    "Zbunduj Chart.js zamiast ładować go z CDN, żeby aplikacja działała offline zgodnie z tym, co obiecuje.",
+    "Nałóż model na jeden prawdziwy przebieg sprintów i zapisz, gdzie się rozjeżdża — albo powiedz wprost w README, że to jest ilustracja pojęcia, a nie narzędzie predykcyjne."
+  ],
+  "risks": [
+    "Model bez kalibracji, przedstawiony jako narzędzie do planowania, mógłby zostać użyty do uzasadnienia decyzji o obciążeniu zespołu. README powinno tę granicę stawiać wyraźniej, niż stawia."
+  ],
+  "headline": "Jedyna pozycja w tym przebiegu, która jest naprawdę wdrożona — i README ma po polsku",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 1,
+    "openPrs": 6,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-09-03",
+    "commits": 27,
+    "files": 56
+  }
+}
