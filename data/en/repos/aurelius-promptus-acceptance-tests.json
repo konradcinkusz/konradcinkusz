@@ -167,7 +167,7 @@
     "Carry out Phase 2: rename the project to `AureliusPromptus.Web.E2ETests`, move the unique scenarios over from the MSTest project and delete it."
   ],
   "risks": [
-    "Seed-account passwords are hard-coded in the repository: `konrad@aurelius.com` / `Konrad123!` in `UserProfileTests/LoginTests.cs:15` and `konrad@aurelius.today` / `Konrad123!` in two files of the Portal project. If those accounts exist in a publicly reachable environment, this is a credential leak.",
+    "Seed-account passwords are hard-coded in the repository: one account in `UserProfileTests/LoginTests.cs:15`, another in two files of the Portal project, both with the same password. The addresses and the password are deliberately **not given here** — this entry is public and the repository it describes is not. If those accounts exist in a publicly reachable environment this is a credential leak: the password has to be changed, not merely removed from the code.",
     "The seed-account domains do not match each other, nor the product's domain after the rebrand, so the suite may have nothing to log in with before it ever reaches the first assertion.",
     "The tests create real data in the environment under test. Nothing removes organisations or prompts, and accounts from `LogoutTests` leak, because after logging out there is no session left to delete with.",
     "No `LICENSE` file, with two versions of .NET and two test frameworks in one solution: nobody else has the right to use this, and maintaining it costs two build paths anyway."

@@ -184,7 +184,7 @@
     "Agent nad Claude nie ma żadnej zdolności ponad zalogowanego użytkownika: pięć narzędzi to opakowania na autoryzowane endpointy wołane jego tokenem, a każde narzędzie wydające punkty pauzuje turę i czeka na jawne potwierdzenie."
   ],
   "risks": [
-    "**Zacommitowany klucz Google Maps API** (prefiks `AIzaSyDPw8`) w czterech modułach Angulara i brak skanera sekretów w jakimkolwiek workflow, mimo że wymaga go faza 0 własnego planu migracji. Klucz jest w historii gita, więc rotacja jest jedynym realnym środkiem.",
+    "**Zacommitowany klucz Google Maps API** w czterech modułach Angulara i brak skanera sekretów w jakimkolwiek workflow, mimo że wymaga go faza 0 własnego planu migracji. Klucz jest w historii gita, więc rotacja jest jedynym realnym środkiem. Prefiks klucza został usunięty z tego wpisu, bo wpis jest publiczny.",
     "Brak pliku LICENSE przy repozytorium cytowanym z innych repo estate; `package.json` Angulara deklaruje MIT, co jest metadaną odziedziczoną po legacy i może zostać odczytane jako licencja całości.",
     "Dwaj wystawcy tokenów działają równolegle świadomie (`Jwt:AdditionalAuthority`), ale konto założone w authservice to inny principal niż to samo konto w IdentityService. ADR-013 przyznaje, że ciągłości identyfikatora użytkownika nie ma.",
     "Angular 10 z ngcc, rxjs-compat i core-js 2.5.1 to porzucony łańcuch zależności bez wsparcia bezpieczeństwa. 169 plików TS zostaje w repozytorium bez decyzji o wykonaniu, a część ekranów admina woła cztery endpointy `/Admin/*`, których backend nie ma."

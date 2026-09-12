@@ -148,7 +148,7 @@
     "**README to 34-bajtowy stub zapisany w UTF-16 z BOM**, o treści `# landing-page`. Nie mówi, czym jest projekt, dla kogo powstał, skąd pochodzi szablon ani jak go uruchomić.",
     "`index.html` linkuje w linii 19 arkusz `bxslider/jquery.bxslider.css`, a katalogu `bxslider` w repo nie ma. Każde załadowanie strony kończy się widocznym w konsoli 404.",
     "Pozycja menu **Cennik prowadzi do `#testimonials`** (linia 74), bo sekcja cennika w linii 245 odziedziczyła identyfikator po usuniętym sliderze opinii. Nawigacja działa przypadkiem, nie z projektu.",
-    "Adres `franke.label@gmail.com` stoi w dwóch miejscach w tagu `<a>` bez atrybutu `href`, a `<span class=\"year\"></span>` w stopce nie jest przez nic wypełniany, więc renderuje się `Copyright ©  | Template By`. To dwa najbardziej widoczne elementy strony kontaktowej.",
+    "Adres e-mail właściciela szablonu (zredagowany tutaj — ten wpis jest publiczny, a adres jest cudzy) stoi w dwóch miejscach w tagu `<a>` bez atrybutu `href`, a `<span class=\"year\"></span>` w stopce nie jest przez nic wypełniany, więc renderuje się `Copyright ©  | Template By`. To dwa najbardziej widoczne elementy strony kontaktowej.",
     "Martwe wywołania `owlCarousel` i `datepicker` w `js/scripts.js` to {{term:drift}} po dwóch funkcjach szablonu, które autor wyciął: znaczniki oraz katalogi `owl-slider` i `contactform` zniknęły z repo w commitach `remove contact form` i `remove unnecessary files`, a `scripts.js` został nietknięty od importu."
   ],
   "risks": [

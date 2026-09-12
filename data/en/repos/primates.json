@@ -184,7 +184,7 @@
     "The agent over Claude has no capability beyond the logged-in user: the five tools are wrappers over authorised endpoints called with his token, and every tool that spends points pauses the turn and waits for explicit confirmation."
   ],
   "risks": [
-    "**A committed Google Maps API key** (prefix `AIzaSyDPw8`) in four Angular modules and no secret scanner in any workflow, even though phase 0 of its own migration plan requires one. The key is in the git history, so rotation is the only real remedy.",
+    "**A committed Google Maps API key** in four Angular modules and no secret scanner in any workflow, even though phase 0 of its own migration plan requires one. The key is in the git history, so rotation is the only real remedy. The key prefix has been removed from this entry, because this entry is public.",
     "No LICENSE file, in a repository cited from other repositories in the estate; the Angular `package.json` declares MIT, which is metadata inherited from the legacy code and can be read as the licence for the whole thing.",
     "Two token issuers run in parallel deliberately (`Jwt:AdditionalAuthority`), but an account created in authservice is a different principal from the same account in IdentityService. ADR-013 admits that there is no continuity of the user identifier.",
     "Angular 10 with ngcc, rxjs-compat and core-js 2.5.1 is an abandoned dependency chain with no security support. 169 TS files stay in the repository with no decision about what to do with them, and some admin screens call four `/Admin/*` endpoints that the backend does not have."

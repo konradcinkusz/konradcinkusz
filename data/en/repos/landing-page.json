@@ -148,7 +148,7 @@
     "**The README is a 34-byte stub written in UTF-16 with a BOM**, reading `# landing-page`. It does not say what the project is, who it was built for, where the template comes from or how to run it.",
     "`index.html` links the sheet `bxslider/jquery.bxslider.css` on line 19, and there is no `bxslider` directory in the repo. Every page load ends in a 404 visible in the console.",
     "The menu item **Cennik points at `#testimonials`** (line 74), because the pricing section on line 245 inherited the identifier from the deleted reviews slider. The navigation works by accident, not by design.",
-    "The address `franke.label@gmail.com` sits in two places inside an `<a>` tag with no `href` attribute, and `<span class=\"year\"></span>` in the footer is filled in by nothing, so it renders as `Copyright ©  | Template By`. Those are the two most visible elements of the contact page.",
+    "The template owner's e-mail address (redacted here — this entry is public and the address belongs to somebody else) sits in two places inside an `<a>` tag with no `href` attribute, and `<span class=\"year\"></span>` in the footer is filled in by nothing, so it renders as `Copyright ©  | Template By`. Those are the two most visible elements of the contact page.",
     "The dead `owlCarousel` and `datepicker` calls in `js/scripts.js` are {{term:drift}} left by two template features the author cut out: the markup and the `owl-slider` and `contactform` directories vanished from the repo in the commits `remove contact form` and `remove unnecessary files`, while `scripts.js` was left untouched since the import."
   ],
   "risks": [
