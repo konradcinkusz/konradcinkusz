@@ -39,7 +39,7 @@
       "checks.lede": "Miara bez progu jest wykresem, a próg bez zapisanej akcji jest wyrzutem sumienia. Każdy wiersz poniżej ma wszystkie trzy części, żeby przekroczenie progu kończyło się czynnością, a nie zmartwieniem.",
       "wip.h": "Limity równoległej pracy",
       "wip.tag": "to, co powstrzymuje 35 połówek",
-      "wip.lede": "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu pięciu rzeczy zaczętych i żadnej skończonej. Poniższe limity są twarde: przekroczenie ich jest sygnałem, żeby coś zamknąć, a nie żeby pracować dłużej.",
+      "wip.lede": "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od czterdziestu trzech rzeczy zaczętych i żadnej skończonej. Poniższe limity są twarde: przekroczenie ich jest sygnałem, żeby coś zamknąć, a nie żeby pracować dłużej.",
       "automation.h": "Automaty",
       "automation.tag": "gdzie mieszka każdy z nich",
       "automation.lede": "Wszystko poniżej istnieje po to, żeby zdjąć decyzję z człowieka albo postawić ją przed nim w momencie, w którym da się ją podjąć w minutę. Przy każdym jest ścieżka w repozytorium — jeśli jej nie ma, to znaczy, że automat jest do zbudowania, i to jest część planu.",
@@ -275,8 +275,8 @@
       "checks.tag": "signal, threshold, action",
       "checks.lede": "A measure with no threshold is a chart, and a threshold with no written-down action is a pang of conscience. Every row below has all three parts, so that a breach ends in an action rather than a worry.",
       "wip.h": "Work-in-progress limits",
-      "wip.tag": "what stops thirty-five halves",
-      "wip.lede": "A one-person portfolio does not die from a lack of ideas. It dies from thirty-five things started and none finished. The limits below are hard: breaching them is a signal to close something, not to work longer.",
+      "wip.tag": "what stops forty-three halves",
+      "wip.lede": "A one-person portfolio does not die from a lack of ideas. It dies from forty-three things started and none finished. The limits below are hard: breaching them is a signal to close something, not to work longer.",
       "automation.h": "Automation",
       "automation.tag": "where each one lives",
       "automation.lede": "Everything below exists to take a decision off a person, or to put it in front of them at the moment it can be taken in a minute. Each one names a path in the repository — if there is none, the automation is still to be built, and that is part of the plan.",
@@ -495,7 +495,7 @@
           "url": "https://x.com/dev_insight"
         }
       ],
-      "scope": "Mapa obejmuje **43 repozytoria przeczytane od początku do końca** — README, dokumentację, kod, workflowy i historię gita. Dziewięć z nich dołączyło 12 września 2026 i wszystkie dziewięć jest publicznych. Jedno kolejne, przeczytane w ten sam sposób, jest tymczasowo wycofane z mapy do czasu naprawienia luki bezpieczeństwa, którą znalazł audyt — poświadczenie z historii `quorum` pozostaje ważne, dopóki nie zostanie zrotowane, a repozytorium jest od 1 września publiczne. Konto ma więcej repozytoriów: kolejne są publiczne, nie zarchiwizowane i **nie ma ich tutaj**, w tym `DeepDiveInto_CSharp_Dictionaries_presentation` (3 gwiazdki). Repozytorium trafia na mapę wtedy, gdy ktoś je faktycznie przeczytał — nie wtedy, gdy istnieje."
+      "scope": "Mapa obejmuje **43 repozytoria przeczytane od początku do końca** — README, dokumentację, kod, workflowy i historię gita; 30 z nich jest publicznych, 13 prywatnych. Dziewięć dołączyło 12 września 2026 i wszystkie dziewięć jest publicznych. **To repozytorium jest dziś publiczne, więc manifest — razem z dossier trzynastu repozytoriów prywatnych — jest publiczny również**; patrz `risks` we wpisie `konradcinkusz`. Dwa repozytoria przeczytane w ten sam sposób są poza mapą: `aurelius-promptus`, wycofane do czasu naprawienia luki bezpieczeństwa znalezionej przez audyt, oraz `quorum`, którego historia niesie niezrotowane poświadczenie (commit `f0fca15`), a repozytorium jest publiczne od 1 września. Konto ma więcej repozytoriów: kolejne są publiczne, nie zarchiwizowane i **nie ma ich tutaj**, w tym `DeepDiveInto_CSharp_Dictionaries_presentation` (3 gwiazdki). Repozytorium trafia na mapę wtedy, gdy ktoś je faktycznie przeczytał — nie wtedy, gdy istnieje."
     },
     "clusters": [
       {
@@ -515,7 +515,7 @@
         "id": "C-infra",
         "letter": "C",
         "name": "Klaster C — infrastruktura wielokrotnego użytku",
-        "note": "Wspólny substrat: **usługa, którą konsumuje inny system tego portfolio**. Jest tu dokładnie jedna pozycja, i to jest ustalenie, nie niedopatrzenie: {{term:ghcr|jedna zakończona ekstrakcja}} na trzydzieści pięć repozytoriów. Wzorzec zadziałał raz i jest udokumentowany — cała konsolidacja z zakładki obok to jego powtórzenia."
+        "note": "Wspólny substrat: **usługa, którą konsumuje inny system tego portfolio**. Jest tu dokładnie jedna pozycja, i to jest ustalenie, nie niedopatrzenie: {{term:ghcr|jedna zakończona ekstrakcja}} na czterdzieści trzy repozytoria. Wzorzec zadziałał raz i jest udokumentowany — cała konsolidacja z zakładki obok to jego powtórzenia."
       },
       {
         "id": "D-content",
@@ -2378,7 +2378,7 @@
         "slug": "auto-veritas",
         "name": "Auto Veritas",
         "cluster": "E-lab",
-        "visibility": "private",
+        "visibility": "public",
         "state": "active",
         "tier": "P3",
         "oneLiner": "Porównywarka ofert samochodowych i finansowania na rynku hiszpańskim, w której każda wartość niesie własną datę weryfikacji.",
@@ -5559,7 +5559,7 @@
         "slug": "judge-worker",
         "name": "judge-worker",
         "cluster": "A-runtime",
-        "visibility": "private",
+        "visibility": "public",
         "state": "active",
         "tier": "P3",
         "oneLiner": "Worker TypeScript, który zdejmuje ślady agenta z kolejki BullMQ i ocenia je sędzią LLM — z sędzią sprawdzonym mutacjami, nie założonym.",
@@ -5577,7 +5577,7 @@
         "primaryLanguage": "TypeScript",
         "license": "MIT",
         "tests": "103 wywołania `it()`/`test()` w 32 blokach `describe`, rozłożone na 15 plików w `test/` — policzone grepem, bo `node_modules` nie istnieje w kontenerze i suite nie została uruchomiona. `FINDINGS.md` nadal podaje 7 plików i 30 testów, czyli liczby z wcześniejszego commita.",
-        "ci": "Cztery workflowy: `ci.yml` robi lint, format:check, typecheck, build i `test:coverage` na Node 22 z serwisem `redis:7-alpine`; gitleaks chodzi na **pełnej historii**, na PR/push i co poniedziałek; `docs.yml` buduje Jekylla i wypycha na GitHub Pages przy zmianach w markdownie. CodeQL jest zadeklarowany, ale sam się pomija, dopóki repozytorium jest prywatne.",
+        "ci": "Cztery workflowy: `ci.yml` robi lint, format:check, typecheck, build i `test:coverage` na Node 22 z serwisem `redis:7-alpine`; gitleaks chodzi na **pełnej historii**, na PR/push i co poniedziałek; `docs.yml` buduje Jekylla i wypycha na GitHub Pages przy zmianach w markdownie. CodeQL jest zadeklarowany, a warunek, który go pomijał — prywatność repozytorium — już nie obowiązuje; pierwszy przebieg nie został jeszcze odnotowany w tym wpisie.",
         "metrics": [
           {
             "label": "Commity",
@@ -5727,7 +5727,7 @@
           "Ścieżka `--live` nie ma żadnego pokrycia {{term:mutation|mutacyjnego}} i nigdy nie została uruchomiona przeciwko prawdziwemu API — jest testowana wstrzykniętym `fetch`, więc end-to-end pozostaje niesprawdzone.",
           "Brak realnej telemetrii {{term:otel|OTel}}: są logi pino i metryki Prometheus, a słownictwo pól logu jest zapożyczone z konwencji GenAI OTel, co da się źle odczytać. `SPEC.md` sam to prostuje.",
           "Deploy dokumentacji wymaga jednorazowego ręcznego przełączenia Settings → Pages → Source na GitHub Actions, czego workflow nie wykona sam. README linkuje do tej strony jako do dokumentacji pełnej; nie zweryfikowano, czy odpowiada.",
-          "Strona dokumentacji nie jest potwierdzona jako opublikowana: repozytorium jest prywatne, a nagłówek workflowu Pages sam mówi, że zadanie wdrożenia będzie zwracać błąd uprawnień, dopóki ktoś ręcznie nie przestawi źródła w ustawieniach — czego workflow nie może zrobić za siebie."
+          "Strona dokumentacji nadal nie jest potwierdzona jako opublikowana. Blokada uprawnień wynikająca z prywatności repozytorium zniknęła wraz z jego upublicznieniem, ale nagłówek workflowu Pages sam mówi, że wdrożenie wymaga jednorazowego ręcznego przestawienia źródła w ustawieniach — czego workflow nie może zrobić za siebie."
         ],
         "risks": [
           "LICENSE przypisuje copyright `dev_insight`, co koliduje z inną pozycją portfolio (slug `dev-insight`) i wygląda na artefakt kopiowania między repozytoriami.",
@@ -5740,7 +5740,7 @@
           "Popraw linię copyright w LICENSE na właściwego właściciela — dziś nosi nazwę innego repozytorium.",
           "Uruchom `pnpm run calibrate -- --live` z prawdziwym kluczem na 15 fixture'ach (kilkanaście sekund, grosze) i wpisz tę {{term:kappa|kappę}} obok mockowej. To najtańsza rzecz, która zamienia najsłabszą tezę repozytorium w pomiar.",
           "Dodaj mutacyjny odpowiednik `SilentInjectionComplianceJudge` dla `LiveJudgeProvider` — sprawdź, czy prawdziwy sędzia opiera się atakowi z `adv-003`.",
-          "Rozstrzygnij widoczność repozytorium (issue #19). Dopóki jest prywatne, CodeQL sam się pomija i cała warstwa „skanowanie kodu w CI” jest deklaracją, nie kontrolą."
+          "Widoczność repozytorium jest rozstrzygnięta — jest publiczne, więc CodeQL nie pomija się już sam. Sprawdź pierwszy przebieg i zapisz wynik; do tego czasu warstwa „skanowanie kodu w CI” pozostaje deklaracją, a nie kontrolą."
         ],
         "headline": "Sędzia sprawdzony pięcioma mutantami; ścieżka live nigdy nie dotknęła prawdziwego API",
         "headlineTone": "warn",
@@ -5950,11 +5950,11 @@
         "slug": "konradcinkusz",
         "name": "konradcinkusz (profil GitHub + mapa portfolio)",
         "cluster": "F-meta",
-        "visibility": "private",
+        "visibility": "public",
         "state": "active",
         "tier": "P0",
-        "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący trzydzieści cztery repozytoria, plus strona, która go renderuje.",
-        "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać trzydzieści cztery repozytoria naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
+        "oneLiner": "Profil GitHuba i repozytorium-hub: jeden manifest opisujący czterdzieści trzy repozytoria, plus strona, która go renderuje.",
+        "summary": "Repozytorium robi dwie rzeczy naraz i obie są dziś zacommitowane. Pierwsza to profilowy README — pierwsza rzecz, którą widzi ktokolwiek trafiający na resztę estate. Druga to mapa portfolio: strona w czystym HTML, CSS i JS bez kroku budowania i bez zależności runtime, która z jednego manifestu renderuje pięć zakładek — portfolio, konsolidację, model operacyjny, sortowalny indeks i słownik czterdziestu trzech terminów. Dane leżą rozdzielone w `data/`, po jednym pliku na repozytorium, i **drugi raz** w `data/en/` — polski jest źródłem, angielski tłumaczeniem o wymuszonym kształcie. `scripts/build-manifest.mjs` skleja oba drzewa w jeden `site/data/portfolio.json`, a tryb `--check` wykrywa {{term:drift|dryf}} zacommitowanej kopii wobec źródeł. Najciekawsza decyzja jest w walidatorze: schemat kluczy repozytorium jest **zamknięty**, a integralność referencyjna sprawdzana krzyżowo, więc nieznany slug, {{term:kernel|kernel}} z jednym konsumentem, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. To jest jedyne miejsce w portfolio, z którego widać czterdzieści trzy repozytoria naraz — i dlatego jest na poziomie P0 mimo że nie ma w nim ani jednej linii logiki biznesowej.",
         "stack": [
           "HTML5",
           "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -6121,31 +6121,32 @@
             "reason": "README i `meta.json` linkują do kanału jako głównej osi dystrybucji, więc oba opisują ten sam kanał dotarcia."
           }
         ],
-        "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych trzydziestu trzech repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 34 repozytoria, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
+        "product": "Brak kupującego i nie należy go tu szukać. To jest kanał i wiarygodność: profil GitHuba jest pierwszą rzeczą, którą widzi rekruter albo potencjalny użytkownik pozostałych czterdziestu dwóch repozytoriów. Mapa jest narzędziem decyzyjnym dla jednej osoby, właściciela, i w tej roli ma realną wartość pośrednią, bo jest jedynym miejscem, z którego widać 34 repozytoria, ich duplikacje i limity {{term:wip|WIP}} naraz. Sama strona produktem nie jest i nie ma sensu jej tak pozycjonować.",
         "highlights": [
           "Walidator ma **zamknięty** zestaw kluczy repozytorium i sprawdza integralność krzyżowo: nieznany slug w `overlaps`, repozytorium przypisane do dwóch {{term:poziom|poziomów}} albo martwe odwołanie do słownika zatrzymują build. {{term:kernel|Kernel}} z jednym konsumentem jest ostrzeżeniem, nie błędem — to jest osąd, nie naruszenie schematu.",
           "`data/ops.json` to kompletny model operacyjny, nie deklaracja intencji: 9 zasad, 5 poziomów uwagi pokrywających **dokładnie 34 slugi bez powtórzeń**, 7 rytuałów z timeboksem i artefaktem na wyjściu, 12 kontroli zdrowia z sygnałem, progiem i akcją, 7 limitów WIP, 12 automatów i 6 horyzontów planu z testem zakończenia.",
           "Strona nie ma kroku budowania i zero zależności w czasie działania. Jedyna zależność deweloperska to przeglądarka do testu renderowania — który złapał błąd kolejności bootu zostawiający pustą stronę, trzy przepełnienia layoutu i regułę `[hidden]` przegrywającą z `display: flex`.",
-          "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych trzydziestu trzech."
+          "Manifest jest **plikiem generowanym i commitowanym**, a to wyklucza jedną rzecz: nie może nieść własnej liczby commitów. Próba wypełniania jej z gita przy budowie skończyła się pogonią — każdy commit unieważniał plik, który sam przed chwilą zapisał, i `--check` padał przy następnym przebiegu. Te liczby zbiera nocny kolektor, dla tego repozytorium na tych samych zasadach co dla pozostałych czterdziestu dwóch."
         ],
         "gaps": [
-          "**To repozytorium jest prywatne, więc README profilu nie renderuje się nigdzie.** GitHub pokazuje `README.md` z repozytorium o nazwie równej nazwie użytkownika tylko wtedy, gdy jest ono publiczne. Tu jest prywatne, potwierdzone dwoma niezależnymi źródłami, więc `github.com/konradcinkusz` nie pokazuje ani tabeli projektów, ani niczego innego z tego pliku. Upublicznienie repozytorium naprawia profil i **jednocześnie publikuje cały manifest**, razem z dossier siedemnastu repozytoriów prywatnych — to jedna decyzja, nie dwie, i patrz `risks` poniżej.",
-          "Manifest jest **migawką z jednego dnia** dla trzydziestu trzech pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
+          "**Repozytorium jest publiczne, więc README profilu renderuje się — i razem z nim opublikowany został cały manifest.** To była jedna decyzja, nie dwie: profil działa, a dossier trzynastu repozytoriów prywatnych jest od tej chwili czytelne dla każdego, kto otworzy `site/data/portfolio.json`. Skutek jest opisany w `risks` poniżej i nie da się go cofnąć samym przestawieniem widoczności z powrotem.",
+          "Manifest jest **migawką z jednego dnia** dla czterdziestu dwóch pozostałych repozytoriów. Nocny kolektor, który ma to zdjąć, jest napisany i przetestowany wobec atrapy API, ale **nigdy nie chodził na żywo** — wymaga tokenu o zasięgu całego konta, którego jeszcze nie ma. Do tego czasu liczby w kartach pochodzą z jednorazowego odczytu.",
           "Tabela projektów w README jest nadal pisana ręcznie, mimo że ten sam manifest mógłby ją generować. To dokładnie ten problem, który {{term:drift|walidator dryfu}} już rozwiązał dla samego manifestu.",
           "Strona nie została jeszcze ani razu wdrożona — konfiguracja Fly i workflow są napisane i nieuruchomione.",
           "Wpisy o repozytoriach prywatnych wskazują dokumenty, których czytelnik nie otworzy. Renderer wygasza takie linki i podaje powód, ale nie ma sposobu, żeby to naprawić bez otwarcia repozytoriów."
         ],
         "next": [
+          "Przejrzyj trzynaście wpisów o repozytoriach prywatnych i usuń z nich wszystko, co nie powinno być publiczne — opisy potwierdzonych luk bezpieczeństwa przede wszystkim. To jest pierwsza pozycja na liście całego portfolio, przed czymkolwiek innym.",
           "Wypuść pierwszy tag i sprawdź, czy wdrożenie faktycznie przechodzi — łącznie z krokiem weryfikującym serwowany manifest.",
           "Zbuduj `scripts/build-readme.mjs` i generuj tabelę projektów w README z manifestu, żeby usunąć rozjazd u źródła.",
           "Dodaj nocny kolektor zdrowia zapisujący `data/health.json` i otwierający **jedno** zgłoszenie z przekroczonymi progami.",
           "Przenieś tu wielokrotnie używalny workflow CI dla .NET; szesnaście kopii `ci.yml` w estate to jeden `workflow_call` i trzy linijki u konsumenta."
         ],
         "risks": [
-          "**Manifest opisuje repozytoria prywatne na tyle dokładnie, że jego upublicznienie jest decyzją, a nie formalnością.** Dziś repozytorium jest prywatne, a strona nie jest wdrożona, więc nic nie wyciekło. Ale wpisy prywatne wymieniają ścieżki plików, nazwy klas i **potwierdzone luki bezpieczeństwa** w działającym, płatnym produkcie. Publikacja — czy przez upublicznienie repozytorium, czy przez wdrożenie strony pod adresem, który ktoś znajdzie — udostępnia to wszystko. Zamknięty schemat kluczy pilnuje, żeby zakres nie rósł sam; nie zmniejsza tego, co już jest w środku."
+          "**To ryzyko się zmaterializowało.** Repozytorium jest publiczne, a manifest razem z nim. Wpisy o repozytoriach prywatnych wymieniają ścieżki plików, nazwy klas i **potwierdzone luki bezpieczeństwa** w działającym, płatnym produkcie — i są dziś czytelne dla każdego. Przestawienie widoczności z powrotem tego nie cofa: publiczny commit jest publiczny na zawsze i nie dosięga klonów, forków ani scraperów, które już były. Jedyne działanie, które cokolwiek zmienia, to przejrzenie trzynastu wpisów prywatnych i usunięcie z nich tego, co nie powinno być publiczne."
         ],
-        "headline": "Jedyne miejsce, z którego widać całe portfolio naraz — i jedyne, które pilnuje, żeby nie kłamało",
-        "headlineTone": "good",
+        "headline": "Manifest został opublikowany razem z repozytorium — i niesie dossier trzynastu repozytoriów prywatnych",
+        "headlineTone": "bad",
         "github": {
           "stars": 0,
           "openIssues": 0,
@@ -6867,7 +6868,7 @@
         "slug": "math-for-ai-engineers",
         "name": "math-for-ai-engineers",
         "cluster": "D-content",
-        "visibility": "private",
+        "visibility": "public",
         "state": "stub",
         "tier": "P4",
         "oneLiner": "Zarezerwowana nazwa repozytorium: jeden commit, jeden plik README o rozmiarze 49 bajtów, zero treści.",
@@ -8879,7 +8880,7 @@
         },
         {
           "title": "Repo bez zadeklarowanego poziomu obsługi nie istnieje",
-          "body": "Każde z trzydziestu czterech repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
+          "body": "Każde z czterdziestu trzech repozytoriów ma dokładnie jeden {{term:poziom|poziom uwagi}} i on jest zapisany, nie domyślny. Poziom nie służy do tego, żeby wiedzieć, czym się zająć — służy do tego, żeby **świadomie nie zajmować się** dwudziestoma repozytoriami w danym tygodniu i nie mieć z tego powodu poczucia winy."
         },
         {
           "title": "Poziom wyznacza promień rażenia, nie sympatia",
@@ -9140,7 +9141,7 @@
         },
         {
           "name": "Sprawdzenie widoczności i istnienia repozytoriów",
-          "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy trzydziestu czterech pozycjach.",
+          "how": "`check-repos.mjs` odpytuje API GitHuba o każdy slug z manifestu i przerywa build, gdy repozytorium zniknęło, zostało zarchiwizowane albo zmieniło widoczność. To jedyna kontrola, której człowiek nie wykona rzetelnie przy czterdziestu trzech pozycjach.",
           "where": "konradcinkusz/scripts/check-repos.mjs"
         },
         {
@@ -9170,7 +9171,7 @@
         },
         {
           "name": "Wtyczki agentowe jako sposób dystrybucji reguł",
-          "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania trzydziestu czterech plików.",
+          "how": "Reguły architektoniczne są instalowane przez agenta, nie wklejane do promptu — to jest {{term:skille|system skilli}} zastosowany do własnych standardów. Każde repozytorium P0–P2 wskazuje w `AGENTS.md` wtyczkę, którą agent ma wczytać przed pracą, dzięki czemu poprawka reguły propaguje się bez dotykania czterdziestu trzech plików.",
           "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
         },
         {
@@ -9666,7 +9667,7 @@
           "Licencje permisywne — pozwalają używać, modyfikować i wbudowywać komercyjnie. MIT dla kodu, CC-BY dla specyfikacji i dokumentów.",
           "Wybór oparty na precedensie adopcyjnym, nie na ideologii: licencje typu AGPL skutecznie blokują adopcję w .NET-owych organizacjach enterprise, czyli dokładnie w segmencie docelowym. Ryzyko sklonowania solowego projektu bez klientów jest bliskie zeru; ryzyko odbicia się enterprise od licencji jest pewne."
         ],
-        "where": "trzydzieści repozytoriów na MIT; pięć bez pliku licencji"
+        "where": "trzydzieści siedem repozytoriów na licencji z rodziny MIT; sześć bez pliku licencji"
       },
       {
         "id": "perseat",
@@ -9744,7 +9745,7 @@
         "tag": "operacje",
         "body": [
           "Twardy limit liczby rzeczy zaczętych i nieskończonych. Nie wytyczna — limit: przekroczenie jest sygnałem, żeby coś **zamknąć**, a nie żeby pracować dłużej.",
-          "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu czterech rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
+          "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od czterdziestu trzech rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
         ],
         "where": "zakładka „operacje”, sekcja „limity”"
       },
@@ -9818,7 +9819,7 @@
           "url": "https://x.com/dev_insight"
         }
       ],
-      "scope": "The map covers **43 repositories read from beginning to end** — README, documentation, code, workflows and git history. Nine of them joined on 12 September 2026, and all nine are public. One more, read the same way, is temporarily withdrawn from the map until a security gap the audit found in it is fixed — a credential in `quorum`'s history stays valid until it is rotated, and that repository has been public since 1 September. The account holds more repositories than this: others are public, not archived and **are not here**, among them `DeepDiveInto_CSharp_Dictionaries_presentation` (3 stars). A repository reaches the map when someone has actually read it — not when it exists."
+      "scope": "The map covers **43 repositories read from beginning to end** — README, documentation, code, workflows and git history; 30 of them are public and 13 private. Nine joined on 12 September 2026, and all nine are public. **This repository is public today, so the manifest — dossiers for thirteen private repositories included — is public as well**; see `risks` in the `konradcinkusz` entry. Two repositories read the same way are off the map: `aurelius-promptus`, withdrawn until a security gap the audit found in it is fixed, and `quorum`, whose history carries an unrotated credential (commit `f0fca15`) in a repository that has been public since 1 September. The account holds more repositories: others are public, not archived and **are not here**, among them `DeepDiveInto_CSharp_Dictionaries_presentation` (3 stars). A repository reaches the map when someone has actually read it — not when it exists."
     },
     "clusters": [
       {
@@ -9838,7 +9839,7 @@
         "id": "C-infra",
         "letter": "C",
         "name": "Cluster C — reusable infrastructure",
-        "note": "Shared substrate: **a service that another system in this portfolio consumes**. There is exactly one entry here, and that is a finding, not an oversight: {{term:ghcr|one completed extraction}} across thirty-five repositories. The pattern worked once and is documented — the whole consolidation in the next tab is repetitions of it."
+        "note": "Shared substrate: **a service that another system in this portfolio consumes**. There is exactly one entry here, and that is a finding, not an oversight: {{term:ghcr|one completed extraction}} across forty-three repositories. The pattern worked once and is documented — the whole consolidation in the next tab is repetitions of it."
       },
       {
         "id": "D-content",
@@ -11701,7 +11702,7 @@
         "slug": "auto-veritas",
         "name": "Auto Veritas",
         "cluster": "E-lab",
-        "visibility": "private",
+        "visibility": "public",
         "state": "active",
         "tier": "P3",
         "oneLiner": "A comparison tool for car and finance offers on the Spanish market, where every value carries its own verification date.",
@@ -14882,7 +14883,7 @@
         "slug": "judge-worker",
         "name": "judge-worker",
         "cluster": "A-runtime",
-        "visibility": "private",
+        "visibility": "public",
         "state": "active",
         "tier": "P3",
         "oneLiner": "A TypeScript worker that pulls agent traces off a BullMQ queue and scores them with an LLM judge — a judge checked by mutants, not assumed.",
@@ -14900,7 +14901,7 @@
         "primaryLanguage": "TypeScript",
         "license": "MIT",
         "tests": "103 `it()`/`test()` calls in 32 `describe` blocks, spread over 15 files in `test/` — counted with grep, because `node_modules` does not exist in the container and the suite has not been run. `FINDINGS.md` still says 7 files and 30 tests, which are the figures from an earlier commit.",
-        "ci": "Four workflows: `ci.yml` runs lint, format:check, typecheck, build and `test:coverage` on Node 22 with a `redis:7-alpine` service; gitleaks runs over the **full history**, on PR/push and every Monday; `docs.yml` builds Jekyll and pushes to GitHub Pages when markdown changes. CodeQL is declared but skips itself for as long as the repository is private.",
+        "ci": "Four workflows: `ci.yml` runs lint, format:check, typecheck, build and `test:coverage` on Node 22 with a `redis:7-alpine` service; gitleaks runs over the **full history**, on PR/push and every Monday; `docs.yml` builds Jekyll and pushes to GitHub Pages when markdown changes. CodeQL is declared, and the condition that made it skip itself — the repository being private — no longer holds; no first run has been recorded in this entry yet.",
         "metrics": [
           {
             "label": "Commits",
@@ -15050,7 +15051,7 @@
           "The `--live` path has no {{term:mutation|mutation}} coverage at all and has never been run against the real API — it is tested with an injected `fetch`, so end to end remains unchecked.",
           "No real {{term:otel|OTel}} telemetry: there are pino logs and Prometheus metrics, and the log field vocabulary is borrowed from the GenAI OTel conventions, which can be misread. `SPEC.md` corrects this itself.",
           "Deploying the documentation needs a one-off manual switch of Settings → Pages → Source to GitHub Actions, which the workflow cannot do for itself. The README links to that site as the full documentation; whether it responds has not been verified.",
-          "The documentation site is not confirmed as published: the repository is private, and the header of the Pages workflow says itself that the deployment job will return a permissions error until somebody manually changes the source in the settings — which the workflow cannot do on its own behalf."
+          "The documentation site is still not confirmed as published. The permissions block that followed from the repository being private went away when it was made public, but the header of the Pages workflow says itself that deployment needs a one-off manual switch of the source in the settings — which the workflow cannot do on its own behalf."
         ],
         "risks": [
           "LICENSE assigns copyright to `dev_insight`, which clashes with another portfolio entry (slug `dev-insight`) and looks like an artefact of copying between repositories.",
@@ -15063,7 +15064,7 @@
           "Fix the copyright line in LICENSE to the right owner — today it carries the name of another repository.",
           "Run `pnpm run calibrate -- --live` with a real key over the 15 fixtures (a dozen seconds, pennies) and record that {{term:kappa|kappa}} next to the mock one. It is the cheapest thing that turns the repository's weakest claim into a measurement.",
           "Add a mutation counterpart to `SilentInjectionComplianceJudge` for `LiveJudgeProvider` — check whether the real judge resists the attack in `adv-003`.",
-          "Settle the repository's visibility (issue #19). While it is private, CodeQL skips itself and the whole 'code scanning in CI' layer is a declaration, not a control."
+          "The repository's visibility is settled — it is public, so CodeQL no longer skips itself. Check the first run and record the result; until then the 'code scanning in CI' layer remains a declaration rather than a control."
         ],
         "headline": "A judge checked by five mutants; the live path has never touched the real API",
         "headlineTone": "warn",
@@ -15273,11 +15274,11 @@
         "slug": "konradcinkusz",
         "name": "konradcinkusz (GitHub profile + portfolio map)",
         "cluster": "F-meta",
-        "visibility": "private",
+        "visibility": "public",
         "state": "active",
         "tier": "P0",
-        "oneLiner": "GitHub profile and hub repository: one manifest describing thirty-four repositories, plus a site that renders it.",
-        "summary": "The repository does two things at once and both are committed today. The first is the profile README — the first thing anyone arriving at the rest of the estate sees. The second is the portfolio map: a site in plain HTML, CSS and JS with no build step and no runtime dependencies, which renders five tabs from a single manifest — portfolio, consolidation, operating model, a sortable index and a glossary of forty-three terms. The data sits split across `data/`, one file per repository, and **a second time** under `data/en/` — Polish is the source, English a translation with an enforced shape. `scripts/build-manifest.mjs` glues both trees into the one `site/data/portfolio.json`, and `--check` mode detects {{term:drift|drift}} of the committed copy against the sources. The most interesting decision is in the validator: the schema of repository keys is **closed**, and referential integrity is checked across files, so an unknown slug, a {{term:kernel|kernel}} with one consumer, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. This is the only place in the portfolio from which thirty-four repositories are visible at once — and that is why it sits at tier P0 despite not containing a single line of business logic.",
+        "oneLiner": "GitHub profile and hub repository: one manifest describing forty-three repositories, plus a site that renders it.",
+        "summary": "The repository does two things at once and both are committed today. The first is the profile README — the first thing anyone arriving at the rest of the estate sees. The second is the portfolio map: a site in plain HTML, CSS and JS with no build step and no runtime dependencies, which renders five tabs from a single manifest — portfolio, consolidation, operating model, a sortable index and a glossary of forty-three terms. The data sits split across `data/`, one file per repository, and **a second time** under `data/en/` — Polish is the source, English a translation with an enforced shape. `scripts/build-manifest.mjs` glues both trees into the one `site/data/portfolio.json`, and `--check` mode detects {{term:drift|drift}} of the committed copy against the sources. The most interesting decision is in the validator: the schema of repository keys is **closed**, and referential integrity is checked across files, so an unknown slug, a {{term:kernel|kernel}} with one consumer, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. This is the only place in the portfolio from which forty-three repositories are visible at once — and that is why it sits at tier P0 despite not containing a single line of business logic.",
         "stack": [
           "HTML5",
           "CSS3 z custom properties (motyw jasny/ciemny)",
@@ -15444,31 +15445,32 @@
             "reason": "The README and `meta.json` link to the channel as the main axis of distribution, so both describe the same channel of reach."
           }
         ],
-        "product": "No buyer, and none should be looked for here. This is channel and credibility: the GitHub profile is the first thing a recruiter or a prospective user of the other thirty-three repositories sees. The map is a decision tool for one person, the owner, and in that role it has real indirect value, because it is the only place from which 34 repositories, their duplications and the {{term:wip|WIP}} limits are visible at once. The site itself is not a product and there is no sense in positioning it as one.",
+        "product": "No buyer, and none should be looked for here. This is channel and credibility: the GitHub profile is the first thing a recruiter or a prospective user of the other forty-two repositories sees. The map is a decision tool for one person, the owner, and in that role it has real indirect value, because it is the only place from which 34 repositories, their duplications and the {{term:wip|WIP}} limits are visible at once. The site itself is not a product and there is no sense in positioning it as one.",
         "highlights": [
           "The validator has a **closed** set of repository keys and checks integrity across files: an unknown slug in `overlaps`, a repository assigned to two {{term:poziom|tiers}} or a dead glossary reference stop the build. A {{term:kernel|kernel}} with one consumer is a warning, not an error — that is a judgement, not a schema violation.",
           "`data/ops.json` is a complete operating model, not a declaration of intent: 9 principles, 5 attention tiers covering **exactly 34 slugs with no repeats**, 7 rituals with a timebox and an artefact on the way out, 12 health checks with a signal, a threshold and an action, 7 WIP limits, 12 automations and 6 plan horizons with a completion test.",
           "The site has no build step and zero dependencies at run time. The only development dependency is a browser for the rendering test — which caught a boot-ordering bug that left the page blank, three layout overflows and a `[hidden]` rule losing to `display: flex`.",
-          "The manifest is a **generated and committed file**, and that rules one thing out: it cannot carry its own commit count. An attempt to fill that in from git at build time ended in a chase — every commit invalidated the file it had itself written a moment earlier, and `--check` failed on the next run. Those numbers are gathered by the nightly collector, for this repository on the same terms as for the other thirty-three."
+          "The manifest is a **generated and committed file**, and that rules one thing out: it cannot carry its own commit count. An attempt to fill that in from git at build time ended in a chase — every commit invalidated the file it had itself written a moment earlier, and `--check` failed on the next run. Those numbers are gathered by the nightly collector, for this repository on the same terms as for the other forty-two."
         ],
         "gaps": [
-          "**This repository is private, so the profile README renders nowhere.** GitHub only shows the `README.md` of a repository named after the account when that repository is public. This one is private, confirmed against two independent sources, so `github.com/konradcinkusz` shows neither the project table nor anything else from that file. Making the repository public fixes the profile and **publishes the whole manifest at the same time**, dossiers for seventeen private repositories included — that is one decision, not two, and see `risks` below.",
-          "The manifest is a **snapshot from a single day** for the thirty-three other repositories. The nightly collector meant to take that away is written and tested against a fake API, but has **never run live** — it needs an account-wide token that does not exist yet. Until then the numbers on the cards come from a one-off read.",
+          "**The repository is public, so the profile README renders — and the whole manifest was published along with it.** That was one decision, not two: the profile works, and dossiers for thirteen private repositories are legible from that moment to anyone who opens `site/data/portfolio.json`. The consequence is described in `risks` below, and flipping visibility back does not undo it.",
+          "The manifest is a **snapshot from a single day** for the forty-two other repositories. The nightly collector meant to take that away is written and tested against a fake API, but has **never run live** — it needs an account-wide token that does not exist yet. Until then the numbers on the cards come from a one-off read.",
           "The project table in the README is still written by hand, even though the same manifest could generate it. This is exactly the problem the {{term:drift|drift validator}} has already solved for the manifest itself.",
           "The site has not been deployed even once — the Fly configuration and the workflow are written and never run.",
           "Entries about private repositories point at documents the reader will not open. The renderer greys such links out and gives the reason, but there is no way to fix it without opening the repositories."
         ],
         "next": [
+          "Review the thirteen entries about private repositories and strip anything from them that should not be public — the descriptions of confirmed security holes above all. This is the first item on the whole portfolio's list, ahead of anything else.",
           "Cut the first tag and check whether the deployment actually passes — including the step that verifies the served manifest.",
           "Build `scripts/build-readme.mjs` and generate the README's project table from the manifest, to remove the divergence at source.",
           "Add the nightly health collector, writing `data/health.json` and opening **one** issue with the breached thresholds.",
           "Move the reusable CI workflow for .NET here; sixteen copies of `ci.yml` across the estate come to one `workflow_call` and three lines at the consumer."
         ],
         "risks": [
-          "**The manifest describes private repositories precisely enough that publishing it is a decision, not a formality.** Today the repository is private and the site is not deployed, so nothing has leaked. But the private entries name file paths, class names and **confirmed security holes** in a live, paid product. Publishing — whether by making the repository public or by deploying the site at an address someone finds — hands all of that over. The closed key schema keeps the scope from growing on its own; it does not shrink what is already inside."
+          "**This risk has materialized.** The repository is public and the manifest went with it. The entries about private repositories name file paths, class names and **confirmed security holes** in a live, paid product — and they are legible to anyone today. Flipping visibility back does not undo it: a public commit is public forever and does not reach the clones, forks and scrapers that were already there. The only action that changes anything is to review the thirteen private entries and strip from them what should not be public."
         ],
-        "headline": "The only place the whole portfolio is visible at once — and the only one keeping it honest",
-        "headlineTone": "good",
+        "headline": "The manifest was published along with the repository — carrying dossiers on thirteen private repositories",
+        "headlineTone": "bad",
         "github": {
           "stars": 0,
           "openIssues": 0,
@@ -16190,7 +16192,7 @@
         "slug": "math-for-ai-engineers",
         "name": "math-for-ai-engineers",
         "cluster": "D-content",
-        "visibility": "private",
+        "visibility": "public",
         "state": "stub",
         "tier": "P4",
         "oneLiner": "A reserved repository name: one commit, one README file of 49 bytes, no content.",
@@ -18202,7 +18204,7 @@
         },
         {
           "title": "A repository with no declared level of service does not exist",
-          "body": "Each of the thirty-four repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
+          "body": "Each of the forty-three repositories has exactly one {{term:poziom|attention tier}} and it is written down, not implied. The tier is not there to tell you what to work on — it is there so that you can **deliberately not work on** twenty repositories in a given week and not feel guilty about it."
         },
         {
           "title": "The tier follows blast radius, not affection",
@@ -18463,7 +18465,7 @@
         },
         {
           "name": "A check on repository visibility and existence",
-          "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across thirty-four entries.",
+          "how": "`check-repos.mjs` asks the GitHub API about every slug in the manifest and stops the build when a repository has disappeared, been archived or changed visibility. It is the one check a person will not perform reliably across forty-three entries.",
           "where": "konradcinkusz/scripts/check-repos.mjs"
         },
         {
@@ -18493,7 +18495,7 @@
         },
         {
           "name": "Agent plugins as the way to distribute rules",
-          "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching thirty-four files.",
+          "how": "Architectural rules are installed by the agent, not pasted into the prompt — this is the {{term:skille|skills system}} applied to your own standards. Every P0–P2 repository names in `AGENTS.md` the plugin the agent is to load before working, so that a fix to a rule propagates without touching forty-three files.",
           "where": "architecture-standards/plugins/, <repo>/AGENTS.md"
         },
         {
@@ -18989,7 +18991,7 @@
           "Permissive licences — they allow use, modification and commercial embedding. MIT for code, CC-BY for specifications and documents.",
           "The choice rests on adoption precedent, not on ideology: AGPL-style licences effectively block adoption in .NET enterprise organisations, which is exactly the target segment. The risk of a solo project with no customers being cloned is close to zero; the risk of an enterprise bouncing off the licence is a certainty."
         ],
-        "where": "thirty repositories on MIT; five with no licence file"
+        "where": "thirty-seven repositories on an MIT-family licence; six with no licence file"
       },
       {
         "id": "perseat",
@@ -19067,7 +19069,7 @@
         "tag": "operations",
         "body": [
           "A hard cap on the number of things started and unfinished. Not a guideline — a limit: a breach is a signal to **close** something, not to work longer.",
-          "One person's portfolio does not die from a shortage of ideas. It dies from thirty-four things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
+          "One person's portfolio does not die from a shortage of ideas. It dies from forty-three things started and none finished — because each of them levies a tax on attention whether or not you are working on it."
         ],
         "where": "the 'operations' tab, the 'limits' section"
       },

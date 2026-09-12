@@ -2,7 +2,7 @@
   "slug": "judge-worker",
   "name": "judge-worker",
   "cluster": "A-runtime",
-  "visibility": "private",
+  "visibility": "public",
   "state": "active",
   "tier": "P3",
   "oneLiner": "Worker TypeScript, który zdejmuje ślady agenta z kolejki BullMQ i ocenia je sędzią LLM — z sędzią sprawdzonym mutacjami, nie założonym.",
@@ -20,7 +20,7 @@
   "primaryLanguage": "TypeScript",
   "license": "MIT",
   "tests": "103 wywołania `it()`/`test()` w 32 blokach `describe`, rozłożone na 15 plików w `test/` — policzone grepem, bo `node_modules` nie istnieje w kontenerze i suite nie została uruchomiona. `FINDINGS.md` nadal podaje 7 plików i 30 testów, czyli liczby z wcześniejszego commita.",
-  "ci": "Cztery workflowy: `ci.yml` robi lint, format:check, typecheck, build i `test:coverage` na Node 22 z serwisem `redis:7-alpine`; gitleaks chodzi na **pełnej historii**, na PR/push i co poniedziałek; `docs.yml` buduje Jekylla i wypycha na GitHub Pages przy zmianach w markdownie. CodeQL jest zadeklarowany, ale sam się pomija, dopóki repozytorium jest prywatne.",
+  "ci": "Cztery workflowy: `ci.yml` robi lint, format:check, typecheck, build i `test:coverage` na Node 22 z serwisem `redis:7-alpine`; gitleaks chodzi na **pełnej historii**, na PR/push i co poniedziałek; `docs.yml` buduje Jekylla i wypycha na GitHub Pages przy zmianach w markdownie. CodeQL jest zadeklarowany, a warunek, który go pomijał — prywatność repozytorium — już nie obowiązuje; pierwszy przebieg nie został jeszcze odnotowany w tym wpisie.",
   "metrics": [
     {
       "label": "Commity",
@@ -170,7 +170,7 @@
     "Ścieżka `--live` nie ma żadnego pokrycia {{term:mutation|mutacyjnego}} i nigdy nie została uruchomiona przeciwko prawdziwemu API — jest testowana wstrzykniętym `fetch`, więc end-to-end pozostaje niesprawdzone.",
     "Brak realnej telemetrii {{term:otel|OTel}}: są logi pino i metryki Prometheus, a słownictwo pól logu jest zapożyczone z konwencji GenAI OTel, co da się źle odczytać. `SPEC.md` sam to prostuje.",
     "Deploy dokumentacji wymaga jednorazowego ręcznego przełączenia Settings → Pages → Source na GitHub Actions, czego workflow nie wykona sam. README linkuje do tej strony jako do dokumentacji pełnej; nie zweryfikowano, czy odpowiada.",
-    "Strona dokumentacji nie jest potwierdzona jako opublikowana: repozytorium jest prywatne, a nagłówek workflowu Pages sam mówi, że zadanie wdrożenia będzie zwracać błąd uprawnień, dopóki ktoś ręcznie nie przestawi źródła w ustawieniach — czego workflow nie może zrobić za siebie."
+    "Strona dokumentacji nadal nie jest potwierdzona jako opublikowana. Blokada uprawnień wynikająca z prywatności repozytorium zniknęła wraz z jego upublicznieniem, ale nagłówek workflowu Pages sam mówi, że wdrożenie wymaga jednorazowego ręcznego przestawienia źródła w ustawieniach — czego workflow nie może zrobić za siebie."
   ],
   "risks": [
     "LICENSE przypisuje copyright `dev_insight`, co koliduje z inną pozycją portfolio (slug `dev-insight`) i wygląda na artefakt kopiowania między repozytoriami.",
@@ -183,7 +183,7 @@
     "Popraw linię copyright w LICENSE na właściwego właściciela — dziś nosi nazwę innego repozytorium.",
     "Uruchom `pnpm run calibrate -- --live` z prawdziwym kluczem na 15 fixture'ach (kilkanaście sekund, grosze) i wpisz tę {{term:kappa|kappę}} obok mockowej. To najtańsza rzecz, która zamienia najsłabszą tezę repozytorium w pomiar.",
     "Dodaj mutacyjny odpowiednik `SilentInjectionComplianceJudge` dla `LiveJudgeProvider` — sprawdź, czy prawdziwy sędzia opiera się atakowi z `adv-003`.",
-    "Rozstrzygnij widoczność repozytorium (issue #19). Dopóki jest prywatne, CodeQL sam się pomija i cała warstwa „skanowanie kodu w CI” jest deklaracją, nie kontrolą."
+    "Widoczność repozytorium jest rozstrzygnięta — jest publiczne, więc CodeQL nie pomija się już sam. Sprawdź pierwszy przebieg i zapisz wynik; do tego czasu warstwa „skanowanie kodu w CI” pozostaje deklaracją, a nie kontrolą."
   ],
   "headline": "Sędzia sprawdzony pięcioma mutantami; ścieżka live nigdy nie dotknęła prawdziwego API",
   "headlineTone": "warn",

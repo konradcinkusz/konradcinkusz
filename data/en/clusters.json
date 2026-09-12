@@ -16,7 +16,7 @@
     "id": "C-infra",
     "letter": "C",
     "name": "Cluster C — reusable infrastructure",
-    "note": "Shared substrate: **a service that another system in this portfolio consumes**. There is exactly one entry here, and that is a finding, not an oversight: {{term:ghcr|one completed extraction}} across thirty-five repositories. The pattern worked once and is documented — the whole consolidation in the next tab is repetitions of it."
+    "note": "Shared substrate: **a service that another system in this portfolio consumes**. There is exactly one entry here, and that is a finding, not an oversight: {{term:ghcr|one completed extraction}} across forty-three repositories. The pattern worked once and is documented — the whole consolidation in the next tab is repetitions of it."
   },
   {
     "id": "D-content",

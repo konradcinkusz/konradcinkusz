@@ -405,7 +405,7 @@
       "Licencje permisywne — pozwalają używać, modyfikować i wbudowywać komercyjnie. MIT dla kodu, CC-BY dla specyfikacji i dokumentów.",
       "Wybór oparty na precedensie adopcyjnym, nie na ideologii: licencje typu AGPL skutecznie blokują adopcję w .NET-owych organizacjach enterprise, czyli dokładnie w segmencie docelowym. Ryzyko sklonowania solowego projektu bez klientów jest bliskie zeru; ryzyko odbicia się enterprise od licencji jest pewne."
     ],
-    "where": "trzydzieści repozytoriów na MIT; pięć bez pliku licencji"
+    "where": "trzydzieści siedem repozytoriów na licencji z rodziny MIT; sześć bez pliku licencji"
   },
   {
     "id": "perseat",
@@ -483,7 +483,7 @@
     "tag": "operacje",
     "body": [
       "Twardy limit liczby rzeczy zaczętych i nieskończonych. Nie wytyczna — limit: przekroczenie jest sygnałem, żeby coś **zamknąć**, a nie żeby pracować dłużej.",
-      "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od trzydziestu czterech rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
+      "Portfolio jednej osoby nie umiera od braku pomysłów. Umiera od czterdziestu trzech rzeczy zaczętych i żadnej skończonej — bo każda z nich pobiera podatek od uwagi niezależnie od tego, czy się nią zajmujesz."
     ],
     "where": "zakładka „operacje”, sekcja „limity”"
   },

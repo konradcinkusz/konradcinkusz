@@ -2,54 +2,163 @@
   "slug": "auto-veritas",
   "name": "Auto Veritas",
   "cluster": "E-lab",
-  "visibility": "private",
+  "visibility": "public",
   "state": "active",
   "tier": "P3",
   "oneLiner": "Porównywarka ofert samochodowych i finansowania na rynku hiszpańskim, w której każda wartość niesie własną datę weryfikacji.",
   "summary": "Serwis za logowaniem, który zestawia oferty aut i kredytów i przy każdej liczbie trzyma trzy znaczniki czasu: kiedy agent sprawdził ją u źródła, do kiedy sprzedawca deklaruje ważność i kiedy opublikowano samo źródło. Świeżość liczy serwer, według progów zależnych od typu danych — ceny 7/30 dni, raty 14/45, specyfikacje 183/365 — i publikuje je pod `/api/v1/meta/freshness-policy`, więc UI renderuje dokładnie te wartości, które backend egzekwuje, zamiast trzymać drugi komplet stałych, który się rozjedzie (decyzja D-4). Dane przeterminowane są degradowane i oznaczane, nigdy ukrywane; wartość szacowana dostaje chip **szacunek**, a finansowanie balonowe chip **BALON**, zamiast chować się za niską ratą. Każdy `PUT` zmieniający cenę lub ratę zapisuje snapshot poprzedniego stanu, kluczowany po `Guid` oferty, a nie po slugu — właśnie dlatego, że `PUT` pozwala slug zmienić. Zapis idzie wyłącznie przez API i wymaga roli `Admin` albo `SuperAdmin` z {{term:servicedefaults|authservice}}; frontend nie ma żadnej powierzchni zapisu i jest to decyzja produktowa, nie brak czasu. Całość stoi jako czteroelementowa topologia (Postgres, authservice z obrazu, OffersService, BFF w Next.js) zbudowana wprost przeciw checkliście z `architecture-standards`.",
-  "stack": [".NET 10 / Minimal API", "EF Core 10 + PostgreSQL 17", ".NET Aspire 13.5.2", "Next.js 15 + React 19", "jose 6 (weryfikacja JWKS)", "xUnit + vitest + Playwright", "Docker Compose", "Fly.io (region waw)"],
+  "stack": [
+    ".NET 10 / Minimal API",
+    "EF Core 10 + PostgreSQL 17",
+    ".NET Aspire 13.5.2",
+    "Next.js 15 + React 19",
+    "jose 6 (weryfikacja JWKS)",
+    "xUnit + vitest + Playwright",
+    "Docker Compose",
+    "Fly.io (region waw)"
+  ],
   "primaryLanguage": "C#",
   "license": "MIT",
   "tests": "52 przypadki backendowe (40 `[Fact]` plus 3 `[Theory]` z 12 wierszami `[InlineData]`) na `WebApplicationFactory` z SQLite, 5 testów `it()` w vitest dla web-kit i 7 testów smoke w Playwright — razem 64 przypadki, wszystkie policzone bezpośrednio w kodzie.",
   "ci": "Pięć workflowów. `ci.yml` ma cztery joby: backend (build Release, test, `dotnet format --verify-no-changes`), **mechanical-guards** (limit 800 linii na kernelu, grep zakazujący typów domenowych w kernelu, grep zakazujący `waitForTimeout` w e2e), frontend i e2e-smoke, który podnosi cały stos compose, czeka na `/health/ready` i publikuje raport. Do tego CodeQL na macierzy dwóch języków z cotygodniowym cronem, gitleaks na push i PR, oraz 249-liniowy `flyio.yml` z {{term:tagdeploy|deployem sterowanym tagiem}} i ręczny teardown za frazą potwierdzającą.",
   "metrics": [
-    { "label": "Przypadki testowe backend", "value": "52" },
-    { "label": "Testy jednostkowe web-kit", "value": "5" },
-    { "label": "Testy e2e smoke", "value": "7" },
-    { "label": "Linie kernela ServiceDefaults", "value": "361 z limitu 800 egzekwowanego w CI" },
-    { "label": "Aplikacje Fly.io w topologii", "value": "4" },
-    { "label": "Zaseedowane oferty", "value": "17 aut, 22 finansowania" },
-    { "label": "Migracje EF Core", "value": "2" },
-    { "label": "Decyzje architektoniczne", "value": "14 (D-1..D-14)" }
+    {
+      "label": "Przypadki testowe backend",
+      "value": "52"
+    },
+    {
+      "label": "Testy jednostkowe web-kit",
+      "value": "5"
+    },
+    {
+      "label": "Testy e2e smoke",
+      "value": "7"
+    },
+    {
+      "label": "Linie kernela ServiceDefaults",
+      "value": "361 z limitu 800 egzekwowanego w CI"
+    },
+    {
+      "label": "Aplikacje Fly.io w topologii",
+      "value": "4"
+    },
+    {
+      "label": "Zaseedowane oferty",
+      "value": "17 aut, 22 finansowania"
+    },
+    {
+      "label": "Migracje EF Core",
+      "value": "2"
+    },
+    {
+      "label": "Decyzje architektoniczne",
+      "value": "14 (D-1..D-14)"
+    }
   ],
   "links": {
     "repo": "https://github.com/konradcinkusz/auto-veritas",
     "live": [],
     "docs": [
-      { "label": "Runbook — compose, Aspire i deploy Fly.io", "path": "docs/RUNBOOK.md" },
-      { "label": "Instrukcja agenta — jak oferty trafiają do systemu", "path": "docs/AGENT-GUIDE.md" },
-      { "label": "Decyzje architektoniczne D-1..D-14", "path": "docs/architecture/05-DECISIONS.md" },
-      { "label": "Rejestr odchyleń od standardu", "path": "docs/architecture/DEVIATIONS.md" },
-      { "label": "Przegląd bezpieczeństwa przed wystawieniem", "path": "docs/security/SECURITY-REVIEW-2026-08-24.md" },
-      { "label": "Karta suite E2E — napisana przed testami", "path": "e2e/CHARTER.md" }
+      {
+        "label": "Runbook — compose, Aspire i deploy Fly.io",
+        "path": "docs/RUNBOOK.md"
+      },
+      {
+        "label": "Instrukcja agenta — jak oferty trafiają do systemu",
+        "path": "docs/AGENT-GUIDE.md"
+      },
+      {
+        "label": "Decyzje architektoniczne D-1..D-14",
+        "path": "docs/architecture/05-DECISIONS.md"
+      },
+      {
+        "label": "Rejestr odchyleń od standardu",
+        "path": "docs/architecture/DEVIATIONS.md"
+      },
+      {
+        "label": "Przegląd bezpieczeństwa przed wystawieniem",
+        "path": "docs/security/SECURITY-REVIEW-2026-08-24.md"
+      },
+      {
+        "label": "Karta suite E2E — napisana przed testami",
+        "path": "e2e/CHARTER.md"
+      }
     ]
   },
-  "deployment": { "fly": true, "docker": true, "ghcr": false, "pages": false, "packages": false },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
   "components": [
-    { "name": "AutoVeritas.ServiceDefaults", "path": "src/AutoVeritas.ServiceDefaults", "description": "361 linii wspólnego {{term:kernel|kernela}}: {{term:otel|OTel}}, rozdział liveness i readiness, service discovery z odpornością, weryfikacja JWT wyłącznie po JWKS, rate limiting partycjonowany per użytkownik z fallbackiem na IP (200/min na `api`, 500/min globalnie). Brak typów domenowych nie jest tu konwencją, tylko grepem w CI, który wywraca build.", "reusable": true },
-    { "name": "@auto-veritas/web-kit", "path": "packages/web-kit", "description": "Cała logika bezpieczeństwa BFF w jednym pakiecie workspace: ciasteczka HttpOnly SameSite=Strict w pojedynczej definicji `set`/`clear`, trasy `/api/auth/*`, pełna weryfikacja podpisu tokenu przez `jose` wobec JWKS (nie sam decode), edge middleware i catch-all proxy z rotacją tokenu lądującą na każdej ścieżce wyjścia. Nie zna żadnego typu ofertowego — wiąże go tylko kontrakt authservice.", "reusable": true },
-    { "name": "FreshnessCalculator + FreshnessPolicy", "path": "src/AutoVeritas.OffersService/Domain/Freshness.cs", "description": "63 linie liczące status `Fresh`/`Warning`/`Stale`/`Expired` z zasadą, że przekroczony `offerValidUntil` bije każdą świeżość weryfikacji. Liczy przez `TimeProvider`, więc testuje się bez dotykania zegara systemowego, a same progi są parametrem, nie stałą w kodzie ścieżki.", "reusable": true },
-    { "name": "Topologia Fly.io i deploy sterowany tagiem", "path": "flyio", "description": "Cztery skomentowane `fly.toml`, rejestr czterech sekretów i arytmetyka kosztów. Workflow wykrywa zmiany względem poprzedniego tagu, zawsze dobiera serwis, którego aplikacja Fly jeszcze nie istnieje, buduje obraz raz do `registry.fly.io` i deployuje w kolejności zależności z asercją niepustego JWKS po authservice.", "reusable": true },
-    { "name": "AutoVeritas.OffersService", "path": "src/AutoVeritas.OffersService", "description": "Minimal API .NET 10, właściciel bazy `offersdb`. `Program.cs` czyta się jak manifest: dwie grupy `MapGroup` deklarują triadę autoryzacji, gdzie `viewerApi` wymaga zalogowania, a `editorApi` roli `Admin` lub `SuperAdmin`. Poza CRUD-em wystawia `/verify`, historię zmian i politykę świeżości.", "reusable": false },
-    { "name": "apps/web", "path": "apps/web", "description": "Next.js 15 w trybie standalone, polskie ciemne UI: dwie tabele porównawcze, badge świeżości, filtr po statusie i rozwijany panel Historia z poprzednimi wartościami. Powierzchni zapisu nie ma w ogóle — czytelnik nie może nic zepsuć, bo nie ma czym.", "reusable": false },
-    { "name": "Suite testów integracyjnych", "path": "tests/AutoVeritas.OffersService.Tests", "description": "52 przypadki na `WebApplicationFactory` z SQLite, świadomie zamiast EF InMemory, bo ten ignoruje unikalny indeks na slugu, który testy sprawdzają. Pokrywa progi świeżości, egzekwowanie ról (anonim 401, viewer piszący 403), idempotencję seedera i snapshoty historii.", "reusable": false },
-    { "name": "Suite E2E Playwright", "path": "e2e", "description": "Siedem testów smoke odpowiadających jeden do jednego przepływom z `CHARTER.md`, napisanej **przed** testami wraz z jawnymi non-goals. Karta zakazuje stałych `sleep`, a zakaz jest grepowany w osobnym jobie CI, więc nie da się go cicho złamać.", "reusable": false }
+    {
+      "name": "AutoVeritas.ServiceDefaults",
+      "path": "src/AutoVeritas.ServiceDefaults",
+      "description": "361 linii wspólnego {{term:kernel|kernela}}: {{term:otel|OTel}}, rozdział liveness i readiness, service discovery z odpornością, weryfikacja JWT wyłącznie po JWKS, rate limiting partycjonowany per użytkownik z fallbackiem na IP (200/min na `api`, 500/min globalnie). Brak typów domenowych nie jest tu konwencją, tylko grepem w CI, który wywraca build.",
+      "reusable": true
+    },
+    {
+      "name": "@auto-veritas/web-kit",
+      "path": "packages/web-kit",
+      "description": "Cała logika bezpieczeństwa BFF w jednym pakiecie workspace: ciasteczka HttpOnly SameSite=Strict w pojedynczej definicji `set`/`clear`, trasy `/api/auth/*`, pełna weryfikacja podpisu tokenu przez `jose` wobec JWKS (nie sam decode), edge middleware i catch-all proxy z rotacją tokenu lądującą na każdej ścieżce wyjścia. Nie zna żadnego typu ofertowego — wiąże go tylko kontrakt authservice.",
+      "reusable": true
+    },
+    {
+      "name": "FreshnessCalculator + FreshnessPolicy",
+      "path": "src/AutoVeritas.OffersService/Domain/Freshness.cs",
+      "description": "63 linie liczące status `Fresh`/`Warning`/`Stale`/`Expired` z zasadą, że przekroczony `offerValidUntil` bije każdą świeżość weryfikacji. Liczy przez `TimeProvider`, więc testuje się bez dotykania zegara systemowego, a same progi są parametrem, nie stałą w kodzie ścieżki.",
+      "reusable": true
+    },
+    {
+      "name": "Topologia Fly.io i deploy sterowany tagiem",
+      "path": "flyio",
+      "description": "Cztery skomentowane `fly.toml`, rejestr czterech sekretów i arytmetyka kosztów. Workflow wykrywa zmiany względem poprzedniego tagu, zawsze dobiera serwis, którego aplikacja Fly jeszcze nie istnieje, buduje obraz raz do `registry.fly.io` i deployuje w kolejności zależności z asercją niepustego JWKS po authservice.",
+      "reusable": true
+    },
+    {
+      "name": "AutoVeritas.OffersService",
+      "path": "src/AutoVeritas.OffersService",
+      "description": "Minimal API .NET 10, właściciel bazy `offersdb`. `Program.cs` czyta się jak manifest: dwie grupy `MapGroup` deklarują triadę autoryzacji, gdzie `viewerApi` wymaga zalogowania, a `editorApi` roli `Admin` lub `SuperAdmin`. Poza CRUD-em wystawia `/verify`, historię zmian i politykę świeżości.",
+      "reusable": false
+    },
+    {
+      "name": "apps/web",
+      "path": "apps/web",
+      "description": "Next.js 15 w trybie standalone, polskie ciemne UI: dwie tabele porównawcze, badge świeżości, filtr po statusie i rozwijany panel Historia z poprzednimi wartościami. Powierzchni zapisu nie ma w ogóle — czytelnik nie może nic zepsuć, bo nie ma czym.",
+      "reusable": false
+    },
+    {
+      "name": "Suite testów integracyjnych",
+      "path": "tests/AutoVeritas.OffersService.Tests",
+      "description": "52 przypadki na `WebApplicationFactory` z SQLite, świadomie zamiast EF InMemory, bo ten ignoruje unikalny indeks na slugu, który testy sprawdzają. Pokrywa progi świeżości, egzekwowanie ról (anonim 401, viewer piszący 403), idempotencję seedera i snapshoty historii.",
+      "reusable": false
+    },
+    {
+      "name": "Suite E2E Playwright",
+      "path": "e2e",
+      "description": "Siedem testów smoke odpowiadających jeden do jednego przepływom z `CHARTER.md`, napisanej **przed** testami wraz z jawnymi non-goals. Karta zakazuje stałych `sleep`, a zakaz jest grepowany w osobnym jobie CI, więc nie da się go cicho złamać.",
+      "reusable": false
+    }
   ],
   "overlaps": [
-    { "slug": "authservice", "reason": "Jedyne źródło tożsamości, przypięte jako obraz `ghcr.io/konradcinkusz/authservice:v0.3.1` w compose, Aspire i `fly.toml`. Model uprawnień opiera się wprost na platformowych rolach `Admin` i `SuperAdmin` tamtej usługi — to jest szósty konsument tego samego obrazu." },
-    { "slug": "architecture-standards", "reason": "Struktura repo, komplet `docs/architecture`, mechaniczne guardy CI i przegląd bezpieczeństwa są pisane przeciw checkliście P1-P15, a standard jest wpięty jako plugin w `.claude/settings.json`. To najczystsza istniejąca implementacja tego standardu od zera." },
-    { "slug": "copilot-scope", "reason": "Ten sam wzorzec domenowo neutralnego kernela `ServiceDefaults` obok usług biznesowych. Tam sto linii i konwencja, tu 361 linii i limit egzekwowany jobem CI — dwa punkty danych dla tej samej hipotezy o wspólnym substracie." },
-    { "slug": "dev-insight", "reason": "Plik `LICENSE` niesie `Copyright (c) 2026 dev_insight`, czyli szablon przeniesiony z tamtego repozytorium bez podmiany nazwiska. Ślad wspólnego pochodzenia scaffoldingu, nie zamierzona zależność." }
+    {
+      "slug": "authservice",
+      "reason": "Jedyne źródło tożsamości, przypięte jako obraz `ghcr.io/konradcinkusz/authservice:v0.3.1` w compose, Aspire i `fly.toml`. Model uprawnień opiera się wprost na platformowych rolach `Admin` i `SuperAdmin` tamtej usługi — to jest szósty konsument tego samego obrazu."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Struktura repo, komplet `docs/architecture`, mechaniczne guardy CI i przegląd bezpieczeństwa są pisane przeciw checkliście P1-P15, a standard jest wpięty jako plugin w `.claude/settings.json`. To najczystsza istniejąca implementacja tego standardu od zera."
+    },
+    {
+      "slug": "copilot-scope",
+      "reason": "Ten sam wzorzec domenowo neutralnego kernela `ServiceDefaults` obok usług biznesowych. Tam sto linii i konwencja, tu 361 linii i limit egzekwowany jobem CI — dwa punkty danych dla tej samej hipotezy o wspólnym substracie."
+    },
+    {
+      "slug": "dev-insight",
+      "reason": "Plik `LICENSE` niesie `Copyright (c) 2026 dev_insight`, czyli szablon przeniesiony z tamtego repozytorium bez podmiany nazwiska. Ślad wspólnego pochodzenia scaffoldingu, nie zamierzona zależność."
+    }
   ],
   "product": "Kupującego zewnętrznego nie ma i nie będzie: to narzędzie dla jednego gospodarstwa domowego wybierającego auto w Hiszpanii, z kilkoma zaproszonymi czytelnikami i jednym agentem piszącym przez API. Wartość jest wyłącznie referencyjna — to dowód, że `architecture-standards` da się zastosować od pustego katalogu, z kompletem decyzji, rejestrem odchyleń i uzasadnieniem kosztów infrastruktury, a nie tylko opisać w dokumencie. Jeśli cokolwiek stąd miałoby kupca, to sam mechanizm zaufania: data weryfikacji przy każdej wartości i degradacja zamiast ukrywania. Katalog aut jest tu nośnikiem, nie produktem.",
   "highlights": [
@@ -81,5 +190,13 @@
   ],
   "headline": "Cztery aplikacje Fly opisane co do linii, zero tagów `v*` — deploy nigdy nie ruszył",
   "headlineTone": "warn",
-  "github": { "stars": 0, "openIssues": 0, "openPrs": 0, "dependabotPrs": 0, "lastCommit": "2026-08-25", "commits": 40, "files": 151 }
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-25",
+    "commits": 40,
+    "files": 151
+  }
 }

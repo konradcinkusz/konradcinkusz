@@ -16,7 +16,7 @@
     "id": "C-infra",
     "letter": "C",
     "name": "Klaster C — infrastruktura wielokrotnego użytku",
-    "note": "Wspólny substrat: **usługa, którą konsumuje inny system tego portfolio**. Jest tu dokładnie jedna pozycja, i to jest ustalenie, nie niedopatrzenie: {{term:ghcr|jedna zakończona ekstrakcja}} na trzydzieści pięć repozytoriów. Wzorzec zadziałał raz i jest udokumentowany — cała konsolidacja z zakładki obok to jego powtórzenia."
+    "note": "Wspólny substrat: **usługa, którą konsumuje inny system tego portfolio**. Jest tu dokładnie jedna pozycja, i to jest ustalenie, nie niedopatrzenie: {{term:ghcr|jedna zakończona ekstrakcja}} na czterdzieści trzy repozytoria. Wzorzec zadziałał raz i jest udokumentowany — cała konsolidacja z zakładki obok to jego powtórzenia."
   },
   {
     "id": "D-content",

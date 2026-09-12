@@ -1,7 +1,7 @@
 # Portfolio map
 
 This repository is the hub. It holds a single manifest describing forty-three
-repositories — twenty-six public, seventeen private — what each is, what it is for, what is
+repositories — thirty public, thirteen private — what each is, what it is for, what is
 finished, what is not, plus the consolidation analysis and the operating model that keeps
 them from rotting.
 
