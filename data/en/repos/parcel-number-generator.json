@@ -1,0 +1,177 @@
+{
+  "slug": "parcel-number-generator",
+  "name": "parcel-number-generator",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Three warehousing services built directly against the architectural constitution — and not one of them is deployed anywhere.",
+  "summary": "The PNG system issues parcel tracking numbers from a finite pool: never the same number twice, honouring sub-ranges withheld from allocation, without leaking daily volume. Alongside it, a service records events raised against parcels and the warehouse, and an operator console sits over both. It is the most interesting case in the portfolio from a methodological point of view: the repository grew out of a 2018 .NET Framework 4.5.2 solution modernised directly against `architecture-standards`, then absorbed the notification service from a separate `komunikaty` repository (itself modernised from a 2019 WinForms application). The consolidation is documented in ADR-0004 — one of the very few places in the whole portfolio where the 'merge two repositories' pattern was actually carried out rather than merely proposed. The gates are real: CI fails a pull request whose model has drifted from its committed migrations, for both services and both database providers, builds three images and runs them under `ASPNETCORE_ENVIRONMENT=Production` to check that the startup guards still refuse to boot without a connection string and without a token issuer.",
+  "stack": [
+    ".NET 10",
+    "ASP.NET Core Minimal API",
+    ".NET Aspire",
+    "EF Core",
+    "PostgreSQL",
+    "SQL Server",
+    "Blazor",
+    "Docker",
+    "Fly.io",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Two test projects, 112 `[Fact]`/`[Theory]` attributes (the README cites 139 cases — theories expand to more than one apiece). They cover pool arithmetic and the allocation strategies, the API surface of both services, mapping, and the purity of the shared kernel. A separate class enforces that no HTTP route reaches where it should not.",
+  "ci": "Six workflows: `ci.yml` (tests, `dotnet format`, migration-drift checks for both services and both providers, the architecture guards, three image builds with startup-guard smoke tests, gitleaks over full history, a transitive vulnerability audit), `codeql.yml`, `secret-scan.yml`, and three Fly.io workflows. Warnings are errors, NuGet advisories included.",
+  "metrics": [
+    {
+      "label": "Services",
+      "value": "3 — generator, notifications, console with a BFF"
+    },
+    {
+      "label": "Projects in the solution",
+      "value": "15"
+    },
+    {
+      "label": "Test attributes",
+      "value": "112 (README: 139 cases)"
+    },
+    {
+      "label": "Workflows",
+      "value": "6"
+    },
+    {
+      "label": "Allocation strategies",
+      "value": "3 — adaptive, random-probe, sequential-scan"
+    },
+    {
+      "label": "Open deviations",
+      "value": "3 (DEV-1, DEV-2, DEV-7)"
+    },
+    {
+      "label": "Deployed environments",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/parcel-number-generator",
+    "live": [],
+    "docs": [
+      {
+        "label": "The open-deviations register",
+        "path": "docs/architecture/DEVIATIONS.md"
+      },
+      {
+        "label": "ADR-0004: one repository for the PNG system",
+        "path": "docs/decisions/0004-one-repository-for-the-png-system.md"
+      },
+      {
+        "label": "Open-source readiness and the history audit",
+        "path": "docs/architecture/06-OPEN-SOURCE-READINESS.md"
+      },
+      {
+        "label": "The variable and secret inventory",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Roadmap: four phases, thirteen issues",
+        "path": "ROADMAP.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Pool domain and allocation strategies",
+      "path": "src/ParcelNumberGenerator.Domain/",
+      "description": "Pool arithmetic with exclusions and three strategies behind one interface. No package references at all — a fourth strategy is one class and one registration line.",
+      "reusable": true
+    },
+    {
+      "name": "The notification service",
+      "path": "src/ParcelNumberGenerator.Notifications/",
+      "description": "Transferred here from the deprecated `komunikaty` repository. It normalizes every parcel-number dialect at the edge and stores the canonical form; acknowledgement is idempotent, and the first timestamp wins.",
+      "reusable": true
+    },
+    {
+      "name": "Operator console and BFF",
+      "path": "src/ParcelNumberGenerator.Web/",
+      "description": "The system's only public face. The browser talks to this origin and no other, and the BFF proxies to both services — pool dashboard, batch allocation, dialect-tolerant lookup, the notification board.",
+      "reusable": false
+    },
+    {
+      "name": "The shared kernel",
+      "path": "src/ParcelNumberGenerator.ServiceDefaults/",
+      "description": "Plumbing only, with an 800-line ceiling enforced by a script in CI rather than by prose. Exactly the same pattern as in `architecture-standards-init-example`.",
+      "reusable": true
+    },
+    {
+      "name": "Per-provider migrations",
+      "path": "src/ParcelNumberGenerator.Migrations.PostgreSQL/",
+      "description": "A separate migration set per provider, for both services. The drift gate in CI compares the model against the committed set — a schema change without a migration does not pass.",
+      "reusable": true
+    },
+    {
+      "name": "The deviations register",
+      "path": "docs/architecture/DEVIATIONS.md",
+      "description": "The repository's own register of what it does not yet satisfy: what, against which principle, since when, and what closes it. The roadmap is finished when the *Open* table is empty.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "Built directly against that constitution and measured by it in `02-GAP-ANALYSIS.md`. The deviations register exists here because §3a of that document requires it."
+    },
+    {
+      "slug": "authservice",
+      "reason": "DEV-2 is waiting on a decision about which identity issuer is trusted. `authservice` is the obvious candidate — both services already validate tokens against a JWKS and hold no key material."
+    },
+    {
+      "slug": "architecture-standards-init-example",
+      "reason": "The same shape: a shared kernel with a line ceiling, an in-memory database fallback, migrations from a hosted service that starts after Kestrel. Greenfield there, modernization here — the same rules produce the same skeleton from two different starting points."
+    }
+  ],
+  "product": "A proof of method, not a transaction. The commercial value is not in issuing parcel numbers — it is in the documented path from a 2018 .NET Framework 4.5.2 solution to three .NET 10 services with migration gates, startup guards and a full-history secret audit. That is precisely the work a modernization consultant is paid for, and here it is shown end to end, including the parts that did not land.",
+  "highlights": [
+    "A consolidation actually carried out: the notification service moved in from a separate repository, with an ADR recording what was harmonized. In a portfolio full of merge proposals, this is one of the few that happened.",
+    "The status code carries what the caller should do next: 201 with `complete: false` for a partial batch, 409 when the pool is exhausted and retrying will never help, 503 under contention with `Retry-After`. The difference between 'impossible' and 'try shortly' lives in the protocol, not in the documentation.",
+    "A fresh clone runs with no credential at all — an in-memory database fallback — but in Production the startup guard refuses to boot without a connection string and an issuer. CI runs the built images under `ASPNETCORE_ENVIRONMENT=Production` for the express purpose of checking that the guards still fire.",
+    "The secret audit covers full history, not just HEAD, and is written up as a four-step release procedure of which two steps cannot be performed by a commit. This is the lesson that was missing in `quorum`."
+  ],
+  "gaps": [
+    "**Nothing is deployed.** DEV-1: the workflow can stand up the whole estate from a single tag, but no Fly app exists, there is no `FLY_API_TOKEN`, and no migration has touched a real database. Every deployment claim is argued, not measured.",
+    "DEV-2: no identity provider is configured. A deployment would be open were it not for the guards — which means the JWKS validation path has never been exercised against a real issuer.",
+    "DEV-7: the open-source release is unfinished. The repository has been public since 2026-09-01, but the description and topics (#20) and the GHCR packages (#29) remain outstanding.",
+    "Six open Dependabot pull requests out of thirteen open items. Phase 2 of the roadmap exists precisely to clear them, and it has not started.",
+    "The 'never the same number twice' guarantee is today proven against an in-memory database. Phase 3 of the roadmap turns it into a measurement against a real engine — until that runs, the system's strongest claim is tested in the weakest place."
+  ],
+  "next": [
+    "Close phase 1 of the roadmap: the repository description and topics, a badge row that matches reality, a rendered documentation page. These are minutes of work and they unblock legibility for anyone from outside.",
+    "Merge the six Dependabot pull requests in one pass — CI is strong enough to make that safe, and every week of delay raises the cost.",
+    "Point `Jwt__Authority` at `authservice` (DEV-2). It needs no code change — the wiring is conditional and already in place — and it unblocks the first deployment.",
+    "Push the first `v*` tag and replace the text of DEV-1 with what the first deployment actually measured.",
+    "Move the uniqueness proof onto a real database engine under concurrency — it is the one claim in this repository that must not be left resting on an in-memory database."
+  ],
+  "risks": [
+    "The entire deployment path is untested in practice: the health-check grace period, the `.flycast` wake path and JWKS validation have never once run. The image builds and smoke tests in CI bound the 'works on my machine' class but not the platform class.",
+    "The repository has been public since 2026-09-01 with the release unfinished. A public commit is public forever, and re-privating does not reach the clones and forks that already exist."
+  ],
+  "headline": "Three services, six workflows, a full history audit — and zero deployed environments",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 5,
+    "openPrs": 6,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-09-02",
+    "commits": 43,
+    "files": 166
+  }
+}

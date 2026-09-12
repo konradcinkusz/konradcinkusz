@@ -1,0 +1,155 @@
+{
+  "slug": "claude-scope",
+  "name": "claude-scope",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Session forensics for a coding agent: the script counts and the model only names the phases — with an adapter boundary so the session source can be swapped.",
+  "summary": "The `/session-report` skill turns a session's own history into token, timing and conversation-shape analytics, with a visual timeline. The most important decision is a single line of rule: **the model never does arithmetic**. A deterministic, stdlib-only Python script parses the transcript and counts; the model receives only finished numbers, names the phases of work from its own narration, and writes the summary. That ruling carries further: under an agent whose history lives in a database or a cloud store, the model **fetches** raw events and writes normalized JSON, and the script still does all the counting. The second decision of the same class is the source's declared capability tier, which reaches the page — a source that only knows per-turn totals renders one flat block and says so, instead of faking a timeline nobody observed. The whole thing is packaged in the Agent Plugins format, so it installs identically under Claude Code, Copilot CLI and VS Code.",
+  "stack": [
+    "Python 3 (biblioteka standardowa)",
+    "Agent Plugins",
+    "HTML",
+    "JSONL"
+  ],
+  "primaryLanguage": "Python",
+  "license": "MIT",
+  "tests": "25 tests in `tests/test_analyze.py`, run by hand: `python3 tests/test_analyze.py`. Each pins one of the format traps and the rendered shape of the JSONL path. The suite is good; nothing runs it automatically.",
+  "ci": "**None.** There is no `.github/workflows/` directory. No lint, no test and no plugin-manifest validation runs — a repository distributed as an installable plugin has not a single gate in front of publication.",
+  "metrics": [
+    {
+      "label": "Tests",
+      "value": "25, run by hand"
+    },
+    {
+      "label": "CI workflows",
+      "value": "0"
+    },
+    {
+      "label": "Source adapters",
+      "value": "3 — transcript, stream, events"
+    },
+    {
+      "label": "Capability tiers",
+      "value": "full · stream · whatever the source honestly claims"
+    },
+    {
+      "label": "Commits",
+      "value": "7"
+    },
+    {
+      "label": "Files",
+      "value": "15"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/claude-scope",
+    "live": [],
+    "docs": [
+      {
+        "label": "The skill: /session-report",
+        "path": "plugins/claude-scope/skills/session-report/SKILL.md"
+      },
+      {
+        "label": "The JSONL transcript format — the closest thing to a spec we know of",
+        "path": "plugins/claude-scope/skills/session-report/references/transcript-format.md"
+      },
+      {
+        "label": "Every other session source, including the ones rejected as insufficient",
+        "path": "plugins/claude-scope/skills/session-report/references/session-sources.md"
+      },
+      {
+        "label": "The analyzer — all the arithmetic lives here",
+        "path": "plugins/claude-scope/skills/session-report/scripts/analyze.py"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The analyzer",
+      "path": "plugins/claude-scope/skills/session-report/scripts/analyze.py",
+      "description": "Stdlib only, and deliberately so: the script cannot open a database or make a tool call, so the boundary between 'counts' and 'fetches' is enforced by what the script physically cannot do.",
+      "reusable": true
+    },
+    {
+      "name": "The transcript-format reference",
+      "path": "plugins/claude-scope/skills/session-report/references/transcript-format.md",
+      "description": "A catalogue of traps hit on real sessions: duplicate records per API response, subagent sidechains, pseudo-turns fabricated by local slash commands, image payloads masquerading as huge text reads, reasoning blocks whose text arrives redacted to an empty string.",
+      "reusable": true
+    },
+    {
+      "name": "The session-sources reference",
+      "path": "plugins/claude-scope/skills/session-report/references/session-sources.md",
+      "description": "Describes every source together with its capability tier — and, more unusually, the sources that looked promising but could not be confirmed against a live session. Recorded as unconfirmed rather than guessed at.",
+      "reusable": true
+    },
+    {
+      "name": "The timeline template",
+      "path": "plugins/claude-scope/skills/session-report/assets/template.html",
+      "description": "Self-contained HTML, light and dark, with tooltips and a full event table. One card per turn on a shared clock: phase bands, tool-call ticks scaled by how much text each read back, and the reply block that ends the turn.",
+      "reusable": false
+    },
+    {
+      "name": "The marketplace manifests",
+      "path": ".claude-plugin/marketplace.json",
+      "description": "Two copies of the manifest, in `.claude-plugin/` and in `.github/plugin/`, because different clients read different paths. Exactly the compatibility problem `architecture-standards` solves with a generator — here maintained by hand.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "copilot-scope",
+      "reason": "The same domain — coding-assistant session observability — approached from the opposite side. That one is an OTLP collector with a store and a dashboard; this is a retro of one session from a snapshot. The definitions of session quality ought to be shared and today are not."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "The same Agent Plugins format and the same two-manifest-path problem. That repository generates its plugin tree and validates it independently; here the manifests are written by hand, which is exactly the drift that standard warns about."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Both take an agent's execution trace apart into facts. There the trace is graded against a contract; here it is described and measured — the same event normalization would serve both."
+    }
+  ],
+  "product": "A channel, not a transaction, and right now the cheapest one in the whole portfolio: seven commits, fifteen files, installed with one command in three clients. The value sits in the two format references — they are the closest thing to a specification anyone has written for these transcripts, and they, not the script, are why a stranger will find this repository.",
+  "highlights": [
+    "The 'the model never counts' rule is enforced architecturally rather than promised in a prompt: the script is stdlib-only and cannot reach for data, so the split between 'the model fetches, the script counts' cannot be violated by accident.",
+    "The source's capability tier reaches the rendered page — the lede, the legend, the stat tiles and a card of its own. Under-claiming costs a little detail; over-claiming invents a session nobody observed. That choice is rare and is made here deliberately.",
+    "The stream-json partials trap: summing per-record token counts undercounts output by more than an order of magnitude. Hit on a real session, documented, and pinned by a test.",
+    "The privacy policy is part of the design rather than an afterthought: tool outputs never reach the report, and reasoning text is counted but never quoted. The same rule binds any new source."
+  ],
+  "gaps": [
+    "**Zero CI.** A repository distributed as an installable plugin runs neither its tests nor any manifest validation. Twenty-five good tests that nothing triggers protect only whoever remembers to run them.",
+    "Two marketplace manifests maintained by hand — exactly the copy-paste drift `architecture-standards` solves with a generator. That solution sits next door and is not used here.",
+    "Installation is served from the default branch with no release tagging: a consumer has no way to detect that the skill's contents changed.",
+    "Adapters exist only for sources verified against a live session, which is honest, but it means the agent-neutrality promise is today demonstrated on one agent."
+  ],
+  "next": [
+    "Add a `ci.yml` that runs `python3 tests/test_analyze.py` and validates both manifests. It is one file and it closes the largest gap in this repository.",
+    "Generate the second manifest from the first instead of maintaining both, or at minimum add a test that compares them.",
+    "Introduce release tagging so that whoever installs can see which version of the skill they are getting.",
+    "Reconcile the session-quality definitions with `copilot-scope` — today two repositories measure the same thing with two vocabularies."
+  ],
+  "risks": [
+    "The transcript formats are undocumented and unstable between releases. The parser is defensive (skip, never crash), but with no CI a format change will surface only when somebody sees an empty page.",
+    "Session data contains the full conversation and every tool output, possibly secrets. The redaction rules are stated and observed, but they are enforced by convention and by tests that nothing runs automatically."
+  ],
+  "headline": "Twenty-five tests pinning the format traps — and not one workflow to run them",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-09-03",
+    "commits": 7,
+    "files": 15
+  }
+}

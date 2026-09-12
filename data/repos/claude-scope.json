@@ -1,0 +1,155 @@
+{
+  "slug": "claude-scope",
+  "name": "claude-scope",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Forensyka sesji agenta: skrypt liczy, model tylko nazywa fazy — z granicą adaptera, żeby źródło przebiegu dało się wymienić.",
+  "summary": "Skill `/session-report` zamienia własną historię sesji w analitykę tokenów, czasu i kształtu rozmowy, z wizualną osią czasu. Najważniejsza decyzja jest jedną linijką reguły: **model nigdy nie wykonuje arytmetyki**. Deterministyczny skrypt w czystej bibliotece standardowej Pythona parsuje transkrypt i liczy; model dostaje tylko gotowe liczby, nazywa fazy pracy z własnej narracji i pisze podsumowanie. To rozstrzygnięcie przenosi się dalej: pod agentem, którego historia leży w bazie albo w chmurze, model **pobiera** surowe zdarzenia i zapisuje znormalizowany JSON, a skrypt nadal liczy wszystko sam. Druga decyzja tej samej klasy to deklarowany poziom możliwości źródła, który dociera aż na stronę — źródło znające tylko sumy per tura rysuje jeden płaski blok i mówi to wprost, zamiast udawać oś czasu, której nikt nie zaobserwował. Całość jest zapakowana w formacie Agent Plugins, więc instaluje się tak samo w Claude Code, Copilot CLI i VS Code.",
+  "stack": [
+    "Python 3 (biblioteka standardowa)",
+    "Agent Plugins",
+    "HTML",
+    "JSONL"
+  ],
+  "primaryLanguage": "Python",
+  "license": "MIT",
+  "tests": "25 testów w `tests/test_analyze.py`, uruchamianych ręcznie: `python3 tests/test_analyze.py`. Każdy przypiera jedną z pułapek formatu i kształt wyrenderowanej strony dla ścieżki JSONL. Zestaw jest dobry; nic go automatycznie nie odpala.",
+  "ci": "**Brak.** Katalog `.github/workflows/` nie istnieje. Nie działa żaden lint, żaden test i żadna walidacja manifestu wtyczki — repozytorium dystrybuowane jako instalowalna wtyczka nie ma ani jednej bramki przed publikacją.",
+  "metrics": [
+    {
+      "label": "Testy",
+      "value": "25, uruchamiane ręcznie"
+    },
+    {
+      "label": "Workflowy CI",
+      "value": "0"
+    },
+    {
+      "label": "Adaptery źródeł",
+      "value": "3 — transcript, stream, events"
+    },
+    {
+      "label": "Poziomy możliwości",
+      "value": "full · stream · deklarowany przez źródło"
+    },
+    {
+      "label": "Commity",
+      "value": "7"
+    },
+    {
+      "label": "Pliki",
+      "value": "15"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/claude-scope",
+    "live": [],
+    "docs": [
+      {
+        "label": "Skill: /session-report",
+        "path": "plugins/claude-scope/skills/session-report/SKILL.md"
+      },
+      {
+        "label": "Format transkryptu JSONL — najbliższe specyfikacji, co znamy",
+        "path": "plugins/claude-scope/skills/session-report/references/transcript-format.md"
+      },
+      {
+        "label": "Pozostałe źródła sesji, w tym te odrzucone jako niewystarczające",
+        "path": "plugins/claude-scope/skills/session-report/references/session-sources.md"
+      },
+      {
+        "label": "Analizator — cała arytmetyka jest tutaj",
+        "path": "plugins/claude-scope/skills/session-report/scripts/analyze.py"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Analizator",
+      "path": "plugins/claude-scope/skills/session-report/scripts/analyze.py",
+      "description": "Wyłącznie biblioteka standardowa, celowo: skrypt nie potrafi otworzyć bazy ani wykonać wywołania narzędzia, więc granica między „liczy” a „pobiera” jest wymuszona przez to, czego skrypt fizycznie nie umie.",
+      "reusable": true
+    },
+    {
+      "name": "Referencja formatu transkryptu",
+      "path": "plugins/claude-scope/skills/session-report/references/transcript-format.md",
+      "description": "Katalog pułapek trafionych na prawdziwych sesjach: zduplikowane rekordy per odpowiedź API, boczne wątki subagentów, pseudotury fabrykowane przez lokalne komendy, ładunki obrazów udające ogromne odczyty tekstu, bloki rozumowania docierające z tekstem zredagowanym do pustego stringa.",
+      "reusable": true
+    },
+    {
+      "name": "Referencja źródeł sesji",
+      "path": "plugins/claude-scope/skills/session-report/references/session-sources.md",
+      "description": "Opisuje każde źródło razem z jego poziomem możliwości — i, co rzadsze, te źródła, które wyglądały obiecująco, ale nie dało się ich potwierdzić wobec żywej sesji. Zapisane jako niepotwierdzone, nie zgadnięte.",
+      "reusable": true
+    },
+    {
+      "name": "Szablon osi czasu",
+      "path": "plugins/claude-scope/skills/session-report/assets/template.html",
+      "description": "Samodzielny HTML, jasny i ciemny, z podpowiedziami i pełną tabelą zdarzeń. Jedna karta na turę na wspólnym zegarze: pasma faz, tiki wywołań narzędzi skalowane objętością odczytanego tekstu, blok odpowiedzi zamykający turę.",
+      "reusable": false
+    },
+    {
+      "name": "Manifesty marketplace",
+      "path": ".claude-plugin/marketplace.json",
+      "description": "Dwie kopie manifestu, w `.claude-plugin/` i w `.github/plugin/`, bo różne klienty czytają różne ścieżki. Dokładnie ten sam problem zgodności, który `architecture-standards` rozwiązuje generatorem — tutaj utrzymywany ręcznie.",
+      "reusable": false
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "copilot-scope",
+      "reason": "Ta sama dziedzina — obserwowalność sesji asystenta kodowania — z przeciwnej strony. Tamto jest kolektorem OTLP ze sklepem i pulpitem, to jest retrospektywą jednej sesji ze snapshotu. Definicje jakości sesji powinny być wspólne i dziś nie są."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Ten sam format Agent Plugins i ten sam problem dwóch ścieżek manifestu. Tamto repozytorium generuje drzewo wtyczek i waliduje je niezależnie; tutaj manifesty są pisane ręcznie, co jest dokładnie tym dryfem, przed którym tamten standard ostrzega."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Obie rozbierają ślad wykonania agenta na fakty. Tam ślad jest oceniany wobec kontraktu, tutaj jest opisywany i mierzony — ta sama normalizacja zdarzeń przydałaby się obu."
+    }
+  ],
+  "product": "Kanał, nie transakcja, i w tej chwili najtańszy w całym portfolio: siedem commitów, piętnaście plików, instaluje się jedną komendą w trzech klientach. Wartość leży w dwóch referencjach formatu — są najbliższe specyfikacji, jaką ktokolwiek napisał dla tych transkryptów, i to one, a nie skrypt, są powodem, dla którego ktoś obcy trafi do tego repozytorium.",
+  "highlights": [
+    "Reguła „model nigdy nie liczy” jest wymuszona architektonicznie, a nie obietnicą w promptcie: skrypt jest stdlib-only i nie umie sięgnąć po dane, więc podział na „model pobiera, skrypt liczy” nie da się przypadkiem naruszyć.",
+    "Poziom możliwości źródła dociera aż do wyrenderowanej strony — do ledu, legendy, kafelków i osobnej karty. Niedoszacowanie kosztuje trochę szczegółu; przeszacowanie wymyśla sesję, której nikt nie obserwował. Ten wybór jest rzadki i jest tu zrobiony świadomie.",
+    "Pułapka partiali w stream-json: sumowanie liczników tokenów per rekord zaniża wyjście o rząd wielkości. Trafiona na prawdziwej sesji, udokumentowana i przypięta testem.",
+    "Polityka prywatności jest częścią projektu, nie dopiskiem: wyjścia narzędzi nigdy nie trafiają do raportu, a tekst rozumowania jest liczony i nigdy cytowany. Ta sama reguła wiąże każde nowe źródło."
+  ],
+  "gaps": [
+    "**Zero CI.** Repozytorium dystrybuowane jako instalowalna wtyczka nie uruchamia ani testów, ani walidacji manifestów. Dwadzieścia pięć dobrych testów, których nic nie odpala, chroni tylko tego, kto pamięta je uruchomić.",
+    "Dwa manifesty marketplace utrzymywane ręcznie, dokładnie ten dryf kopiuj-wklej, który `architecture-standards` rozwiązuje generatorem. Tamto rozwiązanie stoi obok i nie jest tu użyte.",
+    "Instalacja jest serwowana z gałęzi domyślnej, bez tagowania wydań: konsument nie ma jak wykryć, że zawartość skilla się zmieniła.",
+    "Adaptery istnieją tylko dla źródeł zweryfikowanych wobec żywej sesji, co jest uczciwe, ale oznacza, że obietnica neutralności wobec agenta jest dziś dowiedziona na jednym agencie."
+  ],
+  "next": [
+    "Dodaj `ci.yml`, który uruchamia `python3 tests/test_analyze.py` i waliduje oba manifesty. To jest jeden plik i zamyka największą lukę w tym repozytorium.",
+    "Wygeneruj drugi manifest z pierwszego zamiast utrzymywać oba, albo przynajmniej dodaj test porównujący je ze sobą.",
+    "Wprowadź tagowanie wydań, żeby instalujący widział wersję skilla, którą dostaje.",
+    "Uzgodnij definicje jakości sesji z `copilot-scope` — dziś dwa repozytoria mierzą to samo dwoma słownikami."
+  ],
+  "risks": [
+    "Formaty transkryptów są nieudokumentowane i niestabilne między wydaniami. Parser jest defensywny (pomija, nigdy nie wywraca), ale bez CI zmiana formatu ujawni się dopiero wtedy, gdy ktoś zobaczy pustą stronę.",
+    "Dane sesji zawierają całą rozmowę i każde wyjście narzędzia, potencjalnie sekrety. Reguły redakcji są opisane i przestrzegane, ale egzekwuje je konwencja i testy, których nic nie uruchamia automatycznie."
+  ],
+  "headline": "Dwadzieścia pięć testów przypinających pułapki formatu — i ani jednego workflow, który by je uruchomił",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-09-03",
+    "commits": 7,
+    "files": 15
+  }
+}

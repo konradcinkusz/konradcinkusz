@@ -1,0 +1,169 @@
+{
+  "slug": "listing-search-bench",
+  "name": "listing-search-bench",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "prototype",
+  "tier": "P3",
+  "oneLiner": "Ta sama metoda ewaluacji co w agent-eval-bench, przyłożona do hybrydowego rankingu: specimen się zmienił, kształt przyrządu nie.",
+  "summary": "Kontrakt behawioralny napisany zanim powstał pipeline, 28 scenariuszy trzymanych jako dane w pięciu klasach i harness warstwy 1, który ocenia **ślad wykonania** prawdziwego hybrydowego pipeline'u wyszukiwania: które kandydaty zwróciła ścieżka leksykalna, które wektorowa, jak zostały odfiltrowane i uszeregowane, a co **nigdy nie było kandydatem**. Sens jest jeden: strojenie wag rankingu, refaktor filtra albo ogłoszenie próbujące wygadać się z twardego ograniczenia mają wywrócić build, a nie klienta. To jest druga instancja tej samej metody co `agent-eval-bench` — i właśnie dlatego jest w portfolio interesująca: dowodzi, że tamten przyrząd jest przenośny między dziedzinami. Dwadzieścia dwa procent asercji sprawdza **nieobecność** — że czegoś nie było w kandydatach, nie było w odpowiedzi, nie zostało ponownie zastosowane — a to jest ta połowa ewaluacji, którą prawie wszyscy pomijają. Przebieg mutacyjny psuje pipeline na cztery sposoby i wymaga, żeby każdy został złapany; dokument z wynikami dopisuje, że złapanie za pierwszym razem jest słabszym dowodem, niż wygląda.",
+  "stack": [
+    ".NET 10",
+    "ASP.NET Core Minimal API",
+    "Elasticsearch",
+    "YAML",
+    "Docker",
+    "Kubernetes",
+    "Mermaid",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Dwie warstwy plus przebieg mutacyjny. Warstwa 1 jest deterministyczna — bez modelu, bez sieci, bez poświadczenia — i pokrywa 28 scenariuszy 128 asercjami, z czego 28 sprawdza nieobecność. Warstwa 2 to sędzia rubrykowy z przypiętymi rubrykami i zahaszowanym promptem. Obok tego 46 atrybutów xUnit, w tym `NoHttpRouteReachesTheIndexTests`, który sprawdza jedyną ścieżkę zapisu zamiast ją deklarować.",
+  "ci": "Cztery workflowy: `ci.yml` (bramki — twarde ograniczenia muszą przejść w 100%, zachowania są porównywane z baseline), `codeql.yml`, `nightly.yml` oraz `build-overview-pdf.yml`, który składa dokument przeglądowy po angielsku i po polsku.",
+  "metrics": [
+    {
+      "label": "Zachowania w kontrakcie",
+      "value": "12"
+    },
+    {
+      "label": "Twarde ograniczenia",
+      "value": "7"
+    },
+    {
+      "label": "Scenariusze",
+      "value": "28, w pięciu klasach"
+    },
+    {
+      "label": "Asercje",
+      "value": "128, z czego 28 (22%) sprawdza nieobecność"
+    },
+    {
+      "label": "Przebieg mutacyjny",
+      "value": "4/4 złapane, z zastrzeżeniem zapisanym w FINDINGS"
+    },
+    {
+      "label": "Ścieżki zapisu do indeksu",
+      "value": "dokładnie 1, sprawdzana testem"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/listing-search-bench",
+    "live": [
+      {
+        "label": "Przewodnik po architekturze i benchu (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/listing-search-bench/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Kontrakt napisany przed pipeline'em",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "Wyniki i przebieg mutacyjny — jedyne miejsce, gdzie żyją te liczby",
+        "path": "docs/FINDINGS.md"
+      },
+      {
+        "label": "ADR-0002: domyślnie mock-first, zero poświadczeń",
+        "path": "docs/adr/0002-mock-first-zero-credential-default.md"
+      },
+      {
+        "label": "ADR-0006: idempotencja zdarzeń na granicy konsumenta",
+        "path": "docs/adr/0006-event-idempotency-at-the-consumer-boundary.md"
+      },
+      {
+        "label": "Scenariusze jako dane",
+        "path": "evals/scenarios/"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Kontrakt behawioralny",
+      "path": "docs/SPEC.md",
+      "description": "Dwanaście zachowań, siedem twardych ograniczeń, cztery rubryki — napisane zanim istniał `src/ListingSearch.Service`. Każde zachowanie cytuje swój dowód, więc kontrakt nie może się po cichu rozjechać ze scenariuszami.",
+      "reusable": true
+    },
+    {
+      "name": "Scenariusze jako dane",
+      "path": "evals/scenarios/",
+      "description": "28 scenariuszy w YAML-u w pięciu klasach: happy, ambiguity, exclusion, adversarial, degradation. Klasa adwersarialna jest tu najważniejsza — testuje ogłoszenie, które próbuje wygadać się z twardego ograniczenia własnym tekstem.",
+      "reusable": true
+    },
+    {
+      "name": "Runner scenariuszy",
+      "path": "src/",
+      "description": "Uruchamia **prawdziwy** pipeline w procesie i wstrzykuje awarie na szwie indeksu, więc klasa degradacyjna mierzy realne zachowanie przy awarii, a nie atrapę zachowania.",
+      "reusable": true
+    },
+    {
+      "name": "Konsument zdarzeń — jedyna ścieżka zapisu",
+      "path": "src/ListingSearch.Service/Ingestion/IngestionConsumer.cs",
+      "description": "Czyta `listing.published`, `listing.price_changed` i `listing.delisted`, idempotentnie po `event_id`. Że żadna trasa HTTP nie dosięga indeksu, jest **sprawdzane testem**, a nie zapisane w README.",
+      "reusable": true
+    },
+    {
+      "name": "Hybrydowy ranker",
+      "path": "src/ListingSearch.Service/Pipeline/Stages/",
+      "description": "Druga, prawdziwa ścieżka wyszukiwania wektorowego scalana z leksykalną przez `HybridRankerStage` — nigdy odwrotnie. Warstwa 1 sprawdza strukturę rankingu, warstwa 2 ocenia, czy najlepsze dopasowanie faktycznie ląduje na górze.",
+      "reusable": true
+    },
+    {
+      "name": "Dokument wyników",
+      "path": "docs/FINDINGS.md",
+      "description": "Jedyne miejsce, gdzie liczby są przeliczane, i jedyne, które samo osłabia własny wynik: przebieg mutacyjny złapał 4/4 za pierwszym razem, a dokument mówi wprost, że to słabszy dowód, niż wygląda.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Ta sama metoda, inny specimen — i to jest cała teza tego repozytorium. Tam mierzone jest „czy agent zapytał, zanim zapisał”, tutaj „czy ranker respektuje twarde ograniczenia, gdy tekst ogłoszenia próbuje go z nich wygadać”. Harness, klasy scenariuszy, podział na warstwy i przebieg mutacyjny są wspólne i powinny być jednym kernelem."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Implementuje standard ewaluacji AI z `docs/guides/AI-EVALS.md`. Odchylenia od niego są rozliczane, a poprawki wracają do standardu — ta pętla jest domknięta w obie strony."
+    }
+  ],
+  "product": "Publiczny dowód metodologii, zbudowany na syntetycznym korpusie, i repozytorium mówi to wprost: nie jest wdrożoną usługą ani wkładem do żadnego produkcyjnego kodu. Handlowo to jest próbka pracy — dokładnie ta, którą pokazuje się zespołowi mającemu ranking wyszukiwania bez kontraktu i bez sposobu, żeby wykryć, że strojenie wag właśnie złamało twarde ograniczenie.",
+  "highlights": [
+    "Kontrakt powstał **przed** pipeline'em, a każde zachowanie cytuje swój dowód. To jest różnica między ewaluacją a testami napisanymi po fakcie do tego, co kod już robi.",
+    "Dwadzieścia dwa procent asercji sprawdza nieobecność. Łatwo sprawdzić, że dobry wynik jest w odpowiedzi; trudno i znacznie ważniej sprawdzić, że wykluczony nigdy nie był nawet kandydatem.",
+    "Warstwa 1 nie potrzebuje modelu, sieci ani poświadczenia, więc bramka działa na każdym pull requeście i na każdym forku. Sędzia rubrykowy stoi osobno i nie blokuje builda bez kluczy.",
+    "Przebieg mutacyjny dowodzi, że zestaw **potrafi** zawieść — a dokument z wynikami sam zaznacza, że złapanie wszystkich czterech wariantów za pierwszym razem jest słabszym dowodem, niż brzmi. Takie osłabienie własnego wyniku jest w portfolio rzadkie."
+  ],
+  "gaps": [
+    "Sześć otwartych pull requestów Dependabota przy jednym otwartym zgłoszeniu — repozytorium o bramkach ma najbardziej zaniedbaną kolejkę aktualizacji ze wszystkich dodanych w tym przebiegu.",
+    "Korpus jest syntetyczny. Repozytorium mówi to wprost i to jest uczciwe, ale oznacza, że rubryka trafności była walidowana wobec danych, które sama strona wymyśliła.",
+    "Przebieg mutacyjny ma cztery warianty. Cztery to za mało, żeby powiedzieć cokolwiek o czułości zestawu poza tymi czterema trybami awarii.",
+    "Wspólny harness z `agent-eval-bench` nie jest wyekstrahowany — dwa repozytoria niosą dziś dwie kopie tej samej metody, a to jest dokładnie ta duplikacja, którą analiza konsolidacyjna ma wyłapywać."
+  ],
+  "next": [
+    "Zmerguj kolejkę Dependabota — sześć pull requestów na repozytorium, którego tezą jest, że bramki mają działać.",
+    "Wyekstrahuj harness warstwy 1 i klasy scenariuszy wspólne z `agent-eval-bench` do jednego kernela. Dwa specimeny to minimum, przy którym w ogóle wolno o tym mówić, i właśnie zostało osiągnięte.",
+    "Rozszerz przebieg mutacyjny poza cztery warianty i zapisz, który z nich zestaw przepuścił, jeśli któryś przepuści.",
+    "Uruchom bench wobec niesyntetycznego korpusu, choćby publicznego — dziś najsłabszym ogniwem dowodu są dane, nie przyrząd."
+  ],
+  "risks": [
+    "Repozytorium jest dowodem metodologii na syntetycznych danych. Zaprezentowane jako dowód, że ranking **produkcyjny** jest bezpieczny, twierdziłoby więcej, niż zmierzono — i tylko dokument z wynikami stoi między jednym a drugim."
+  ],
+  "headline": "Drugi specimen tej samej metody — i pierwszy moment, w którym wspólny harness wolno nazwać kernelem",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 1,
+    "openPrs": 6,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-09-01",
+    "commits": 19,
+    "files": 175
+  }
+}

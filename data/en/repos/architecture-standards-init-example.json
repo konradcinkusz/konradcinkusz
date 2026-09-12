@@ -1,0 +1,159 @@
+{
+  "slug": "architecture-standards-init-example",
+  "name": "architecture-standards-init-example",
+  "cluster": "B-static",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "What the architectural constitution produces when pointed at an empty repository — compliant on the first commit, not after a later cleanup pass.",
+  "summary": "A worked run of the greenfield initializer: one Aspire composition root, one shared kernel, one service that owns its database, one Next.js surface in front of it, three Fly.io apps and eight workflows. It **ships no domain model, deliberately** — it exists to be read as an example of the architecture, not used as a product. This is the most important companion piece to `architecture-standards`: the constitution describes what a system should look like, and this repository shows that shape without a single line of domain to distract from it. Several things here are done better than in most real systems: the frontend reads its configuration per request from `/api/config` and never from `NEXT_PUBLIC_*`, because that bakes at build time and costs one image per environment; the shared kernel is 477 lines against an 800-line ceiling enforced by a test **and** a CI step; and the setup script **generates** the one mandatory secret, because a human asked to invent one produces `changeme`.",
+  "stack": [
+    ".NET 10",
+    ".NET Aspire",
+    "ASP.NET Core Minimal API",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "EF Core",
+    "Playwright",
+    "Fly.io",
+    "Docker",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Nine test attributes in `tests/…Api.Tests` (the README says ten tests): the zero-credential health report, list clamping, the error shape and three kernel guards. Alongside them, four Playwright tests through the whole stack, run on every pull request — and those are the strong point here, because they boot exactly the Docker-less path the repository advertises.",
+  "ci": "Eight workflows — the most of any repository added in this pass: `ci.yml` with the E2E suite, `codeql.yml`, `secret-scan.yml`, `pages.yml`, `build-overview-pdf.yml`, and three Fly.io workflows (deploy, scale, and a teardown gated by a typed confirmation).",
+  "metrics": [
+    {
+      "label": "Shared-kernel lines",
+      "value": "477 against an 800-line ceiling"
+    },
+    {
+      "label": "Workflows",
+      "value": "8"
+    },
+    {
+      "label": "E2E tests (Playwright)",
+      "value": "4, on every pull request"
+    },
+    {
+      "label": "Fly apps",
+      "value": "3 — api, web, postgres"
+    },
+    {
+      "label": "Domain model",
+      "value": "none, deliberately"
+    },
+    {
+      "label": "Credentials needed to run it",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/architecture-standards-init-example",
+    "live": [],
+    "docs": [
+      {
+        "label": "Entry point for an agent",
+        "path": "AGENTS.md"
+      },
+      {
+        "label": "The secret inventory",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Infrastructure and cost analysis",
+        "path": "flyio/INFRASTRUCTURE-ANALYSIS.md"
+      },
+      {
+        "label": "The setup script — it generates the secret rather than asking for one",
+        "path": "scripts/"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": true,
+    "docker": true,
+    "ghcr": true,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The Aspire composition root",
+      "path": "src/ArchitectureStandardsInitExample.AppHost/",
+      "description": "Declares Postgres, the API and the frontend with `WithReference`, `WaitFor` and `WithHttpHealthCheck`. Explicitly **not** the production topology — and the repository says so outright, which is the most commonly confused point about Aspire.",
+      "reusable": true
+    },
+    {
+      "name": "The shared kernel",
+      "path": "src/ArchitectureStandardsInitExample.ServiceDefaults/",
+      "description": "Telemetry, health, discovery, resilience, JWT, CORS, OpenAPI, the database provider — 477 lines. An architecture test asserts the kernel holds no entity type and exports nothing you can inherit from.",
+      "reusable": true
+    },
+    {
+      "name": "The product surface",
+      "path": "web/app/",
+      "description": "The browser's only origin. Its server side reads configuration per request from `/api/config` and reaches the API through a catch-all proxy that walks a candidate ladder — one code path works on a laptop, under Aspire and on Fly.",
+      "reusable": true
+    },
+    {
+      "name": "The setup scripts",
+      "path": "scripts/",
+      "description": "Check prerequisites, restore both dependency graphs, and **generate** the one mandatory secret into `dotnet user-secrets`. `--check` reports what is missing and changes nothing. The PowerShell variant does the same job without `openssl`, which is not a command on Windows.",
+      "reusable": true
+    },
+    {
+      "name": "The E2E suite",
+      "path": "tests/e2e/",
+      "description": "Four Playwright tests through the whole stack, booting the Docker-less path on every pull request. That is not a convenience — it is principle P8 turned into something checkable.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "This is that initializer's output and the one complete worked example of the constitution with no domain to distract. A change to the standard that cannot be reproduced here is a standard nobody has executed."
+    },
+    {
+      "slug": "parcel-number-generator",
+      "reason": "The same skeleton reached from the other side: a 2018 solution modernized there, greenfield here. The kernel with its line ceiling, the in-memory database fallback and post-Kestrel migrations are identical in both."
+    },
+    {
+      "slug": "authservice",
+      "reason": "The kernel carries the JWT wiring but the issuer is external — the same split as everywhere in this portfolio: a service validates tokens and cannot mint them."
+    }
+  ],
+  "product": "Credibility, not a transaction, and the highest value-to-size ratio in cluster B. For a consulting buyer it answers the question 'what does your first commit look like': not a slide, but a repository that boots with no credential and carries eight gates from day one. What sells here is the initialization method, not the code.",
+  "highlights": [
+    "Configuration read per request from `/api/config` instead of `NEXT_PUBLIC_*`. That is the mistake most Next.js deployments make, and it costs one image per environment — here it is solved in the skeleton before anyone has a chance to make it.",
+    "The setup script generates the secret instead of asking a human to invent one. The justification recorded in the repository is one sentence and it is correct: a human asked to invent a secret produces `changeme`.",
+    "The kernel ceiling is enforced by two independent mechanisms — an architecture test and a CI step. The duplication is deliberate: the test protects in the editor, the CI step protects against a test somebody deleted.",
+    "The dependency count per project is printed in the README. A rise in a diff becomes a question somebody can ask at review — a cheap mechanism with a disproportionate effect."
+  ],
+  "gaps": [
+    "Five open Dependabot pull requests against zero open issues — every open item in this repository is a dependency update.",
+    "Shipping no domain model is a decision, but it has a price: the repository cannot show how the constitution copes with a domain that does not fit in one service. The hardest architectural question stays untouched here.",
+    "Nine test attributes on the API side is thin for a repository that advertises its gates — the burden of proof rests on four E2E tests."
+  ],
+  "next": [
+    "Merge the five Dependabot pull requests. With zero issues open, it is the only outstanding work in this repository.",
+    "Add a second service to the example, or record as an explicit decision that one service is the limit of what the initializer demonstrates.",
+    "Wire this example into `architecture-standards`' validation: a change to the constitution that cannot be reproduced here should fail that repository's build."
+  ],
+  "risks": [
+    "The example is compliant with the constitution as of the day it was generated. Without a gate binding it to the standard it will drift silently — and that would be the worst possible kind of drift, because this repository is cited as the reference shape."
+  ],
+  "headline": "Eight workflows, zero credentials needed to run it, zero domain — exactly as designed",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 5,
+    "dependabotPrs": 5,
+    "lastCommit": "2026-09-07",
+    "commits": 20,
+    "files": 127
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "slug": "llm-book-mini-project",
+  "name": "llm-book-mini-project",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "stub",
+  "tier": "P4",
+  "oneLiner": "Projekt towarzyszący do książki o LangChain: czternaście etapów z kontraktem na każdy i ani jeden zaimplementowany.",
+  "summary": "Ops Copilot ma być wewnętrznym asystentem operacyjnym: odpowiada na pytania o zamówienia i incydenty, odpytując prawdziwe systemy, i może wykonać dokładnie jedną nieodwracalną akcję — wysłać maila — wyłącznie zza bramki zatwierdzenia przez człowieka. Jest budowany etapami przez siedemnaście rozdziałów `llm-book`, a każdy katalog etapu niesie `README.md` mówiący, co ten etap ma pokazać i co mają udowodnić jego testy. **To jest dziś szkielet: struktura etapów i oprzyrządowanie stoją, żaden etap nie jest zaimplementowany**, i repozytorium mówi to wprost na górze README. Jedna reguła jest warta więcej niż cała reszta: **testy każdego etapu przechodzą bez ani jednego prawdziwego wywołania modelu.** Nie „przeważnie” i nie „z wyjątkiem integracyjnych”. Etap, który potrzebuje żywego dostawcy, żeby cokolwiek pokazać, jest zaprojektowany źle — i książka poświęca temu cały rozdział. Drugim deliverable jest `DECISIONS.md` etapu końcowego, o którym repozytorium mówi wprost, że liczy się bardziej niż kod.",
+  "stack": [
+    "Python",
+    "LangChain 1.x",
+    "LangGraph",
+    "FastAPI",
+    "uv",
+    "ruff",
+    "mypy strict",
+    "pytest",
+    "Docker"
+  ],
+  "primaryLanguage": "Python",
+  "license": "MIT",
+  "tests": "Oprzyrządowanie stoi — pytest, ruff, mypy w trybie strict, bramka w CI — i jest dokładnie zero testów treści, bo nie ma treści. Każdy katalog etapu niesie za to kontrakt opisujący, co jego testy będą musiały udowodnić; to jest specyfikacja testów napisana przed testami.",
+  "ci": "Jeden workflow `ci.yml` uruchamiający bramkę toolchainu. Etap `00-skeleton` istnieje właśnie po to, żeby udowodnić, że ta bramka jest prawdziwa, i to jest jedyne twierdzenie repozytorium, które da się dziś zweryfikować.",
+  "metrics": [
+    {
+      "label": "Etapy",
+      "value": "14, od 00-skeleton do final"
+    },
+    {
+      "label": "Etapy zaimplementowane",
+      "value": "0"
+    },
+    {
+      "label": "Rozdziały książki pokryte",
+      "value": "17"
+    },
+    {
+      "label": "Prawdziwe wywołania modelu w testach",
+      "value": "0 — to jest reguła, nie wynik"
+    },
+    {
+      "label": "Commity",
+      "value": "14"
+    },
+    {
+      "label": "Pliki",
+      "value": "44, z czego 21 to markdown"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/llm-book-mini-project",
+    "live": [],
+    "docs": [
+      {
+        "label": "Kontrakty etapów",
+        "path": "stages/"
+      },
+      {
+        "label": "Punkt wejścia dla agenta",
+        "path": "CLAUDE.md"
+      },
+      {
+        "label": "Dokumentacja projektu",
+        "path": "docs/"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Kontrakty etapów",
+      "path": "stages/",
+      "description": "Czternaście katalogów, każdy z `README.md` mówiącym, co etap dodaje i co mają udowodnić jego testy. Kontrakt jest napisany przed implementacją — ten sam wzorzec, co `docs/SPEC.md` w `listing-search-bench`, tylko zastosowany do materiału dydaktycznego.",
+      "reusable": true
+    },
+    {
+      "name": "Bramka toolchainu",
+      "path": "pyproject.toml",
+      "description": "uv, ruff, mypy w trybie strict i pytest, spięte jednym workflow. Etap zerowy ma udowodnić, że bramka jest prawdziwa, zanim cokolwiek zacznie przez nią przechodzić.",
+      "reusable": true
+    },
+    {
+      "name": "Reguła zero wywołań modelu",
+      "path": "README.md",
+      "description": "Postawiona jako reguła projektu, nie jako cel wydajnościowy: zestaw ma być szybki na tyle, żeby chodzić przy każdym zapisie, deterministyczny na tyle, żeby dało się go bisektować, i uczciwy na tyle, żeby zielony build coś znaczył.",
+      "reusable": true
+    },
+    {
+      "name": "Dziennik decyzji jako deliverable",
+      "path": "docs/",
+      "description": "Etap końcowy ma wydać `DECISIONS.md`: wybór, odrzucona alternatywa, powód i koszt. Repozytorium mówi wprost, że recenzent przeczyta ten dokument, a kodu nie przeczyta nikt.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "llm-book",
+      "reason": "To jest projekt towarzyszący tamtej książki i jej jedyny artefakt wykonywalny. Rozdziały odwołują się do etapów, więc niedokończony szkielet jest luką w książce, a nie osobnym repozytorium bez znaczenia."
+    },
+    {
+      "slug": "maf-book",
+      "reason": "Ta sama para: książka plus projekt, który ma jej dowieść. Warto zdecydować raz, czy każda książka w portfolio niesie wykonywalny projekt towarzyszący, bo dziś odpowiedź jest różna dla różnych książek."
+    },
+    {
+      "slug": "agent-eval-bench",
+      "reason": "Etap 11 ma wnieść zestaw dwudziestu przypadków ewaluacyjnych z progiem regresji w CI. To jest dokładnie ta metoda, którą tamto repozytorium już zaimplementowało — nie ma powodu pisać jej tu drugi raz."
+    }
+  ],
+  "product": "Kanał, i to kanał z długiem: książka jest publiczna i odsyła do projektu, który jest pusty. Wartością tego repozytorium nie będzie kod, tylko `DECISIONS.md` — dokument mówiący, dlaczego pojedynczy agent zamiast supervisora, dlaczego klucz idempotencyjny zamiast transakcji rozproszonej, dlaczego SSE zamiast WebSocketów. Takich dokumentów jest w sieci mało i to one się cytuje.",
+  "highlights": [
+    "Reguła „zero prawdziwych wywołań modelu w testach”, postawiona bez wyjątków. Większość projektów tej klasy zaczyna od tej reguły i traci ją przy pierwszym trudnym etapie; tutaj jest zapisana jako warunek projektu, zanim cokolwiek powstało.",
+    "Każdy etap ma kontrakt napisany przed implementacją, mówiący co ma pokazać i co mają udowodnić jego testy. Szkielet z czternastoma kontraktami jest znacznie więcej wart niż szkielet z czternastoma pustymi katalogami.",
+    "Status jest podany uczciwie w pierwszym akapicie README. Repozytorium nie udaje, że jest dalej, niż jest — a przy projekcie towarzyszącym publicznej książce to jest jedyna właściwa decyzja."
+  ],
+  "gaps": [
+    "**Żaden etap nie jest zaimplementowany.** Czternaście kontraktów i zero kodu, przy książce, która już jest publiczna i już do nich odsyła.",
+    "Ostatni commit pochodzi z 5 sierpnia 2026. Repozytorium stoi dokładnie tam, gdzie postawiono szkielet.",
+    "`DECISIONS.md`, o którym repozytorium mówi, że jest najważniejszym deliverable, nie istnieje — a jest jedyną rzeczą, którą dałoby się napisać już teraz, bez implementowania czegokolwiek.",
+    "Etap 11 planuje zestaw ewaluacyjny z progiem regresji, czyli powtórzenie metody z `agent-eval-bench` po raz trzeci w portfolio."
+  ],
+  "next": [
+    "Zaimplementuj etapy 00–02. Trzy najprostsze etapy zamieniają repozytorium ze szkieletu w coś, co czytelnik książki może uruchomić, i to jest cała różnica.",
+    "Napisz `DECISIONS.md` teraz, na podstawie decyzji już podjętych przy projektowaniu etapów. Nie wymaga ani jednej linijki implementacji, a jest deklarowanym głównym deliverable.",
+    "Dodaj do README książki widoczną informację o statusie projektu towarzyszącego, żeby czytelnik nie trafiał na pusty katalog bez ostrzeżenia.",
+    "Zamiast pisać ewaluację od zera w etapie 11, zaimportuj metodę z `agent-eval-bench` i opisz różnice — to jest lepszy materiał dydaktyczny niż trzecia implementacja tego samego."
+  ],
+  "risks": [
+    "Publiczna książka odsyłająca do pustego repozytorium działa przeciwko wiarygodności obu. To jedyna pozycja w tym przebiegu, w której zwłoka kosztuje coś, co już zostało opublikowane."
+  ],
+  "headline": "Czternaście kontraktów etapów, zero implementacji — przy książce, która już jest publiczna",
+  "headlineTone": "bad",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-05",
+    "commits": 14,
+    "files": 44
+  }
+}

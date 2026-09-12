@@ -95,7 +95,12 @@
         "aurelius-promptus-acceptance-tests",
         "zoo-companion",
         "bayesian-inference",
-        "black-hole-sim"
+        "black-hole-sim",
+        "parcel-number-generator",
+        "claude-scope",
+        "listing-search-bench",
+        "architecture-standards-init-example",
+        "SupercompensationApp"
       ]
     },
     {
@@ -114,7 +119,11 @@
         "ai-coding-assistant-article",
         "agent-eval-bench-factorial",
         "math-for-ai-engineers",
-        "landing-page"
+        "landing-page",
+        "combustion-reports",
+        "llm-book-mini-project",
+        "dotnet-aspire-postgress-article",
+        "rsna-knee-abnormalities-efficiency-lb"
       ]
     }
   ],

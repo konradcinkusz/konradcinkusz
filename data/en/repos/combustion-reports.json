@@ -1,0 +1,142 @@
+{
+  "slug": "combustion-reports",
+  "name": "combustion-reports",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P4",
+  "oneLiner": "A car's fuel consumption as a curve rather than two numbers from a brochure — with a README section on how **not** to read that curve.",
+  "summary": "The manufacturer quotes two numbers, city and highway; the car has a curve. The application takes recorded trips and fits a polynomial model of consumption against average speed and against route length, so you can see where a car is genuinely efficient rather than where the brochure says it is. It runs entirely in the browser: no account, no server, no telemetry, state in `localStorage`. What sets this repository apart from everything else in the portfolio is its **'How not to read it'** section — a curve fitted to four points is a drawing, not a model; the fit is anchored at the origin by default, which is not physically true and is a stability trade-off; extrapolation is deliberately short, to 1.2× the furthest sample; and the largest confound is the driver's own right foot. R² is displayed next to every fit precisely so that it can be disbelieved. That is rare: a product that actively makes it harder to over-read its own output.",
+  "stack": [
+    "React 18",
+    "Redux Toolkit",
+    "Vite",
+    "Plotly",
+    "Vitest",
+    "Docker",
+    "nginx",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "JavaScript",
+  "license": "MIT",
+  "tests": "Five Vitest test files, focused on the polynomial fit and the persistence layer. The storage tests cover the cases applications like this usually break on: an incompatible schema version, a corrupt entry, no access to `localStorage` at all.",
+  "ci": "Two workflows: `ci.yml` (lint and tests) and `pages.yml`, which publishes the application. A Docker image with nginx is built but published nowhere.",
+  "metrics": [
+    {
+      "label": "Test files",
+      "value": "5"
+    },
+    {
+      "label": "Fit dimensions",
+      "value": "2 — average speed, route length"
+    },
+    {
+      "label": "Interface languages",
+      "value": "2 — English and Polish, detected from the browser"
+    },
+    {
+      "label": "Backend",
+      "value": "none — entirely in the browser"
+    },
+    {
+      "label": "Extrapolation limit",
+      "value": "1.2× the furthest sample"
+    },
+    {
+      "label": "Commits",
+      "value": "42"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/combustion-reports",
+    "live": [],
+    "docs": [
+      {
+        "label": "Changelog",
+        "path": "CHANGELOG.md"
+      },
+      {
+        "label": "House rules for contributors",
+        "path": "CONTRIBUTING.md"
+      },
+      {
+        "label": "Security policy",
+        "path": "SECURITY.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The polynomial fit",
+      "path": "src/",
+      "description": "A degree-2 fit, anchored at the origin by default. The anchor is not physically true — an idling car still burns fuel — but without it a handful of samples produces a curve that swings wildly outside the data. The trade-off is documented and can be switched off with a parameter.",
+      "reusable": true
+    },
+    {
+      "name": "The persistence layer",
+      "path": "src/",
+      "description": "Writes are debounced, the snapshot carries a schema version, and a snapshot from an incompatible version is discarded rather than half-loaded. When `localStorage` is unavailable or full, the application keeps working in memory instead of throwing.",
+      "reusable": true
+    },
+    {
+      "name": "The 'How not to read it' section",
+      "path": "README.md",
+      "description": "Four warnings against over-reading, written by the author against his own product: too few points, the origin anchor, the short extrapolation, and the driver's own habits as a confound.",
+      "reusable": true
+    },
+    {
+      "name": "The bilingual interface",
+      "path": "src/",
+      "description": "English and Polish, switchable from the navigation bar and detected from the browser on the first visit — exactly the arrangement the portfolio map uses, solved independently.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "IberiaFamilyCalculator",
+      "reason": "The same species: a calculator that computes entirely in the browser, with no account and no backend, and a model written out so it can be checked. The persistence layer and the state-sharing pattern are common to both and have never been extracted."
+    },
+    {
+      "slug": "brain-train",
+      "reason": "A browser application holding all its state locally on the user's machine, with the same set of problems: schema versioning, no export, data migration between releases."
+    }
+  ],
+  "product": "The closest thing to a product among the things built for their own sake: it solves a real problem, has an audience beyond the author, and needs no infrastructure, so the marginal cost per user is zero. What it lacks to be a product is not features but data export — without it a user who has entered a hundred trips is tied to one browser on one machine.",
+  "highlights": [
+    "A section on how **not** to read its own output. In a portfolio full of repositories honestly listing their own gaps, this is the cleanest case of that same virtue aimed at the user rather than at a reviewer.",
+    "R² shown next to every fit — shown, not hidden. The application hands the reader the number that lets them disbelieve it.",
+    "The origin anchor is a documented trade-off with a rationale and an escape hatch rather than a hidden implementation decision. Most tools in this class make that decision and never mention it.",
+    "The persistence layer degrades correctly: private browsing, blocked cookies and an exceeded quota do not take the application down, they switch it to memory."
+  ],
+  "gaps": [
+    "**No export.** All state sits in one browser's `localStorage`: clearing site data destroys everything, and moving to another device is impossible. It is the single thing standing between this application and being useful to a stranger.",
+    "The last substantive commit is from 1 August 2026; since then the only things open have been Dependabot pull requests.",
+    "The Docker image is built and published nowhere — configuration that does nothing except require maintenance."
+  ],
+  "next": [
+    "Add JSON export and import. It is one feature, and it decides whether anyone but the author will ever record a hundred trips in this application.",
+    "Merge the two Dependabot pull requests and decide whether the repository is maintained or frozen — today the badge says one thing and the commit history another.",
+    "Publish the image to GHCR or delete the Dockerfile and `nginx.conf`. An unused deployment path is a cost with no benefit."
+  ],
+  "risks": [
+    "User data lives in one browser only and cannot be exported. A user who has been entering trips for a year will lose them on a site-data clear — with no warning at all."
+  ],
+  "headline": "It has a section on how not to read its own charts — and no way to export your data",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 4,
+    "openPrs": 2,
+    "dependabotPrs": 2,
+    "lastCommit": "2026-08-01",
+    "commits": 42,
+    "files": 67
+  }
+}

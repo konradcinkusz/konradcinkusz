@@ -1,7 +1,7 @@
 {
   "title": "Portfolio, konsolidacja i operacje",
-  "subtitle": "Trzydzieści pięć repozytoriów, sześć substratów i jedna osoba. Co da się scalić, co jest zbudowane dwa razy, gdzie biegnie granica, której nie wolno przekroczyć — oraz system, którym to wszystko da się prowadzić bez rozpadu.",
-  "stamp": "Konrad Cinkusz · mapa portfolio · 26 sierpnia 2026",
+  "subtitle": "Czterdzieści cztery repozytoria, sześć substratów i jedna osoba. Co da się scalić, co jest zbudowane dwa razy, gdzie biegnie granica, której nie wolno przekroczyć — oraz system, którym to wszystko da się prowadzić bez rozpadu.",
+  "stamp": "Konrad Cinkusz · mapa portfolio · 12 września 2026",
   "owner": "Konrad Cinkusz",
   "links": [
     {
@@ -17,5 +17,5 @@
       "url": "https://x.com/dev_insight"
     }
   ],
-  "scope": "Mapa obejmuje **34 repozytoria przeczytane od początku do końca** — README, dokumentację, kod, workflowy i historię gita. Jedno kolejne, przeczytane w ten sam sposób, jest tymczasowo wycofane z mapy do czasu naprawienia luki bezpieczeństwa, którą znalazł audyt. Konto ma ich więcej: co najmniej jedenaście kolejnych jest publicznych, nie zarchiwizowanych i **nie ma ich tutaj**, w tym `DeepDiveInto_CSharp_Dictionaries_presentation` (3 gwiazdki) i `llm-book-mini-project`, do którego odwołuje się jedna z książek. Repozytorium trafia na mapę wtedy, gdy ktoś je faktycznie przeczytał — nie wtedy, gdy istnieje."
+  "scope": "Mapa obejmuje **43 repozytoria przeczytane od początku do końca** — README, dokumentację, kod, workflowy i historię gita. Dziewięć z nich dołączyło 12 września 2026 i wszystkie dziewięć jest publicznych. Jedno kolejne, przeczytane w ten sam sposób, jest tymczasowo wycofane z mapy do czasu naprawienia luki bezpieczeństwa, którą znalazł audyt — poświadczenie z historii `quorum` pozostaje ważne, dopóki nie zostanie zrotowane, a repozytorium jest od 1 września publiczne. Konto ma więcej repozytoriów: kolejne są publiczne, nie zarchiwizowane i **nie ma ich tutaj**, w tym `DeepDiveInto_CSharp_Dictionaries_presentation` (3 gwiazdki). Repozytorium trafia na mapę wtedy, gdy ktoś je faktycznie przeczytał — nie wtedy, gdy istnieje."
 }

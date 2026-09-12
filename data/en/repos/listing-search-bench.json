@@ -1,0 +1,169 @@
+{
+  "slug": "listing-search-bench",
+  "name": "listing-search-bench",
+  "cluster": "A-runtime",
+  "visibility": "public",
+  "state": "prototype",
+  "tier": "P3",
+  "oneLiner": "The same evaluation method as agent-eval-bench, applied to a hybrid ranker: the specimen changed, the instrument's shape did not.",
+  "summary": "A behaviour contract written before the pipeline existed, 28 scenarios stored as data across five classes, and a Layer 1 harness that grades the **execution trace** of a real hybrid retrieval pipeline: which candidates the lexical path returned, which the vector path did, how they were filtered and ranked, and what was **never a candidate at all**. The point is singular: a ranking-weight tune, a filter refactor, or a listing trying to talk its way out of a hard constraint should fail a build rather than a customer. This is the second instance of the same method as `agent-eval-bench` — and that is exactly what makes it interesting in the portfolio: it demonstrates that the instrument is portable across domains. Twenty-two per cent of the assertions check **absence** — that something was never a candidate, never in a response, never re-applied — which is the half of evaluation almost everyone skips. A mutation pass breaks the pipeline four ways and requires every variant to be caught; the findings document adds that catching them on the first run is weaker evidence than it looks.",
+  "stack": [
+    ".NET 10",
+    "ASP.NET Core Minimal API",
+    "Elasticsearch",
+    "YAML",
+    "Docker",
+    "Kubernetes",
+    "Mermaid",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Two layers plus a mutation pass. Layer 1 is deterministic — no model, no network, no credential — and covers 28 scenarios with 128 assertions, 28 of which check absence. Layer 2 is a rubric judge with pinned rubrics and a hashed prompt. Alongside them, 46 xUnit attributes, including `NoHttpRouteReachesTheIndexTests`, which checks the single write path rather than declaring it.",
+  "ci": "Four workflows: `ci.yml` (the gates — hard constraints must pass 100%, behaviours are compared against a baseline), `codeql.yml`, `nightly.yml`, and `build-overview-pdf.yml`, which assembles the overview document in English and Polish.",
+  "metrics": [
+    {
+      "label": "Behaviours in the contract",
+      "value": "12"
+    },
+    {
+      "label": "Hard constraints",
+      "value": "7"
+    },
+    {
+      "label": "Scenarios",
+      "value": "28, across five classes"
+    },
+    {
+      "label": "Assertions",
+      "value": "128, of which 28 (22%) check absence"
+    },
+    {
+      "label": "Mutation pass",
+      "value": "4/4 caught, with a caveat recorded in FINDINGS"
+    },
+    {
+      "label": "Write paths into the index",
+      "value": "exactly 1, checked by a test"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/listing-search-bench",
+    "live": [
+      {
+        "label": "Architecture and eval-bench walkthrough (GitHub Pages)",
+        "url": "https://konradcinkusz.github.io/listing-search-bench/"
+      }
+    ],
+    "docs": [
+      {
+        "label": "The contract, written before the pipeline",
+        "path": "docs/SPEC.md"
+      },
+      {
+        "label": "Findings and the mutation pass — the one place these counts live",
+        "path": "docs/FINDINGS.md"
+      },
+      {
+        "label": "ADR-0002: mock-first, zero-credential default",
+        "path": "docs/adr/0002-mock-first-zero-credential-default.md"
+      },
+      {
+        "label": "ADR-0006: event idempotency at the consumer boundary",
+        "path": "docs/adr/0006-event-idempotency-at-the-consumer-boundary.md"
+      },
+      {
+        "label": "The scenarios, as data",
+        "path": "evals/scenarios/"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": true,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "The behaviour contract",
+      "path": "docs/SPEC.md",
+      "description": "Twelve behaviours, seven hard constraints, four rubrics — written before `src/ListingSearch.Service` existed. Every behaviour cites its proof, so the contract cannot quietly drift from the scenarios.",
+      "reusable": true
+    },
+    {
+      "name": "Scenarios as data",
+      "path": "evals/scenarios/",
+      "description": "28 YAML scenarios across five classes: happy, ambiguity, exclusion, adversarial, degradation. The adversarial class matters most — it tests a listing trying to talk its way out of a hard constraint using its own text.",
+      "reusable": true
+    },
+    {
+      "name": "The scenario runner",
+      "path": "src/",
+      "description": "Runs the **real** pipeline in-process and injects faults at the index seam, so the degradation class measures genuine failure behaviour rather than a mock of it.",
+      "reusable": true
+    },
+    {
+      "name": "The ingestion consumer — the only write path",
+      "path": "src/ListingSearch.Service/Ingestion/IngestionConsumer.cs",
+      "description": "Reads `listing.published`, `listing.price_changed` and `listing.delisted`, idempotent by `event_id`. That no HTTP route reaches the index is **checked by a test**, not stated in the README.",
+      "reusable": true
+    },
+    {
+      "name": "The hybrid ranker",
+      "path": "src/ListingSearch.Service/Pipeline/Stages/",
+      "description": "A second, genuine vector retrieval path merged with the lexical one by `HybridRankerStage` — never the other way round. Layer 1 checks the structure of the ranking; Layer 2 grades whether the best match actually lands on top.",
+      "reusable": true
+    },
+    {
+      "name": "The findings document",
+      "path": "docs/FINDINGS.md",
+      "description": "The one place the counts are recomputed, and the one that weakens its own result: the mutation pass caught 4/4 on the first run, and the document says outright that this is weaker evidence than it looks.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "agent-eval-bench",
+      "reason": "The same method, a different specimen — and that is this repository's entire thesis. There the measurement is 'did the agent ask before it wrote'; here it is 'does the ranker respect hard constraints when a listing's text tries to talk it out of them'. The harness, the scenario classes, the layer split and the mutation pass are common and ought to be one kernel."
+    },
+    {
+      "slug": "architecture-standards",
+      "reason": "Implements the AI evaluation standard from `docs/guides/AI-EVALS.md`. Deviations from it are accounted for and fixes flow back into the standard — the loop is closed in both directions."
+    }
+  ],
+  "product": "Public proof of methodology, built on a synthetic corpus, and the repository says so outright: it is not a deployed service and not a contribution to any production codebase. Commercially it is a work sample — precisely the one you show a team that has a search ranker with no contract and no way to detect that a weight tune has just broken a hard constraint.",
+  "highlights": [
+    "The contract was written **before** the pipeline, and every behaviour cites its proof. That is the difference between an evaluation and tests written after the fact against whatever the code already does.",
+    "Twenty-two per cent of the assertions check absence. It is easy to check that a good result is in the response; it is harder and far more important to check that an excluded one was never even a candidate.",
+    "Layer 1 needs no model, no network and no credential, so the gate runs on every pull request and on every fork. The rubric judge sits separately and does not block a build without keys.",
+    "The mutation pass proves the suite **can** fail — and the findings document itself flags that catching all four variants on the first run is weaker evidence than it sounds. Weakening one's own result like that is rare in this portfolio."
+  ],
+  "gaps": [
+    "Six open Dependabot pull requests against a single open issue — the repository about gates has the most neglected update queue of everything added in this pass.",
+    "The corpus is synthetic. The repository says so outright and that is honest, but it means the relevance rubric was validated against data the same side invented.",
+    "The mutation pass has four variants. Four is too few to say anything about the suite's sensitivity beyond those four failure modes.",
+    "The harness shared with `agent-eval-bench` is not extracted — two repositories carry two copies of the same method today, and that is exactly the duplication the consolidation analysis exists to catch."
+  ],
+  "next": [
+    "Merge the Dependabot queue — six pull requests on a repository whose thesis is that gates should work.",
+    "Extract the Layer 1 harness and the scenario classes shared with `agent-eval-bench` into one kernel. Two specimens is the minimum at which that is even discussable, and it has just been reached.",
+    "Extend the mutation pass beyond four variants, and record which of them the suite lets through, if any does.",
+    "Run the bench against a non-synthetic corpus, even a public one — today the weakest link in the evidence is the data, not the instrument."
+  ],
+  "risks": [
+    "The repository is proof of methodology on synthetic data. Presented as proof that a **production** ranker is safe, it would claim more than was measured — and only the findings document stands between the two."
+  ],
+  "headline": "A second specimen of the same method — and the first moment the shared harness may fairly be called a kernel",
+  "headlineTone": "good",
+  "github": {
+    "stars": 0,
+    "openIssues": 1,
+    "openPrs": 6,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-09-01",
+    "commits": 19,
+    "files": 175
+  }
+}

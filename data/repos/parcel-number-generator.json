@@ -1,0 +1,177 @@
+{
+  "slug": "parcel-number-generator",
+  "name": "parcel-number-generator",
+  "cluster": "E-lab",
+  "visibility": "public",
+  "state": "active",
+  "tier": "P3",
+  "oneLiner": "Trzy usługi magazynowe zbudowane wprost pod konstytucję architektoniczną — i ani jedna z nich nie jest nigdzie wdrożona.",
+  "summary": "System PNG wydaje numery przesyłek ze skończonej puli: nigdy dwa razy tego samego, z poszanowaniem podzakresów wyłączonych z alokacji, bez zdradzania dziennego wolumenu. Obok tego rejestruje zdarzenia zgłaszane wobec przesyłek i magazynu, a konsola operatora stoi nad jednym i drugim. To najciekawszy przypadek w portfolio z punktu widzenia metody: repozytorium powstało z rozwiązania .NET Framework 4.5.2 z 2018 roku zmodernizowanego wprost pod `architecture-standards`, a potem wchłonęło serwis powiadomień z osobnego repozytorium `komunikaty` (samo zmodernizowane z aplikacji WinForms z 2019). Konsolidacja jest udokumentowana w ADR-0004 — to jedno z nielicznych miejsc w całym portfolio, gdzie wzorzec „scal dwa repozytoria” został faktycznie wykonany, a nie tylko zaproponowany. Bramki są prawdziwe: CI wywraca pull request, którego model rozjechał się z zatwierdzonymi migracjami, dla obu serwisów i obu dostawców baz, buduje trzy obrazy i odpala je pod `ASPNETCORE_ENVIRONMENT=Production`, żeby sprawdzić, czy strażnicy startowe nadal odmawiają uruchomienia bez connection stringa i bez wystawcy tokenów.",
+  "stack": [
+    ".NET 10",
+    "ASP.NET Core Minimal API",
+    ".NET Aspire",
+    "EF Core",
+    "PostgreSQL",
+    "SQL Server",
+    "Blazor",
+    "Docker",
+    "Fly.io",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "C#",
+  "license": "MIT",
+  "tests": "Dwa projekty testowe, 112 atrybutów `[Fact]`/`[Theory]` (README podaje 139 przypadków — teorie rozwijają się na więcej niż jeden). Pokrywają arytmetykę puli i strategie alokacji, powierzchnię API obu serwisów, mapowanie i czystość jądra współdzielonego. Osobna klasa pilnuje, że żadna trasa HTTP nie sięga tam, gdzie nie powinna.",
+  "ci": "Sześć workflowów: `ci.yml` (testy, `dotnet format`, kontrola dryfu migracji dla obu serwisów i obu dostawców, strażnicy architektury, trzy budowy obrazów ze smoke testem strażnika startowego, gitleaks po pełnej historii, audyt podatności przechodnich), `codeql.yml`, `secret-scan.yml` oraz trzy workflowy Fly.io. Ostrzeżenia są błędami, łącznie z ostrzeżeniami NuGet.",
+  "metrics": [
+    {
+      "label": "Usługi",
+      "value": "3 — generator, powiadomienia, konsola z BFF"
+    },
+    {
+      "label": "Projekty w rozwiązaniu",
+      "value": "15"
+    },
+    {
+      "label": "Atrybuty testowe",
+      "value": "112 (README: 139 przypadków)"
+    },
+    {
+      "label": "Workflowy",
+      "value": "6"
+    },
+    {
+      "label": "Strategie alokacji",
+      "value": "3 — adaptive, random-probe, sequential-scan"
+    },
+    {
+      "label": "Otwarte odchylenia",
+      "value": "3 (DEV-1, DEV-2, DEV-7)"
+    },
+    {
+      "label": "Wdrożone środowiska",
+      "value": "0"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/parcel-number-generator",
+    "live": [],
+    "docs": [
+      {
+        "label": "Rejestr otwartych odchyleń",
+        "path": "docs/architecture/DEVIATIONS.md"
+      },
+      {
+        "label": "ADR-0004: jedno repozytorium dla systemu PNG",
+        "path": "docs/decisions/0004-one-repository-for-the-png-system.md"
+      },
+      {
+        "label": "Gotowość do wydania open source i audyt historii",
+        "path": "docs/architecture/06-OPEN-SOURCE-READINESS.md"
+      },
+      {
+        "label": "Inwentarz zmiennych i sekretów",
+        "path": "flyio/SECRETS.md"
+      },
+      {
+        "label": "Roadmapa: cztery fazy, trzynaście zgłoszeń",
+        "path": "ROADMAP.md"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": true,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Domena puli i strategie alokacji",
+      "path": "src/ParcelNumberGenerator.Domain/",
+      "description": "Arytmetyka puli z wyłączeniami i trzy strategie za jednym interfejsem. Zero referencji do pakietów — czwarta strategia to jedna klasa i jedna linia rejestracji.",
+      "reusable": true
+    },
+    {
+      "name": "Serwis powiadomień",
+      "path": "src/ParcelNumberGenerator.Notifications/",
+      "description": "Przeniesiony tutaj z wycofanego repozytorium `komunikaty`. Normalizuje każdy dialekt numeru przesyłki na krawędzi i przechowuje postać kanoniczną; potwierdzenie odbioru jest idempotentne, wygrywa pierwszy znacznik czasu.",
+      "reusable": true
+    },
+    {
+      "name": "Konsola operatora i BFF",
+      "path": "src/ParcelNumberGenerator.Web/",
+      "description": "Jedyna publiczna twarz systemu. Przeglądarka rozmawia wyłącznie z tym originem, a BFF proxuje do obu serwisów — pulpit puli, alokacja wsadowa, wyszukiwanie tolerujące dialekty, tablica powiadomień.",
+      "reusable": false
+    },
+    {
+      "name": "Jądro współdzielone",
+      "path": "src/ParcelNumberGenerator.ServiceDefaults/",
+      "description": "Wyłącznie hydraulika, z sufitem 800 linii pilnowanym przez skrypt w CI, a nie przez prozę. Dokładnie ten sam wzorzec co w `architecture-standards-init-example`.",
+      "reusable": true
+    },
+    {
+      "name": "Migracje per dostawca",
+      "path": "src/ParcelNumberGenerator.Migrations.PostgreSQL/",
+      "description": "Osobny zestaw migracji na dostawcę, dla obu serwisów. Bramka dryfu w CI porównuje model z zatwierdzonym zestawem — zmiana schematu bez migracji nie przechodzi.",
+      "reusable": true
+    },
+    {
+      "name": "Rejestr odchyleń",
+      "path": "docs/architecture/DEVIATIONS.md",
+      "description": "Własny rejestr tego, czego repozytorium jeszcze nie spełnia: co, wobec której zasady, od kiedy i co to zamyka. Roadmapa jest skończona wtedy, gdy tabela *Open* jest pusta.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "Zbudowane wprost pod tę konstytucję i mierzone nią w `02-GAP-ANALYSIS.md`. Rejestr odchyleń jest tu wymagany przez §3a tamtego dokumentu."
+    },
+    {
+      "slug": "authservice",
+      "reason": "DEV-2 czeka na decyzję, który wystawca tożsamości jest zaufany. `authservice` jest oczywistym kandydatem — obie usługi już dziś tylko walidują tokeny wobec JWKS i nie trzymają materiału klucza."
+    },
+    {
+      "slug": "architecture-standards-init-example",
+      "reason": "Ten sam kształt: jądro współdzielone z sufitem linii, awaryjna baza w pamięci, migracje z usługi hostowanej startującej po Kestrelu. Tam greenfield, tutaj modernizacja — te same reguły dają ten sam szkielet z dwóch różnych punktów startu."
+    }
+  ],
+  "product": "Dowód metody, nie transakcja. Wartość handlowa nie leży w wydawaniu numerów przesyłek — leży w udokumentowanej ścieżce z rozwiązania .NET Framework 4.5.2 z 2018 roku do trzech usług na .NET 10 z bramkami migracji, strażnikami startowymi i audytem sekretów po pełnej historii. To jest dokładnie ta praca, za którą płaci się konsultantowi od modernizacji, i tutaj jest pokazana od początku do końca, razem z tym, co się nie udało.",
+  "highlights": [
+    "Konsolidacja faktycznie wykonana: serwis powiadomień przeniesiony z osobnego repozytorium, z ADR opisującym co zharmonizowano. W portfolio pełnym propozycji scalenia to jedna z nielicznych, która się zdarzyła.",
+    "Kod statusu niesie to, co wywołujący ma zrobić dalej: 201 z `complete: false` dla częściowej partii, 409 gdy pula jest wyczerpana i ponawianie nigdy nie pomoże, 503 przy kontencji z `Retry-After`. Rozróżnienie „nie da się” od „spróbuj za chwilę” jest w protokole, nie w dokumentacji.",
+    "Świeży klon działa bez żadnego poświadczenia — awaryjna baza w pamięci — ale w Production strażnik startowy odmawia uruchomienia bez connection stringa i wystawcy. CI odpala zbudowane obrazy pod `ASPNETCORE_ENVIRONMENT=Production` właśnie po to, żeby sprawdzić, że strażnicy nadal działają.",
+    "Audyt sekretów obejmuje pełną historię, nie tylko HEAD, i zapisano go jako czterostopniową procedurę wydania, z której dwóch kroków nie da się wykonać commitem. To jest ta lekcja, której zabrakło w `quorum`."
+  ],
+  "gaps": [
+    "**Nic nie jest wdrożone.** DEV-1: workflow potrafi postawić całą infrastrukturę z jednego tagu, ale nie istnieje żadna aplikacja Fly, nie ma `FLY_API_TOKEN`, a żadna migracja nie dotknęła prawdziwej bazy. Wszystkie twierdzenia o wdrożeniu są argumentowane, nie zmierzone.",
+    "DEV-2: nie skonfigurowano żadnego dostawcy tożsamości. Wdrożenie byłoby otwarte, gdyby nie strażniki — co znaczy, że ścieżka walidacji JWKS nigdy nie została wykonana wobec prawdziwego wystawcy.",
+    "DEV-7: wydanie open source jest nieskończone. Repozytorium jest publiczne od 2026-09-01, ale opis i tematy (#20) oraz pakiety GHCR (#29) pozostają otwarte.",
+    "Sześć otwartych pull requestów Dependabota na trzynaście otwartych pozycji. Faza 2 roadmapy istnieje właśnie po to, żeby je domknąć, i jeszcze nie ruszyła.",
+    "Gwarancja „nigdy dwa razy tego samego numeru” jest dziś dowodzona wobec bazy w pamięci. Faza 3 roadmapy ma zamienić ją w pomiar wobec prawdziwego silnika — dopóki nie zostanie wykonana, najmocniejsze twierdzenie systemu jest przetestowane w najsłabszym miejscu."
+  ],
+  "next": [
+    "Zamknij fazę 1 roadmapy: opis i tematy repozytorium, rząd odznak zgodny z rzeczywistością, wyrenderowana strona dokumentacji. To są zmiany na minuty, a odblokowują czytelność dla kogokolwiek z zewnątrz.",
+    "Zmerguj sześć pull requestów Dependabota jednym przebiegiem — CI jest wystarczająco mocne, żeby to było bezpieczne, a każdy tydzień zwłoki podnosi koszt.",
+    "Podepnij `authservice` jako wystawcę (DEV-2). Nie wymaga zmiany kodu — okablowanie jest warunkowe i już na miejscu — a odblokowuje pierwsze wdrożenie.",
+    "Wypchnij pierwszy tag `v*` i zastąp treść DEV-1 tym, co faktycznie zmierzyło pierwsze wdrożenie.",
+    "Przenieś dowód unikalności numerów na prawdziwy silnik bazodanowy pod współbieżnością — to jest jedyne twierdzenie w tym repozytorium, którego nie wolno zostawić na bazie w pamięci."
+  ],
+  "risks": [
+    "Cała ścieżka wdrożeniowa jest nieprzetestowana w praktyce: okres karencji health-checków, ścieżka wybudzania `.flycast` i walidacja JWKS nie zostały ani razu wykonane. Budowy obrazów i smoke testy w CI ograniczają klasę „działa u mnie”, ale nie klasę platformową.",
+    "Repozytorium jest publiczne od 2026-09-01, a wydanie nie zostało domknięte. Publiczny commit jest publiczny na zawsze i cofnięcie widoczności nie dosięga klonów ani forków, które już istnieją."
+  ],
+  "headline": "Trzy usługi, sześć workflowów, pełny audyt historii — i zero wdrożonych środowisk",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 5,
+    "openPrs": 6,
+    "dependabotPrs": 6,
+    "lastCommit": "2026-09-02",
+    "commits": 43,
+    "files": 166
+  }
+}

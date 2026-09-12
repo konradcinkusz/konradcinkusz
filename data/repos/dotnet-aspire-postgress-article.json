@@ -1,0 +1,142 @@
+{
+  "slug": "dotnet-aspire-postgress-article",
+  "name": "dotnet-aspire-postgress-article",
+  "cluster": "D-content",
+  "visibility": "public",
+  "state": "stable",
+  "tier": "P4",
+  "oneLiner": "Artykuł techniczny w LaTeX-u o dopinaniu Aspire do istniejącego rozwiązania — z promptem wzorcowym, który go wyprodukował, w README.",
+  "summary": "Dziewięć rozdziałów przechodzących przez każdy krok potrzebny, żeby dodać projekt AppHost .NET Aspire do istniejącego rozwiązania .NET 9, na konkretnym przykładzie roboczym. Struktura ma jedną cechę wartą osobnej uwagi: rozdział o `Program.cs` niesie **tabelę każdego wywołania buildera razem z trybem awarii, jaki daje jego pominięcie**. To jest odwrotność zwykłego tutoriala — zamiast pokazywać poprawną sekwencję i zostawiać czytelnika z pytaniem, co się stanie, gdy o czymś zapomni, dokument wypisuje konsekwencje wprost. Podobną funkcję pełni tabela pułapek w rozdziale o sekretach. Osobno wart odnotowania jest **prompt wzorcowy** wydrukowany w README wraz z tabelą placeholderów: repozytorium nie tylko wydaje artykuł, ale i narzędzie do wyprodukowania jego odpowiednika dla dowolnego innego rozwiązania. To jedyna pozycja w portfolio, która publikuje własną metodę wytworzenia w tak dosłownej formie.",
+  "stack": [
+    "LaTeX",
+    "XeLaTeX",
+    "latexmk",
+    "PlantUML",
+    "GitHub Actions"
+  ],
+  "primaryLanguage": "TeX",
+  "license": "MIT",
+  "tests": "Brak i słusznie — to jest dokument. Sprawdzalne jest to, czy się kompiluje, i tym zajmuje się CI.",
+  "ci": "Jeden workflow `ci.yml`: kompiluje diagram PlantUML, składa artykuł XeLaTeX-iem przez `latexmk` i przy tagu `v*` publikuje PDF jako artefakt wydania. Odznaka PDF w README wskazuje na najnowsze wydanie.",
+  "metrics": [
+    {
+      "label": "Rozdziały",
+      "value": "9"
+    },
+    {
+      "label": "Pliki TeX",
+      "value": "11"
+    },
+    {
+      "label": "Tabele referencyjne",
+      "value": "2"
+    },
+    {
+      "label": "Diagramy",
+      "value": "1 — źródło PlantUML kompilowane w CI"
+    },
+    {
+      "label": "Commity",
+      "value": "5"
+    },
+    {
+      "label": "Dystrybucja",
+      "value": "PDF w GitHub Releases przy tagu"
+    }
+  ],
+  "links": {
+    "repo": "https://github.com/konradcinkusz/dotnet-aspire-postgress-article",
+    "live": [],
+    "docs": [
+      {
+        "label": "Punkt wejścia artykułu",
+        "path": "main.tex"
+      },
+      {
+        "label": "Okablowanie Program.cs i tryby awarii pominięć",
+        "path": "chapters/04-program-wiring.tex"
+      },
+      {
+        "label": "Sekrety i poświadczenia, z tabelą pułapek",
+        "path": "chapters/07-secrets-and-credentials.tex"
+      },
+      {
+        "label": "Źródło diagramu",
+        "path": "figures/aspire-wiring.plantuml"
+      }
+    ]
+  },
+  "deployment": {
+    "fly": false,
+    "docker": false,
+    "ghcr": false,
+    "pages": false,
+    "packages": false
+  },
+  "components": [
+    {
+      "name": "Tabela wywołań buildera i trybów awarii",
+      "path": "chapters/04-program-wiring.tex",
+      "description": "Każde wywołanie buildera razem z tym, co się psuje przy jego pominięciu. To jest najbardziej użyteczna strona całego dokumentu i rzecz, której brakuje w dokumentacji Aspire.",
+      "reusable": true
+    },
+    {
+      "name": "Tabela pułapek sekretów",
+      "path": "chapters/07-secrets-and-credentials.tex",
+      "description": "Jak Aspire generuje hasła, gdzie ląduje magazyn User Secrets, skąd biorą się poświadczenia pgAdmina i co idzie nie tak — ta sama konstrukcja co wyżej, zastosowana do warstwy, na której ludzie tracą najwięcej czasu.",
+      "reusable": true
+    },
+    {
+      "name": "Prompt wzorcowy",
+      "path": "README.md",
+      "description": "Prompt, którym wyprodukowano artykuł, z tabelą placeholderów do podstawienia pod dowolne inne rozwiązanie. Publikacja własnej metody wytworzenia, nie tylko wyniku.",
+      "reusable": true
+    },
+    {
+      "name": "Potok wydania",
+      "path": ".github/workflows/ci.yml",
+      "description": "Diagram i PDF budowane z tagu i publikowane jako wydanie. Dokument ma wersje, a odznaka wskazuje na najnowszą — tyle dyscypliny wydawniczej wystarcza dla artykułu.",
+      "reusable": true
+    }
+  ],
+  "overlaps": [
+    {
+      "slug": "architecture-standards",
+      "reason": "Tamten przewodnik po Aspire i ten artykuł opisują tę samą technologię dla dwóch różnych odbiorców: standard mówi zespołowi, jak ma być, artykuł mówi pojedynczemu inżynierowi, jak to zrobić. Numery wersji i kształt okablowania powinny być cytowane z jednego miejsca i dziś nie są."
+    },
+    {
+      "slug": "parcel-number-generator",
+      "reason": "Kompozycja Aspire opisana w artykule jest dokładnie tą, którą to repozytorium wykonuje — działający przykład stoi obok tekstu i nie jest z niego cytowany."
+    }
+  ],
+  "product": "Czysty kanał, najtańszy w utrzymaniu w całym portfolio: pięć commitów, jeden workflow, zero zależności do aktualizowania. Artykuł tej klasy nie generuje przychodu i nie ma go generować — akumuluje się sam, o ile wersje, które opisuje, pozostają aktualne. Prawdziwym aktywem jest tu prompt wzorcowy, bo jest przenośny na dowolną inną technologię.",
+  "highlights": [
+    "Tabela „każde wywołanie buildera i tryb awarii jego pominięcia” jest konstrukcją, której brakuje w oficjalnej dokumentacji Aspire i która sama uzasadnia istnienie tego dokumentu.",
+    "Prompt wzorcowy z tabelą placeholderów czyni artykuł powtarzalnym dla dowolnego innego rozwiązania. Publikowanie metody obok wyniku jest w portfolio rzadkie i tutaj jest zrobione najbardziej dosłownie.",
+    "Diagram jest źródłem PlantUML kompilowanym w CI, a nie obrazkiem wrzuconym do repozytorium. Rysunek nie może rozjechać się z tym, co opisuje, bo powstaje przy każdym buildzie."
+  ],
+  "gaps": [
+    "Artykuł jest przypięty do .NET 9 i Aspire 9.0.0, a reszta portfolio przeszła już na .NET 10. Dokument o konfiguracji starzeje się dokładnie w tempie wersji, które wymienia.",
+    "Przykładem roboczym jest rozwiązanie `Game`, którego nie ma w tym portfolio — czytelnik nie może zestawić tekstu z kodem, choć w `parcel-number-generator` stoi dokładnie ta kompozycja.",
+    "Ostatni commit pochodzi z 10 sierpnia 2026 i nie wypuszczono żadnego wydania od czasu przejścia portfolio na .NET 10."
+  ],
+  "next": [
+    "Zaktualizuj artykuł do .NET 10 i bieżącej wersji Aspire albo dopisz na pierwszej stronie, której wersji dotyczy. Jedno albo drugie — dokument bez daty ważności wprowadza w błąd.",
+    "Zamień przykład roboczy na `parcel-number-generator`, który jest publiczny i wykonuje opisywaną kompozycję. Czytelnik dostaje wtedy tekst i działający kod obok siebie.",
+    "Zacytuj przewodnik Aspire z `architecture-standards` zamiast powtarzać jego treść, żeby numery wersji miały jedno źródło prawdy."
+  ],
+  "risks": [
+    "Artykuł konfiguracyjny przypięty do nieaktualnych wersji jest gorszy niż brak artykułu: czytelnik wykonuje kroki, które już nie działają, i traci zaufanie do wszystkiego innego pod tym samym nazwiskiem."
+  ],
+  "headline": "Publikuje prompt, którym powstał — i opisuje .NET 9, kiedy reszta portfolio jest na .NET 10",
+  "headlineTone": "warn",
+  "github": {
+    "stars": 0,
+    "openIssues": 0,
+    "openPrs": 0,
+    "dependabotPrs": 0,
+    "lastCommit": "2026-08-10",
+    "commits": 5,
+    "files": 17
+  }
+}
