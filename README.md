@@ -1,56 +1,21 @@
-<div align="center">
+<h1 align="center">Hi 👋, I'm Konrad</h1>
+<h3 align="center">Backend engineer building .NET systems, AI tools, and developer infrastructure</h3>
 
-<!-- HEADER -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=180&section=header&text=Konrad%20Cinkusz&fontSize=42&fontColor=fff&animation=twinkling&fontAlignY=32&desc=Backend%20engineer%20%7C%20.NET%20%26%20Azure%20%7C%20AI%20tooling%20%7C%20Dev%20Insight&descAlignY=52&descSize=18" width="100%" alt="Konrad Cinkusz - Backend engineer | .NET & Azure | AI tooling | Dev Insight"/>
-
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=58A6FF&center=true&vCenter=true&random=false&width=640&lines=Backend+engineer+%7C+.NET%2C+C%23%2C+Azure%2C+microservices;10+years+of+commercial+experience;Building+AI+observability+and+agent+tooling;Writing+books+and+flashcards+for+.NET+engineers;Running+Dev+Insight+on+YouTube)](https://github.com/konradcinkusz)
-
-<br/>
-
-<!-- GITHUB BADGES -->
-<a href="https://github.com/konradcinkusz?tab=followers">
-  <img src="https://img.shields.io/github/followers/konradcinkusz?label=Followers&style=for-the-badge&logo=github&logoColor=white&labelColor=1a1b27&color=58a6ff" alt="GitHub followers" />
-</a>
-<a href="https://github.com/konradcinkusz?tab=repositories">
-  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fusers%2Fkonradcinkusz&query=%24.public_repos&label=Public%20repos&style=for-the-badge&logo=github&logoColor=white&labelColor=1a1b27&color=58a6ff" alt="Public repositories" />
-</a>
-<img src="https://komarev.com/ghpvc/?username=konradcinkusz&style=for-the-badge&color=blueviolet&labelColor=1a1b27" alt="Profile views" />
-
-<br/><br/>
-
-<!-- SOCIAL BADGES -->
-<a href="https://www.youtube.com/@_dev_insight"><img src="https://img.shields.io/badge/Dev%20Insight-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Dev Insight on YouTube" /></a>
-<a href="https://x.com/dev_insight"><img src="https://img.shields.io/badge/@dev__insight-000000?style=for-the-badge&logo=x&logoColor=white" alt="@dev_insight on X" /></a>
-<a href="https://konradcinkusz.github.io"><img src="https://img.shields.io/badge/Website-1a1b27?style=for-the-badge&logo=githubpages&logoColor=white" alt="Personal website" /></a>
-<a href="docs/PORTFOLIO-MAP.md"><img src="https://img.shields.io/badge/Portfolio%20map-58a6ff?style=for-the-badge&logo=mapbox&logoColor=white" alt="Portfolio map" /></a>
-
-</div>
+<p align="center">
+  <a href="https://www.youtube.com/@_dev_insight" title="Dev Insight on YouTube">▶️ Dev Insight</a>
+  &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+  <a href="https://x.com/dev_insight" title="@dev_insight on X">🐦 @dev_insight</a>
+  &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+  <a href="https://konradcinkusz.github.io" title="Personal website">🌐 konradcinkusz.github.io</a>
+</p>
 
 <br/>
 
-## About me
+I'm a software engineer with **10 years of commercial experience** across e-commerce, energy, and enterprise domains. My core stack is **.NET, C#, Azure, and microservices** - building distributed systems that handle real load on real infrastructure.
 
-I'm a backend engineer with **10 years of commercial experience** across e-commerce, energy,
-and enterprise domains. My core stack is **.NET, C#, Azure, and microservices** - building
-distributed systems that handle real load on real infrastructure.
+When I build something useful and repeatable, I open-source it. Right now that means **AI observability platforms**, **evaluation benches and tooling for coding agents**, and **books and flashcards for .NET engineers**.
 
-When I build something useful and repeatable, I open-source it. Right now that means
-**AI observability platforms**, **evaluation benches and tooling for coding agents**, and
-**books and flashcards for .NET engineers**.
-
-I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** - a channel covering C#,
-.NET, and system design through deep dives, flashcards, and live coding.
-
-```csharp
-var konrad = new Engineer
-{
-    Role        = "Backend engineer, 10 years of commercial experience",
-    Stack       = [".NET", "C#", "ASP.NET Core", ".NET Aspire", "Azure", "PostgreSQL"],
-    Domains     = ["e-commerce", "energy", "enterprise"],
-    BuildingNow = ["AI observability", "agent evaluation", "coding-agent tooling"],
-    Teaching    = ["Dev Insight on YouTube", "practitioner's books", "flashcard decks"],
-};
-```
+I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** - a channel covering C#, .NET, and system design through deep dives, flashcards, and live coding.
 
 ---
 
@@ -66,8 +31,7 @@ An architecture constitution for .NET Aspire on Fly.io and Azure - 15 principles
 17 operational guides, readable as documentation and installable as agent plugins for
 Claude Code, Copilot and VS Code.
 
-![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/architecture-standards?style=flat-square&labelColor=1a1b27&color=58a6ff)
-![Top language](https://img.shields.io/github/languages/top/konradcinkusz/architecture-standards?style=flat-square&labelColor=1a1b27&color=58a6ff)
+[![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/architecture-standards?style=flat-square&labelColor=1a1b27&color=58a6ff)](https://github.com/konradcinkusz/architecture-standards/commits/main "Last commit")
 
 </td>
 <td width="50%" valign="top">
@@ -78,8 +42,7 @@ A spec-first evaluation bench for tool-using agents: 35 YAML scenarios, 313 asse
 over the execution trace, a deterministic layer that gates every pull request, and a
 rubric judge that reports `skipped` rather than green without credentials.
 
-![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/agent-eval-bench?style=flat-square&labelColor=1a1b27&color=58a6ff)
-![Top language](https://img.shields.io/github/languages/top/konradcinkusz/agent-eval-bench?style=flat-square&labelColor=1a1b27&color=58a6ff)
+[![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/agent-eval-bench?style=flat-square&labelColor=1a1b27&color=58a6ff)](https://github.com/konradcinkusz/agent-eval-bench/commits/main "Last commit")
 
 </td>
 </tr>
@@ -92,8 +55,7 @@ AI coding-session observability - an OTLP collector with a hand-written protobuf
 decoder, a Postgres store, and a Blazor dashboard that scores session quality rather
 than token spend, across five assistants.
 
-![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/copilot-scope?style=flat-square&labelColor=1a1b27&color=58a6ff)
-![Top language](https://img.shields.io/github/languages/top/konradcinkusz/copilot-scope?style=flat-square&labelColor=1a1b27&color=58a6ff)
+[![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/copilot-scope?style=flat-square&labelColor=1a1b27&color=58a6ff)](https://github.com/konradcinkusz/copilot-scope/commits/master "Last commit")
 
 </td>
 <td width="50%" valign="top">
@@ -104,8 +66,7 @@ Standalone auth microservice for ASP.NET Core: JWT with rotating refresh tokens 
 reuse detection, RS256 with published JWKS, Google/GitHub OAuth, multi-tenant
 organizations, and an append-only audit log.
 
-![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/authservice?style=flat-square&labelColor=1a1b27&color=58a6ff)
-![Top language](https://img.shields.io/github/languages/top/konradcinkusz/authservice?style=flat-square&labelColor=1a1b27&color=58a6ff)
+[![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/authservice?style=flat-square&labelColor=1a1b27&color=58a6ff)](https://github.com/konradcinkusz/authservice/commits/main "Last commit")
 
 </td>
 </tr>
@@ -115,8 +76,7 @@ organizations, and an append-only audit log.
 
 ## 🛠️ Open source projects
 
-The open source projects I actively maintain, grouped by what they are for. Every
-repository below is public and linked.
+The open source projects I actively maintain, grouped by what they are for.
 
 ### 🤖 AI tooling and agent engineering
 
@@ -173,21 +133,17 @@ repository below is public and linked.
 
 ## 🎥 Dev Insight
 
+C#, .NET and system design through deep dives, flashcards and live coding. The latest uploads:
+
 <div align="center">
-
-C#, .NET and system design through deep dives, flashcards and live coding.
-
-<a href="https://www.youtube.com/@_dev_insight?sub_confirmation=1">
-  <img src="https://img.shields.io/badge/Subscribe-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Subscribe to Dev Insight" />
-</a>
 
 <!-- YOUTUBE:START -->
 <a href="https://www.youtube.com/@_dev_insight">Latest videos on YouTube</a>
 <!-- YOUTUBE:END -->
 
-<sub>Auto-updated weekly from <a href="https://www.youtube.com/@_dev_insight">youtube.com/@_dev_insight</a> by the <code>readme-videos</code> workflow.</sub>
-
 </div>
+
+<sub>Refreshed weekly from <a href="https://www.youtube.com/@_dev_insight">youtube.com/@_dev_insight</a> by the <code>readme-videos</code> workflow.</sub>
 
 ---
 
@@ -202,9 +158,8 @@ maintained and how it deploys.
 
 ## 💻 Tech stack
 
-<div align="center">
+**Languages and runtime**
 
-### Languages and runtime
 ![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)
 ![.NET](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=dotnet&logoColor=white)
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
@@ -214,7 +169,8 @@ maintained and how it deploys.
 ![SignalR](https://img.shields.io/badge/SignalR-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-### Cloud and delivery
+**Cloud and delivery**
+
 ![Azure](https://img.shields.io/badge/Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
@@ -222,62 +178,28 @@ maintained and how it deploys.
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Azure DevOps](https://img.shields.io/badge/Azure%20DevOps-0078D4?style=for-the-badge&logo=azuredevops&logoColor=white)
 
-### Data and observability
+**Data and observability**
+
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-000000?style=for-the-badge&logo=opentelemetry&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
-
-### AI and agents
-![Microsoft Agent Framework](https://img.shields.io/badge/Microsoft%20Agent%20Framework-0078D4?style=for-the-badge&logo=microsoft&logoColor=white)
-![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
-![MCP](https://img.shields.io/badge/MCP-1a1b27?style=for-the-badge&logo=modelcontextprotocol&logoColor=white)
-![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=for-the-badge&logo=claude&logoColor=white)
-![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-000000?style=for-the-badge&logo=githubcopilot&logoColor=white)
-
-</div>
 
 ---
 
 ## 📊 GitHub activity
 
-Mostly AI tooling, educational .NET content, and long-lived open source platforms rather
-than throwaway demos.
+Mostly AI tooling, educational .NET content, and long-lived open source platforms rather than throwaway demos.
 
-<div align="center">
-
-<img width="49%" src="https://github-readme-stats.vercel.app/api?username=konradcinkusz&show_icons=true&include_all_commits=true&count_private=true&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=58a6ff&icon_color=58a6ff&text_color=c9d1d9" alt="GitHub stats" />
-<img width="49%" src="https://nirzak-streak-stats.vercel.app/?user=konradcinkusz&theme=tokyonight&hide_border=true&background=0D1117&stroke=58a6ff&ring=58a6ff&fire=58a6ff&currStreakLabel=58a6ff" alt="GitHub streak" />
-
-<img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=konradcinkusz&bg_color=0D1117&color=58a6ff&line=58a6ff&point=58a6ff&area=true&hide_border=true" alt="Contribution activity graph" />
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/konradcinkusz/konradcinkusz/output/github-snake-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/konradcinkusz/konradcinkusz/output/github-snake.svg" />
-  <img alt="Contribution graph snake animation" src="https://raw.githubusercontent.com/konradcinkusz/konradcinkusz/output/github-snake-dark.svg" />
-</picture>
-
-</div>
-
-<details>
-<summary><b>More stats</b></summary>
-<div align="center">
-
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=konradcinkusz&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=58a6ff&text_color=c9d1d9" alt="Top languages" />
-
-<img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=konradcinkusz&theme=github_dark" alt="Profile details" />
-
-</div>
-</details>
+<p align="center">
+  <img width="49%" src="https://github-readme-stats.vercel.app/api?username=konradcinkusz&show_icons=true&include_all_commits=true&count_private=true&theme=tokyonight&hide_border=true" alt="GitHub stats" />
+  <img width="49%" src="https://nirzak-streak-stats.vercel.app/?user=konradcinkusz&theme=tokyonight&hide_border=true" alt="GitHub streak" />
+</p>
 
 ---
 
-<!-- FOOTER -->
-<div align="center">
+## 👋 Follow
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer" width="100%" alt=""/>
-
-**[Dev Insight](https://www.youtube.com/@_dev_insight)** · **[@dev_insight](https://x.com/dev_insight)** · **[konradcinkusz.github.io](https://konradcinkusz.github.io)**
-
-</div>
+[![GitHub followers](https://img.shields.io/github/followers/konradcinkusz?style=social)](https://github.com/konradcinkusz?tab=followers "Follow on GitHub")
+[![YouTube channel](https://img.shields.io/badge/YouTube-Dev%20Insight-red?style=social&logo=youtube)](https://www.youtube.com/@_dev_insight "Dev Insight on YouTube")
+[![X](https://img.shields.io/badge/X-@dev__insight-black?style=social&logo=x)](https://x.com/dev_insight "@dev_insight on X")
