@@ -33,6 +33,7 @@ scripts/
   collect-health.mjs      nightly: reads every repo in the estate -> data/health.json
   health-selftest.mjs     exercises every collector threshold against a stub API
   health-issue.mjs        one issue for the whole estate, closed again when clean
+  update-readme-videos.mjs  weekly: the channel's latest uploads -> the YOUTUBE block in README.md
 site/                     the served artefact; never hand-edit site/data/
 deploy/nginx.conf         listens on 8080, /healthz outside the SPA fallback, gzip tuned
 flyio/portfolio.fly.toml  one app, scale to zero, no secrets
