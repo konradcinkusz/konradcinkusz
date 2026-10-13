@@ -131,22 +131,6 @@ The open source projects I actively maintain, grouped by what they are for.
 
 ---
 
-## 🎥 Dev Insight
-
-C#, .NET and system design through deep dives, flashcards and live coding. The latest uploads:
-
-<div align="center">
-
-<!-- YOUTUBE:START -->
-<a href="https://www.youtube.com/@_dev_insight">Latest videos on YouTube</a>
-<!-- YOUTUBE:END -->
-
-</div>
-
-<sub>Refreshed weekly from <a href="https://www.youtube.com/@_dev_insight">youtube.com/@_dev_insight</a> by the <code>readme-videos</code> workflow.</sub>
-
----
-
 ## 🗺️ Portfolio map
 
 This repository also hosts a data-driven portfolio map: forty-three repositories, bilingual,
