@@ -60,6 +60,19 @@ organizations, and an append-only audit log.
 
 </td>
 </tr>
+<tr>
+<td width="50%" valign="top">
+
+### [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess)
+
+Two LLM-powered chess agents battle through a Streamlit interface with configurable
+personalities and real-time board visualisation.
+
+[![Last commit](https://img.shields.io/github/last-commit/konradcinkusz/llm-multi-agent-chess?style=flat-square&labelColor=1a1b27&color=58a6ff)](https://github.com/konradcinkusz/llm-multi-agent-chess/commits "Last commit")
+
+</td>
+<td width="50%" valign="top"></td>
+</tr>
 </table>
 
 ---
@@ -83,7 +96,6 @@ The open source projects I actively maintain, grouped by what they are for.
 | [exit-interview-agent](https://github.com/konradcinkusz/exit-interview-agent) | An open-source agent for structured exit interviews - bring your own model through MCP, the CLI with an API key, or a local model - with privacy-preserving employer signals and an eval harness that scores interview quality from OpenTelemetry traces. Not deployed |
 | [AgentHelm](https://github.com/konradcinkusz/agent-helm) | Web cockpit for AI coding agents - drive GitHub Copilot CLI, Claude Code, and Gemini via the Agent Client Protocol with permission policies, audit trail, and git diff review |
 | [chess-mas](https://github.com/konradcinkusz/chess-mas) | Multi-agent chess in C#, orchestrated with .NET Aspire and Microsoft Agent Framework, with cost tracking against Azure AI Foundry |
-| [llm-multi-agent-chess](https://github.com/konradcinkusz/llm-multi-agent-chess) | Two LLM-powered chess agents battle through a Streamlit interface with configurable personalities and real-time board visualisation |
 
 ### 🏗️ Platform, architecture and backend
 
