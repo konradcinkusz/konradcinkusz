@@ -1,16 +1,6 @@
 <h1 align="center">Hi 👋, I'm Konrad</h1>
 <h3 align="center">Backend engineer building .NET systems, AI tools, and developer infrastructure</h3>
 
-<p align="center">
-  <a href="https://www.youtube.com/@_dev_insight" title="Dev Insight on YouTube">▶️ Dev Insight</a>
-  &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-  <a href="https://x.com/dev_insight" title="@dev_insight on X">🐦 @dev_insight</a>
-  &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-  <a href="https://konradcinkusz.github.io" title="Personal website">🌐 konradcinkusz.github.io</a>
-</p>
-
-<br/>
-
 I'm a software engineer with **10 years of commercial experience** across e-commerce, energy, and enterprise domains. My core stack is **.NET, C#, Azure, and microservices** - building distributed systems that handle real load on real infrastructure.
 
 When I build something useful and repeatable, I open-source it. Right now that means **AI observability platforms**, **evaluation benches and tooling for coding agents**, and **books and flashcards for .NET engineers**.
