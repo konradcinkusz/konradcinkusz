@@ -7,8 +7,6 @@ In day-to-day development I mainly use **Claude Code** and **GitHub Copilot**, p
 
 When I build something useful and repeatable, I open-source it. Right now that means **AI observability platforms**, **evaluation benches and tooling for coding agents**, and **books and flashcards for .NET engineers**.
 
-I also run **[Dev Insight](https://www.youtube.com/@_dev_insight)** - a channel covering C#, .NET, and system design through deep dives, flashcards, and live coding.
-
 ---
 
 ## 🚀 Featured projects
